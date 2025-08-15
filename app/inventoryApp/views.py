@@ -357,7 +357,7 @@ class MarketInventory(APIView):
     @limits(calls=5, period=1)
     def get_item_details(self, access_token, item_id):
         minv = MarketInventory()
-        """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
+
         # # Set up the headers with the access token
         # headers = {
         #     'Authorization': f'Bearer {access_token}',
