@@ -30,7 +30,7 @@ COPY ./app /app
  
 # Collect static files
 
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic
  
 # Expose port (CapRover will map this)
 
