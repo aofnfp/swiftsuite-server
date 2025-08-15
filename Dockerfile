@@ -38,5 +38,5 @@ EXPOSE 8000
  
 # Start Gunicorn server
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "your_project.wsgi:application", "--workers", "4"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "swiftsuite.wsgi:application", "--workers", "4"]
  
