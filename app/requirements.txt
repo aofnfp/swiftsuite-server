@@ -26,3 +26,4 @@ gunicorn
 whitenoise
 django-cleanup>=8.1.0
 cloudinary
+ratelimit
