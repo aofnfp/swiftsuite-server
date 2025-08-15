@@ -104,10 +104,10 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'swifssax_swiftsuite_db',
-        'USER': 'swifssax_yemi',
-        'PASSWORD': 'swiftsuite12',
-        'HOST': '162.0.209.172',                    
+        'NAME': 'swiftsuite_db',
+        'USER': 'root',
+        'PASSWORD': 'swiftsuite@1234',
+        'HOST': 'srv-captain--mysql-test-db',                    
         'PORT': '3306',
         'OPTIONS': {
             'autocommit': True,
