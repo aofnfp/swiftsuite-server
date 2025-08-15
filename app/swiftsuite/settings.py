@@ -16,7 +16,9 @@ SECRET_KEY = "django-insecure-ip$fhb8ohczcq&hvlr)*kqu^43i^&(r^olzd11y^lna*nc*4a+
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "service-test.184.94.212.224.sslip.io"
+    "service-test.184.94.212.224.sslip.io",
+    'localhost',
+    '127.0.0.1',
 ]
 
 
