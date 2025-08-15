@@ -2,25 +2,19 @@
 
 FROM python:3.11-slim
  
-# Set environment variables
-
-# ENV PYTHONDONTWRITEBYTECODE=1 \
-
-    # PYTHONUNBUFFERED=1 \
-
-    # DJANGO_SETTINGS_MODULE=your_project.settings
- 
 # Set working directory
 
 WORKDIR /app
- 
-# Install system dependencies
 
-# RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies for mysqlclient and other build tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    musl-dev \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
 
-#     build-essential \
-# && rm -rf /var/lib/apt/lists/*
- 
 # Copy requirements first for caching
 
 COPY ./app/requirements.txt /app/requirements.txt
