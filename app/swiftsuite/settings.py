@@ -16,7 +16,7 @@ SECRET_KEY = "django-insecure-ip$fhb8ohczcq&hvlr)*kqu^43i^&(r^olzd11y^lna*nc*4a+
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "https://service-test.vps.swiftsuite.app",
+    "service-test.vps.swiftsuite.app",
     'localhost',
     '127.0.0.1',
 ]
