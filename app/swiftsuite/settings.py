@@ -17,8 +17,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "service-test.vps.swiftsuite.app",
-    'localhost',
-    '127.0.0.1',
+    "service.swiftsuite.app",
+    "localhost",
+    "127.0.0.1",
 ]
 
 
