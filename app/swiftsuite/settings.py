@@ -117,20 +117,16 @@ DATABASES = {
 }
 
 
+# Email Backend Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'srv-captain--test-email2'
+EMAIL_PORT = 1025
+EMAIL_USE_SSL = True  
+EMAIL_USE_TLS = False  
+EMAIL_HOST_USER = 'support@service.swiftsuite.app'
+EMAIL_HOST_PASSWORD = 'swiftsuite12#'
+DEFAULT_FROM_EMAIL = 'support@service.swiftsuite.app'
 
-# # Email Backend Configuration
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Replace with your preferred backend
-# EMAIL_PORT = 587  # Replace with your email port
-# EMAIL_USE_TLS = True  # Set to False if your email server doesn't use TLS
-# EMAIL_HOST = 'your_email_host'  # Replace with your email host for gmail -> 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'your_email_username'  # Replace with your email username
-# EMAIL_HOST_PASSWORD = 'your_email_password'  # Replace with your email password
-
-
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
-EMAIL_HOST_USER = '4ef4b514d33fdd'
-EMAIL_HOST_PASSWORD = 'bba302e1fa5c69'
-EMAIL_PORT = '2525'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
