@@ -21,7 +21,7 @@ ALLOWED_HOSTS = [
     "https://service-test.vps.swiftsuite.app",
     "https://service.swiftsuite.app",
     "https://frontend-test.vps.swiftsuite.app",
-    "https://localhost:5173",
+    "http://localhost:5173",
     "swiftsuite.app",
     "service-test.vps.swiftsuite.app",
     "service.swiftsuite.app",
