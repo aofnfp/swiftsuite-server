@@ -23,7 +23,7 @@ class Vendors(models.Model):
 
 class Cwr(models.Model):
     id = models.BigAutoField(primary_key=True)
-    cwr_part_number = models.TextField(unique=True,  blank=True, null=True)
+    cwr_part_number = models.CharField(max_length=100, blank=True, null=True)
     manufacturer_part_number = models.TextField(blank=True, null=True)
     upc = models.TextField(blank=True, null=True)
     quantity_available_to_ship_combined = models.TextField(blank=True, null=True)
