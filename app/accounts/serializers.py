@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import User, UploadedUserProfileImage
+from .models import User, UploadedUserProfileImage, Tier, Subscription, Payment
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -12,6 +12,21 @@ from .utils import send_normal_email
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .utils import send_code_to_user
 
+
+def create_reset_link(user):
+    uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+    token = PasswordResetTokenGenerator().make_token(user)
+    site_domain = 'https://swiftsuite.app'
+    relative_link = reverse('password_reset_confirm', kwargs={'uidb64':uidb64, 'token':token})
+    abslink = f'{site_domain}{relative_link}'
+    data = {
+        'reset_link':abslink,
+        'email_subject':'Reset your password',
+        "to_email":user.email,
+        'first_name':user.first_name
+    }
+
+    send_normal_email(data)
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length = 68, min_length = 6, write_only = True)
@@ -51,13 +66,16 @@ class LoginSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(max_length = 255, read_only = True)
     access_token = serializers.CharField(max_length = 255, read_only = True)
     refresh_token = serializers.CharField(max_length = 255, read_only = True)
-    isAdmin = serializers.BooleanField(read_only=True)
-
-
+    isAdmin = serializers.BooleanField(read_only = True)
+    subscribed = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ["id", "email", "password", "full_name", "isAdmin", "access_token", "refresh_token"]
+        fields = ["id", "email", "password", "full_name", "isAdmin", "subscribed", "access_token", "refresh_token"]
 
+    def get_subscribed(self, obj):
+        subscription = getattr(obj, 'tier_subscription', None)
+        return subscription.is_active() if subscription else False
     
     def validate(self, attrs):
         email = attrs.get('email')
@@ -83,7 +101,6 @@ class LoginSerializer(serializers.ModelSerializer):
         }
 
 
-
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length = 255)
 
@@ -92,28 +109,12 @@ class PasswordResetSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         email = attrs.get('email')
-        user = User.objects.filter(email=email).first()
-
-        if not user:
-            raise serializers.ValidationError("User with this email does not exist.")
-
-        uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-        token = PasswordResetTokenGenerator().make_token(user)
-        request = self.context.get('request')
-        site_domain = 'https://swiftsuite.app'
-        relative_link = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
-        abslink = f'{site_domain}{relative_link}'
-        
-        data = {
-            'reset_link': abslink,
-            'email_subject': 'Reset your password',
-            "to_email": user.email,
-            'first_name': user.first_name
-        }
-
-        send_normal_email(data)
-
-        return attrs  # Return attrs instead of calling super().validate(attrs)
+        if User.objects.filter(email = email).exists():
+            user = User.objects.get(email = email)
+            create_reset_link(user)
+        else:
+            raise serializers.ValidationError("User with this email does not exist")
+        return super().validate(attrs)
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
@@ -141,6 +142,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
                 raise AuthenticationFailed("password do not match")
             
             user.set_password(password)
+            user.is_verified = True
             user.save()
 
             return user
@@ -166,10 +168,49 @@ class LogoutUserSerializer(serializers.Serializer):
             token.blacklist()
         except TokenError:
             return self.fail('bad_token')
-            
+
             
 class UploadedUserProfileImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UploadedUserProfileImage
         fields = ['image_url']
+
+
+class RegisterSubaccountSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(max_length=100, min_length=6, write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name', 'phone', 'password']
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError('Email is already in use')
+        return attrs
+
+    def create(self, validated_data):
+        parent = self.context['request'].user
+        validated_data['parent'] = parent
+
+        user = User.objects.create_user(**validated_data)
+        create_reset_link(user)
+        return user
+    
+class TierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tier
+        fields = "__all__"
+        
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ['tier']
+        
+    
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = "__all__"
+        

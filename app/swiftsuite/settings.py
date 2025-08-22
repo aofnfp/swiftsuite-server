@@ -1,6 +1,7 @@
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,10 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ip$fhb8ohczcq&hvlr)*kqu^43i^&(r^olzd11y^lna*nc*4a+"
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = [
     "service-test.vps.swiftsuite.app",
@@ -55,8 +56,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # "vendorApp.startup_task.StartupMiddleware",
-    # "vendorApp.catalogueUpdate.StartupMiddleware"
 ]
 
 ROOT_URLCONF = "swiftsuite.urls"
@@ -106,11 +105,11 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'swiftsuite_db',
-        'USER': 'root',
-        'PASSWORD': 'swiftsuite@1234',
-        'HOST': 'srv-captain--mysql-test-db',                    
-        'PORT': '3306',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        "HOST": config("DB_HOST", default="127.0.0.1"),
+        "PORT": config("DB_PORT", cast=int, default=3306),
         'OPTIONS': {
             'autocommit': True,
         },
@@ -120,13 +119,14 @@ DATABASES = {
 
 # Email Backend Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'service.swiftsuite.app'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True  
-EMAIL_USE_TLS = False  
-EMAIL_HOST_USER = 'support@service.swiftsuite.app'
-EMAIL_HOST_PASSWORD = 'swiftsuite12#'
-DEFAULT_FROM_EMAIL = 'support@service.swiftsuite.app'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool) 
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool) 
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
 
 
 # Password validation
@@ -169,3 +169,6 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")

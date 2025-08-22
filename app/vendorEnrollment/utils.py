@@ -143,7 +143,8 @@ def map_vendor_data_to_general(vendor_name, product, user):
 
         else:
             return {}
-            
+
+
 def identifier_filter(Enrollment, vendor_name, identifier, userid, model, updateModel):
     """
     Filters the Enrollment model based on the vendor name and identifier.
@@ -220,7 +221,9 @@ def identifier_filter(Enrollment, vendor_name, identifier, userid, model, update
             filters['quantity__gte'] = enrollment.stock_minimum
 
     return updateModel.objects.filter(**filters).select_related('product').order_by('created_at')
-    
+
+
+
 class VendorDataMixin:
     vendor_models = {
         'fragrancex': (_.Fragrancex, _.FragrancexUpdate),
@@ -275,6 +278,7 @@ class VendorDataMixin:
             if enrollment.shippable and product.drop_shippable not in enrollment.shippable:
                 return False
         elif vendor_name == 'cwr':
+            
             if product.returnable == False:
                 if enrollment.returnable == False:
                     return False
@@ -290,6 +294,7 @@ class VendorDataMixin:
             if product.truck_freight == True:
                 if enrollment.truck_freight == False:
                     return False
+            
         elif vendor_name == 'ssi':
             if enrollment.product_category and product.category not in enrollment.product_category:
                 return False

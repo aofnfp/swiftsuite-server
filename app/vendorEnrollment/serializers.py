@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from .utils import VendorDataMixin
 
 
+
 class VendorTestSerializer(serializers.ModelSerializer):
     vendor = serializers.PrimaryKeyRelatedField(queryset=Vendors.objects.all())
     class Meta:
@@ -31,7 +32,6 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = '__all__'
         extra_kwargs = {field.name: {'required': False} for field in Account._meta.get_fields()}
-
         
 class EnrollmentSerializer(VendorDataMixin, serializers.ModelSerializer):
     vendor = serializers.PrimaryKeyRelatedField(queryset=Vendors.objects.all())
@@ -70,6 +70,7 @@ class EnrollmentSerializer(VendorDataMixin, serializers.ModelSerializer):
                     raise serializers.ValidationError({'error': 'An account with this name already exists.'})
 
             enrollment = Enrollment.objects.create(**validated_data)
+            enrollment.refresh_from_db()
 
             if not update_model.objects.filter(account=account).exists():
                 filtered_data = [
@@ -81,10 +82,11 @@ class EnrollmentSerializer(VendorDataMixin, serializers.ModelSerializer):
                         product=item,
                         account=account,
                         vendor=vendor,
-                        enrollment=enrollment,
+                        enrollment_id = enrollment.id,
                         sku=getattr(item, 'sku', None),
                         mpn=getattr(item, mpn_field, None),
                         upc=getattr(item, 'upc', None),
+                        map = getattr(item, 'map', None)
                     )
                     for item in filtered_data
                 ]
@@ -152,10 +154,11 @@ class RsrUpdateSerializer(serializers.ModelSerializer):
         model = RsrUpdate
         fields = '__all__'
 
-class GeneralProductSerializer(serializers.ModelSerializer):
+class GeneralProductSerializer(serializers.ModelSerializer): 
     class Meta:
         model = Generalproducttable
         fields = '__all__'
+        
         
 class AccountWithEnrollmentsSerializer(serializers.ModelSerializer):
     enrollments = serializers.SerializerMethodField()

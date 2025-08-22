@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from .models import Enrollment, Account, FragrancexUpdate, CwrUpdate, ZandersUpdate, LipseyUpdate, RsrUpdate, Generalproducttable, BackgroundTask
+from vendorActivities.models import Vendors
 from vendorActivities.utils import VendorActivity, get_suppliers_for_vendor
 from .serializers import (
     EnrollmentSerializer, 
@@ -21,13 +22,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .tasks import update_func, update_vendor_data
 from rest_framework.decorators import api_view, permission_classes
-from swiftsuite.vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
+from vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
 from rest_framework.generics import ListAPIView
 from .pagination import CustomOffsetPagination
-from swiftsuite.accounts.models import User
+from accounts.models import User
 from .utils import map_vendor_data_to_general, identifier_filter
+import threading, json
 from django.db.models import Q
-
 
 # Create your views here.
 MODELS_MAPPING = {
@@ -52,7 +53,6 @@ SERIALIZER_MAPPING = {
         'fragrancex': FragrancexUpdateSerializer,
         'cwr': CwrUpdateSerializer,
         'lipsey': LipseyUpdateSerializer,
-        # 'ssi': Ssi,
         'zanders': ZandersUpdateSerializer,
         'rsr': RsrUpdateSerializer
     }
@@ -129,8 +129,7 @@ class AccountViewset(viewsets.ModelViewSet):
             return Response({"detail": "You do not have permission to delete this account."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response({"message": "Account, Vendor data and enrollments deleted successfully."},status=status.HTTP_200_OK)
-
-    
+  
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_enrolment(request, identifier):
@@ -231,8 +230,9 @@ class CatalogueBaseView(ListAPIView):
     def get_queryset(self):
         userid = self.request.user.id
         identifier = self.kwargs.get('identifier', None)
-        return identifier_filter(Enrollment, self.vendor_name, identifier, userid, self.model, self.updateModel)   
         
+        return identifier_filter(Enrollment, self.vendor_name, identifier, userid, self.model, self.updateModel)   
+    
     def get_serializer_class(self):
         if self.vendor_name == 'FragranceX':
             return FragrancexUpdateSerializer
@@ -244,8 +244,6 @@ class CatalogueBaseView(ListAPIView):
             return RsrUpdateSerializer
         elif self.vendor_name == 'CWR':
             return CwrUpdateSerializer
-        # elif self.vendor_name == 'SSI':
-        #     return SsiUpdateSerializer
         return None
 
     def list(self, request, *args, **kwargs):
@@ -336,6 +334,7 @@ class AllCatalogueView(ListAPIView):
         all_serialized = []
         for model_name, model_class in UPDATE_MODELS_MAPPING.items():
             if model_name in vendors:
+                # apply filters to the queryset
                 queryset = identifier_filter(Enrollment, model_name, None, user_id, model_class, model_class)
                 serializer_class = SERIALIZER_MAPPING.get(model_name)
                 if serializer_class:
@@ -423,7 +422,7 @@ def removeProduct(request, productId):
         # Extract data BEFORE deletion
         product_id = product.product_id
         vendor_name = product.enrollment.vendor.name
-        
+        product.delete()
 
         # Look up the correct update model
         product_model = UPDATE_MODELS_MAPPING.get(vendor_name.lower())
@@ -484,7 +483,8 @@ class ViewAllProducts(ListAPIView):
             queryset = queryset.filter(filters)
         
         return queryset
-        
+    
+    
 class UserAccountEnrollmentsView(APIView):
     permission_classes = [IsAuthenticated]
 
