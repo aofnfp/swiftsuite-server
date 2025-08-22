@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = [
     "service-test.vps.swiftsuite.app",
@@ -108,8 +108,8 @@ DATABASES = {
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),                    
-        'PORT': config('DB_PORT'),
+        "HOST": config("DB_HOST", default="127.0.0.1"),
+        "PORT": config("DB_PORT", cast=int, default=3306),
         'OPTIONS': {
             'autocommit': True,
         },
@@ -120,9 +120,9 @@ DATABASES = {
 # Email Backend Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config("EMAIL_PORT")
-EMAIL_USE_SSL = config("EMAIL_USE_SSL") 
-EMAIL_USE_TLS = config("EMAIL_USE_TLS") 
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool) 
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool) 
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")

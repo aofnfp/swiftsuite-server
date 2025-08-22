@@ -149,6 +149,22 @@ class ZandersUpdate(models.Model):
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+class SsiUpdate(models.Model):
+    vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
+    product = models.ForeignKey(Zanders, on_delete=models.CASCADE)
+    sku = models.CharField(max_length=255, blank=True, null=True)
+    upc = models.CharField(max_length=255, blank=True, null=True)
+    mpn = models.CharField(max_length=255, blank=True, null=True)
+    map = models.CharField(max_length=255, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
+    quantity = models.PositiveIntegerField(default=1)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class Generalproducttable(models.Model):
     id = models.BigAutoField(primary_key=True)
