@@ -17,15 +17,15 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = [
-    "https://swiftsuite.app",
-    "https://service-test.vps.swiftsuite.app",
-    "https://service.swiftsuite.app",
-    "https://frontend-test.vps.swiftsuite.app",
-    "http://localhost:5173",
     "swiftsuite.app",
     "service-test.vps.swiftsuite.app",
     "service.swiftsuite.app",
-    "frontend-test.vps.swiftsuite.app"
+    "frontend-test.vps.swiftsuite.app",
+    "localhost:5173",
+    "swiftsuite.app",
+    "service-test.vps.swiftsuite.app",
+    "service.swiftsuite.app",
+    "frontend-test.vps.swiftsuite.app",
     "localhost",
     "127.0.0.1",
 ]
