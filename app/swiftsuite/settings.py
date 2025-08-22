@@ -120,8 +120,8 @@ DATABASES = {
 
 # Email Backend Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'srv-captain--test-email2'
-EMAIL_PORT = 1025
+EMAIL_HOST = 'service.swiftsuite.app'
+EMAIL_PORT = 465
 EMAIL_USE_SSL = True  
 EMAIL_USE_TLS = False  
 EMAIL_HOST_USER = 'support@service.swiftsuite.app'
