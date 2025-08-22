@@ -1,5 +1,5 @@
 from django.db import models
-from vendorActivities.models import Vendors, Fragrancex, Lipsey, Cwr, Rsr, Zanders, Ssi
+from vendorActivities.models import Vendors, Fragrancex, Lipsey, Cwr, Rsr, Zanders
 from accounts.models import User
 
 
@@ -25,7 +25,6 @@ class Account(models.Model):
         ]
 
 
-
 class Enrollment(models.Model):
     vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -39,8 +38,8 @@ class Enrollment(models.Model):
     fixed_markup = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     shipping_cost_average = models.BooleanField(default=False)
-    stock_minimum = models.PositiveIntegerField(default=0, null=True)
-    stock_maximum = models.PositiveIntegerField(default=0, null=True)
+    stock_minimum = models.PositiveIntegerField(default=0)
+    stock_maximum = models.PositiveIntegerField(default=0)
     update_inventory = models.BooleanField(default=False)
     send_orders = models.BooleanField(default=False)
     update_tracking = models.BooleanField(default=False)
@@ -70,45 +69,32 @@ class BackgroundTask(models.Model):
     processed = models.BooleanField(default=False)
     result = models.TextField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
 class FragrancexUpdate(models.Model):
     vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
     product = models.ForeignKey(Fragrancex, on_delete=models.CASCADE)
     sku = models.CharField(max_length=255, blank=True, null=True)
     upc = models.CharField(max_length=255, blank=True, null=True)
     mpn = models.CharField(max_length=255, blank=True, null=True)
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
+    map = models.CharField(max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-class SsiUpdate(models.Model):
-    vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
-    product = models.ForeignKey(Ssi, on_delete=models.CASCADE)
-    sku = models.CharField(max_length=255, blank=True, null=True)
-    upc = models.CharField(max_length=255, blank=True, null=True)
-    mpn = models.CharField(max_length=255, blank=True, null=True)
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    quantity = models.PositiveIntegerField(default=1)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    active = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
+      
 class LipseyUpdate(models.Model):
     vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
     product = models.ForeignKey(Lipsey, on_delete=models.CASCADE)
     sku = models.CharField(max_length=255, blank=True, null=True)
     upc = models.CharField(max_length=255, blank=True, null=True)
     mpn = models.CharField(max_length=255, blank=True, null=True)
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
+    map = models.CharField(max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -122,8 +108,9 @@ class CwrUpdate(models.Model):
     sku = models.CharField(max_length=255, blank=True, null=True)
     upc = models.CharField(max_length=255, blank=True, null=True)
     mpn = models.CharField(max_length=255, blank=True, null=True)
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
+    map = models.CharField(max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
     quantity = models.PositiveIntegerField(default=1)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -137,8 +124,9 @@ class RsrUpdate(models.Model):
     sku = models.CharField(max_length=255, blank=True, null=True)
     upc = models.CharField(max_length=255, blank=True, null=True)
     mpn = models.CharField(max_length=255, blank=True, null=True)
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
+    map = models.CharField(max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
     quantity = models.PositiveIntegerField(default=1)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -152,8 +140,9 @@ class ZandersUpdate(models.Model):
     sku = models.CharField(max_length=255, blank=True, null=True)
     upc = models.CharField(max_length=255, blank=True, null=True)
     mpn = models.CharField(max_length=255, blank=True, null=True)
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
+    map = models.CharField(max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, null=True)
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)

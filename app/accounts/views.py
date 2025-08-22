@@ -1,23 +1,31 @@
 
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, UploadedUserProfileImageSerializer
+from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, UploadedUserProfileImageSerializer,  TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .utils import send_code_to_user
-from .models import OneTimePassword, User, UploadedUserProfileImage
+from .models import OneTimePassword, User, UploadedUserProfileImage, Tier, Subscription, Payment
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from rest_framework.decorators import api_view
-import cloudinary
+import cloudinary, stripe
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
 from django.http import JsonResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
+from django.utils import timezone
+from vendorEnrollment.pagination import CustomOffsetPagination
+from rest_framework.viewsets import ModelViewSet
+from .permissions import CanCreateSubaccount
+from vendorActivities.permission import IsSuperUser
 
 
+stripe.api_key = settings.STRIPE_SECRET_KEY 
 
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
@@ -49,23 +57,6 @@ class SendOTP(GenericAPIView):
         except User.DoesNotExist:
             return Response({"message":"user does not exist"}, status=status.HTTP_404_NOT_FOUND)
             
-# class VerifyUserEmail(GenericAPIView):
-#     def post(self, request):
-#         otpcode = request.data.get('otp')
-#         try:
-#             user_code_obj = OneTimePassword.objects.get(code = otpcode)
-#             user = user_code_obj.user
-#             if not user.is_verified:
-#                 user.is_verified = True
-#                 user.save()
-#                 return Response({
-#                     "message":"account email verified successfully"
-#                 }, status=status.HTTP_200_OK)
-#             return Response({
-#                 "message":"code is invalid, user already verified."
-#             }, status=status.HTTP_204_NO_CONTENT)
-#         except OneTimePassword.DoesNotExist:
-#             return Response({"message":"Passcode not provided"}, status=status.HTTP_404_NOT_FOUND)
     
 class VerifyUserEmail(GenericAPIView):
     serializer_class = VerifyEmailSerializer
@@ -175,4 +166,197 @@ def upload_user_profile_image(request, userid):
 def get_uploaded_user_profile_image(request, userid):
     save_image = UploadedUserProfileImage.objects.filter(user_id=userid, image_name=f"profile_{userid}").values()
     return JsonResponse({"profile_image":list(save_image)}, safe=False, status=status.HTTP_200_OK)
- 
+
+class RegisterSubaccountView(GenericAPIView):
+    serializer_class = RegisterSubaccountSerializer
+    permission_classes = [IsAuthenticated, CanCreateSubaccount]
+
+    def post(self, request):
+        user_data = request.data 
+        serializer = self.serializer_class(data=user_data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            user = serializer.data
+    
+            return Response({
+                "data": user, 
+                'message': "Subaccount created successfully", 
+            }, status=status.HTTP_201_CREATED)
+
+class TierViewSet(ModelViewSet):
+    permission_classes = [IsSuperUser]
+    serializer_class = TierSerializer
+    queryset = Tier.objects.all()
+
+
+class SubscriptionView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SubscriptionSerializer
+    queryset = Subscription.objects.all()
+    
+    def get(self, request):
+        try:
+            subscription = request.user.tier_subscription
+            
+            if not subscription.is_active():
+                return Response({"detail": "Your subscription has expired."}, status=403)
+        
+            return Response({
+                "tier": subscription.tier.name,
+                "subscribed_at": subscription.subscribed_at
+            })
+        except Subscription.DoesNotExist:
+            return Response({"detail": "You are not subscribed to any tier."}, status=404)
+
+    
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        tier = serializer.validated_data['tier']
+        
+        existing_payment = Payment.objects.filter(
+            user=request.user,
+            tier=tier,
+            status='pending'
+        ).first()
+
+        if existing_payment:
+            try:
+                checkout_session = stripe.checkout.Session.retrieve(existing_payment.stripe_session_id)
+                if checkout_session.status == 'open':
+                    return Response({'checkout_url': checkout_session.url}, status=200)
+                
+                existing_payment.status = 'failed'
+                existing_payment.save()
+            except stripe.error.InvalidRequestError:
+                pass
+                
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': tier.name,
+                        'description': tier.description,
+                    },
+                    'unit_amount': int(tier.price * 100),
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            customer_email=request.user.email,
+            success_url='https://dropshipping-project.netlify.app/?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url='https://dropshipping-project.netlify.app/',
+            metadata={
+                'user_id': request.user.id,
+                'tier_id': tier.id
+            }
+        )
+                
+        Payment.objects.create(
+            user=request.user,
+            tier=tier,
+            amount=tier.price,
+            stripe_session_id=checkout_session.id,
+            status='pending'
+        )
+        
+        return Response({'checkout_url': checkout_session.url}, status=200)
+    
+      
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except (ValueError, stripe.error.SignatureVerificationError):
+        return Response({'error': 'Invalid signature or payload'}, status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session['metadata']['user_id']
+        tier_id = session['metadata']['tier_id']
+        try: 
+            user = User.objects.get(id=user_id)
+            tier = Tier.objects.get(id=tier_id)
+
+            now = timezone.now()
+            expires_at = now + timedelta(days=30)
+
+            # Try fetch subscription to check current expiry
+            try:
+                subscription = Subscription.objects.get(user=user)
+                if subscription.expires_at and subscription.expires_at > now:
+                    expires_at = subscription.expires_at + timedelta(days=30)
+            except Subscription.DoesNotExist:
+                pass
+
+            # Create or update the subscription
+            Subscription.objects.update_or_create(
+                user=user,
+                defaults={
+                    'tier': tier,
+                    'subscribed_at': now,
+                    'expires_at': expires_at,
+                }
+            )
+
+            # Optional: reflect tier directly on user model
+            user.tier = tier
+            user.save()
+
+            # Update payment status
+            Payment.objects.filter(stripe_session_id=session['id']).update(status='paid')
+            
+        except (User.DoesNotExist, Tier.DoesNotExist):
+            return JsonResponse({'error': 'Invalid user or tier in metadata'}, status=400)
+        
+    return JsonResponse({'status': 'success'}, status=200)
+
+class VerifyCheckoutSessionView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, session_id):
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            if session.payment_status == "paid" and session.customer_email == request.user.email:
+                # Confirm payment is in the database
+                payment = Payment.objects.filter(
+                    user=request.user,
+                    stripe_session_id=session_id,
+                    status='paid'
+                ).first()
+
+                if payment:
+                    return Response({
+                        "status": "success",
+                        "tier": payment.tier.name,
+                        "amount": payment.amount
+                    })
+
+                return Response({"status": "paid_but_not_recorded"}, status=206)
+            Payment.objects.filter(stripe_session_id=session_id).update(status='failed')
+            return Response({"status": "failed"}, status=400)
+        except Exception:
+            return Response({"error": "Invalid session"}, status=400)
+        
+class PaymentView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PaymentSerializer
+    pagination_class = CustomOffsetPagination
+    
+    def get(self, request):
+        payments = Payment.objects.filter(user=request.user).order_by('-created_at')
+        
+        page = self.paginate_queryset(payments)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)

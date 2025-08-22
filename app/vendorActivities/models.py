@@ -23,7 +23,7 @@ class Vendors(models.Model):
 
 class Cwr(models.Model):
     id = models.BigAutoField(primary_key=True)
-    cwr_part_number = models.TextField(blank=True, null=True)
+    cwr_part_number = models.TextField(unique=True,  blank=True, null=True)
     manufacturer_part_number = models.TextField(blank=True, null=True)
     upc = models.TextField(blank=True, null=True)
     quantity_available_to_ship_combined = models.TextField(blank=True, null=True)
@@ -175,7 +175,7 @@ class Lipsey(models.Model):
     onsale = models.TextField(db_column='OnSale', blank=True, null=True)
     price = models.DecimalField(db_column='Price', max_digits=10, decimal_places=2, blank=True, null=True)
     currentprice = models.TextField(db_column='CurrentPrice', blank=True, null=True)
-    retailmap = models.TextField(db_column='RetailMap', blank=True, null=True)
+    map = models.TextField(db_column='Map', blank=True, null=True)
     fflrequired = models.TextField(db_column='FflRequired', blank=True, null=True)
     sotrequired = models.TextField(db_column='SotRequired', blank=True, null=True)
     exclusivetype = models.TextField(db_column='ExclusiveType', blank=True, null=True)

@@ -1,9 +1,12 @@
-import pandas as pd
+import pandas as pd # type: ignore
 from .models import Fragrancex, Lipsey, Cwr, Zanders, Rsr
 import re, json, os, csv, time
 from .apiSupplier import getFragranceXData, getRSR, getRsrItemAttribute
 from ftplib import FTP
 from django.utils import timezone
+from PIL import Image
+import requests
+from io import BytesIO
 
 
 
@@ -57,7 +60,7 @@ class VendorActivity():
         
         return re.sub(r'[^\x00-\x7F]+', '', text)
 
-    def main(self, suppliers):
+    def main(self, suppliers:tuple|list[tuple]):
         try:
             if isinstance(suppliers[0], str) and suppliers[0] in ['fragrancex', 'rsr']:
                 value = self.process_supplier(suppliers)
@@ -310,7 +313,7 @@ class VendorActivity():
 
         return {}
      
-         
+     
     def process_fragranceX(self):             
         try:
             for _, row in self.data.iterrows():
@@ -458,7 +461,7 @@ class VendorActivity():
                         onsale=row["OnSale"],
                         price=row["Price"],
                         currentprice=row["CurrentPrice"],
-                        retailmap=row["RetailMap"],
+                        map=row["RetailMap"],
                         fflrequired=row["FflRequired"],
                         sotrequired=row["SotRequired"],
                         exclusivetype=row["ExclusiveType"],
@@ -651,7 +654,24 @@ class VendorActivity():
         except Exception as e:
             print(f"An error occurred: {e}")
             return e
-        
+    
+    def is_valid_image(self, url, min_width=100, min_height=100):
+        try:
+            resp = requests.get(url, timeout=5)
+            resp.raise_for_status()
+
+            img = Image.open(BytesIO(resp.content))
+            img.verify()  # Basic integrity check
+
+            # Re-open to get dimensions
+            img = Image.open(BytesIO(resp.content))
+            width, height = img.size
+
+            return width >= min_width and height >= min_height
+        except Exception:
+            return False
+
+    
     def process_rsr(self):
         try:
             for row in self.data.iterrows():
@@ -663,8 +683,12 @@ class VendorActivity():
                     last_modified = timezone.make_aware(last_modified, timezone.get_current_timezone())
                 
 
+                images = []
                 if int(row['ImageCount']) > 0:
-                    images = [f"https://img.rsrgroup.com/highres-pimages/{row['SKU']}_{count}_HR.jpg"  for count in range(int(row['ImageCount']))]
+                    for count in range(int(row['ImageCount'])):
+                        url = f"https://img.rsrgroup.com/highres-pimages/{row['SKU']}_{count}_HR.jpg"
+                        if self.is_valid_image(url):
+                            images.append(url)
                 else:
                     images = []
                 try: 
