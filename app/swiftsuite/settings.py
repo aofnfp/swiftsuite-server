@@ -50,6 +50,8 @@ INSTALLED_APPS = [
 #     "http://localhost:5173"
 # ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
