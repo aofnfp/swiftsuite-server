@@ -19,9 +19,4 @@ class Migration(migrations.Migration):
             name='map',
             field=models.TextField(blank=True, db_column='Map', null=True),
         ),
-        migrations.AlterField(
-            model_name='cwr',
-            name='cwr_part_number',
-            field=models.TextField(blank=True, null=True, unique=True),
-        ),
     ]
