@@ -19,15 +19,7 @@ DEBUG = config('DEBUG', cast=bool)
 ALLOWED_HOSTS = [
     "swiftsuite.app",
     "service-test.vps.swiftsuite.app",
-    "service.swiftsuite.app",
-    "frontend-test.vps.swiftsuite.app",
-    "localhost:5173",
-    "swiftsuite.app",
-    "service-test.vps.swiftsuite.app",
-    "service.swiftsuite.app",
-    "frontend-test.vps.swiftsuite.app",
-    "localhost",
-    "127.0.0.1",
+    "service.swiftsuite.app"
 ]
 
 # Application definition
@@ -52,11 +44,11 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig'
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://swiftsuite.app",
-    "https://frontend-test.vps.swiftsuite.app",
-    "http://localhost:5173",   # for local Vite dev
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://swiftsuite.app",
+#     "https://frontend-test.vps.swiftsuite.app",
+#     "http://localhost:5173"
+# ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
