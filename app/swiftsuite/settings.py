@@ -18,12 +18,8 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = [
     "service-test.vps.swiftsuite.app",
-    "service.swiftsuite.app",
-    "https://frontend-test.vps.swiftsuite.app"
-    "localhost",
-    "127.0.0.1",
+    "service.swiftsuite.app"
 ]
-
 
 # Application definition
 
@@ -46,6 +42,14 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'django_cleanup.apps.CleanupConfig'
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://swiftsuite.app",
+    "https://frontend-test.vps.swiftsuite.app",
+    "http://localhost:5173"
+]
+
+# CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
