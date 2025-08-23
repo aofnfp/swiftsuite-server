@@ -1,5 +1,5 @@
 
-from django.urls import path
+from django.urls import path, include
 from . import views as vw
 from rest_framework.routers import DefaultRouter
 
@@ -23,5 +23,7 @@ urlpatterns = [
     path('tier-subscription/', vw.SubscriptionView.as_view(), name='tier-subsciption'),
     path('stripe-webhook/', vw.stripe_webhook, name='stripe-webhook'),
     path('verify-checkout/<str:session_id>/', vw.VerifyCheckoutSessionView.as_view(), name='verify-checkout'),
-    path('payment-history/', vw.PaymentView.as_view(), name='payment-history')
+    path('payment-history/', vw.PaymentView.as_view(), name='payment-history'),
+    
+    path("", include(router.urls))
 ]
