@@ -23,12 +23,14 @@ from vendorEnrollment.pagination import CustomOffsetPagination
 from rest_framework.viewsets import ModelViewSet
 from .permissions import CanCreateSubaccount
 from vendorActivities.permission import IsSuperUser
+from rest_framework.permissions import AllowAny
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY 
 
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
         user_data = request.data 
@@ -86,6 +88,7 @@ class VerifyUserEmail(GenericAPIView):
 
 class LoginUserView(GenericAPIView):
     serializer_class  = LoginSerializer
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context = {'request':request})
         serializer.is_valid(raise_exception=True)
