@@ -31,6 +31,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         user_data = request.data 
@@ -49,6 +50,8 @@ class RegisterUserView(GenericAPIView):
 
 class SendOTP(GenericAPIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
+    
     def post(self, request):
         email = request.data['email']
         try:
@@ -64,6 +67,7 @@ class SendOTP(GenericAPIView):
 class VerifyUserEmail(GenericAPIView):
     serializer_class = VerifyEmailSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -91,6 +95,8 @@ class VerifyUserEmail(GenericAPIView):
 class LoginUserView(GenericAPIView):
     serializer_class  = LoginSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
+    
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context = {'request':request})
         serializer.is_valid(raise_exception=True)
@@ -101,6 +107,8 @@ class LoginUserView(GenericAPIView):
 class PasswordResetView(GenericAPIView):
     serializer_class = PasswordResetSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
+    
     def post(self, request):
         serializer = self.serializer_class(data = request.data, context ={'request':request})
         serializer.is_valid(raise_exception = True)
@@ -109,6 +117,8 @@ class PasswordResetView(GenericAPIView):
     
 class PasswordResetConfirm(GenericAPIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
+    
     def get(self, request, uidb64, token):
         try:
             user_id = smart_str(urlsafe_base64_decode(uidb64))
@@ -122,6 +132,8 @@ class PasswordResetConfirm(GenericAPIView):
         
 class SetNewPassword(GenericAPIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
+    
     serializer_class = SetNewPasswordSerializer
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -132,6 +144,7 @@ class SetNewPassword(GenericAPIView):
 class LogoutUserView(GenericAPIView):
     serializer_class = LogoutUserSerializer
     permission_classes = [IsAuthenticated]
+    
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -193,6 +206,7 @@ class RegisterSubaccountView(GenericAPIView):
 
 class TierViewSet(ModelViewSet):
     permission_classes = [AllowAny]
+    authentication_classes = []
     permission_classes = [IsSuperUser]
     serializer_class = TierSerializer
     queryset = Tier.objects.all()
