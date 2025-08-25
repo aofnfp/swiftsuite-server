@@ -247,9 +247,15 @@ class SubscriptionView(GenericAPIView):
                 checkout_session = stripe.checkout.Session.retrieve(existing_payment.stripe_session_id)
                 if checkout_session.status == 'open':
                     return Response({'checkout_url': checkout_session.url}, status=200)
-                
-                existing_payment.status = 'failed'
-                existing_payment.save()
+
+                elif checkout_session.status == 'complete':
+                    existing_payment.status = 'paid'
+                    existing_payment.save()
+                    return Response({'message': 'Payment already completed for this tier.'}, status=400)
+                elif checkout_session.status == 'failed':
+                    existing_payment.status = 'failed'
+                    existing_payment.save()
+                    return Response({'message': 'Payment failed for this tier.'}, status=400)
             except stripe.error.InvalidRequestError:
                 pass
                 

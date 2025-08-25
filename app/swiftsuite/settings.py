@@ -19,6 +19,7 @@ DEBUG = config('DEBUG', cast=bool)
 ALLOWED_HOSTS = [
     "service-test.vps.swiftsuite.app",
     "service.swiftsuite.app",
+    "127.0.0.1"
 ]
 
 # Application definition
@@ -46,7 +47,8 @@ INSTALLED_APPS = [
 CORS_ALLOWED_ORIGINS = [
     "https://swiftsuite.app",
     "https://frontend-test.vps.swiftsuite.app",
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "http://127.0.0.1"
 ]
 
 # CORS_ALLOW_ALL_ORIGINS = True
