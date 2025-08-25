@@ -205,8 +205,6 @@ class RegisterSubaccountView(GenericAPIView):
             }, status=status.HTTP_201_CREATED)
 
 class TierViewSet(ModelViewSet):
-    permission_classes = [AllowAny]
-    authentication_classes = []
     permission_classes = [IsSuperUser]
     serializer_class = TierSerializer
     queryset = Tier.objects.all()
