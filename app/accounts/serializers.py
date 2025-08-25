@@ -204,6 +204,7 @@ class TierSerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 class SubscriptionSerializer(serializers.ModelSerializer):
+    tier = serializers.PrimaryKeyRelatedField(queryset=Tier.objects.all())
     class Meta:
         model = Subscription
         fields = ['tier']

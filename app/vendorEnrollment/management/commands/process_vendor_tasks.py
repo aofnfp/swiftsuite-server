@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
-from swiftsuite.vendorEnrollment.models import BackgroundTask
-from swiftsuite.vendorEnrollment.views import update_vendor_data
+from vendorEnrollment.models import BackgroundTask
+from vendorEnrollment.views import update_vendor_data
 
 class Command(BaseCommand):
     help = "Processes queued vendor update tasks"
