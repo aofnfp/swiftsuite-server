@@ -18,7 +18,8 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = [
     "service-test.vps.swiftsuite.app",
-    "service.swiftsuite.app"
+    "service.swiftsuite.app",
+    " emailservice.swiftsuite.app"
 ]
 
 # Application definition
