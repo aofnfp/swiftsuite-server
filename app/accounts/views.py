@@ -251,6 +251,14 @@ class SubscriptionView(GenericAPIView):
                 elif checkout_session.status == 'complete':
                     existing_payment.status = 'paid'
                     existing_payment.save()
+                    # Create or update the subscription
+                    Subscription.objects.update_or_create(
+                        user=request.user,
+                        defaults={
+                            'tier': tier,
+                            'expires_at': timezone.now() + timedelta(days=30)
+                        }
+                    )
                     return Response({'message': 'Payment already completed for this tier.'}, status=400)
                 elif checkout_session.status == 'failed':
                     existing_payment.status = 'failed'
