@@ -4,6 +4,7 @@ charset-normalizer==3.3.2
 cloudinary==1.44.1
 Django==5.0.1
 django-cleanup==9.0.0
+django-cloudinary-storage==0.3.0
 django-cors-headers==4.3.1
 django-decouple==2.1
 djangorestframework==3.14.0

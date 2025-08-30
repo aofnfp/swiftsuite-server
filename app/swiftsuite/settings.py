@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "vendorEnrollment",
     "rest_framework",
     "corsheaders",
+    'cloudinary',
+    'cloudinary_storage',
     'rest_framework_simplejwt.token_blacklist',
     'django_cleanup.apps.CleanupConfig'
 ]
@@ -186,10 +188,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 # Cloudinary Configuration       
-cloudinary.config( 
-    cloud_name = config("cloud_name"), 
-    api_key = config("api_key"), 
-    api_secret = config("api_secret"),
+cloudinary.config(
+    CLOUD_NAME = config("cloud_name"),
+    API_KEY = config("api_key"),
+    API_SECRET = config("api_secret"),
     secure = config("secure")
 )
+
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": config("cloud_name"),
+    "API_KEY": config("api_key"),
+    "API_SECRET": config("api_secret"),
+}

@@ -283,8 +283,8 @@ class SubscriptionView(GenericAPIView):
             }],
             mode='payment',
             customer_email=request.user.email,
-            success_url='https://dropshipping-project.netlify.app/?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url='https://dropshipping-project.netlify.app/',
+            success_url='https://swiftsuite.app/chooseplan/paymentsuccessful/?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url='https://swiftsuite.app/chooseplan/paymentfailed/',
             metadata={
                 'user_id': request.user.id,
                 'tier_id': tier.id
