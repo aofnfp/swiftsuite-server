@@ -28,10 +28,6 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY ./app /app
  
-# Collect static files
-
-# RUN python manage.py makemigrations
-# RUN python manage.py migrate
  
 # Expose port (CapRover will map this)
 
@@ -41,10 +37,3 @@ COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
- 
-# Set environment
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Run migrations + collectstatic at startup
-CMD ["gunicorn", "swiftsuite.wsgi:application", "--bind", "0.0.0.0:8000"]
