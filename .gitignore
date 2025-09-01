@@ -21,3 +21,7 @@ venv/
 # VSCode / IDE
 .vscode/
 .idea/
+
+celerybeat-schedule.dat
+celerybeat-schedule.bak
+celerybeat-schedule.dir

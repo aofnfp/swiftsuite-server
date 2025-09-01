@@ -13,7 +13,7 @@ case "$1" in
     ;;
     celery)
         echo "Starting Celery worker..."
-        exec celery -A swiftsuite worker -l info
+        exec celery -A swiftsuite worker -l info -c 4 --pool=threads
     ;;
     beat)
         echo "Starting Beat worker..."
