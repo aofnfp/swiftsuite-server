@@ -8,9 +8,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import  smart_bytes, force_str
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from .utils import send_normal_email
+from .tasks import send_normal_email
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from .utils import send_code_to_user
+from .tasks import send_code_to_user
 
 
 def create_reset_link(user):
@@ -26,7 +26,7 @@ def create_reset_link(user):
         'first_name':user.first_name
     }
 
-    send_normal_email(data)
+    send_normal_email.delay(data)
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length = 68, min_length = 6, write_only = True)

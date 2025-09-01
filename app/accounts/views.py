@@ -3,7 +3,7 @@ from rest_framework.generics import GenericAPIView
 from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, UploadedUserProfileImageSerializer,  TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from .utils import send_code_to_user
+from .tasks import send_code_to_user
 from .models import OneTimePassword, User, UploadedUserProfileImage, Tier, Subscription, Payment
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
@@ -57,7 +57,7 @@ class SendOTP(GenericAPIView):
         try:
             user = User.objects.get(email=email)
             if not user.is_verified:
-                send_code_to_user(email)
+                send_code_to_user.delay(email)
                 return Response({"message":"code sent to your email"}, status=status.HTTP_200_OK)
             return Response({"message":"user already verified"}, status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:

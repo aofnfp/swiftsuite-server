@@ -6,13 +6,15 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
+from celery import shared_task
+import logging
 
 def generate_otp():
     totp = pyotp.TOTP('base32secret3232')
     val = totp.now() # => '492039'
     return val
 
-
+@shared_task
 def send_code_to_user(email):
     subject = "One time passcode for Email Verification"
     otp_code =  generate_otp()
@@ -43,8 +45,9 @@ def send_code_to_user(email):
     d_email.attach_alternative(html_message, 'text/html')
     d_email.send(fail_silently=True)
 
-def send_normal_email(data):
-    html_message = render_to_string('reset_password.html', context=data)
+@shared_task
+def send_normal_email(data, file='reset_password.html'):
+    html_message = render_to_string(file, context=data)
     plain_message = strip_tags(html_message) 
 
 
