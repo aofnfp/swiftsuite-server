@@ -24,7 +24,7 @@ from .serializer import InventoryModelUpdateSerializer
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Generalproducttable
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from ratelimit import limits, sleep_and_retry
-from app.inventoryApp.tasks import sync_ebay_inventory_task
+from .tasks import sync_ebay_inventory_task
 
 
 
