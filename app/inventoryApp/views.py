@@ -541,19 +541,19 @@ class MarketInventory(APIView):
                                     continue
                         except Exception as e:
                             print(f"Attempted operation on this product failed in the first try block {e}")
-                            # try:
-                            #     # check if item from ebay already inserted before
-                            #     print(f"Trying to check if item is already in the inventory")
-                            #     db_objects = InventoryModel.objects.filter(sku=item.get("ebay_sku"), user_id=user.id)
-                            #     if db_objects:
-                            #         continue
-                            #     else:
-                            #         # Item doesn't exist, insert new item
-                            #         print(f"About to insert into inventory table")
-                            #         item_to_save = InventoryModel(title=item.get("Title"), description=product_details.get("shortDescription"), location=product_details.get("itemLocation")["country"], category_id=product_details.get("categoryId"), sku=item.get("ebay_sku"), upc=ebay_upc, start_price=product_details.get("price")["value"], picture_detail=product_details.get("image")["imageUrl"],  postal_code=product_details.get("itemLocation")["postalCode"], quantity=item.get("ebay_quantity"), return_profileID=item.get('ReturnProfileID'), return_profileName=item.get('ReturnProfileName'), payment_profileID=item.get('PaymentProfileID'), payment_profileName=item.get('PaymentProfileName'), shipping_profileID=item.get('ShippingProfileID'), shipping_profileName=item.get('ShippingProfileName'), bestOfferEnabled=True, listingType=item.get('ListingType'), gift="", categoryMappingAllowed="", item_specific_fields=product_details.get("localizedAspects"), market_logos=product_details.get("listingMarketplaceId"), ebay_item_id=item.get("ebay_item_id"), user_id=user.id, date_created=product_details.get("itemCreationDate"), active=True, category=product_details.get("categoryPath"), city=product_details.get("itemLocation")["city"], cost=product_details.get("price")["value"], country=product_details.get("itemLocation")["country"], price=product_details.get("price")["value"], thumbnailImage=product_details.get("additionalImages"))
-                            #         item_to_save.save()
-                            # except Exception as e:
-                            #     print(f"All attempted operation on this product failed {e}")
+                            try:
+                                # check if item from ebay already inserted before
+                                print(f"Trying to check if item is already in the inventory")
+                                db_objects = InventoryModel.objects.filter(sku=item.get("ebay_sku"), user_id=user.id)
+                                if db_objects:
+                                    continue
+                                else:
+                                    # Item doesn't exist, insert new item
+                                    print(f"About to insert into inventory table")
+                                    item_to_save = InventoryModel(title=item.get("Title"), description=product_details.get("shortDescription"), location=product_details.get("itemLocation")["country"], category_id=product_details.get("categoryId"), sku=item.get("ebay_sku"), upc=ebay_upc, start_price=product_details.get("price")["value"], picture_detail=product_details.get("image")["imageUrl"],  postal_code=product_details.get("itemLocation")["postalCode"], quantity=item.get("ebay_quantity"), return_profileID=item.get('ReturnProfileID'), return_profileName=item.get('ReturnProfileName'), payment_profileID=item.get('PaymentProfileID'), payment_profileName=item.get('PaymentProfileName'), shipping_profileID=item.get('ShippingProfileID'), shipping_profileName=item.get('ShippingProfileName'), bestOfferEnabled=True, listingType=item.get('ListingType'), gift="", categoryMappingAllowed="", item_specific_fields=product_details.get("localizedAspects"), market_logos=product_details.get("listingMarketplaceId"), ebay_item_id=item.get("ebay_item_id"), user_id=user.id, date_created=product_details.get("itemCreationDate"), active=True, category=product_details.get("categoryPath"), city=product_details.get("itemLocation")["city"], cost=product_details.get("price")["value"], country=product_details.get("itemLocation")["country"], price=product_details.get("price")["value"], thumbnailImage=product_details.get("additionalImages"))
+                                    item_to_save.save()
+                            except Exception as e:
+                                print(f"All attempted operation on this product failed {e}")
                     
     
     # Get all product already listed on Ebay from the inventory
