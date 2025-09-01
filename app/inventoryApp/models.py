@@ -41,6 +41,7 @@ class InventoryModel(models.Model):
     msrp = models.CharField(null=True, unique=False, max_length=20)
     price = models.CharField(null=True, unique=False, max_length=20)
     percentage_markup = models.CharField(null=True, unique=False, max_length=20)
+    fixed_percentage_markup = models.CharField(null=True, unique=False, max_length=20)
     fixed_markup = models.TextField(null=True, unique=False)
     shipping_cost = models.CharField(null=True, unique=False, max_length=20)
     shipping_height = models.CharField(null=True, unique=False, max_length=20)
