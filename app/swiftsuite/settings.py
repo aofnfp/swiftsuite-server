@@ -104,7 +104,6 @@ REST_FRAMEWORK = {
 }
 
 
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -140,8 +139,6 @@ EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool, default=False)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
-
-
 
 
 # Password validation
@@ -203,3 +200,11 @@ CLOUDINARY_STORAGE = {
     "API_KEY": config("api_key"),
     "API_SECRET": config("api_secret"),
 }
+
+# Configuration for celery
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"

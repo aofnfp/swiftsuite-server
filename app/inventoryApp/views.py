@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-import os, threading, requests, time, json
+import os, requests, time, json
 import base64
 from urllib.parse import urlencode, urlparse, parse_qs
 from rest_framework.views import APIView
@@ -24,6 +24,10 @@ from .serializer import InventoryModelUpdateSerializer
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Generalproducttable
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from ratelimit import limits, sleep_and_retry
+from app.inventoryApp.tasks import sync_ebay_inventory_task
+
+
+
 
 # Create your views here.
 class MarketInventory(APIView):
@@ -720,13 +724,7 @@ class MarketInventory(APIView):
         
         return JsonResponse({"saved_items":all_results[0:20]}, safe=False, status=status.HTTP_200_OK)
 
-        
-        
 
- 
- 
-# Create a code to perform mapping process at the background
-mapping_thread = threading.Thread(target=MarketInventory.sync_ebay_items_with_local, name='procduct_mapping', daemon=True)
-# mapping_thread.start()
 
-# crunk job
+# run inventory async in background
+sync_ebay_inventory_task.delay()

@@ -42,3 +42,9 @@ RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
  
+# Set environment
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Run migrations + collectstatic at startup
+CMD ["gunicorn", "swiftsuite.wsgi:application", "--bind", "0.0.0.0:8000"]
