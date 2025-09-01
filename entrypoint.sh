@@ -19,6 +19,7 @@ case "$1" in
     beat)
         echo "Starting Beat worker..."
         celery -A swiftsuite beat -l info
+    ;;
     *)
         echo "Unknown command: $1"
         echo "Usage: entrypoint.sh {web|celery|celery-beat}"
