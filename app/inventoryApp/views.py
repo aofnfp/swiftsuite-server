@@ -14,6 +14,7 @@ from .serializer import InventoryModelUpdateSerializer
 from vendorEnrollment.models import Generalproducttable
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
+from .tasks import sync_ebay_inventory_task
 
 
 # Create your views here.
@@ -335,4 +336,5 @@ class MarketInventory(APIView):
         return JsonResponse({"item":listings[0:10], "Total items": len(listings)}, status=status.HTTP_200_OK)
 
 
-
+# Inventory background task invocation
+sync_ebay_inventory_task.delay()

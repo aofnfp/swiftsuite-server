@@ -1,8 +1,9 @@
 from .views import MarketInventory as ebview
+from .tasks import sync_ebay_items_with_local
 from django.urls import path
 
 urlpatterns = [
-    path('syc_ebay_product_map/', ebview.sync_ebay_items_with_local, name='syc_ebay_product_map'),
+    path('syc_ebay_product_map/', sync_ebay_items_with_local, name='syc_ebay_product_map'),
     path('get_all_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', ebview.get_all_inventory_items, name='get_all_inventory_items'),
     path('get_all_saved_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', ebview.get_all_saved_inventory_items, name='get_all_saved_inventory_items'),
     path('get_all_unmapped_items/<int:userid>/', ebview.get_unmapped_ebay_listing, name='get_all_unmapped_items'),
