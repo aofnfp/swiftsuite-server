@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 set -e
-cd swiftsuite/
 
 case "$1" in
     web)
