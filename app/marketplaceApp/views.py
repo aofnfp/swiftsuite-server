@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import webbrowser
 import requests
 import base64
-import os, threading, time, json, random
+import os, json, random
 from urllib.parse import urlencode, urlparse, parse_qs
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,7 +20,6 @@ from vendorEnrollment.models import Generalproducttable, Enrollment
 from xml.etree.ElementTree import Element, tostring, SubElement
 from xml.etree import ElementTree as ET
 from rest_framework import serializers
-from accounts.models import User
 from ebaysdk.trading import Connection as Trading
 import cloudinary
 import cloudinary.uploader
