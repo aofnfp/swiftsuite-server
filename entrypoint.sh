@@ -17,7 +17,7 @@ case "$1" in
     ;;
     beat)
         echo "Starting Beat worker..."
-        celery -A swiftsuite beat -l info
+        exec celery -A swiftsuite beat -l info
     ;;
     *)
         echo "Unknown command: $1"

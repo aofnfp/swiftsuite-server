@@ -7,5 +7,5 @@ router.register('vendor', views.VendorsViewSet, basename='vendor')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('upload-data/', views.UploadVendorData.as_view(), name='upload_data'),
+    path('upload-data/<int:vendor_id>/', views.UploadVendorData.as_view(), name='upload_data'),
 ]

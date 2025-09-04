@@ -15,6 +15,25 @@ class Vendors(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Supplier credentials
+    api_access_id = models.CharField(max_length=255, null=True, blank=True)
+    api_access_key = models.CharField(max_length=255, null=True, blank=True)
+    
+    username = models.CharField(max_length=255, null=True, blank=True)
+    password = models.CharField(max_length=255, null=True, blank=True)  
+    pos = models.CharField(max_length=20, null=True, blank=True)
+    
+    ftp_username = models.CharField(max_length=255, null=True, blank=True)
+    ftp_password = models.CharField(max_length=255, null=True, blank=True)
+    host = models.CharField(max_length=255, null=True, blank=True)  
+
+    has_data = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+    
     def __str__(self):
         return self.name
         
@@ -86,7 +105,7 @@ class Cwr(models.Model):
     case_qty_fl = models.TextField(blank=True, null=True)
     number_3rd_party_marketplaces = models.BooleanField(db_column='3rd Party Marketplaces', blank=True, null=True)
     fcc_id = models.TextField(db_column='FCC ID', blank=True, null=True)  
-    sku = models.TextField(blank=True, null=True)
+    sku = models.TextField(unique=True, blank=True, null=True)
     mfgn = models.TextField(blank=True, null=True)
     qty = models.TextField(blank=True, null=True)
     qtynj = models.TextField(blank=True, null=True)
@@ -98,7 +117,7 @@ class Cwr(models.Model):
 
     
 class Fragrancex(models.Model):
-    sku = models.CharField(db_column='SKU', max_length=255, blank=True, null=True)  
+    sku = models.CharField(db_column='SKU', max_length=255, blank=True, null=True, unique=True)  
     productName = models.CharField(db_column='PRODUCT_NAME', max_length=255, blank=True, null=True)  
     description = models.TextField(db_column='DESCRIPTION', blank=True, null=True)  
     brandName = models.CharField(db_column='BRAND_NAME', max_length=255, blank=True, null=True)  
@@ -121,7 +140,7 @@ class Fragrancex(models.Model):
     features = models.TextField(db_column='Features', blank=True, null=True)
     
 class Lipsey(models.Model):
-    sku = models.TextField(db_column='Sku', blank=True, null=True)
+    sku = models.TextField(db_column='Sku', blank=True, null=True, unique=True)
     description1 = models.TextField(db_column='Description1', blank=True, null=True)
     description2 = models.TextField(db_column='Description2', blank=True, null=True)
     upc = models.TextField(db_column='Upc', blank=True, null=True)
@@ -201,7 +220,7 @@ class Lipsey(models.Model):
     features = models.TextField(db_column='Features', blank=True, null=True)
 
 class Rsr(models.Model):
-    sku = models.TextField(db_column='SKU', blank=True, null=True)  # SKU
+    sku = models.TextField(db_column='SKU', blank=True, null=True, unique=True)  # SKU
     last_modified = models.DateTimeField(db_column='Last_Modified', blank=True, null=True)  # LastModified
     upc = models.TextField(db_column='UPC', blank=True, null=True)  # UPC
     title = models.TextField(db_column='Title', blank=True, null=True)  # Title
@@ -250,7 +269,7 @@ class Rsr(models.Model):
 
 
 class Ssi(models.Model):
-    sku = models.CharField(db_column='SKU', max_length=255, blank=True, null=True, db_index=True)
+    sku = models.CharField(db_column='SKU', max_length=255, blank=True, null=True, db_index=True, unique=True)
     description = models.CharField(db_column='Description', max_length=255, blank=True, null=True)
     datecreated = models.CharField(db_column='DateCreated', max_length=255, blank=True, null=True)
     dimensionh = models.CharField(db_column='DimensionH', max_length=255, blank=True, null=True)

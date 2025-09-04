@@ -4,8 +4,7 @@ from rest_framework.views import APIView
 from .models import Vendors
 from rest_framework import status
 from .serializers import (
-    VendorsSerializer,
-    SupplierDetailSerializer
+    VendorsSerializer
     )
 from .permission import IsSuperUser
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -14,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import uuid
 from django.core.cache import cache
 from .tasks import process_vendor_data
+from django.shortcuts import get_object_or_404
 
 
 class VendorsViewSet(ModelViewSet):
@@ -25,54 +25,26 @@ class VendorsViewSet(ModelViewSet):
 class UploadVendorData(APIView):
     permission_classes = [IsSuperUser]
     
-    def post(self, request):
-        vendor_name = request.query_params.get('vendor_name')
-        if not vendor_name:
-            return Response({'error': 'Vendor name is required'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            vendor_info = Vendors.objects.get(name=vendor_name)
-        except ObjectDoesNotExist:
-            return Response({'error': 'Vendor not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = SupplierDetailSerializer(data = request.data)
-        
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        payload = serializer.validated_data
+    def get(self, request, vendor_id):    
+        vendor = get_object_or_404(Vendors, id = vendor_id)
         supplier = None
         task_id = str(uuid.uuid4())
         
-        if vendor_info and not vendor_info.has_data:
-            if vendor_name == 'fragrancex':
-                apiAccessId = payload.get('api_access_id')
-                apiAccessKey = payload.get('api_access_key')
-                supplier = (vendor_name, apiAccessId, apiAccessKey)
-                
-            elif vendor_name == 'rsr':
-                username = payload.get('username')
-                password = payload.get('password')
-                pos = payload.get('pos')
-                supplier = ('rsr', username, password, pos)
-                
-            else:
-                ftp_host = payload.get('host')
-                ftp_user = payload.get('ftp_username')
-                ftp_password = payload.get('ftp_password')
-                supplier = get_suppliers_for_vendor(vendor_name, ftp_host, ftp_user, ftp_password)
-
-            process_vendor_data.delay(supplier, task_id, vendor_info.id)
-            return Response({
-                'task_id': task_id,
-                'message': 'Vendor processing has started in the background'
-            }, status=status.HTTP_200_OK)
+        if vendor.name == 'fragrancex':
+            supplier = (vendor.name, vendor.api_access_id, vendor.api_access_key)
+            
+        elif vendor.name == 'rsr':
+            supplier = (vendor.name, vendor.username, vendor.password, vendor.pos)
             
         else:
-            return Response({'message': 'Vendor data already loaded'}, status=status.HTTP_400_BAD_REQUEST)
-                
-                
-        
+            supplier = get_suppliers_for_vendor(vendor.name, vendor.host, vendor.ftp_username, vendor.ftp_password)
+
+        process_vendor_data.delay(supplier, task_id, vendor.id)
+        return Response({
+            'task_id': task_id,
+            'message': 'Vendor processing has started in the background'
+        }, status=status.HTTP_200_OK)
+            
 
 class CheckTaskProgress(APIView):
     def get(self, request):
