@@ -4,7 +4,7 @@ import requests
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .serializer import PlaceOrderSerializer
+from .serializers import PlaceOrderSerializer
 
 
 @api_view(['GET'])
