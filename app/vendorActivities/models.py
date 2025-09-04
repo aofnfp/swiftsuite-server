@@ -105,7 +105,7 @@ class Cwr(models.Model):
     case_qty_fl = models.TextField(blank=True, null=True)
     number_3rd_party_marketplaces = models.BooleanField(db_column='3rd Party Marketplaces', blank=True, null=True)
     fcc_id = models.TextField(db_column='FCC ID', blank=True, null=True)  
-    sku = models.TextField(unique=True, blank=True, null=True)
+    sku = models.CharField(unique=True, max_length=255, blank=True, null=True)
     mfgn = models.TextField(blank=True, null=True)
     qty = models.TextField(blank=True, null=True)
     qtynj = models.TextField(blank=True, null=True)
@@ -140,7 +140,7 @@ class Fragrancex(models.Model):
     features = models.TextField(db_column='Features', blank=True, null=True)
     
 class Lipsey(models.Model):
-    sku = models.TextField(db_column='Sku', blank=True, null=True, unique=True)
+    sku = models.CharField(db_column='Sku', max_length=255, blank=True, null=True, unique=True)
     description1 = models.TextField(db_column='Description1', blank=True, null=True)
     description2 = models.TextField(db_column='Description2', blank=True, null=True)
     upc = models.TextField(db_column='Upc', blank=True, null=True)
@@ -220,7 +220,7 @@ class Lipsey(models.Model):
     features = models.TextField(db_column='Features', blank=True, null=True)
 
 class Rsr(models.Model):
-    sku = models.TextField(db_column='SKU', blank=True, null=True, unique=True)  # SKU
+    sku = models.CharField(db_column='SKU', max_length=255, blank=True, null=True, unique=True)  # SKU
     last_modified = models.DateTimeField(db_column='Last_Modified', blank=True, null=True)  # LastModified
     upc = models.TextField(db_column='UPC', blank=True, null=True)  # UPC
     title = models.TextField(db_column='Title', blank=True, null=True)  # Title
@@ -331,3 +331,4 @@ class Zanders(models.Model):
     imagelink = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     features = models.TextField(db_column='Features', blank=True, null=True)
+

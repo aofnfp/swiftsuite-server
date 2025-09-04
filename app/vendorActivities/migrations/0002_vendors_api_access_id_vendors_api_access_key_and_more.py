@@ -10,69 +10,44 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='api_access_id',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='api_access_key',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='ftp_password',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='ftp_username',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='host',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='password',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='pos',
-        #     field=models.CharField(blank=True, max_length=20, null=True),
-        # ),
-        # migrations.AddField(
-        #     model_name='vendors',
-        #     name='username',
-        #     field=models.CharField(blank=True, max_length=255, null=True),
-        # ),
-        migrations.AlterField(
-            model_name='cwr',
-            name='sku',
-            field=models.TextField(blank=True, null=True, unique=True),
+        migrations.AddField(
+            model_name='vendors',
+            name='api_access_id',
+            field=models.CharField(blank=True, max_length=255, null=True),
         ),
-        migrations.AlterField(
-            model_name='fragrancex',
-            name='sku',
-            field=models.CharField(blank=True, db_column='SKU', max_length=255, null=True, unique=True),
+        migrations.AddField(
+            model_name='vendors',
+            name='api_access_key',
+            field=models.CharField(blank=True, max_length=255, null=True),
         ),
-        migrations.AlterField(
-            model_name='lipsey',
-            name='sku',
-            field=models.TextField(blank=True, db_column='Sku', null=True, unique=True),
+        migrations.AddField(
+            model_name='vendors',
+            name='ftp_password',
+            field=models.CharField(blank=True, max_length=255, null=True),
         ),
-        migrations.AlterField(
-            model_name='rsr',
-            name='sku',
-            field=models.TextField(blank=True, db_column='SKU', null=True, unique=True),
+        migrations.AddField(
+            model_name='vendors',
+            name='ftp_username',
+            field=models.CharField(blank=True, max_length=255, null=True),
         ),
-        migrations.AlterField(
-            model_name='ssi',
-            name='sku',
-            field=models.CharField(blank=True, db_column='SKU', db_index=True, max_length=255, null=True, unique=True),
+        migrations.AddField(
+            model_name='vendors',
+            name='host',
+            field=models.CharField(blank=True, max_length=255, null=True),
         ),
+        migrations.AddField(
+            model_name='vendors',
+            name='password',
+            field=models.CharField(blank=True, max_length=255, null=True),
+        ),
+        migrations.AddField(
+            model_name='vendors',
+            name='pos',
+            field=models.CharField(blank=True, max_length=20, null=True),
+        ),
+        migrations.AddField(
+            model_name='vendors',
+            name='username',
+            field=models.CharField(blank=True, max_length=255, null=True),
+        )
     ]
