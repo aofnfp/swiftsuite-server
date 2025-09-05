@@ -1,17 +1,10 @@
 import requests, time
 import base64
-from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import get_object_or_404
-from ebaysdk.exception import ConnectionError
-from xml.etree import ElementTree as ET
 from marketplaceApp.views import Ebay
-from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate
 from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
-from django.db.models import Q
-from rest_framework.response import Response
-from rest_framework import status
 from .models import OrdersOnEbayModel
+from inventoryApp.models import InventoryModel
 
 
 
@@ -122,9 +115,7 @@ def get_item_ordered_details(access_token, item_id):
 # Update orders on ebay to the one on local database at the background
 # @api_view(["GET"])
 def sync_ebay_order_with_local():
-    print("synchronizing ebay order starts")
-    vendor_name_item = ""
-    user_token = MarketplaceEnronment.objects.all() #get all user to get their access_token and user id
+    user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
         # Get access_token
         access_token = refresh_access_token_for_sync(user._id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
@@ -141,35 +132,21 @@ def sync_ebay_order_with_local():
         for order in ebay_orders:
             # Check if order already exists on local database else insert it
             try:
+                lineItems = order.get('lineItems', [])[0]
                 ebay_order_id = order.get("orderId")
                 exist_order = OrdersOnEbayModel.objects.get(orderId=ebay_order_id)
-                OrdersOnEbayModel.objects.filter(orderId=ebay_order_id).update(orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"))
+                product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId")).values()[0]
+                if len(product_data) == 0:
+                    product_data = {"vendor_name":""}
+                OrdersOnEbayModel.objects.filter(orderId=ebay_order_id).update(orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"), vendor_name=product_data.get('vendor_name'))
             except:
-                db_item = ""
-                lineItems = order.get('lineItems', [])[0]
-                product_data = get_item_ordered_details(access_token, lineItems.get('legacyItemId'))
-                if product_data == None:
-                    print(f"product details returned None in orderApp for item with item_id {order.get('ebay_item_id')}")
-                    continue
-                print('trying to insert data to the database')
-
-                # Get the product vendor name from the local database.
-                vendor_list = ["CwrUpdate", "FragrancexUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
-                for vendor_db in vendor_list:
-                    try:
-                        # Get the actual model class from the string name
-                        model_class = globals()[vendor_db]
-                        db_item = model_class.objects.get(sku=product_data.get("sku"))
-                        vendor_name_item = vendor_db.split("Up")[0]
-                        break
-                    except Exception as ea:
-                        print(f"product do not match any vendor in orderApp. Error is: {ea}")
-                        vendor_name_item = ""
+                try:
+                    lineItems = order.get('lineItems', [])[0]
+                    product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId")).values()[0]
+                    if len(product_data) == 0:
+                        print(f"product details returned None in orderApp for item with item_id {order.get('ebay_item_id')}")
                         continue
-                if db_item:
-                    OrdersOnEbayModel.objects.filter(orderId=order.get("orderId")).update(vendor_name=vendor_name_item)
-                else:
-                    save_order = OrdersOnEbayModel(user_id=user._id, orderId=order.get("orderId"),
+                    save_order = OrdersOnEbayModel(user_id=user.user_id, orderId=order.get("orderId"),
                                                 legacyOrderId=order.get("legacyOrderId"), creationDate=order.get("creationDate"),
                                                 orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"),
                                                 sellerId=order.get("sellerId"), buyer=order.get("buyer"), cancelStatus=order.get("cancelStatus"),
@@ -177,13 +154,13 @@ def sync_ebay_order_with_local():
                                                 fulfillmentStartInstructions=order.get("fulfillmentStartInstructions"), sku=lineItems.get("sku"), title=lineItems.get("title"),
                                                 lineItemCost=lineItems.get("lineItemCost"), quantity=lineItems.get("quantity"),
                                                 listingMarketplaceId=lineItems.get("listingMarketplaceId"), purchaseMarketplaceId=lineItems.get("purchaseMarketplaceId"),
-                                                itemLocation=lineItems.get("itemLocation"), legacyItemId=lineItems.get('legacyItemId'), image=product_data.get("image"),
-                                                additionalImages=product_data.get("additionalImages"), mpn=product_data.get("mpn"),
-                                                description=product_data.get("description"), categoryId=product_data.get("categoryId"),
-                                                vendor_name=vendor_name_item, ebayItemId=product_data.get("itemId"), localizeAspects=product_data.get("localizeAspects"))
+                                                itemLocation=lineItems.get("itemLocation"), legacyItemId=lineItems.get('legacyItemId'), image=product_data.get("picture_detail"),
+                                                additionalImages=product_data.get("thumbnailImage"), description=product_data.get("description"), categoryId=product_data.get("category_id"),
+                                                ebayItemId=product_data.get("ebay_item_id"), localizeAspects=product_data.get("item_specific_fields"), vendor_name=product_data.get('vendor_name'))
                     save_order.save()
-        print("All user's order update were successful")
-
+                except Exception as e:
+                    print(f"Ordered item insert error {e} ")
+                    
 
 
 
