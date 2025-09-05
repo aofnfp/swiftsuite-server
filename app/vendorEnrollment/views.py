@@ -20,7 +20,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .tasks import update_func, update_vendor_data
+from .tasks import  update_vendor_data
 from rest_framework.decorators import api_view, permission_classes
 from vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
 from rest_framework.generics import ListAPIView
@@ -67,7 +67,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         enrollment_id = response.data.get('id')
         enrollment = get_object_or_404(Enrollment, id=enrollment_id)
         BackgroundTask.objects.create(enrollment=enrollment) 
-        update_vendor_data(enrollment)
+        update_vendor_data.delay(enrollment.id)
         return response
     
 class VendorTestView(APIView):
