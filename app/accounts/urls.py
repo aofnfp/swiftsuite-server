@@ -15,10 +15,9 @@ urlpatterns = [
     path('password_reset_confirm/<uidb64>/<token>/', vw.PasswordResetConfirm.as_view(), name='password_reset_confirm'),
     path('set_new_password/', vw.SetNewPassword.as_view(), name='set_new_password'),
     path('logout/', vw.LogoutUserView.as_view(), name='logout'),
-    path('upload_user_profile_image/<int:userid>/', vw.upload_user_profile_image, name='upload_user_profile_image'),
-    path('get_uploaded_user_profile_image/<int:userid>/', vw.get_uploaded_user_profile_image, name='get_uploaded_user_profile_image'),
     path('send-otp/', vw.SendOTP.as_view(), name='send_otp'),
     path('create-subaccount/', vw.RegisterSubaccountView.as_view(), name="create-subaccount"),
+    path('user-profile/', vw.UserProfileView.as_view(), name='user-profile'),
     
     path('tier-subscription/', vw.SubscriptionView.as_view(), name='tier-subsciption'),
     path('stripe-webhook/', vw.stripe_webhook, name='stripe-webhook'),

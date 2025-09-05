@@ -10,6 +10,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length = 255, unique = True, verbose_name = _("Email Address"))
     first_name = models.CharField(max_length = 100, verbose_name = _('First Name'))
     last_name = models.CharField(max_length = 100, verbose_name = _('Last Name'))
+    profile_image = models.ImageField(upload_to='ProfileImages/', null=True, blank=True)
     is_staff = models.BooleanField(default = False)
     is_superuser = models.BooleanField(default = False )
     is_verified = models.BooleanField(default = False )
@@ -60,15 +61,7 @@ class OneTimePassword(models.Model):
    def __str__(self):
        return f"{self.user.first_name}--passcode"
        
-       
-       
-class UploadedUserProfileImage(models.Model):
-    image_url = models.ImageField(upload_to='UserProfileImage/', null=False, unique=False)
-    image_name = models.CharField(max_length=100, null=False, unique=False)
-    uploaded_date= models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False, null=False)
-    
-    
+           
     
 class SubAccountPermissions(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='permissions')
