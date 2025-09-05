@@ -1,12 +1,11 @@
 
 from rest_framework import serializers
-from .models import User, UploadedUserProfileImage, Tier, Subscription, Payment
+from .models import User, Tier, Subscription, Payment
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import  smart_bytes, force_str
-from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from .tasks import send_normal_email
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
@@ -169,14 +168,12 @@ class LogoutUserSerializer(serializers.Serializer):
         except TokenError:
             return self.fail('bad_token')
 
-            
-class UploadedUserProfileImageSerializer(serializers.ModelSerializer):
-
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UploadedUserProfileImage
-        fields = ['image_url']
-
-
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'profile_image']
+        read_only_fields = ['email']
+        
 class RegisterSubaccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=100, min_length=6, write_only=True)
     

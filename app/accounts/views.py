@@ -1,10 +1,10 @@
 
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, UploadedUserProfileImageSerializer,  TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer
+from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .tasks import send_code_to_user
-from .models import OneTimePassword, User, UploadedUserProfileImage, Tier, Subscription, Payment
+from .models import OneTimePassword, User, Tier, Subscription, Payment
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -158,35 +158,19 @@ def landingPage(request):
     return HttpResponseRedirect("https://swiftsuite.app")
     # return render(request, "index.html")
 
+class UserProfileView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
 
-# Function to upload image to cloudinary
-@api_view(['POST'])
-def upload_user_profile_image(request, userid):
+    def get(self, request):
+        serializer = self.serializer_class(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    if request.method == 'POST':
-        serializer = UploadedUserProfileImageSerializer(data=request.data)
-        if serializer.is_valid():
-            # Upload an image
-            image_file = request.FILES.get("image_url")
-            upload_result = cloudinary.uploader.upload(image_file, public_id=f"profile_{userid}")
-            # Optimize delivery by resizing and applying auto-format and auto-quality
-            optimize_url, _ = cloudinary_url(f"profile_{userid}", fetch_format="auto", quality="auto")
-            # Transform the image: auto-crop to square aspect_ratio
-            auto_crop_url, _ = cloudinary_url(f"profile_{userid}", width=500, height=500, crop="auto", gravity="auto")
-            try:
-                UploadedUserProfileImage.objects.filter(user_id=userid).update(image_url=upload_result["secure_url"])
-            except:
-                save_image = UploadedUserProfileImage(image_url=upload_result["secure_url"], image_name=upload_result["public_id"], user_id=userid)
-                save_image.save()
-            return Response({"image_uploaded":upload_result}, status=201)
-    return Response(serializer.errors, status=400)
-
-
-# Get image details
-@api_view(['GET'])
-def get_uploaded_user_profile_image(request, userid):
-    save_image = UploadedUserProfileImage.objects.filter(user_id=userid, image_name=f"profile_{userid}").values()
-    return JsonResponse({"profile_image":list(save_image)}, safe=False, status=status.HTTP_200_OK)
+    def put(self, request):
+        serializer = self.serializer_class(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class RegisterSubaccountView(GenericAPIView):
     serializer_class = RegisterSubaccountSerializer

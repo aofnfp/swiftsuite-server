@@ -1,14 +1,19 @@
 from vendorActivities.models import Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
-from .models import FragrancexUpdate, LipseyUpdate, CwrUpdate, RsrUpdate, ZandersUpdate, Enrollment
+from .models import FragrancexUpdate, LipseyUpdate, CwrUpdate, RsrUpdate, ZandersUpdate, Enrollment, BackgroundTask
 import os, csv, time
 from ftplib import FTP
 from vendorActivities.apiSupplier import getFragranceXData, getRSR
 from .utils import VendorDataMixin
+from celery import shared_task
+import logging
 
 mixin = VendorDataMixin()
+logger = logging.getLogger(__name__)
 
-def update_vendor_data(enrollment):
+@shared_task
+def update_vendor_data(enrollment_id):
     try:
+        enrollment = Enrollment.objects.get(id = enrollment_id)
         file_path = None
         
         supplier_name = enrollment.vendor.name.lower()
@@ -213,18 +218,19 @@ def process_cwr(file_path, enrollment):
     )
 
 
+@shared_task
 def update_all_enrollments():
-    from vendorEnrollment.models import Enrollment
-    for enrollment in Enrollment.objects.all():
-        update_vendor_data(enrollment)
-
-
-def update_func(enrollment_id):
-    while True:
-        enrollment = Enrollment.objects.get(id=enrollment_id)
-        supplier_name = enrollment.vendor.name.lower()
-        update_vendor_data(enrollment)
-        if supplier_name == 'fragrancex':
-            time.sleep(1080)
-        else:
-            time.sleep(600)
+    tasks = BackgroundTask.objects.all()
+    for task in tasks:
+        try:
+            enrollment = task.enrollment
+            logger.info(f"Processing enrollment {enrollment.identifier}")
+            update_vendor_data.delay(enrollment.id)
+            task.processed = True
+            task.result = "Success"
+        except Exception as e:
+            task.result = f"Error: {str(e)}"
+            logger.error(task.result)
+        finally:
+            task.save()
+        
