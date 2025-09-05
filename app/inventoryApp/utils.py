@@ -194,7 +194,7 @@ def calculated_selling_price(self, enroll_id, start_price, userid, map=""):
     
 
 # Create a function to update items quantity and price at the background on Ebay
-def update_items_on_ebay(self, access_token, item_id, price, quantity):
+def update_items_quantity_or_price_on_ebay(self, access_token, item_id, price, quantity, userid):
     # eBay Trading API endpoint
     url = 'https://api.ebay.com/ws/api.dll'
 
@@ -205,22 +205,52 @@ def update_items_on_ebay(self, access_token, item_id, price, quantity):
         'Content-Type': 'text/xml',
         'Authorization': f'Bearer {access_token}'
     }
+    user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
     try:
         # XML Body for ReviseItem request
-        body = f"""
-        <?xml version="1.0" encoding="utf-8"?>
-        <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>{access_token}</eBayAuthToken>
-            </RequesterCredentials>
-            <Item>
-                <ItemID>{item_id}</ItemID>
-                <StartPrice>{price,}</StartPrice>
-                <Quantity>{quantity}</Quantity>
-            </Item>
-        </ReviseItemRequest>
-        """
-
+        if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>{price,}</StartPrice>
+                    <Quantity>{quantity}</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """
+        elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>{price}</StartPrice>
+                </Item>
+            </ReviseItemRequest>
+            """
+        elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <Quantity>{quantity}</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """
+        else:
+            return None
+        
         # Make the POST request
         response = requests.post(url, headers=headers, data=body)
         # Check the response
@@ -292,7 +322,7 @@ def sync_ebay_items_with_local():
                         # Check if there is a price and quantity update, then update on Ebay
                         if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
                             # Update the product on Ebay
-                            response = update_items_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity)
+                            response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user.user_id)
                             print("product updated on ebay successful.")
 
             except Exception as e:
