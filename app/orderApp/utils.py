@@ -127,7 +127,7 @@ def sync_ebay_order_with_local():
     user_token = MarketplaceEnronment.objects.all() #get all user to get their access_token and user id
     for user in user_token:
         # Get access_token
-        access_token = refresh_access_token_for_sync(user.id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+        access_token = refresh_access_token_for_sync(user._id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
         if not access_token:
             print(f"Failed to refresh access token. Access token returns none in orderapp")
             continue
@@ -135,7 +135,7 @@ def sync_ebay_order_with_local():
         # Fetch all orders from eBay
         ebay_orders = get_product_ordered_from_background(access_token)
         if ebay_orders == None:
-            print(f"Failed to fetch ordered items from ebay for user {user.id}")
+            print(f"Failed to fetch ordered items from ebay for user {user._id}")
             continue
         
         for order in ebay_orders:
@@ -169,7 +169,7 @@ def sync_ebay_order_with_local():
                 if db_item:
                     OrdersOnEbayModel.objects.filter(orderId=order.get("orderId")).update(vendor_name=vendor_name_item)
                 else:
-                    save_order = OrdersOnEbayModel(user_id=user.id, orderId=order.get("orderId"),
+                    save_order = OrdersOnEbayModel(user_id=user._id, orderId=order.get("orderId"),
                                                 legacyOrderId=order.get("legacyOrderId"), creationDate=order.get("creationDate"),
                                                 orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"),
                                                 sellerId=order.get("sellerId"), buyer=order.get("buyer"), cancelStatus=order.get("cancelStatus"),
