@@ -135,9 +135,11 @@ def sync_ebay_order_with_local():
                 lineItems = order.get('lineItems', [])[0]
                 ebay_order_id = order.get("orderId")
                 exist_order = OrdersOnEbayModel.objects.get(orderId=ebay_order_id)
-                product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId")).values()[0]
+                product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId"))
                 if len(product_data) == 0:
                     product_data = {"vendor_name":""}
+                else:
+                    product_data = product_data.values()[0]
                 OrdersOnEbayModel.objects.filter(orderId=ebay_order_id).update(orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"), vendor_name=product_data.get('vendor_name'))
             except:
                 try:

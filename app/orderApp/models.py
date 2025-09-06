@@ -36,4 +36,4 @@ class OrdersOnEbayModel(models.Model):
     ebayItemId = models.CharField(null=True, unique=False, max_length=155)
     itemEbayStatus = models.CharField(null=True, unique=False, max_length=155)
     legacyItemId = models.TextField(null=True, unique=False)
-    localizeAspects = models.CharField(null=True, unique=False, max_length=155)
+    localizeAspects = models.TextField(null=True, unique=False)
