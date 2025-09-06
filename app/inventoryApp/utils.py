@@ -15,10 +15,10 @@ from django.db.models import Q
 # Function to refresh the access token using the refresh token
 @sleep_and_retry
 @limits(calls=5, period=1)
-def refresh_access_token_for_sync(userid, market_name):
+def refresh_access_token_for_sync(market_id, market_name):
     eb = Ebay()
     try:
-        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+        connection = MarketplaceEnronment.objects.all().get(_id=market_id, marketplace_name=market_name)
     except Exception as e:
         print(f"Failed to fetch access token in inventory: {e}")
         return None
@@ -44,7 +44,7 @@ def refresh_access_token_for_sync(userid, market_name):
         if response.status_code == 429:  # Rate limit hit
             retry_after = int(response.headers.get('Retry-After', 2))
             time.sleep(retry_after)
-            return refresh_access_token_for_sync(userid, "Ebay")
+            return refresh_access_token_for_sync(market_id, "Ebay")
             
         if response.status_code != 200:
             print(f"Failed to refresh access token. Authorization code has expired: {response.text}")
@@ -57,7 +57,7 @@ def refresh_access_token_for_sync(userid, market_name):
             print(f"Failed to get access token in inventory from response{result}")
             return None
 
-        MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+        MarketplaceEnronment.objects.filter(_id=market_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
         return access_token
     except Exception as e:
         print(f"Failed to refresh access token in inventoryApp: {e}")
@@ -178,23 +178,23 @@ def get_item_details(access_token, item_id):
             
 
 # Calculate the selling price of product going to ebay
-def calculated_selling_price(enroll_id, start_price, userid, map=""):
+def calculated_selling_price(vendor_id, market_id, start_price, userid, map=""):
     try:
-        market_place = MarketplaceEnronment.objects.get(user_id=userid)
-        enrollment = get_object_or_404(Enrollment, id=enroll_id, user_id=userid)
+        market_place = MarketplaceEnronment.objects.get(_id=market_id)
+        enrollment = get_object_or_404(Enrollment, id=vendor_id, user_id=userid)
         total_product_cost = float(start_price) + float(enrollment.fixed_markup) + ((int(enrollment.percentage_markup)/100) * float(start_price))
         selling_price = total_product_cost + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) * total_product_cost) + ((float(market_place.profit_margin)/100) * total_product_cost)
         if map:
             if selling_price < float(map):
                 selling_price = float(map)
     except Exception as e:
-        print(f"Failed to compute price due to missing data with user id {userid}, enroll_id {enroll_id}, start_price {start_price}: {e}")
+        print(f"Failed to compute price due to missing data with user id {userid}, vendor_id {vendor_id}, start_price {start_price}: {e}")
 
     return round(selling_price, 2)
     
 
 # Create a function to update items quantity and price at the background on Ebay
-def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantity, userid):
+def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantity, market_id):
     # eBay Trading API endpoint
     url = 'https://api.ebay.com/ws/api.dll'
 
@@ -205,7 +205,7 @@ def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantit
         'Content-Type': 'text/xml',
         'Authorization': f'Bearer {access_token}'
     }
-    user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
+    user_data = MarketplaceEnronment.objects.get(_id=market_id, marketplace_name="Ebay")
     try:
         # XML Body for ReviseItem request
         if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
@@ -269,9 +269,9 @@ def sync_ebay_items_with_local():
     db_item = ""
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
-        access_token = refresh_access_token_for_sync(user.user_id, "Ebay")
+        access_token = refresh_access_token_for_sync(user._id, "Ebay")
         if not access_token:
-            print(f"Failed to refresh access token. Access token returns none in inventoryapp {user.user_id}")   
+            print(f"Failed to refresh access token. Access token returns none in inventoryapp {user._id}")   
             continue
         # Fetch all item from eBay
         ebay_items = get_all_items_on_ebay(access_token)
@@ -309,7 +309,7 @@ def sync_ebay_items_with_local():
                 if db_item:
                     # Modify selling price before updating on ebay 
                     print(f"Trying to calculate price for enrollment ID:{db_item.enrollment_id}")
-                    selling_price = calculated_selling_price(enroll_id=db_item.enrollment_id, start_price=db_item.total_price, userid=user.user_id, map="")
+                    selling_price = calculated_selling_price(vendor_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map="")
                     if type(selling_price) == float:
                         if selling_price < float(db_item.product.map):
                             selling_price = float(db_item.product.map)
@@ -322,7 +322,7 @@ def sync_ebay_items_with_local():
                         # Check if there is a price and quantity update, then update on Ebay
                         if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
                             # Update the product on Ebay
-                            response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user.user_id)
+                            response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
                             print("product updated on ebay successful.")
 
             except Exception as e:

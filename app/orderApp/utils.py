@@ -9,10 +9,10 @@ from inventoryApp.models import InventoryModel
 
 
 # Function to refresh the access token using the refresh token
-def refresh_access_token_for_sync(userid, market_name):
+def refresh_access_token_for_sync(market_id, market_name):
     eb = Ebay()
     try:
-        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+        connection = MarketplaceEnronment.objects.all().get(_id=market_id, marketplace_name=market_name)
     except Exception as e:
         print(f"Failed to fetch access token in orderapp: {e}")
         return None
@@ -43,7 +43,7 @@ def refresh_access_token_for_sync(userid, market_name):
     if not access_token:
         print(f"Failed to get access token from response{result}")
 
-    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+    MarketplaceEnronment.objects.filter(_id=market_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
     return access_token
 
 
@@ -126,7 +126,7 @@ def sync_ebay_order_with_local():
         # Fetch all orders from eBay
         ebay_orders = get_product_ordered_from_background(access_token)
         if ebay_orders == None:
-            print(f"Failed to fetch ordered items from ebay for user {user._id}")
+            print(f"Failed to fetch ordered items from ebay for user {user.user_id}")
             continue
         
         for order in ebay_orders:
