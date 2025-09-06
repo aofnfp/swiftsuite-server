@@ -144,10 +144,12 @@ def sync_ebay_order_with_local():
             except:
                 try:
                     lineItems = order.get('lineItems', [])[0]
-                    product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId")).values()[0]
+                    product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId"))
                     if len(product_data) == 0:
                         print(f"product details returned None in orderApp for item with item_id {order.get('ebay_item_id')}")
                         continue
+                    else:
+                        product_data = product_data.values()[0]
                     save_order = OrdersOnEbayModel(user_id=user.user_id, orderId=order.get("orderId"),
                                                 legacyOrderId=order.get("legacyOrderId"), creationDate=order.get("creationDate"),
                                                 orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"),
