@@ -150,9 +150,8 @@ def get_all_items_on_ebay(access_token):
 # Limit to 5 calls per second (eBay's typical limit)
 @sleep_and_retry
 @limits(calls=5, period=1)
-def get_item_details(user_id, item_id):
+def get_item_details(access_token, item_id):
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
-    access_token = refresh_access_token_for_sync(user_id, "Ebay")
     # Set up the headers with the access token
     headers = {
         'Authorization': f'Bearer {access_token}',
@@ -165,7 +164,7 @@ def get_item_details(user_id, item_id):
         if response.status_code == 429:  # Rate limit hit
             retry_after = int(response.headers.get('Retry-After', 2))
             time.sleep(retry_after)
-            return get_item_details(user_id, item_id)
+            return get_item_details(access_token, item_id)
     
         product_data = response.json()
         if response.status_code == 200:
@@ -279,7 +278,7 @@ def sync_ebay_items_with_local():
         for item in ebay_items:
             all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
         for item in all_ebay_items:
-            product_details = get_item_details(user._id, item.get("ebay_item_id"))
+            product_details = get_item_details(access_token, item.get("ebay_item_id"))
             if product_details == None:
                 continue
             else:
