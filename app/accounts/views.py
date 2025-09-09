@@ -1,6 +1,6 @@
 
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer
+from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer, ChangePasswordSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .tasks import send_code_to_user
@@ -102,7 +102,22 @@ class LoginUserView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response (serializer.data, status=status.HTTP_200_OK)
 
-
+class ChangePasswordView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            old_password = serializer.validated_data['password']
+            new_password = serializer.validated_data['new_password']
+            user = request.user
+            if not user.check_password(old_password):
+                return Response({"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.set_password(new_password)
+            user.save()
+            return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordResetView(GenericAPIView):
     serializer_class = PasswordResetSerializer

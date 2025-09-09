@@ -15,6 +15,7 @@ urlpatterns = [
     path('password_reset_confirm/<uidb64>/<token>/', vw.PasswordResetConfirm.as_view(), name='password_reset_confirm'),
     path('set_new_password/', vw.SetNewPassword.as_view(), name='set_new_password'),
     path('logout/', vw.LogoutUserView.as_view(), name='logout'),
+    path('change-password/', vw.ChangePasswordView.as_view(), name='change-password'),
     path('send-otp/', vw.SendOTP.as_view(), name='send_otp'),
     path('create-subaccount/', vw.RegisterSubaccountView.as_view(), name="create-subaccount"),
     path('user-profile/', vw.UserProfileView.as_view(), name='user-profile'),

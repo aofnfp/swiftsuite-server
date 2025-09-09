@@ -173,6 +173,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'profile_image']
         read_only_fields = ['email']
+
+class ChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+    new_password = serializers.CharField(write_only=True, min_length=6)
+    confirm_password = serializers.CharField(write_only=True, min_length=6)
+    
+    def validate(self, data):
+        """Validate the new password and confirm password."""
+        new_password = data.get("new_password")
+        confirm_password = data.get("confirm_password")
+        
+        if new_password != confirm_password:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        
+        return data
         
 class RegisterSubaccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=100, min_length=6, write_only=True)
