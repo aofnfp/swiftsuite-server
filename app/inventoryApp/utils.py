@@ -311,7 +311,8 @@ def sync_ebay_items_with_local():
                             # Update the product on Ebay
                             response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
                             print("product updated on ebay successful.")
-
+                else:
+                    print(f"Product with SKU {item.get('ebay_sku')} not found in any vendor table.")
             except Exception as e:
                 print(f'Product processing failed in the first block with error: {e}')
                 try:
