@@ -286,7 +286,7 @@ def sync_ebay_items_with_local():
                     try:
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_db]
-                        db_item = model_class.objects.get(Q(sku=item.get("ebay_sku")) & (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
+                        db_item = model_class.objects.get(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
                         print(f'product found for vendor: {vendor_db}')
                         item_listing, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, total_price=db_item.total_price, vendor_id=db_item.vendor_id, vendor_name=db_item.vendor.name))
                         break                    
@@ -334,4 +334,4 @@ def sync_ebay_items_with_local():
 
                 except Exception as e:
                     print(f"Product failed to insert into inventory {e}")
-                      
+                    

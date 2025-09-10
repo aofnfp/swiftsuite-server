@@ -78,7 +78,7 @@ class MarketInventory(APIView):
     def update_item_on_ebay(request, inventory_id, userId):
         minv = MarketInventory()
         eb = Ebay()
-        access_token = minv.refresh_access_token_for_sync(userId, "Ebay")
+        access_token = eb.refresh_access_token(userId, "Ebay")
         try:
             product_info = get_object_or_404(InventoryModel, id=inventory_id)
             serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
@@ -215,7 +215,7 @@ class MarketInventory(APIView):
     @api_view(['GET'])
     def get_all_inventory_items(request, userid, page_number, num_per_page):
         try:
-            inventory_listing = InventoryModel.objects.all().filter(user_id=userid, active=True).values().order_by('id')
+            inventory_listing = InventoryModel.objects.all().filter(user_id=userid, active=True).values().order_by('id').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
             try:
