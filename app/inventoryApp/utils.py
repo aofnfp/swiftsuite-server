@@ -306,11 +306,11 @@ def sync_ebay_items_with_local():
                     db_item.active = True
                     db_item.save()
                     
-                    # Check if there is a price and quantity update, then update on Ebay
-                    if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
-                        # Update the product on Ebay
-                        response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
-                        print("product updated on ebay successful.")
+                    # # Check if there is a price and quantity update, then update on Ebay
+                    # if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
+                    #     # Update the product on Ebay
+                    #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
+                    #     print("product updated on ebay successful.")
                
             except Exception as e:
                 print(f'Product processing failed in the first block with error: {e}')
