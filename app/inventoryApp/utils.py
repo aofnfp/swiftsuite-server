@@ -1,4 +1,4 @@
-import requests, time
+import json, requests, time
 import base64
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
@@ -63,6 +63,75 @@ def refresh_access_token_for_sync(market_id, market_name):
         print(f"Failed to refresh access token in inventoryApp: {e}")
         return None
     
+
+# Create a function to update items quantity and price at the background on Ebay
+def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantity, market_id):
+    # eBay Trading API endpoint
+    url = 'https://api.ebay.com/ws/api.dll'
+
+    headers = {
+        'X-EBAY-API-CALL-NAME': 'ReviseItem',
+        'X-EBAY-API-SITEID': '0',  # Change this to your site ID, 0 is for US
+        'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',  # eBay API version
+        'Content-Type': 'text/xml',
+        'Authorization': f'Bearer {access_token}'
+    }
+    user_data = MarketplaceEnronment.objects.get(_id=market_id, marketplace_name="Ebay")
+    try:
+        # XML Body for ReviseItem request
+        if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>{price,}</StartPrice>
+                    <Quantity>{quantity}</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """
+        elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>{price}</StartPrice>
+                </Item>
+            </ReviseItemRequest>
+            """
+        elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <Quantity>{quantity}</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """
+        else:
+            return None
+        
+        # Make the POST request
+        response = requests.post(url, headers=headers, data=body)
+        # Check the response
+        if response.status_code == 200:
+            return f"Success: {response.text}"
+        else:
+            return f"Error:{response.text}"
+    except ConnectionError as e:
+        return f'Error: {e}'
+
 
 # Get all products already listed on Ebay using sku
 def get_all_items_on_ebay(access_token):
@@ -178,89 +247,21 @@ def get_item_details(access_token, item_id):
             
 
 # Calculate the selling price of product going to ebay
-def calculated_selling_price(vendor_id, market_id, start_price, userid, map=""):
+def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
     try:
         market_place = MarketplaceEnronment.objects.get(_id=market_id)
-        enrollment = get_object_or_404(Enrollment, id=vendor_id, user_id=userid)
+        enrollment = get_object_or_404(Enrollment, id=enroll_id, user_id=userid)
         total_product_cost = float(start_price) + float(enrollment.fixed_markup) + ((int(enrollment.percentage_markup)/100) * float(start_price))
         selling_price = total_product_cost + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) * total_product_cost) + ((float(market_place.profit_margin)/100) * total_product_cost)
         if map:
             if selling_price < float(map):
                 selling_price = float(map)
     except Exception as e:
-        print(f"Failed to compute price due to missing data with user id {userid}, vendor_id {vendor_id}, start_price {start_price}: {e}")
+        print(f"Failed to compute price due to missing data with user id {userid}, enroll_id {enroll_id}, start_price {start_price}: {e}")
+        return None
 
     return round(selling_price, 2)
-    
-
-# Create a function to update items quantity and price at the background on Ebay
-def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantity, market_id):
-    # eBay Trading API endpoint
-    url = 'https://api.ebay.com/ws/api.dll'
-
-    headers = {
-        'X-EBAY-API-CALL-NAME': 'ReviseItem',
-        'X-EBAY-API-SITEID': '0',  # Change this to your site ID, 0 is for US
-        'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',  # eBay API version
-        'Content-Type': 'text/xml',
-        'Authorization': f'Bearer {access_token}'
-    }
-    user_data = MarketplaceEnronment.objects.get(_id=market_id, marketplace_name="Ebay")
-    try:
-        # XML Body for ReviseItem request
-        if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>{price,}</StartPrice>
-                    <Quantity>{quantity}</Quantity>
-                </Item>
-            </ReviseItemRequest>
-            """
-        elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>{price}</StartPrice>
-                </Item>
-            </ReviseItemRequest>
-            """
-        elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <Quantity>{quantity}</Quantity>
-                </Item>
-            </ReviseItemRequest>
-            """
-        else:
-            return None
         
-        # Make the POST request
-        response = requests.post(url, headers=headers, data=body)
-        # Check the response
-        if response.status_code == 200:
-            return f"Success: {response.text}"
-        else:
-            return f"Error:{response.text}"
-    except ConnectionError as e:
-        return f'Error: {e}'
-    
 
 # Map items on ebay with the one on local database for updates
 # @api_view(['GET'])
@@ -295,22 +296,20 @@ def sync_ebay_items_with_local():
                 
                 if db_item:
                     # Modify selling price before updating on ebay 
-                    print(f"Trying to calculate price for enrollment ID:{db_item.enrollment_id}")
-                    selling_price = calculated_selling_price(vendor_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map="")
-                    if type(selling_price) == float:
-                        if selling_price < float(db_item.product.map):
-                            selling_price = float(db_item.product.map)
-                        # Item exists, check if we need to update price or quantity , upc=ebay_upc,
-                        InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=db_item.product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
-                        # Update the VendorUpdate table to set listed_market to true
-                        db_item.active = True
-                        db_item.save()
-                        
-                        # Check if there is a price and quantity update, then update on Ebay
-                        if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
-                            # Update the product on Ebay
-                            response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
-                            print("product updated on ebay successful.")
+                    selling_price = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                    if selling_price == None:
+                        continue
+                    # Item exists, check if we need to update price or quantity
+                    InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=db_item.product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                    # Update the VendorUpdate table to set listed_market to true
+                    db_item.active = True
+                    db_item.save()
+                    
+                    # Check if there is a price and quantity update, then update on Ebay
+                    if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
+                        # Update the product on Ebay
+                        response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
+                        print("product updated on ebay successful.")
                 else:
                     print(f"Product with SKU {item.get('ebay_sku')} not found in any vendor table.")
             except Exception as e:
@@ -329,7 +328,7 @@ def sync_ebay_items_with_local():
                             if specific.get("name") == "MPN":
                                 ebay_mpn = specific.get("value")
 
-                    item_to_save = InventoryModel(title=item.get("Title"), description=product_details.get("shortDescription"), location=product_details.get("itemLocation")["country"], category_id=product_details.get("categoryId"), sku=item.get("ebay_sku"), upc=ebay_upc, mpn=ebay_mpn, start_price=product_details.get("price")["value"], picture_detail=product_details.get("image")["imageUrl"],  postal_code=product_details.get("itemLocation")["postalCode"], quantity=item.get("ebay_quantity"), return_profileID=item.get('ReturnProfileID'), return_profileName=item.get('ReturnProfileName'), payment_profileID=item.get('PaymentProfileID'), payment_profileName=item.get('PaymentProfileName'), shipping_profileID=item.get('ShippingProfileID'), shipping_profileName=item.get('ShippingProfileName'), bestOfferEnabled=True, listingType=item.get('ListingType'), gift="", categoryMappingAllowed="", item_specific_fields=product_details.get("localizedAspects"), market_logos=product_details.get("listingMarketplaceId"), ebay_item_id=item.get("ebay_item_id"), user_id=user.user_id, date_created=product_details.get("itemCreationDate"), active=True, category=product_details.get("categoryPath"), city=product_details.get("itemLocation")["city"], cost=product_details.get("price")["value"], country=product_details.get("itemLocation")["country"], price=product_details.get("price")["value"], thumbnailImage=product_details.get("additionalImages"))
+                    item_to_save = InventoryModel(title=item.get("Title"), description=json.dumps(product_details.get("shortDescription")), location=product_details.get("itemLocation")["country"], category_id=product_details.get("categoryId"), sku=item.get("ebay_sku"), upc=ebay_upc, mpn=ebay_mpn, start_price=product_details.get("price")["value"], picture_detail=product_details.get("image")["imageUrl"],  postal_code=product_details.get("itemLocation")["postalCode"], quantity=item.get("ebay_quantity"), return_profileID=item.get('ReturnProfileID'), return_profileName=item.get('ReturnProfileName'), payment_profileID=item.get('PaymentProfileID'), payment_profileName=item.get('PaymentProfileName'), shipping_profileID=item.get('ShippingProfileID'), shipping_profileName=item.get('ShippingProfileName'), bestOfferEnabled=True, listingType=item.get('ListingType'), gift="", categoryMappingAllowed="", item_specific_fields=product_details.get("localizedAspects"), market_logos=product_details.get("listingMarketplaceId"), ebay_item_id=item.get("ebay_item_id"), user_id=user.user_id, date_created=product_details.get("itemCreationDate"), active=True, category=product_details.get("categoryPath"), city=product_details.get("itemLocation")["city"], cost=product_details.get("price")["value"], country=product_details.get("itemLocation")["country"], price=product_details.get("price")["value"], thumbnailImage=product_details.get("additionalImages"))
                     item_to_save.save()
 
                 except Exception as e:

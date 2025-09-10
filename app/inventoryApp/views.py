@@ -233,7 +233,7 @@ class MarketInventory(APIView):
     @api_view(['GET'])
     def get_all_saved_inventory_items(request, userid, page_number, num_per_page):
         try:
-            inventory_saved = InventoryModel.objects.all().filter(user_id=userid, active=False).values().order_by('id')
+            inventory_saved = InventoryModel.objects.all().filter(user_id=userid, active=False).values().order_by('id').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_saved, int(num_per_page))
             try:
@@ -279,8 +279,8 @@ class MarketInventory(APIView):
     # Function to end product listed on ebay and delete from inventory
     @api_view(['GET'])
     def end_delete_product_from_ebay(request, userid, inventoryid):
-        minv = MarketInventory()
-        access_token = minv.refresh_access_token_for_sync(userid, "Ebay")
+        eb = Ebay()
+        access_token = eb.refresh_access_token(userid, "Ebay")
         try:
             invent_item = InventoryModel.objects.filter(id=inventoryid)
             # end item on ebay listing
