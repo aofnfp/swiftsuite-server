@@ -281,6 +281,7 @@ def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
 def sync_ebay_items_with_local():
     all_ebay_items = []
     db_item = ""
+    item_listing = ""
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         access_token = refresh_access_token_for_sync(user._id, "Ebay")
@@ -311,7 +312,6 @@ def sync_ebay_items_with_local():
                         continue
                 
                 if db_item:
-                    print(f"item listing message: {item_listing}")
                     # Modify selling price before updating on ebay 
                     selling_price = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
                     if selling_price == None:
