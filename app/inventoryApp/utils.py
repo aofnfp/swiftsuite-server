@@ -311,6 +311,7 @@ def sync_ebay_items_with_local():
                         continue
                 
                 if db_item:
+                    print(f"item listing message: {item_listing}")
                     # Modify selling price before updating on ebay 
                     selling_price = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
                     if selling_price == None:
