@@ -300,7 +300,7 @@ def sync_ebay_items_with_local():
                     if selling_price == None:
                         continue
                     # Item exists, check if we need to update price or quantity
-                    InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=db_item.product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                    InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=item_listing.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
                     # Update the VendorUpdate table to set listed_market to true
                     db_item.active = True
                     db_item.save()
