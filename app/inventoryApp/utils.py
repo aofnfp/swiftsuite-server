@@ -246,19 +246,6 @@ def get_item_details(access_token, item_id):
         return None
             
 
-
-# Calculate the total cost of product going to ebay
-def calculated_total_product_cost(enroll_id, start_price, userid):
-    try:
-        enrollment = get_object_or_404(Enrollment, id=enroll_id, user_id=userid)
-        total_product_cost = float(start_price) + float(enrollment.fixed_markup) + ((int(enrollment.percentage_markup)/100) * float(start_price))
-        
-    except Exception as e:
-        print(f"Failed to compute total product cost due to missing data with user id {userid}, enroll_id {enroll_id}, start_price {start_price}: {e}")
-        return None
-
-    return round(total_product_cost, 2)
-
 # Calculate the selling price of product going to ebay
 def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
     try:
@@ -273,7 +260,7 @@ def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
         print(f"Failed to compute price due to missing data with user id {userid}, enroll_id {enroll_id}, start_price {start_price}: {e}")
         return None
 
-    return round(selling_price, 2)
+    return round(selling_price, 2), round(total_product_cost, 2)
         
 
 # Map items on ebay with the one on local database for updates
@@ -281,7 +268,6 @@ def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
 def sync_ebay_items_with_local():
     all_ebay_items = []
     db_item = ""
-    item_listing = ""
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         access_token = refresh_access_token_for_sync(user._id, "Ebay")
@@ -303,21 +289,19 @@ def sync_ebay_items_with_local():
                         model_class = globals()[vendor_db]
                         db_item = model_class.objects.get(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
                         print(f'product found for vendor: {vendor_db}')
-                        # Get the calculated total product cost
-                        total_product_cost = calculated_total_product_cost(db_item.enrollment_id, db_item.total_price, user.user_id)
-                        # Create or update the product on GeneralProduct table
-                        item_listing, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, total_price=db_item.total_price, vendor_id=db_item.vendor_id, vendor_name=db_item.vendor.name))
                         break                    
                     except Exception as ea:
                         continue
                 
                 if db_item:
                     # Modify selling price before updating on ebay 
-                    selling_price = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                    selling_price, total_product_cost = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
                     if selling_price == None:
                         continue
+                    # Create or update the product on GeneralProduct table
+                    item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, total_price=db_item.total_price, vendor_id=db_item.vendor_id, vendor_name=db_item.vendor.name))
                     # Item exists, check if we need to update price or quantity
-                    InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=item_listing.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                    InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=item_product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
                     # Update the VendorUpdate table to set listed_market to true
                     db_item.active = True
                     db_item.save()
@@ -327,8 +311,7 @@ def sync_ebay_items_with_local():
                         # Update the product on Ebay
                         response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
                         print("product updated on ebay successful.")
-                else:
-                    print(f"Product with SKU {item.get('ebay_sku')} not found in any vendor table.")
+               
             except Exception as e:
                 print(f'Product processing failed in the first block with error: {e}')
                 try:
