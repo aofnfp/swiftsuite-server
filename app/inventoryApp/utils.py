@@ -282,7 +282,7 @@ def sync_ebay_items_with_local():
             try:
                 item_exists = InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")))[0]
                 # Fetch the item from the local vendor's table
-                vendor_list = ["CwrUpdate", "FragrancexUpdate", "LipseyUpdate", "R  srUpdate", "SsiUpdate", "ZandersUpdate"]
+                vendor_list = ["CwrUpdate", "FragrancexUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
                 for vendor_db in vendor_list:
                     try:
                         # Get the actual model class from the string name
