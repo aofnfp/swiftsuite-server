@@ -311,7 +311,7 @@ def sync_ebay_items_with_local():
                     #     # Update the product on Ebay
                     #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
                     #     print("product updated on ebay successful.")
-               
+                    db_item = ""
             except Exception as e:
                 print(f'Product processing failed in the first block with error: {e}')
                 try:
@@ -328,8 +328,42 @@ def sync_ebay_items_with_local():
                             if specific.get("name") == "MPN":
                                 ebay_mpn = specific.get("value")
 
-                    item_to_save = InventoryModel(title=item.get("Title"), description=json.dumps(product_details.get("shortDescription")), location=product_details.get("itemLocation")["country"], category_id=product_details.get("categoryId"), sku=item.get("ebay_sku"), upc=ebay_upc, mpn=ebay_mpn, start_price=product_details.get("price")["value"], picture_detail=product_details.get("image")["imageUrl"],  postal_code=product_details.get("itemLocation")["postalCode"], quantity=item.get("ebay_quantity"), return_profileID=item.get('ReturnProfileID'), return_profileName=item.get('ReturnProfileName'), payment_profileID=item.get('PaymentProfileID'), payment_profileName=item.get('PaymentProfileName'), shipping_profileID=item.get('ShippingProfileID'), shipping_profileName=item.get('ShippingProfileName'), bestOfferEnabled=True, listingType=item.get('ListingType'), gift="", categoryMappingAllowed="", item_specific_fields=product_details.get("localizedAspects"), market_logos=product_details.get("listingMarketplaceId"), ebay_item_id=item.get("ebay_item_id"), user_id=user.user_id, date_created=product_details.get("itemCreationDate"), active=True, category=product_details.get("categoryPath"), city=product_details.get("itemLocation")["city"], cost=product_details.get("price")["value"], country=product_details.get("itemLocation")["country"], price=product_details.get("price")["value"], thumbnailImage=product_details.get("additionalImages"))
-                    item_to_save.save()
+                    item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, ebay_item_id=item.get("ebay_item_id"), defaults=dict(
+                        title=item.get("Title"),
+                        description=json.dumps(product_details.get("shortDescription")),
+                        location=product_details.get("itemLocation")["country"],
+                        category_id=product_details.get("categoryId"),
+                        sku=item.get("ebay_sku"),
+                        upc=ebay_upc,
+                        mpn=ebay_mpn,
+                        start_price=product_details.get("price")["value"],
+                        picture_detail=product_details.get("image")["imageUrl"],
+                        postal_code=product_details.get("itemLocation")["postalCode"],
+                        quantity=item.get("ebay_quantity"),
+                        return_profileID=item.get('ReturnProfileID'),
+                        return_profileName=item.get('ReturnProfileName'),
+                        payment_profileID=item.get('PaymentProfileID'),
+                        payment_profileName=item.get('PaymentProfileName'),
+                        shipping_profileID=item.get('ShippingProfileID'),
+                        shipping_profileName=item.get('ShippingProfileName'),
+                        bestOfferEnabled=True,
+                        listingType=item.get('ListingType'),
+                        gift="",
+                        categoryMappingAllowed="",
+                        item_specific_fields=product_details.get("localizedAspects"),
+                        market_logos=product_details.get("listingMarketplaceId"),
+                        ebay_item_id=item.get("ebay_item_id"),
+                        user_id=user.user_id,
+                        date_created=product_details.get("itemCreationDate"),
+                        active=True,
+                        category=product_details.get("categoryPath"),
+                        city=product_details.get("itemLocation")["city"],
+                        cost=product_details.get("price")["value"],
+                        country=product_details.get("itemLocation")["country"],
+                        price=product_details.get("price")["value"],
+                        thumbnailImage=product_details.get("additionalImages"),
+                        vendor_name="Not Found",
+                        map_status=False))
 
                 except Exception as e:
                     print(f"Product failed to insert into inventory {e}")
