@@ -11,9 +11,6 @@ class Vendors(models.Model):
     state = models.CharField(max_length=50, null=False)
     zip_code = models.CharField(max_length=50, null=False)
     country = models.CharField(max_length=50, null=False)
-    has_data = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
     # Supplier credentials
     api_access_id = models.CharField(max_length=255, null=True, blank=True)
@@ -27,13 +24,11 @@ class Vendors(models.Model):
     ftp_password = models.CharField(max_length=255, null=True, blank=True)
     host = models.CharField(max_length=255, null=True, blank=True)  
 
+    available = models.BooleanField(default=True)
     has_data = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.name
-    
     def __str__(self):
         return self.name
         

@@ -214,11 +214,12 @@ def identifier_filter(Enrollment, vendor_name, identifier, userid, model, update
             filters['quantity__gte'] = enrollment.stock_minimum
 
     elif vendor == 'zanders':
-        filters['product__serialized'] = 'Yes' if enrollment.serialized else 'No'
-        if enrollment.manufacturer:
-            filters['product__manufacturer__in'] = enrollment.manufacturer
-        if enrollment.stock_minimum != 1:
-            filters['quantity__gte'] = enrollment.stock_minimum
+        pass
+        # filters['product__serialized'] = 'Yes' if enrollment.serialized else 'No'
+        # if enrollment.manufacturer:
+        #     filters['product__manufacturer__in'] = enrollment.manufacturer
+        # if enrollment.stock_minimum != 1:
+        #     filters['quantity__gte'] = enrollment.stock_minimum
 
     return updateModel.objects.filter(**filters).select_related('product').order_by('created_at')
 
@@ -299,8 +300,8 @@ class VendorDataMixin:
             if enrollment.product_category and product.category not in enrollment.product_category:
                 return False
         elif vendor_name == 'zanders':
-            if product.serialized != ('Yes' if enrollment.serialized else 'No'):
-                return False
+            # if product.serialized != ('Yes' if enrollment.serialized else 'No'):
+            #     return False
             if enrollment.manufacturer and product.manufacturer not in enrollment.manufacturer:
                 return False
         return True
