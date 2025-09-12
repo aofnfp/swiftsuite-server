@@ -321,12 +321,9 @@ def sync_ebay_items_with_local():
                         continue
                     else:
                         # Get the upc and also mpn if no main mpn field does not exist
-                        ebay_mpn = product_details.get("mpn")
                         for specific in product_details.get("localizedAspects"):
-                            if specific.get("name") == "UPC":
-                                ebay_upc = specific.get("value")
-                            if specific.get("name") == "MPN":
-                                ebay_mpn = specific.get("value")
+                             ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
+                             ebay_mpn = specific.get("value") if specific.get("name") == "MPN" else product_details.get("mpn")
 
                     item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, ebay_item_id=item.get("ebay_item_id"), defaults=dict(
                         title=item.get("Title"),
