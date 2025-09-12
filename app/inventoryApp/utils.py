@@ -294,28 +294,32 @@ def sync_ebay_items_with_local():
                         continue
                 
                 if db_item:
-                    # Modify selling price before updating on ebay 
-                    selling_price, total_product_cost = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
-                    if selling_price == None:
+                    try:
+                        # Modify selling price before updating on ebay 
+                        selling_price, total_product_cost = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                        if selling_price == None:
+                            continue
+                        # Create or update the product on GeneralProduct table
+                        item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
+                        # Item exists, check if we need to update price or quantity
+                        InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=item_product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                        # Update the VendorUpdate table to set listed_market to true
+                        db_item.active = True
+                        db_item.save()
+                        
+                        # # Check if there is a price and quantity update, then update on Ebay
+                        # if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
+                        #     # Update the product on Ebay
+                        #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
+                        #     print("product updated on ebay successful.")
+                        db_item = ""
+                    except Exception as e:
+                        print(f"Product processing failed with error: {e}")
                         continue
-                    # Create or update the product on GeneralProduct table
-                    item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
-                    # Item exists, check if we need to update price or quantity
-                    InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=item_product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
-                    # Update the VendorUpdate table to set listed_market to true
-                    db_item.active = True
-                    db_item.save()
-                    
-                    # # Check if there is a price and quantity update, then update on Ebay
-                    # if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
-                    #     # Update the product on Ebay
-                    #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
-                    #     print("product updated on ebay successful.")
-                    db_item = ""
             except Exception as e:
-                print(f'Product processing failed in the first block with error: {e}')
+                # If item does not exist, insert new item
                 try:
-                    # Item doesn't exist, insert new item
+                    # Get product details from eBay
                     product_details = get_item_details(access_token, item.get("ebay_item_id"))
                     if product_details == None:
                         continue
