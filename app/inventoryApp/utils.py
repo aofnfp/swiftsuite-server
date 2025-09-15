@@ -287,12 +287,15 @@ def sync_ebay_items_with_local():
                     try:
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_db]
-                        db_item = model_class.objects.get(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
+                        db_item = model_class.objects.filter(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
                         print(f'product found for vendor: {vendor_db}')
+                        # Ensure the item belongs to the same user we are processing currently
+                        if db_item.exists():
+                            db_item = [item_match for item_match in db_item if Enrollment.objects.get(item_match.enrollment_id).user_id == user.user_id][0]
                         break                    
                     except Exception as ea:
                         continue
-                
+
                 if db_item:
                     try:
                         # Modify selling price before updating on ebay 
