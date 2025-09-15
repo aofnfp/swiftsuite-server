@@ -299,9 +299,10 @@ def sync_ebay_items_with_local():
                 if db_item:
                     try:
                         # Modify selling price before updating on ebay 
-                        selling_price, total_product_cost = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
-                        if selling_price == None:
+                        cost_computation = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                        if cost_computation == None:
                             continue
+                        selling_price, total_product_cost = cost_computation
                         # Create or update the product on GeneralProduct table
                         item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                         # Item exists, check if we need to update price or quantity
