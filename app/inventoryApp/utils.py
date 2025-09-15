@@ -292,7 +292,6 @@ def sync_ebay_items_with_local():
                             continue
 
                         # Ensure the item belongs to the same user we are processing currently
-                        print(db_item)
                         for item_match in db_item:
                             enrollment = Enrollment.objects.get(id=item_match.enrollment_id)
                             if enrollment.user_id == user.user_id:
