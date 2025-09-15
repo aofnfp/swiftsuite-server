@@ -288,11 +288,17 @@ def sync_ebay_items_with_local():
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_db]
                         db_item = model_class.objects.filter(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
-                        # Ensure the item belongs to the same user we are processing currently
-                        if len(db_item) == 0:
+                        if not db_item.exists():
                             continue
-                        db_item = [item_match for item_match in db_item if Enrollment.objects.get(item_match.get("enrollment_id")).user_id == user.user_id][0]
+
+                        # Ensure the item belongs to the same user we are processing currently
+                        for item_match in db_item:
+                            enrollment = Enrollment.objects.get(id=item_match.enrollment_id)
+                            if enrollment.user_id == user.user_id:
+                                db_item = item_match
+                                break
                         print(f'product found for vendor: {vendor_db}')
+
                         break                    
                     except Exception as ea:
                         continue
