@@ -329,6 +329,7 @@ def sync_ebay_items_with_local():
                     except Exception as e:
                         print(f"Product processing failed with error: {e}")
                         continue
+                    
             except Exception as e:
                 # If item does not exist, insert new item
                 try:
@@ -368,7 +369,7 @@ def sync_ebay_items_with_local():
                         market_logos=product_details.get("listingMarketplaceId"),
                         ebay_item_id=item.get("ebay_item_id"),
                         user_id=user.user_id,
-                        date_created=product_details.get("itemCreationDate"),
+                        date_created=product_details.get("itemCreationDate").split("T")[0],
                         active=True,
                         category=product_details.get("categoryPath"),
                         city=product_details.get("itemLocation")["city"],
@@ -381,4 +382,5 @@ def sync_ebay_items_with_local():
 
                 except Exception as e:
                     print(f"Product failed to insert into inventory {e}")
-                    
+
+
