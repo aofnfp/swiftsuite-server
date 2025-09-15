@@ -267,7 +267,8 @@ def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
 # @api_view(['GET'])
 def sync_ebay_items_with_local():
     all_ebay_items = []
-    db_item = ""
+    db_items = None
+    # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         access_token = refresh_access_token_for_sync(user._id, "Ebay")
@@ -287,12 +288,13 @@ def sync_ebay_items_with_local():
                     try:
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_db]
-                        db_item = model_class.objects.filter(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
+                        db_items = model_class.objects.filter(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
                         if not db_item.exists():
                             continue
-
+                        
+                        db_item = None                  
                         # Ensure the item belongs to the same user we are processing currently
-                        for item_match in db_item:
+                        for item_match in db_items:
                             enrollment = Enrollment.objects.get(id=item_match.enrollment_id)
                             if enrollment.user_id == user.user_id:
                                 db_item = item_match
@@ -323,7 +325,7 @@ def sync_ebay_items_with_local():
                         #     # Update the product on Ebay
                         #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
                         #     print("product updated on ebay successful.")
-                        db_item = ""
+                        db_items = None
                     except Exception as e:
                         print(f"Product processing failed with error: {e}")
                         continue
