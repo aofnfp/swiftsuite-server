@@ -34,7 +34,7 @@ class InventoryModel(models.Model):
     date_created = models.DateField(auto_now_add=True, unique=False, null=True)
     active = models.BooleanField(default=False, unique=False)
     enable_charity = models.BooleanField(default=False, unique=False)
-    category = models.CharField(null=True, unique=False, max_length=100)
+    category = models.CharField(null=True, unique=False, max_length=150)
     city = models.CharField(null=True, unique=False, max_length=20)
     cost = models.CharField(null=True, unique=False, max_length=20)
     country = models.CharField(null=True, unique=False, max_length=20)
