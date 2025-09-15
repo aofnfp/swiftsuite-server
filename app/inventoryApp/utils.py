@@ -296,8 +296,8 @@ def sync_ebay_items_with_local():
                             enrollment = Enrollment.objects.get(id=item_match.enrollment_id)
                             if enrollment.user_id == user.user_id:
                                 db_item = item_match
+                                print(f'product found for vendor: {vendor_db}')
                                 break
-                        print(f'product found for vendor: {vendor_db}')
 
                         break                    
                     except Exception as ea:
