@@ -46,12 +46,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.parent is not None
     
     @property
-    def can_create_subaccount(self):
-        if self.is_subaccount:
-           return False
-        if not self.tier:
-            return False
-        return self.subaccounts.count() < self.tier.max_subaccounts
+    def can_add_subaccount(self):
+        return self.tier and self.subaccounts.count() < self.tier.max_subaccounts
     
     @property
     def subscribed(self):
@@ -67,16 +63,25 @@ class OneTimePassword(models.Model):
    def __str__(self):
        return f"{self.user.first_name}--passcode"
        
-           
+class Module(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name           
     
 class SubAccountPermissions(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='permissions')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, null=True)
     can_view = models.BooleanField(default=True)
     can_edit = models.BooleanField(default=False)
     can_delete = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ('user', 'module')
+        
 
     def __str__(self):
-        return f"Permissions for {self.user.email}"
+        return f"{self.user.email} - {self.module.name} permissions"
     
     
 class Tier(models.Model):

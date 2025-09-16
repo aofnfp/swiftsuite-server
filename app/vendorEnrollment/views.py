@@ -26,9 +26,9 @@ from vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Z
 from rest_framework.generics import ListAPIView
 from .pagination import CustomOffsetPagination
 from accounts.models import User
-from .utils import map_vendor_data_to_general, identifier_filter
-import threading, json
+from .utils import map_vendor_data_to_general, identifier_filter, with_module
 from django.db.models import Q
+from accounts.permissions import IsOwnerOrHasPermission
 
 # Create your views here.
 MODELS_MAPPING = {
@@ -58,9 +58,10 @@ SERIALIZER_MAPPING = {
     }
 
 class EnrollmentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+    module_name = 'inventory'  # Specify the module name for permission checks
     
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -109,9 +110,10 @@ class VendorTestView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)       
         
 class AccountViewset(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
+    module_name = 'inventory' 
     
     def get_queryset(self):
         user = self.request.user
@@ -131,7 +133,8 @@ class AccountViewset(viewsets.ModelViewSet):
         return Response({"message": "Account, Vendor data and enrollments deleted successfully."},status=status.HTTP_200_OK)
   
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def update_enrolment(request, identifier):
     enrollment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
     serializer = EnrollmentSerializer(enrollment, data=request.data)
@@ -145,7 +148,8 @@ def update_enrolment(request, identifier):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def delete_enrolment(request, identifier):
     enrolment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
     enrolment.delete()
@@ -153,7 +157,8 @@ def delete_enrolment(request, identifier):
     return Response({"message":"Enrollment Deleted Successfully"}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def getEnrollmentWithIdentifier(request, identifier):
     enrollment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
     serializer = EnrollmentSerializer(enrollment)
@@ -221,7 +226,8 @@ def getEnrollmentWithIdentifier(request, identifier):
     return JsonResponse(response_data, status=status.HTTP_200_OK)
 
 class CatalogueBaseView(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     model = None 
     updateModel = None
     vendor_name = ''
@@ -319,7 +325,8 @@ class CatalogueRsrView(CatalogueBaseView):
     updateModel = RsrUpdate
 
 class AllCatalogueView(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     pagination_class = CustomOffsetPagination
 
     def list(self, request, *args, **kwargs):
@@ -352,7 +359,8 @@ class AllCatalogueView(ListAPIView):
         return Response({"results": all_serialized})
 
 class AddProductView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     def get(self, request, userid, product_id, vendor_name, identifier = None):
         vendor_name = vendor_name.lower()
 
@@ -413,7 +421,8 @@ class AddProductView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def removeProduct(request, productId):
     try:
         # Try to fetch the product
@@ -452,7 +461,8 @@ def removeProduct(request, productId):
 
     
 class ViewAllProducts(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     serializer_class = GeneralProductSerializer
     pagination_class  = CustomOffsetPagination
     
@@ -486,7 +496,8 @@ class ViewAllProducts(ListAPIView):
     
     
 class UserAccountEnrollmentsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
 
     def get(self, request):
         user = request.user
@@ -496,7 +507,8 @@ class UserAccountEnrollmentsView(APIView):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def allEnrolledVendors(request):
     user = request.user
     vendors = Enrollment.objects.filter(user=user).values_list('vendor__name', flat=True).distinct()

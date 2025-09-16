@@ -220,7 +220,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         
     
 class PaymentSerializer(serializers.ModelSerializer):
+    expires_at = serializers.SerializerMethodField()
     class Meta:
         model = Payment
         fields = "__all__"
         
+    def get_expires_at(self, obj):
+        subscription = getattr(obj.user, "tier_subscription", None)
+        if subscription and subscription.is_active():
+            return subscription.expires_at
+        return None

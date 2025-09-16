@@ -2,6 +2,13 @@ from . import models as _
 import pandas as pd
 from django.db import transaction
 
+def with_module(module_name):
+    def decorator(view_func):
+        view_func.module_name = module_name
+        return view_func
+    return decorator
+
+
 def map_vendor_data_to_general(vendor_name, product, user):
         if vendor_name == 'lipsey':
             
