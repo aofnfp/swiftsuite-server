@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import User, Tier, Subscription, Payment
+from .models import User, Tier, Subscription, Payment, SubAccountPermissions
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -230,3 +230,13 @@ class PaymentSerializer(serializers.ModelSerializer):
         if subscription and subscription.is_active():
             return subscription.expires_at
         return None
+    
+
+class SubAccountPermissionsSerializer(serializers.ModelSerializer):
+    module_name = serializers.CharField(source='module.name', read_only=True)
+    
+    class Meta:
+        model = SubAccountPermissions
+        fields = ['id', 'user', 'module', 'module_name', 'can_view', 'can_edit', 'can_delete']
+        read_only_fields = ['user', 'module_name']
+        

@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register('account-tier', vw.TierViewSet, basename='account-tier')
+router.register('subaccount-permission', vw.SubAccountPermissionViewSet, basename='subaccount-permission')
 
 
 urlpatterns = [

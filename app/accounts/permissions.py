@@ -18,9 +18,33 @@ class CanCreateSubaccount(BasePermission):
             self.message = 'You have reached your subaccount limit or are not allowed to create subaccounts.'
             return False
         
-        
         return True
 
+class canModifyPermission(BasePermission):
+    
+    def has_permission(self, request, view):
+        user = request.user
+
+        # Subaccounts cannot modify at all
+        if user.is_subaccount:
+            self.message = "Subaccounts are not allowed to modify permissions."
+            return False
+
+        # Check subscription validity
+        if not getattr(user, "subscribed", False):  
+            self.message = "Your subscription is inactive. Please renew to access this feature."
+            return False
+
+        return True
+    
+    def has_object_permission(self, request, view, obj):
+        # Only the owner (parent account) can modify permissions
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            if request.user != obj.user.parent:
+                self.message = "You don't have permission to modify this subaccount's permissions."
+                return False
+            
+        return True
 
 class IsOwnerOrHasPermission(BasePermission):
     """
@@ -47,7 +71,7 @@ class IsOwnerOrHasPermission(BasePermission):
             return False
 
         # Require the view to declare its module
-        module_name = getattr(view, "module_name", None).lower()
+        module_name = getattr(view, "module_name", None).title()
         if not module_name:
             self.message = "Module not specified for this view."
             return False

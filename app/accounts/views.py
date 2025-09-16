@@ -1,19 +1,17 @@
 
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer, ChangePasswordSerializer
+from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer, ChangePasswordSerializer, SubAccountPermissionsSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .tasks import send_code_to_user
-from .models import OneTimePassword, User, Tier, Subscription, Payment
+from .models import OneTimePassword, User, Tier, Subscription, Payment, SubAccountPermissions
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponseRedirect
 from rest_framework.decorators import api_view
-import cloudinary, stripe
-import cloudinary.uploader
-from cloudinary.utils import cloudinary_url
+import stripe
 from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -21,9 +19,10 @@ from datetime import timedelta
 from django.utils import timezone
 from vendorEnrollment.pagination import CustomOffsetPagination
 from rest_framework.viewsets import ModelViewSet
-from .permissions import CanCreateSubaccount
+from .permissions import CanCreateSubaccount, canModifyPermission
 from vendorActivities.permission import IsSuperUser
 from rest_framework.permissions import AllowAny
+from rest_framework.exceptions import PermissionDenied
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY 
@@ -395,3 +394,17 @@ class PaymentView(GenericAPIView):
 
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
+    
+class SubAccountPermissionViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated, canModifyPermission]
+    serializer_class = SubAccountPermissionsSerializer
+    queryset = SubAccountPermissions.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.parent is None:
+            # If the user is a parent account, return permissions for all their subaccounts
+            return SubAccountPermissions.objects.filter(user__parent=user)
+        else:
+            # If the user is a subaccount, return only their permissions
+            return SubAccountPermissions.objects.filter(user=user)

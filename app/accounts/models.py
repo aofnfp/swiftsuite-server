@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from .manager import UserManager
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
@@ -82,6 +84,20 @@ class SubAccountPermissions(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.module.name} permissions"
+    
+    
+@receiver(post_save, sender=User)
+def create_default_permissions(sender, instance, created, **kwargs):
+    if created and instance.is_subaccount:
+        modules = Module.objects.all()
+        for module in modules:
+            SubAccountPermissions.objects.create(
+                user=instance,
+                module=module,
+                can_view=True,  # default can_view
+                can_edit=False,
+                can_delete=False
+            )
     
     
 class Tier(models.Model):

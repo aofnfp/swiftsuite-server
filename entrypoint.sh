@@ -6,7 +6,8 @@ case "$1" in
         echo "Running database migrations..."
         python manage.py migrate --noinput
 
-        # python manage.py tier_seeds
+        python manage.py seed_module
+        python manage.py seed_permission
 
         echo "Starting Gunicorn..."
         exec gunicorn --bind 0.0.0.0:8000 swiftsuite.wsgi:application --workers 4
