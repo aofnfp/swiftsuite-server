@@ -66,16 +66,12 @@ class LoginSerializer(serializers.ModelSerializer):
     access_token = serializers.CharField(max_length = 255, read_only = True)
     refresh_token = serializers.CharField(max_length = 255, read_only = True)
     isAdmin = serializers.BooleanField(read_only = True)
-    subscribed = serializers.SerializerMethodField()
+    subscribed = serializers.BooleanField(read_only=True)
     
     class Meta:
         model = User
         fields = ["id", "email", "password", "full_name", "isAdmin", "subscribed", "access_token", "refresh_token"]
-
-    def get_subscribed(self, obj):
-        subscription = getattr(obj, 'tier_subscription', None)
-        return subscription.is_active() if subscription else False
-    
+        
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
@@ -95,6 +91,7 @@ class LoginSerializer(serializers.ModelSerializer):
             "email":user.email,
             'full_name':user.get_full_name,
             "isAdmin": user.is_staff,
+            "subscribed": user.subscribed,
             'access_token':user_token.get('access'),
             'refresh_token':user_token.get('refresh'),
         }

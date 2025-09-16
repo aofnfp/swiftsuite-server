@@ -52,6 +52,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not self.tier:
             return False
         return self.subaccounts.count() < self.tier.max_subaccounts
+    
+    @property
+    def subscribed(self):
+        if hasattr(self, 'tier_subscription'):
+            return self.tier_subscription.is_active()
+        return False
 
 class OneTimePassword(models.Model):
 
