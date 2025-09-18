@@ -228,12 +228,26 @@ class SubscriptionView(GenericAPIView):
         except Subscription.DoesNotExist:
             return Response({"detail": "You are not subscribed to any tier."}, status=404)
 
-    
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         tier = serializer.validated_data['tier']
+        
+        if request.user.is_subaccount:
+             return Response({"detail": "You are not permitted to subscribe with a subaccount"}, status=403)
+         
+        try:
+            subscription = request.user.tier_subscription
+            if subscription.is_active() and subscription.tier == tier:
+                remaining_days = (subscription.expires_at - timezone.now()).days
+                if remaining_days > 5:  #disallow renewal if > 5 days left
+                    return Response({
+                        "detail": f"You still have {remaining_days} days left on your {tier.name} plan. "
+                                f"Renewals are only allowed within 5 days of expiry."
+                    }, status=400)
+        except Subscription.DoesNotExist:
+            pass
         
         existing_payment = Payment.objects.filter(
             user=request.user,
@@ -258,13 +272,18 @@ class SubscriptionView(GenericAPIView):
                             'expires_at': timezone.now() + timedelta(days=30)
                         }
                     )
+                    request.user.tier = tier
+                    request.user.save(update_fields=["tier"])
+                    
                     return Response({'message': 'Payment already completed for this tier.'}, status=400)
+                
                 elif checkout_session.status == 'failed':
                     existing_payment.status = 'failed'
                     existing_payment.save()
                     return Response({'message': 'Payment failed for this tier.'}, status=400)
             except stripe.error.InvalidRequestError:
                 pass
+            
                 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -320,15 +339,22 @@ def stripe_webhook(request):
             tier = Tier.objects.get(id=tier_id)
 
             now = timezone.now()
-            expires_at = now + timedelta(days=30)
+            subscription = Subscription.objects.filter(user=user).first()
 
-            # Try fetch subscription to check current expiry
-            try:
-                subscription = Subscription.objects.get(user=user)
-                if subscription.expires_at and subscription.expires_at > now:
-                    expires_at = subscription.expires_at + timedelta(days=30)
-            except Subscription.DoesNotExist:
-                pass
+            if subscription:
+                if subscription.is_active():
+                    if subscription.tier == tier:
+                        # Same plan: extend
+                        expires_at = subscription.expires_at + timedelta(days=30)
+                    else:
+                        # Different plan: replace immediately
+                        expires_at = now + timedelta(days=30)
+                else:
+                    # Expired subscription → fresh start
+                    expires_at = now + timedelta(days=30)
+            else:
+                # No subscription → fresh start
+                expires_at = now + timedelta(days=30)
 
             # Create or update the subscription
             Subscription.objects.update_or_create(
@@ -363,17 +389,43 @@ class VerifyCheckoutSessionView(GenericAPIView):
                 payment = Payment.objects.filter(
                     user=request.user,
                     stripe_session_id=session_id,
-                    status='paid'
                 ).first()
 
-                if payment:
+                if payment and payment.status == 'paid':
                     return Response({
                         "status": "success",
                         "tier": payment.tier.name,
                         "amount": payment.amount
                     })
 
-                return Response({"status": "paid_but_not_recorded"}, status=206)
+                if payment:
+                    # Mark as paid
+                    payment.status = 'paid'
+                    payment.save(update_fields=["status"])
+
+                    # Get tier from payment
+                    tier = payment.tier
+
+                    # Update or create subscription
+                    Subscription.objects.update_or_create(
+                        user=request.user,
+                        defaults={
+                            "tier": tier,
+                            "subscribed_at": timezone.now(),
+                            "expires_at": timezone.now() + timedelta(days=30),
+                        },
+                    )
+
+                    # Keep user model in sync
+                    request.user.tier = tier
+                    request.user.save(update_fields=["tier"])
+
+                    return Response({
+                        "status": "success",
+                        "tier": tier.name,
+                        "amount": payment.amount
+                    })
+                
             Payment.objects.filter(stripe_session_id=session_id).update(status='failed')
             return Response({"status": "failed"}, status=400)
         except Exception:
