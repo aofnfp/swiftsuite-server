@@ -142,7 +142,7 @@ def update_enrolment(request, identifier):
         serializer.save()
         # Start the update process in a separate thread
         updated_enrollment = serializer.instance
-        update_vendor_data(updated_enrollment)
+        update_vendor_data.delay(updated_enrollment.id)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
