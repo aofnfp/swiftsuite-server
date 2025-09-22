@@ -12,17 +12,24 @@ case "$1" in
         echo "Starting Gunicorn..."
         exec gunicorn --bind 0.0.0.0:8000 swiftsuite.wsgi:application --workers 4
     ;;
-    celery)
-        echo "Starting Celery worker..."
-        exec celery -A swiftsuite worker -l info -c 8 --pool=threads
+    celery-default)
+        echo "Starting Celery default worker (light tasks)..."
+        exec celery -A swiftsuite worker -l info -Q default -c 500 --pool=gevent
     ;;
+
+    celery-heavy)
+        echo "Starting Celery heavy worker (long tasks)..."
+        exec celery -A swiftsuite worker -l info -Q heavy -c 2 --pool=threads
+    ;;
+
     beat)
         echo "Starting Beat worker..."
         exec celery -A swiftsuite beat -l info
     ;;
+
     *)
         echo "Unknown command: $1"
-        echo "Usage: entrypoint.sh {web|celery|celery-beat}"
+        echo "Usage: entrypoint.sh {web|celery-default|celery-heavy|celery-beat}"
         exit 1
     ;;
 esac

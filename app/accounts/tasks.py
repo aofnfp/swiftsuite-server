@@ -14,7 +14,7 @@ def generate_otp():
     val = totp.now() # => '492039'
     return val
 
-@shared_task
+@shared_task(queue='default')
 def send_code_to_user(email):
     try:
         subject = "One time passcode for Email Verification"
@@ -48,7 +48,7 @@ def send_code_to_user(email):
     except Exception as e:
         logger.error(f"Error sending OTP email to {email}: {e}")
 
-@shared_task
+@shared_task(queue='default')
 def send_normal_email(data, file='reset_password.html'):
     try:
         html_message = render_to_string(file, context=data)
