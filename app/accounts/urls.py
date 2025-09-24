@@ -1,12 +1,10 @@
 
-from django.urls import path, include
+from django.urls import path, include, re_path
 from . import views as vw
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register('account-tier', vw.TierViewSet, basename='account-tier')
-router.register('subaccount-permission', vw.SubAccountPermissionViewSet, basename='subaccount-permission')
-
 
 urlpatterns = [
     path('register/', vw.RegisterUserView.as_view(), name="register"),
@@ -25,6 +23,8 @@ urlpatterns = [
     path('stripe-webhook/', vw.stripe_webhook, name='stripe-webhook'),
     path('verify-checkout/<str:session_id>/', vw.VerifyCheckoutSessionView.as_view(), name='verify-checkout'),
     path('payment-history/', vw.PaymentView.as_view(), name='payment-history'),
+    
+    re_path(r'^subaccounts(?:/(?P<pk>\d+))?/$', vw.ManageSubAccountsView.as_view(), name='manage-subaccounts'),
     
     path("", include(router.urls))
 ]

@@ -1,6 +1,6 @@
 
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer, ChangePasswordSerializer, SubAccountPermissionsSerializer
+from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetSerializer,SetNewPasswordSerializer, LogoutUserSerializer, VerifyEmailSerializer, TierSerializer, SubscriptionSerializer, RegisterSubaccountSerializer, PaymentSerializer, UserProfileSerializer, ChangePasswordSerializer, SubAccountPermissionsSerializer, ManageSubAccountSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .tasks import send_code_to_user
@@ -19,7 +19,7 @@ from datetime import timedelta
 from django.utils import timezone
 from vendorEnrollment.pagination import CustomOffsetPagination
 from rest_framework.viewsets import ModelViewSet
-from .permissions import CanCreateSubaccount, canModifyPermission
+from .permissions import CanCreateSubaccount, IsOwnerOrHasPermission
 from vendorActivities.permission import IsSuperUser
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import PermissionDenied
@@ -318,7 +318,6 @@ class SubscriptionView(GenericAPIView):
         
         return Response({'checkout_url': checkout_session.url}, status=200)
     
-      
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
@@ -447,16 +446,41 @@ class PaymentView(GenericAPIView):
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
     
-class SubAccountPermissionViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated, canModifyPermission]
-    serializer_class = SubAccountPermissionsSerializer
-    queryset = SubAccountPermissions.objects.all()
+
+class ManageSubAccountsView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    serializer_class = ManageSubAccountSerializer
+    pagination_class = CustomOffsetPagination
+    module_name = "accounts"
 
     def get_queryset(self):
         user = self.request.user
-        if user.parent is None:
-            # If the user is a parent account, return permissions for all their subaccounts
-            return SubAccountPermissions.objects.filter(user__parent=user)
-        else:
-            # If the user is a subaccount, return only their permissions
-            return SubAccountPermissions.objects.filter(user=user)
+        if user.is_subaccount:
+            return User.objects.filter(parent=user.parent)
+        return User.objects.filter(parent=user)
+
+    def get(self, request, pk=None):
+        queryset = self.get_queryset().prefetch_related('permissions__module')
+        if pk:
+            try:
+                subaccount = queryset.get(pk=pk)
+            except User.DoesNotExist:
+                return Response({"detail": "Subaccount not found."}, status=404)
+
+            serializer = self.get_serializer(subaccount)
+            return Response(serializer.data)
+        
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+    
+    def put(self, request, pk=None):
+        try:
+            subaccount = self.get_queryset().get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "Subaccount not found."}, status=404)
+
+        serializer = self.get_serializer(subaccount, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

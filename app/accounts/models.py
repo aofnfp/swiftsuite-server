@@ -53,9 +53,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     @property
     def subscribed(self):
-        if hasattr(self, 'tier_subscription'):
-            return self.tier_subscription.is_active()
-        return False
+        if self.is_subaccount and self.parent:
+            subscription = getattr(self.parent, "tier_subscription", None)
+        else:
+            subscription = getattr(self, "tier_subscription", None)
+
+        return subscription.is_active() if subscription else False
 
 class OneTimePassword(models.Model):
 

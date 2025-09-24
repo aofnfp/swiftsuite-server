@@ -240,3 +240,35 @@ class SubAccountPermissionsSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'module', 'module_name', 'can_view', 'can_edit', 'can_delete']
         read_only_fields = ['user', 'module_name']
         
+        
+class ManageSubAccountSerializer(serializers.ModelSerializer):
+    permissions = SubAccountPermissionsSerializer(many=True, read_only=False)
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'profile_image', 'permissions']
+        read_only_fields = ['email']
+
+    def update(self, instance, validated_data):
+        permissions_data = validated_data.pop('permissions', None)
+
+        # Update basic user profile fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update permissions
+        if permissions_data is not None:
+            for perm_data in permissions_data:
+                module_id = perm_data.get('module')
+                try:
+                    perm = SubAccountPermissions.objects.get(user=instance, module_id=module_id)
+                    perm.can_view = perm_data.get('can_view', perm.can_view)
+                    perm.can_edit = perm_data.get('can_edit', perm.can_edit)
+                    perm.can_delete = perm_data.get('can_delete', perm.can_delete)
+                    perm.save()
+                except SubAccountPermissions.DoesNotExist:
+                    # Create new permission if not found (optional)
+                    SubAccountPermissions.objects.create(user=instance, **perm_data)
+
+        return instance

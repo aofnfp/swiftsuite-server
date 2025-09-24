@@ -20,32 +20,6 @@ class CanCreateSubaccount(BasePermission):
         
         return True
 
-class canModifyPermission(BasePermission):
-    
-    def has_permission(self, request, view):
-        user = request.user
-
-        # Subaccounts cannot modify at all
-        if user.is_subaccount:
-            self.message = "Subaccounts are not allowed to modify permissions."
-            return False
-
-        # Check subscription validity
-        if not getattr(user, "subscribed", False):  
-            self.message = "Your subscription is inactive. Please renew to access this feature."
-            return False
-
-        return True
-    
-    def has_object_permission(self, request, view, obj):
-        # Only the owner (parent account) can modify permissions
-        if request.method in ['PUT', 'PATCH', 'DELETE']:
-            if request.user != obj.user.parent:
-                self.message = "You don't have permission to modify this subaccount's permissions."
-                return False
-            
-        return True
-
 class IsOwnerOrHasPermission(BasePermission):
     """
     - Owners (parent accounts) can do everything if subscribed.
@@ -56,34 +30,39 @@ class IsOwnerOrHasPermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
 
-        # Parent must have an active subscription
-        if not user.subscribed:
-            self.message = "Your subscription is inactive. Please renew to access this feature."
-            return False
-
-        # Owners (main account holders) always allowed
+        # -------------------------
+        # 1. Parent account (owner)
+        # -------------------------
         if not user.is_subaccount:
-            return True  
+            if not user.subscribed:
+                self.message = "Your subscription is inactive. Please renew to access this feature."
+                return False
+            return True 
 
-        # Subaccounts: check parent subscription
-        if not user.parent.subscribed:
+        # -------------------------
+        # 2. Subaccount
+        # -------------------------
+        if not user.parent or not user.parent.subscribed:
             self.message = "Your parent account subscription is inactive."
             return False
 
-        # Require the view to declare its module
-        module_name = getattr(view, "module_name", None).title()
+        # -------------------------
+        # 3. Module-specific check
+        # -------------------------
+        module_name = getattr(view, "module_name", None)
         if not module_name:
             self.message = "Module not specified for this view."
             return False
 
-        # Get subaccount permissions for this module
-        permission = user.permissions.filter(module__name=module_name).first()
+        permission = user.permissions.filter(module__name__iexact=module_name).first()
         if not permission:
             self.message = f"You don't have permissions for the {module_name} module."
             return False
 
-        # Check by request type
-        if request.method in SAFE_METHODS:  # GET, HEAD, OPTIONS
+        # -------------------------
+        # 4. Method-based permission
+        # -------------------------
+        if request.method in SAFE_METHODS:
             if not permission.can_view:
                 self.message = "You don't have view permission."
                 return False
@@ -102,5 +81,4 @@ class IsOwnerOrHasPermission(BasePermission):
             self.message = "This action is not allowed for subaccounts."
             return False
 
-        return True        
-        
+        return True
