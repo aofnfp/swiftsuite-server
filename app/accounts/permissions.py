@@ -67,7 +67,7 @@ class IsOwnerOrHasPermission(BasePermission):
                 self.message = "You don't have view permission."
                 return False
 
-        elif request.method in ['PUT', 'PATCH']:
+        elif request.method in ['PUT', 'PATCH', 'POST']:
             if not permission.can_edit:
                 self.message = "You don't have edit permission."
                 return False

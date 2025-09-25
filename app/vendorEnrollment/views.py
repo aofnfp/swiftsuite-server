@@ -117,6 +117,9 @@ class AccountViewset(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
+        if user.is_subaccount:
+            user = user.parent
+            
         queryset = Account.objects.filter(user=user)
 
         vendor_id = self.request.query_params.get("vendor_id")
@@ -136,7 +139,11 @@ class AccountViewset(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @with_module('inventory')
 def update_enrolment(request, identifier):
-    enrollment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
+    user = request.user
+    if user.is_subaccount:
+        user = user.parent
+        
+    enrollment = get_object_or_404(Enrollment, user_id=user.id, identifier=identifier)
     serializer = EnrollmentSerializer(enrollment, data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -151,7 +158,11 @@ def update_enrolment(request, identifier):
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @with_module('inventory')
 def delete_enrolment(request, identifier):
-    enrolment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
+    user = request.user
+    if user.is_subaccount:
+        user = user.parent
+
+    enrolment = get_object_or_404(Enrollment, user_id=user.id, identifier=identifier)
     enrolment.delete()
     
     return Response({"message":"Enrollment Deleted Successfully"}, status=status.HTTP_200_OK)
@@ -160,7 +171,11 @@ def delete_enrolment(request, identifier):
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @with_module('inventory')
 def getEnrollmentWithIdentifier(request, identifier):
-    enrollment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
+    user = request.user
+    if user.is_subaccount:
+        user = user.parent
+        
+    enrollment = get_object_or_404(Enrollment, user_id=user.id, identifier=identifier)
     serializer = EnrollmentSerializer(enrollment)
     
     vendor_name = enrollment.vendor.name.lower()
@@ -234,7 +249,12 @@ class CatalogueBaseView(ListAPIView):
     pagination_class = CustomOffsetPagination 
 
     def get_queryset(self):
-        userid = self.request.user.id
+        user = self.request.user
+        if user.is_subaccount:
+            user = user.parent
+            
+        userid = user.id
+        
         identifier = self.kwargs.get('identifier', None)
         
         return identifier_filter(Enrollment, self.vendor_name, identifier, userid, self.model, self.updateModel)   
@@ -280,7 +300,11 @@ class CatalogueBaseView(ListAPIView):
         if not queryset.exists():
             return Response({"message": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
-        user_id = request.user.id
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+        
+        user_id = user.id
         # Get all vendor enrollments for this user and vendor
         enrollments = Enrollment.objects.filter(user_id=user_id, vendor__name=self.vendor_name).values("identifier")
 
@@ -330,7 +354,11 @@ class AllCatalogueView(ListAPIView):
     pagination_class = CustomOffsetPagination
 
     def list(self, request, *args, **kwargs):
-        user_id = request.user.id
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+            
+        user_id = user.id
 
         vendors = Enrollment.objects.filter(user_id=user_id).values_list('vendor__name', flat=True)
         vendors = {vendor.lower() for vendor in vendors}
@@ -363,7 +391,12 @@ class AddProductView(APIView):
     module_name = 'inventory'
     def get(self, request, userid, product_id, vendor_name, identifier = None):
         vendor_name = vendor_name.lower()
-
+        
+        user = get_object_or_404(User, id=userid)
+        if user.is_subaccount:
+            user = user.parent
+        userid = user.id
+        
         if vendor_name not in UPDATE_MODELS_MAPPING:
             return JsonResponse({'error': 'Invalid vendor name'}, status=400)
 
@@ -380,7 +413,10 @@ class AddProductView(APIView):
 
     def put(self, request, userid, product_id, vendor_name, identifier):
         vendor_name = vendor_name.lower()
-
+        user = get_object_or_404(User, id=userid)
+        if user.is_subaccount:
+            user = user.parent
+        userid = user.id
         if vendor_name not in UPDATE_MODELS_MAPPING:
             return JsonResponse({'error': 'Invalid vendor name'}, status=400)
         
@@ -426,7 +462,11 @@ class AddProductView(APIView):
 def removeProduct(request, productId):
     try:
         # Try to fetch the product
-        product = Generalproducttable.objects.get(id=productId, user=request.user.id)
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+            
+        product = Generalproducttable.objects.get(id=productId, user=user.id)
 
         # Extract data BEFORE deletion
         product_id = product.product_id
@@ -442,7 +482,7 @@ def removeProduct(request, productId):
         try:
             updated_count = product_model.objects.filter(
                 product__id=product_id,
-                account__user=request.user
+                account__user=user
             ).update(active=False)
             
             # Delete the general product AFTER marking vendor updates inactive
@@ -469,6 +509,9 @@ class ViewAllProducts(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if user.is_subaccount:
+            user = user.parent
+            
         queryset = Generalproducttable.objects.filter(user=user, active=False).order_by('-date_created')
         params = self.request.query_params
         filters = Q()
@@ -501,6 +544,9 @@ class UserAccountEnrollmentsView(APIView):
 
     def get(self, request):
         user = request.user
+        if user.is_subaccount:
+            user = user.parent
+            
         accounts = Account.objects.filter(user=user).select_related('vendor').prefetch_related('enrollments')
         data = AccountWithEnrollmentsSerializer(accounts, many=True).data
         return Response(data, status=status.HTTP_200_OK)
@@ -511,5 +557,8 @@ class UserAccountEnrollmentsView(APIView):
 @with_module('inventory')
 def allEnrolledVendors(request):
     user = request.user
+    if user.is_subaccount:
+        user = user.parent
+    
     vendors = Enrollment.objects.filter(user=user).values_list('vendor__name', flat=True).distinct()
     return Response({"vendors": list(vendors)}, status=status.HTTP_200_OK)

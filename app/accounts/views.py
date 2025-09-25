@@ -484,3 +484,41 @@ class ManageSubAccountsView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class DeleteSubAccountView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = "accounts"
+
+    def delete(self, request, pk):
+        try:
+            subaccount = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "Subaccount not found."}, status=404)
+
+        subaccount.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class SubaccountActivationView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = "accounts"
+
+    def post(self, request, pk):
+        try:
+            subaccount = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "Subaccount not found."}, status=404)
+        
+        option = request.data.get("option", "deactivate")
+        if option not in ["deactivate", "activate"]:
+            return Response({"detail": "Invalid option. Use 'deactivate' or 'activate'."}, status=400)
+        
+        if option == "activate":
+            subaccount.is_active = True
+            subaccount.save(update_fields=["is_active"])
+            return Response({"detail": "Subaccount activated."}, status=200)
+        
+        subaccount.is_active = False
+        subaccount.save(update_fields=["is_active"])
+        return Response({"detail": "Subaccount deactivated."}, status=200)

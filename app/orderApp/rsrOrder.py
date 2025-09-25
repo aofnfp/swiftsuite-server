@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from vendorApp.models import VendoEnronment
+from vendorEnrollment.models import Enrollment
 import requests
 from django.http import JsonResponse
 from rest_framework import status
@@ -12,8 +12,8 @@ from .serializers import PlaceOrderSerializer
 def getOrderInfo(request, userid, market_name, ebayorderid):
     try:
         # Get enrolment details
-        enrolment_details = VendoEnronment.objects.filter(
-            user_id=request.user.id, vendor_name='RSR'
+        enrolment_details = Enrollment.objects.filter(
+            user=request.user, vendor__name__iexact='RSR' 
         ).first()
         
         if not enrolment_details:
@@ -22,9 +22,9 @@ def getOrderInfo(request, userid, market_name, ebayorderid):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        username = enrolment_details.Username
-        password = enrolment_details.Password
-        POS = enrolment_details.POS
+        username = enrolment_details.vendor.username
+        password = enrolment_details.vendor.password
+        POS = enrolment_details.vendor.pos
         
         # Get order details
         ebay_orderDetails_url = f"https://service.swiftsuite.app/orderApp/get_ordered_item_details/{userid}/{market_name}/{ebayorderid}/"
