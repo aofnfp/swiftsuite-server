@@ -14,22 +14,32 @@ def generate_otp():
     val = totp.now() # => '492039'
     return val
 
+def clean_string(value):
+    if not value:
+        return ""
+    return str(value).replace("\xa0", " ").strip()
+    
+
 @shared_task(queue='default')
 def send_code_to_user(email):
     try:
-        subject = "One time passcode for Email Verification".replace("\xa0", " ")
+        subject = clean_string("One time passcode for Email Verification")
         otp_code =  generate_otp()
         user = User.objects.get(email=email)
-        from_email = settings.DEFAULT_FROM_EMAIL.replace("\xa0", " ")
+        from_email = clean_string(settings.DEFAULT_FROM_EMAIL)
         OneTimePassword.objects.update_or_create(
             user=user,
             defaults={'code': otp_code}
         )
+        
+        first_name = clean_string(user.first_name)
+        last_name = clean_string(user.last_name)
+        otp_code = clean_string(generate_otp())
 
         context = {
-            'first_name':user.first_name,
-            'last_name':user.last_name,
-            'otp_code':otp_code
+            'first_name': first_name,
+            'last_name': last_name,
+            'otp_code': otp_code
         }
 
         html_message = render_to_string('verify_email.html', context=context)
@@ -43,10 +53,11 @@ def send_code_to_user(email):
             subject=subject,
             body=plain_message,
             from_email=from_email,
-            to=[email]
+            to=[email],
+            headers={'Content-Type': 'text/plain; charset=utf-8'}
         )
 
-        d_email.attach_alternative(html_message, 'text/html')
+        d_email.attach_alternative(html_message, 'text/html; charset=utf-8')
         d_email.encoding = "utf-8"
         d_email.send(fail_silently=False)
     except Exception as e:
