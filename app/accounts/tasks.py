@@ -17,10 +17,10 @@ def generate_otp():
 @shared_task(queue='default')
 def send_code_to_user(email):
     try:
-        subject = "One time passcode for Email Verification"
+        subject = "One time passcode for Email Verification".replace("\xa0", " ")
         otp_code =  generate_otp()
         user = User.objects.get(email=email)
-        from_email = settings.DEFAULT_FROM_EMAIL
+        from_email = settings.DEFAULT_FROM_EMAIL.replace("\xa0", " ")
         OneTimePassword.objects.update_or_create(
             user=user,
             defaults={'code': otp_code}
