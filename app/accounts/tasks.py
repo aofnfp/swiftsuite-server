@@ -34,6 +34,9 @@ def send_code_to_user(email):
 
         html_message = render_to_string('verify_email.html', context=context)
         plain_message = strip_tags(html_message)
+        
+        html_message = html_message.replace("\xa0", " ")
+        plain_message = strip_tags(html_message).replace("\xa0", " ")
 
 
         d_email = EmailMultiAlternatives(
@@ -44,6 +47,7 @@ def send_code_to_user(email):
         )
 
         d_email.attach_alternative(html_message, 'text/html')
+        d_email.encoding = "utf-8"
         d_email.send(fail_silently=False)
     except Exception as e:
         logger.error(f"Error sending OTP email to {email}: {e}")
@@ -62,6 +66,7 @@ def send_normal_email(data, file='reset_password.html'):
             to = [data['to_email']] 
         )
         email.attach_alternative(html_message, 'text/html')
+        email.encoding = "utf-8"
         email.send(fail_silently=False)
     except Exception as e:
         logger.error(f"Error sending email to {data['to_email']}: {e}")
