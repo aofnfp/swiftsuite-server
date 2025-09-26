@@ -26,9 +26,9 @@ from vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Z
 from rest_framework.generics import ListAPIView
 from .pagination import CustomOffsetPagination
 from accounts.models import User
-from .utils import map_vendor_data_to_general, identifier_filter
-import threading, json
+from .utils import map_vendor_data_to_general, identifier_filter, with_module
 from django.db.models import Q
+from accounts.permissions import IsOwnerOrHasPermission
 
 # Create your views here.
 MODELS_MAPPING = {
@@ -58,9 +58,10 @@ SERIALIZER_MAPPING = {
     }
 
 class EnrollmentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+    module_name = 'inventory'  # Specify the module name for permission checks
     
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -109,12 +110,16 @@ class VendorTestView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)       
         
 class AccountViewset(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
+    module_name = 'inventory' 
     
     def get_queryset(self):
         user = self.request.user
+        if user.is_subaccount:
+            user = user.parent
+            
         queryset = Account.objects.filter(user=user)
 
         vendor_id = self.request.query_params.get("vendor_id")
@@ -131,31 +136,46 @@ class AccountViewset(viewsets.ModelViewSet):
         return Response({"message": "Account, Vendor data and enrollments deleted successfully."},status=status.HTTP_200_OK)
   
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def update_enrolment(request, identifier):
-    enrollment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
+    user = request.user
+    if user.is_subaccount:
+        user = user.parent
+        
+    enrollment = get_object_or_404(Enrollment, user_id=user.id, identifier=identifier)
     serializer = EnrollmentSerializer(enrollment, data=request.data)
     if serializer.is_valid():
         serializer.save()
         # Start the update process in a separate thread
         updated_enrollment = serializer.instance
-        update_vendor_data(updated_enrollment)
+        update_vendor_data.delay(updated_enrollment.id)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def delete_enrolment(request, identifier):
-    enrolment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
+    user = request.user
+    if user.is_subaccount:
+        user = user.parent
+
+    enrolment = get_object_or_404(Enrollment, user_id=user.id, identifier=identifier)
     enrolment.delete()
     
     return Response({"message":"Enrollment Deleted Successfully"}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def getEnrollmentWithIdentifier(request, identifier):
-    enrollment = get_object_or_404(Enrollment, user_id=request.user.id, identifier=identifier)
+    user = request.user
+    if user.is_subaccount:
+        user = user.parent
+        
+    enrollment = get_object_or_404(Enrollment, user_id=user.id, identifier=identifier)
     serializer = EnrollmentSerializer(enrollment)
     
     vendor_name = enrollment.vendor.name.lower()
@@ -221,14 +241,20 @@ def getEnrollmentWithIdentifier(request, identifier):
     return JsonResponse(response_data, status=status.HTTP_200_OK)
 
 class CatalogueBaseView(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     model = None 
     updateModel = None
     vendor_name = ''
     pagination_class = CustomOffsetPagination 
 
     def get_queryset(self):
-        userid = self.request.user.id
+        user = self.request.user
+        if user.is_subaccount:
+            user = user.parent
+            
+        userid = user.id
+        
         identifier = self.kwargs.get('identifier', None)
         
         return identifier_filter(Enrollment, self.vendor_name, identifier, userid, self.model, self.updateModel)   
@@ -274,7 +300,11 @@ class CatalogueBaseView(ListAPIView):
         if not queryset.exists():
             return Response({"message": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
-        user_id = request.user.id
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+        
+        user_id = user.id
         # Get all vendor enrollments for this user and vendor
         enrollments = Enrollment.objects.filter(user_id=user_id, vendor__name=self.vendor_name).values("identifier")
 
@@ -319,11 +349,16 @@ class CatalogueRsrView(CatalogueBaseView):
     updateModel = RsrUpdate
 
 class AllCatalogueView(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     pagination_class = CustomOffsetPagination
 
     def list(self, request, *args, **kwargs):
-        user_id = request.user.id
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+            
+        user_id = user.id
 
         vendors = Enrollment.objects.filter(user_id=user_id).values_list('vendor__name', flat=True)
         vendors = {vendor.lower() for vendor in vendors}
@@ -352,10 +387,16 @@ class AllCatalogueView(ListAPIView):
         return Response({"results": all_serialized})
 
 class AddProductView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     def get(self, request, userid, product_id, vendor_name, identifier = None):
         vendor_name = vendor_name.lower()
-
+        
+        user = get_object_or_404(User, id=userid)
+        if user.is_subaccount:
+            user = user.parent
+        userid = user.id
+        
         if vendor_name not in UPDATE_MODELS_MAPPING:
             return JsonResponse({'error': 'Invalid vendor name'}, status=400)
 
@@ -372,7 +413,10 @@ class AddProductView(APIView):
 
     def put(self, request, userid, product_id, vendor_name, identifier):
         vendor_name = vendor_name.lower()
-
+        user = get_object_or_404(User, id=userid)
+        if user.is_subaccount:
+            user = user.parent
+        userid = user.id
         if vendor_name not in UPDATE_MODELS_MAPPING:
             return JsonResponse({'error': 'Invalid vendor name'}, status=400)
         
@@ -413,11 +457,16 @@ class AddProductView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def removeProduct(request, productId):
     try:
         # Try to fetch the product
-        product = Generalproducttable.objects.get(id=productId, user=request.user.id)
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+            
+        product = Generalproducttable.objects.get(id=productId, user=user.id)
 
         # Extract data BEFORE deletion
         product_id = product.product_id
@@ -433,7 +482,7 @@ def removeProduct(request, productId):
         try:
             updated_count = product_model.objects.filter(
                 product__id=product_id,
-                account__user=request.user
+                account__user=user
             ).update(active=False)
             
             # Delete the general product AFTER marking vendor updates inactive
@@ -452,13 +501,17 @@ def removeProduct(request, productId):
 
     
 class ViewAllProducts(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
     serializer_class = GeneralProductSerializer
     pagination_class  = CustomOffsetPagination
     
 
     def get_queryset(self):
         user = self.request.user
+        if user.is_subaccount:
+            user = user.parent
+            
         queryset = Generalproducttable.objects.filter(user=user, active=False).order_by('-date_created')
         params = self.request.query_params
         filters = Q()
@@ -486,18 +539,26 @@ class ViewAllProducts(ListAPIView):
     
     
 class UserAccountEnrollmentsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'inventory'
 
     def get(self, request):
         user = request.user
+        if user.is_subaccount:
+            user = user.parent
+            
         accounts = Account.objects.filter(user=user).select_related('vendor').prefetch_related('enrollments')
         data = AccountWithEnrollmentsSerializer(accounts, many=True).data
         return Response(data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@with_module('inventory')
 def allEnrolledVendors(request):
     user = request.user
+    if user.is_subaccount:
+        user = user.parent
+    
     vendors = Enrollment.objects.filter(user=user).values_list('vendor__name', flat=True).distinct()
     return Response({"vendors": list(vendors)}, status=status.HTTP_200_OK)

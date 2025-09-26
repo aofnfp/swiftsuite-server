@@ -1,10 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes
-from vendorApp.models import VendoEnronment
+from vendorEnrollment.models import Enrollment
 import requests
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from vendorApp.apiSupplier import getFragranceXAuth
+from vendorActivities.apiSupplier import getFragranceXAuth
 
 
 
@@ -28,8 +28,8 @@ class FrgxOrderApiClient:
 @permission_classes([IsAuthenticated])
 def place_order_fragrancex(request, userid, market_name, ebayorderid):
     # Get vendor enrollment details
-    enrolment_details = VendoEnronment.objects.filter(
-        user_id=request.user.id, vendor_name='FragranceX'
+    enrolment_details = Enrollment.objects.filter(
+        user=request.user, vendor__name__iexact='FragranceX'
     ).first()
 
     if not enrolment_details:
@@ -38,8 +38,8 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    apiAccessId = enrolment_details.apiAccessId
-    apiAccessKey = enrolment_details.apiAccessKey
+    apiAccessId = enrolment_details.vendor.api_access_id
+    apiAccessKey = enrolment_details.vendor.api_access_key
     
  
     # Get order details
@@ -128,8 +128,8 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
 def getTracking_fragranceX(request, orderId):
     try:
         # Get vendor enrollment details
-        enrolment_details = VendoEnronment.objects.filter(
-            user_id=request.user.id, vendor_name='FragranceX'
+        enrolment_details = Enrollment.objects.filter(
+            user=request.user, vendor__name__iexact='FragranceX' 
         ).first()
 
         if not enrolment_details:

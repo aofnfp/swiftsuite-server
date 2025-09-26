@@ -10,7 +10,7 @@ import logging
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
 
-@shared_task
+@shared_task(queue='default')
 def update_vendor_data(enrollment_id):
     try:
         enrollment = Enrollment.objects.get(id = enrollment_id)
@@ -218,7 +218,7 @@ def process_cwr(file_path, enrollment):
     )
 
 
-@shared_task
+@shared_task(queue='default')
 def update_all_enrollments():
     tasks = BackgroundTask.objects.all()
     for task in tasks:

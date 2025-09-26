@@ -1,11 +1,10 @@
 
-from django.urls import path, include
+from django.urls import path, include, re_path
 from . import views as vw
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register('account-tier', vw.TierViewSet, basename='account-tier')
-
 
 urlpatterns = [
     path('register/', vw.RegisterUserView.as_view(), name="register"),
@@ -25,5 +24,10 @@ urlpatterns = [
     path('verify-checkout/<str:session_id>/', vw.VerifyCheckoutSessionView.as_view(), name='verify-checkout'),
     path('payment-history/', vw.PaymentView.as_view(), name='payment-history'),
     
+    re_path(r'^subaccounts(?:/(?P<pk>\d+))?/$', vw.ManageSubAccountsView.as_view(), name='manage-subaccounts'),
+    path('delete-subaccount/<int:pk>/', vw.DeleteSubAccountView.as_view(), name='delete-subaccount'),
+    path('subaccount-activation/<int:pk>/', vw.SubaccountActivationView.as_view(), name='subaccount-activation'),
+    
+     
     path("", include(router.urls))
 ]

@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from .manager import UserManager
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
@@ -46,12 +48,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.parent is not None
     
     @property
-    def can_create_subaccount(self):
-        if self.is_subaccount:
-           return False
-        if not self.tier:
-            return False
-        return self.subaccounts.count() < self.tier.max_subaccounts
+    def can_add_subaccount(self):
+        return self.tier and self.subaccounts.count() < self.tier.max_subaccounts
+    
+    @property
+    def subscribed(self):
+        if self.is_subaccount and self.parent:
+            subscription = getattr(self.parent, "tier_subscription", None)
+        else:
+            subscription = getattr(self, "tier_subscription", None)
+
+        return subscription.is_active() if subscription else False
 
 class OneTimePassword(models.Model):
 
@@ -61,16 +68,39 @@ class OneTimePassword(models.Model):
    def __str__(self):
        return f"{self.user.first_name}--passcode"
        
-           
+class Module(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name           
     
 class SubAccountPermissions(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='permissions')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, null=True)
     can_view = models.BooleanField(default=True)
     can_edit = models.BooleanField(default=False)
     can_delete = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ('user', 'module')
+        
 
     def __str__(self):
-        return f"Permissions for {self.user.email}"
+        return f"{self.user.email} - {self.module.name} permissions"
+    
+    
+@receiver(post_save, sender=User)
+def create_default_permissions(sender, instance, created, **kwargs):
+    if created and instance.is_subaccount:
+        modules = Module.objects.all()
+        for module in modules:
+            SubAccountPermissions.objects.create(
+                user=instance,
+                module=module,
+                can_view=True,  # default can_view
+                can_edit=False,
+                can_delete=False
+            )
     
     
 class Tier(models.Model):
