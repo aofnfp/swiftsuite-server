@@ -283,12 +283,12 @@ def sync_ebay_items_with_local():
             try:
                 item_exists = InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")))[0]
                 # Fetch the item from the local vendor's table
-                vendor_list = ["CwrUpdate", "FragrancexUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
+                vendor_list = ["FragrancexUpdate", "CwrUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
                 for vendor_db in vendor_list:
                     try:
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_db]
-                        db_items = model_class.objects.filter(Q(sku=item.get("ebay_sku")) | (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
+                        db_items = model_class.objects.filter(Q(sku=item.get("ebay_sku")) & (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
                         if not db_items.exists():
                             continue
                         
@@ -315,12 +315,12 @@ def sync_ebay_items_with_local():
                         # Create or update the product on GeneralProduct table
                         item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                         # Item exists, check if we need to update price or quantity
-                        InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, map_status=True, product_id=item_product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                        InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
                         # Update the VendorUpdate table to set listed_market to true
                         db_item.active = True
                         db_item.save()
                         
-                        # # Check if there is a price and quantity update, then update on Ebay
+                        # Check if there is a price and quantity update, then update on Ebay
                         # if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
                         #     # Update the product on Ebay
                         #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
