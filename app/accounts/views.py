@@ -61,7 +61,29 @@ class SendOTP(GenericAPIView):
             return Response({"message":"user already verified"}, status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:
             return Response({"message":"user does not exist"}, status=status.HTTP_404_NOT_FOUND)
-            
+
+class ManageUser(GenericAPIView):
+    permission_classes = [IsSuperUser]
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                user = User.objects.get(pk=pk)
+                serializer = UserProfileSerializer(user)
+                return Response(serializer.data)
+            except User.DoesNotExist:
+                return Response({"detail": "User not found."}, status=404)
+        else:
+            users = User.objects.all()
+            serializer = UserProfileSerializer(users, many=True)
+            return Response(serializer.data)   
+
+    def delete(self, request, pk=None):
+        try:
+            user = User.objects.get(pk=pk)
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=404)          
     
 class VerifyUserEmail(GenericAPIView):
     serializer_class = VerifyEmailSerializer
@@ -89,7 +111,6 @@ class VerifyUserEmail(GenericAPIView):
             }, status=status.HTTP_204_NO_CONTENT)
         except OneTimePassword.DoesNotExist:
             return Response({"message": "Passcode not provided"}, status=status.HTTP_404_NOT_FOUND)
-
 
 class LoginUserView(GenericAPIView):
     serializer_class  = LoginSerializer

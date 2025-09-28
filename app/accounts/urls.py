@@ -18,6 +18,7 @@ urlpatterns = [
     path('send-otp/', vw.SendOTP.as_view(), name='send_otp'),
     path('create-subaccount/', vw.RegisterSubaccountView.as_view(), name="create-subaccount"),
     path('user-profile/', vw.UserProfileView.as_view(), name='user-profile'),
+    re_path(r'^manage-user(?:/(?P<pk>\d+))?/$', vw.ManageUser.as_view(), name='manage-user'),
     
     path('tier-subscription/', vw.SubscriptionView.as_view(), name='tier-subsciption'),
     path('stripe-webhook/', vw.stripe_webhook, name='stripe-webhook'),

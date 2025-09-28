@@ -36,8 +36,8 @@ def send_code_to_user(email):
         )
 
         # Clean strings
-        subject = clean_string("One time passcode for Email Verification")
-        from_email = clean_string(settings.DEFAULT_FROM_EMAIL)
+        subject = clean_string("One Time Passcode For Email Verification")
+        from_email = clean_string(settings.EMAIL_HOST_USER)
         first_name = clean_string(user.first_name)
         last_name = clean_string(user.last_name)
 
