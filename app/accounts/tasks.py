@@ -59,7 +59,7 @@ def send_normal_email(data, file='reset_password.html'):
         email = EmailMultiAlternatives(
             subject= data['email_subject'],
             body = plain_message,
-            from_email = settings.EMAIL_HOST_USER,
+            from_email = settings.DEFAULT_FROM_EMAIL,
             to = [data['to_email']] 
         )
         email.attach_alternative(html_message, 'text/html')
