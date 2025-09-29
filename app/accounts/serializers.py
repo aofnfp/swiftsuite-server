@@ -81,7 +81,7 @@ class LoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed('Invalid credentials try again')
         if not user.is_verified:
             # resend an otp to the user for verification
-            send_code_to_user(user.email)
+            send_code_to_user.delay(user.email)
             raise AuthenticationFailed('Account not verified, check your email for verification code')
 
         user_token = user.tokens()

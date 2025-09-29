@@ -39,7 +39,7 @@ class RegisterUserView(GenericAPIView):
             serializer.save()
             user = serializer.data
             # send email
-            send_code_to_user(user['email'])
+            send_code_to_user.delay(user['email'])
 
             return Response({
                 "data":user, 
