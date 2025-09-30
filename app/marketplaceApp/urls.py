@@ -14,7 +14,9 @@ urlpatterns = [
     path('save_product_before_listing/<int:userid>/<int:leaf_category_id>/', view.save_product_before_listing, name='save_product_before_listing'),
     path('get_ebay_store_id/', view.get_ebay_user_id, name='get_ebay_store_id'),
     path('upload_product_image/<int:productid>/<str:product_name>/<int:userid>/', view.upload_product_image, name='upload_product_image'),
+    path('upload_multiple_product_image/<int:productid>/<str:product_name>/<int:userid>/', view.upload_multiple_product_images, name='upload_multiple_product_image'),
     path('get_uploaded_images/<int:productid>/<str:product_name>/<int:userid>/', view.get_uploaded_image, name='get_uploaded_images'),
+    path('get_multiple_uploaded_images/<int:productid>/<str:product_name>/<int:userid>/', view.get_multiple_uploaded_images, name='get_multiple_uploaded_images'),
     path('delete_uploaded_images/<str:image_name>/<int:image_id>/', view.delete_uploaded_image, name='delete_uploaded_images'),
     
 ]
