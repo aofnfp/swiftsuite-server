@@ -766,6 +766,7 @@ class Ebay(APIView):
     @api_view(['POST'])
     @parser_classes([MultiPartParser, FormParser])
     def upload_multiple_product_images(request, productid, product_name, userid):
+        uploaded_urls = []
         gen_val = random.randint(100, 100000)
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
@@ -774,24 +775,25 @@ class Ebay(APIView):
                 if not images:
                     return Response({"error": "No images provided. Use key 'images' in form-data."}, status=400)
 
-        uploaded_urls = []
+                for image_file in images:
+                    upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
+                    # Optimize delivery by resizing and applying auto-format and auto-quality
+                    optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
+                    # Transform the image: auto-crop to square aspect_ratio
+                    auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
+                    # Append uploaded image details to list 
+                    uploaded_urls.append({"image_url": upload_result["secure_url"], "image_name": upload_result["public_id"], "product_id": productid})
+                
+                # Save images to the database
+                save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
+                save_image.save()
 
-        for image_file in images:
-            upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
-            # Optimize delivery by resizing and applying auto-format and auto-quality
-            optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
-            # Transform the image: auto-crop to square aspect_ratio
-            auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
-            # Append uploaded image details to list 
-            uploaded_urls.append({"image_url": upload_result["secure_url"], "image_name": upload_result["public_id"], "product_id": productid})
-        
-        # Save images to the database
-        save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
-        save_image.save()
-
-        return Response({
-            "message": "Images uploaded successfully", "product": product_name, "Total uploaded": len(uploaded_urls)}, status=201)
-
+                return Response({
+                    "message": "Images uploaded successfully",
+                    "product": product_name,
+                    "Total uploaded": len(uploaded_urls)
+                    }, status=201)
+            return Response(serializer.errors, status=400)
 
 
     # Get thumbnail image details
@@ -806,6 +808,7 @@ class Ebay(APIView):
     def get_multiple_uploaded_images(request, productid, product_name, userid):
         save_images = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
         return JsonResponse({"image_data":list(save_images)}, safe=False, status=status.HTTP_200_OK)
+
 
     # Delete thumbnail image
     @api_view(['GET'])
