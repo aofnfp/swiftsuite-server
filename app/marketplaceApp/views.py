@@ -765,7 +765,6 @@ class Ebay(APIView):
     # Function to upload multiple images to cloudinary
     @api_view(['POST'])
     @parser_classes([MultiPartParser, FormParser])
-    @permission_classes([AllowAny])
     def upload_multiple_product_images(request, productid, product_name, userid):
         gen_val = random.randint(100, 100000)
         if request.method == 'POST':
