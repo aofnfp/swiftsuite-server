@@ -16,7 +16,6 @@ urlpatterns = [
     path('upload_product_image/<int:productid>/<str:product_name>/<int:userid>/', view.upload_product_image, name='upload_product_image'),
     path('upload_multiple_product_image/<int:productid>/<str:product_name>/<int:userid>/', view.upload_multiple_product_images, name='upload_multiple_product_image'),
     path('get_uploaded_images/<int:productid>/<str:product_name>/<int:userid>/', view.get_uploaded_image, name='get_uploaded_images'),
-    path('get_multiple_uploaded_images/<int:productid>/<str:product_name>/<int:userid>/', view.get_multiple_uploaded_images, name='get_multiple_uploaded_images'),
     path('delete_uploaded_images/<str:image_name>/<int:image_id>/', view.delete_uploaded_image, name='delete_uploaded_images'),
     
 ]
