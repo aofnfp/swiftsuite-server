@@ -30,7 +30,7 @@ class ItemListingToEbaySerializer:
 		valid_choices_field = {}
 		# Create a ModelSerializer class for the model fields
 		class ModelSerializer(serializers.ModelSerializer):
-		    class Meta:
+			class Meta:
 				model = InventoryModel
 				exclude = [
 					'id',
@@ -57,15 +57,15 @@ class ItemListingToEbaySerializer:
 			
 			# If there are predefined options, use ChoiceField
 			if options:
-			    choices = [(opt['localizedValue'], opt['localizedValue']) for opt in options]
+				choices = [(opt['localizedValue'], opt['localizedValue']) for opt in options]
 			    # Store valid choices separately for reference
-			    valid_choices_field[aspect_name] = [opt['localizedValue'] for opt in options]
+				valid_choices_field[aspect_name] = [opt['localizedValue'] for opt in options]
 			    # Use CharField instead of ChoiceField to allow custom values
-			    serializer_fields[aspect_name] = serializers.CharField(
+				serializer_fields[aspect_name] = serializers.CharField(
                     required=is_required,
                     allow_blank=not is_required
                 )
-			    item_specifics_name.append(aspect_name)
+				item_specifics_name.append(aspect_name)
                 
 			# If there are no options but it's a yes/no field, use BooleanField
 			elif 'Yes' in [v['localizedValue'] for v in aspect.get('aspectValues', [])] and 'No' in [v['localizedValue'] for v in aspect.get('aspectValues', [])]:
@@ -89,14 +89,14 @@ class ItemListingToEbaySerializer:
 		model_class = []
 		# Create a ModelSerializer class for the model fields
 		class ModelSerializer(serializers.ModelSerializer):
-		    class Meta:
+			class Meta:
 				model = InventoryModel
 				exclude = [
 					'id',
 					'item_specific_fields',
 					'ebay_item_id',
 					'user',
-				]
+					]
 
 		# Extract model fields (excluding the ones already present in eBay item specifics)
 		for field_name, field_instance in ModelSerializer().get_fields().items():
