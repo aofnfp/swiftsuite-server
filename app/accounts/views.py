@@ -554,7 +554,8 @@ class DashboardAnalyticsView(GenericAPIView):
         
         total_subaccounts = User.objects.filter(parent=user).count()
         active_subaccounts = User.objects.filter(parent=user, is_active=True).count()
-        inactive_subaccounts = total_subaccounts - active_subaccounts
+        inactive_subaccounts = User.objects.filter(parent=user, is_active=False).count()
+        pending_subaccounts = User.objects.filter(parent=user, is_active=False, is_verified=False).count()
         
         try:
             subscription = user.tier_subscription
@@ -574,6 +575,7 @@ class DashboardAnalyticsView(GenericAPIView):
             "total_subaccounts": total_subaccounts,
             "active_subaccounts": active_subaccounts,
             "inactive_subaccounts": inactive_subaccounts,
+            "pending_subaccounts": pending_subaccounts,
             "subscription_status": subscription_status,
             "tier": tier_name,
             "days_remaining": days_remaining
