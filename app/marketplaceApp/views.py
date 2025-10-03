@@ -785,7 +785,7 @@ class Ebay(APIView):
                     uploaded_urls.append({"image_url": upload_result["secure_url"], "image_name": upload_result["public_id"], "product_id": productid})
                 
                 # Save images to the database
-                save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
+                save_image = UploadedProductImage(image_url=uploaded_urls, image_name=product_name, product_id=productid, user_id=userid)
                 save_image.save()
 
                 return Response({
