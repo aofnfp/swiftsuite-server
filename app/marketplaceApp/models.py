@@ -39,7 +39,7 @@ class AuthorizationCode(models.Model):
 
 class UploadedProductImage(models.Model):
     # image_url = CloudinaryField('image')
-    image_url = models.ImageField(upload_to='productImage/', null=False, unique=False)
+    image_url = models.TextField(null=False, unique=False)
     image_name = models.CharField(max_length=100, null=False, unique=False)
     uploaded_date= models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False, null=False)

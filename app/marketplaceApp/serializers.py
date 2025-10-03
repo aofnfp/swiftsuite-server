@@ -31,8 +31,8 @@ class ItemListingToEbaySerializer:
 		# Create a ModelSerializer class for the model fields
 		class ModelSerializer(serializers.ModelSerializer):
 		    class Meta:
-		        model = InventoryModel
-		        exclude = [
+				model = InventoryModel
+				exclude = [
 					'id',
 					'item_specific_fields',
 					'ebay_item_id',
@@ -82,6 +82,32 @@ class ItemListingToEbaySerializer:
 		# Dynamically create a Serializer class combining eBay specifics and model fields
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
 		return DynamicSerializer, item_specifics_name, valid_choices_field
+	
+	def generate_item_listing_fields_serializer():
+		# Create a dictionary for dynamic serializer fields
+		serializer_fields = {}
+		model_class = []
+		# Create a ModelSerializer class for the model fields
+		class ModelSerializer(serializers.ModelSerializer):
+		    class Meta:
+				model = InventoryModel
+				exclude = [
+					'id',
+					'item_specific_fields',
+					'ebay_item_id',
+					'user',
+				]
+
+		# Extract model fields (excluding the ones already present in eBay item specifics)
+		for field_name, field_instance in ModelSerializer().get_fields().items():
+			if field_name not in serializer_fields:
+				serializer_fields[field_name] = field_instance
+				model_class.append(field_name)
+
+		# Dynamically create a Serializer class combining eBay specifics and model fields
+		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
+		return DynamicSerializer
+
 
 	
 class UploadedProductImageSerializer(serializers.ModelSerializer):

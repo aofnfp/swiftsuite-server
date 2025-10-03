@@ -801,13 +801,6 @@ class Ebay(APIView):
     def get_uploaded_image(request, productid, product_name, userid):
         save_image = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
         return JsonResponse({"image_data":list(save_image)}, safe=False, status=status.HTTP_200_OK)
-    
-
-    # Get multiple thumbnail image details
-    @api_view(['GET'])
-    def get_multiple_uploaded_images(request, productid, product_name, userid):
-        save_images = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
-        return JsonResponse({"image_data":list(save_images)}, safe=False, status=status.HTTP_200_OK)
 
 
     # Delete thumbnail image
@@ -830,11 +823,86 @@ class WooCommerce(APIView):
         version = "wc/v3"                # API version
     )
 
+
     @api_view(['GET'])
     def get_product_category(request):
         # Get all product categories
         wcm = WooCommerce()
         categories = wcm.wcapi.get("products/categories").json()
+        return JsonResponse({"Product_categories":categories}, safe=False, status=status.HTTP_200_OK)
+        # for cat in categories:
+        #     print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
+
+
+    # Helper function to get category ID by name
+    def get_category_id(self, category_name: str):
+        wcm = WooCommerce()
+        """Return the category ID for a given category name."""
+        categories = wcm.wcapi.get("products/categories").json()
 
         for cat in categories:
-            print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
+            if cat["name"].lower() == category_name.lower():
+                return cat["id"]
+        
+        return None  # Not found
+
+
+    @api_view(['POST'])
+    def list_product_on_woocommerce(request, userid, market_name, category_name):
+        """Return the category ID for a given category name."""
+        wcm = WooCommerce()
+        eb = Ebay()
+        # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
+        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_item_listing_fields_serializer()
+        # Pass request data to the dynamic serializer for validation
+        serializer = DynamicItemSpecificsSerializer(data=request.data)          
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        
+        # Get the calculated price of the product to list
+        try:
+            product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
+            enroll_id = product_details[0].get("enrollment_id")
+            minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+            if type(minimum_offer_price) != float:
+                return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+       
+        # Product payload mapped to WooCommerce
+        product_data = {
+            "name": validated_data['title'],
+            "type": "simple",
+            "regular_price": validated_data['start_price'],
+            "description": (
+                validated_data['description']
+            ),
+            "sku": validated_data['sku'],
+            "stock_quantity": validated_data['quantity'],
+            "manage_stock": True,
+            "categories": [
+                {"id": wcm.get_category_id(category_name)}   # Category ID must exist in WooCommerce
+            ],
+            "images": [
+                {"src": validated_data['picture_detail']}
+            ],
+            "meta_data": [
+                {"key": "UPC", "value": validated_data['upc']},
+
+            ]
+        }
+        # Send POST request to WooCommerce to create the product
+        response = wcm.wcapi.post("products", product_data).json()
+        if response.status_code == 201:
+            return Response(f"Product listing was successful {response.json()}", status=status.HTTP_200_OK)
+        else:
+            return Response(f"Failed to post: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
+        
+    @api_view(['GET'])
+    def get_listed_products(request):
+        wcm = WooCommerce()
+        # Get all products
+        products = wcm.wcapi.get("products").json()
+        return JsonResponse({"Listed_products":products}, safe=False, status=status.HTTP_200_OK)
