@@ -99,9 +99,9 @@ class MarketInventory(APIView):
             minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userId)
             if type(minimum_offer_price) != float:
                 return Response(f"Failed to fetch data:", status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response(f"Failed to fetch data:", status=status.HTTP_400_BAD_REQUEST)
-            
+        except Exception as e:
+            return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+
         # eBay Trading API endpoint
         url = 'https://api.ebay.com/ws/api.dll'
 
