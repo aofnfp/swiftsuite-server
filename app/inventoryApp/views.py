@@ -15,6 +15,8 @@ from vendorEnrollment.models import Generalproducttable
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
 from .tasks import sync_ebay_inventory_task
+from woocommerce import API
+from decouple import config
 
 
 # Create your views here.
@@ -334,6 +336,26 @@ class MarketInventory(APIView):
         listings = minv.get_all_items_on_ebay(access_token)
        
         return JsonResponse({"item":listings[0:10], "Total items": len(listings)}, status=status.HTTP_200_OK)
+
+
+
+class WooCommerce(APIView):
+    # Set up the WooCommerce API client
+    wcapi = API(
+        url = config("WOOC_URL"), 
+        consumer_key = config("WOOC_CONSUMER_KEY"),  
+        consumer_secret = config("WOOC_CONSUMER_SECRET"), 
+        version = "wc/v3"                # API version
+    )
+
+
+    # Get all the products from the WooCommerce store
+    @api_view(['GET'])
+    def get_all_existing_products(request):
+        wcm = WooCommerce()
+        products = wcm.wcapi.get("products").json()  
+        return JsonResponse({"products": products}, safe=False, status=status.HTTP_200_OK)
+    
 
 
 # Inventory background task invocation

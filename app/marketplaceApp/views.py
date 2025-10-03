@@ -9,10 +9,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from .serializers import MarketplaceEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from .models import MarketplaceEnronment, UploadedProductImage
 from inventoryApp.models import InventoryModel
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from ebaysdk.exception import ConnectionError
 from vendorActivities.models import Vendors
@@ -24,6 +24,9 @@ from ebaysdk.trading import Connection as Trading
 import cloudinary
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
+from woocommerce import API
+from decouple import config
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class Ebay(APIView):
@@ -31,12 +34,12 @@ class Ebay(APIView):
     def __init__(self):
         super().__init__()
         # eBay Developer App credentials
-        self.client_id = "os.getenv('EBAY_CLIENT_ID')"
-        self.client_secret = "os.getenv('EBAY_CLIENT_SECRET')"
-        self.app_id = 'os.getenv('EBAY_CLIENT_ID')'
-        self.cert_id = 'os.getenv('EBAY_CLIENT_SECRET')'
-        self.dev_id = 'os.getenv('EBAY_DEV_ID')'
-        self.ru_name = "https://swiftsuite.app/"
+        self.client_id = config("EB_CLIENT_ID")
+        self.client_secret = config("EB_CLIENT_SECRET")
+        self.app_id = config("EB_APP_ID")
+        self.cert_id = config("EB_CERT_ID")
+        self.dev_id = config("EB_DEV_ID")
+        self.ru_name = config("EB_RU_NAME")
         # eBay API endpoints
         self.authorization_base_url = "https://signin.ebay.com/authorize"
         self.token_url = "https://api.ebay.com/identity/v1/oauth2/token"
@@ -758,6 +761,40 @@ class Ebay(APIView):
                 return Response({"image_uploaded":upload_result}, status=201)
         return Response(serializer.errors, status=400)
 
+    
+    # Function to upload multiple images to cloudinary
+    @api_view(['POST'])
+    @parser_classes([MultiPartParser, FormParser])
+    def upload_multiple_product_images(request, productid, product_name, userid):
+        uploaded_urls = []
+        gen_val = random.randint(100, 100000)
+        if request.method == 'POST':
+            serializer = UploadedProductImageSerializer(data=request.data)
+            if serializer.is_valid():
+                images = request.FILES.getlist("image_url")  # getlist() for multiple files
+                if not images:
+                    return Response({"error": "No images provided. Use key 'images' in form-data."}, status=400)
+
+                for image_file in images:
+                    upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
+                    # Optimize delivery by resizing and applying auto-format and auto-quality
+                    optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
+                    # Transform the image: auto-crop to square aspect_ratio
+                    auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
+                    # Append uploaded image details to list 
+                    uploaded_urls.append({"image_url": upload_result["secure_url"], "image_name": upload_result["public_id"], "product_id": productid})
+                
+                # Save images to the database
+                save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
+                save_image.save()
+
+                return Response({
+                    "message": "Images uploaded successfully",
+                    "product": product_name,
+                    "Total uploaded": len(uploaded_urls)
+                    }, status=201)
+            return Response(serializer.errors, status=400)
+
 
     # Get thumbnail image details
     @api_view(['GET'])
@@ -765,6 +802,14 @@ class Ebay(APIView):
         save_image = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
         return JsonResponse({"image_data":list(save_image)}, safe=False, status=status.HTTP_200_OK)
     
+
+    # Get multiple thumbnail image details
+    @api_view(['GET'])
+    def get_multiple_uploaded_images(request, productid, product_name, userid):
+        save_images = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
+        return JsonResponse({"image_data":list(save_images)}, safe=False, status=status.HTTP_200_OK)
+
+
     # Delete thumbnail image
     @api_view(['GET'])
     def delete_uploaded_image(request, image_name, image_id):
@@ -775,3 +820,21 @@ class Ebay(APIView):
         return Response(f"Image deleted successfully from thumbnail {response}", status=status.HTTP_200_OK)
       
 
+
+class WooCommerce(APIView):
+    # Set up the WooCommerce API client
+    wcapi = API(
+        url = config("WOOC_URL"), 
+        consumer_key = config("WOOC_CONSUMER_KEY"),  
+        consumer_secret = config("WOOC_CONSUMER_SECRET"), 
+        version = "wc/v3"                # API version
+    )
+
+    @api_view(['GET'])
+    def get_product_category(request):
+        # Get all product categories
+        wcm = WooCommerce()
+        categories = wcm.wcapi.get("products/categories").json()
+
+        for cat in categories:
+            print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
