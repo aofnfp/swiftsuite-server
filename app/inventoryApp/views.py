@@ -87,7 +87,7 @@ class MarketInventory(APIView):
             if serializer.is_valid():
                 validated_data = serializer.validated_data
             else:
-                return Response(f"Form not filled correctly. Please check for missing fields or wrong values.", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Form not filled correctly. {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
         # convert item specific field into xml
