@@ -175,7 +175,6 @@ class SetNewPassword(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response({'message':'Password reset successful'}, status=status.HTTP_200_OK)
     
-
 class LogoutUserView(GenericAPIView):
     serializer_class = LogoutUserSerializer
     permission_classes = [IsAuthenticated]
@@ -207,6 +206,9 @@ class UserProfileView(GenericAPIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+# Subaccount Management Views and payment handling
+
 class RegisterSubaccountView(GenericAPIView):
     serializer_class = RegisterSubaccountSerializer
     permission_classes = [IsAuthenticated, CanCreateSubaccount]
@@ -228,7 +230,6 @@ class TierViewSet(ModelViewSet):
     permission_classes = [IsSuperUser]
     serializer_class = TierSerializer
     queryset = Tier.objects.all()
-
 
 class SubscriptionView(GenericAPIView):
     permission_classes = [IsAuthenticated]
@@ -467,7 +468,6 @@ class PaymentView(GenericAPIView):
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
     
-
 class ManageSubAccountsView(GenericAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     serializer_class = ManageSubAccountSerializer
@@ -506,7 +506,6 @@ class ManageSubAccountsView(GenericAPIView):
         serializer.save()
         return Response(serializer.data)
 
-
 class DeleteSubAccountView(GenericAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     module_name = "accounts"
@@ -520,7 +519,6 @@ class DeleteSubAccountView(GenericAPIView):
         subaccount.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-
 class SubaccountActivationView(GenericAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     module_name = "accounts"
@@ -543,3 +541,40 @@ class SubaccountActivationView(GenericAPIView):
         subaccount.is_active = False
         subaccount.save(update_fields=["is_active"])
         return Response({"detail": "Subaccount deactivated."}, status=200)
+    
+# Dashboard analytics
+
+class DashboardAnalyticsView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+        
+        total_subaccounts = User.objects.filter(parent=user).count()
+        active_subaccounts = User.objects.filter(parent=user, is_active=True).count()
+        inactive_subaccounts = total_subaccounts - active_subaccounts
+        
+        try:
+            subscription = user.tier_subscription
+            if subscription.is_active():
+                subscription_status = "active"
+                days_remaining = (subscription.expires_at - timezone.now()).days
+            else:
+                subscription_status = "expired"
+                days_remaining = 0
+            tier_name = subscription.tier.name
+        except Subscription.DoesNotExist:
+            subscription_status = "none"
+            days_remaining = 0
+            tier_name = "Free"
+        
+        return Response({
+            "total_subaccounts": total_subaccounts,
+            "active_subaccounts": active_subaccounts,
+            "inactive_subaccounts": inactive_subaccounts,
+            "subscription_status": subscription_status,
+            "tier": tier_name,
+            "days_remaining": days_remaining
+        })
