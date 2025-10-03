@@ -767,7 +767,6 @@ class Ebay(APIView):
     @parser_classes([MultiPartParser, FormParser])
     def upload_multiple_product_images(request, productid, product_name, userid):
         uploaded_urls = []
-        gen_val = random.randint(100, 100000)
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
             if serializer.is_valid():
@@ -776,13 +775,15 @@ class Ebay(APIView):
                     return Response({"error": "No images provided. Use key 'images' in form-data."}, status=400)
 
                 for image_file in images:
+                    # Generat a unique index for each image
+                    gen_val = random.randint(100, 100000)
                     upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
                     # Optimize delivery by resizing and applying auto-format and auto-quality
                     optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
                     # Transform the image: auto-crop to square aspect_ratio
                     auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
                     # Append uploaded image details to list 
-                    uploaded_urls.append({"image_url": upload_result["secure_url"], "image_name": upload_result["public_id"], "product_id": productid})
+                    uploaded_urls.append({"image_url": upload_result["secure_url"]})
                 
                 # Save images to the database
                 save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
