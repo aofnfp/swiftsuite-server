@@ -246,7 +246,7 @@ class ManageSubAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'profile_image', 'permissions']
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'is_active','profile_image', 'permissions']
         read_only_fields = ['email']
 
     def update(self, instance, validated_data):
