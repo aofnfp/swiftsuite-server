@@ -1,8 +1,20 @@
 from django.db import models
+from accounts.models import User
 
 # Create your models here.
 
 class Vendors(models.Model):
+    INTEGRATION_TYPE_CHOICES = [
+        ('default', 'Default Integration'),
+        ('requested', 'Requested Integration'),
+    ]
+
+    REQUEST_TYPE_CHOICES = [
+        ('regular', 'Regular Request'),
+        ('force', 'Force Request'),
+    ]
+    
+    
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
     logo = models.ImageField(upload_to='logos/')
     address_street1 = models.CharField(max_length=150, null=False)
@@ -11,6 +23,7 @@ class Vendors(models.Model):
     state = models.CharField(max_length=50, null=False)
     zip_code = models.CharField(max_length=50, null=False)
     country = models.CharField(max_length=50, null=False)
+    description = models.TextField(null=True, blank=True)
     
     # Supplier credentials
     api_access_id = models.CharField(max_length=255, null=True, blank=True)
@@ -24,8 +37,15 @@ class Vendors(models.Model):
     ftp_password = models.CharField(max_length=255, null=True, blank=True)
     host = models.CharField(max_length=255, null=True, blank=True)  
 
-    available = models.BooleanField(default=True)
+    available = models.BooleanField(default=False)
     has_data = models.BooleanField(default=False)
+    
+    api_details = models.JSONField(null=True, blank=True)
+    
+    integration_type = models.CharField(max_length=20, choices=INTEGRATION_TYPE_CHOICES, default='default')
+    request_type = models.CharField(max_length=20, choices=REQUEST_TYPE_CHOICES, null=True, blank=True)
+    requested_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='requested_vendors')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

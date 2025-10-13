@@ -4,16 +4,19 @@ from rest_framework.views import APIView
 from .models import Vendors
 from rest_framework import status
 from .serializers import (
-    VendorsSerializer
+    VendorsSerializer,
+    VendorRequestSerializer
     )
 from .permission import IsSuperUser
 from rest_framework.parsers import MultiPartParser, FormParser
 from .utils import get_suppliers_for_vendor
-from django.core.exceptions import ObjectDoesNotExist
 import uuid
 from django.core.cache import cache
 from .tasks import process_vendor_data
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from vendorActivities.payment_utils import create_vendor_checkout_session
+
 
 
 class VendorsViewSet(ModelViewSet):
@@ -58,3 +61,51 @@ class CheckTaskProgress(APIView):
 
         return Response({'task_id': task_id, 'progress': progress}, status=status.HTTP_200_OK)
    
+
+
+class VendorRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer = VendorRequestSerializer(data=request.data , context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        vendor = serializer.save()
+        
+        message = (
+            "Vendor request submitted successfully."
+            if vendor.request_type == 'regular'
+            else "Force integration request submitted. Payment pending."
+        )
+
+        return Response({
+            "message": message,
+            "vendor": VendorRequestSerializer(vendor).data
+        }, status=status.HTTP_201_CREATED)
+    
+
+class VendorPaymentInitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, vendor_id):
+        vendor = get_object_or_404(Vendors, id=vendor_id, requested_by=request.user)
+
+        if vendor.request_type != 'force':
+            return Response({"error": "This vendor does not require payment."}, status=400)
+
+        if vendor.payment_status == 'paid':
+            return Response({"message": "Payment already completed."}, status=200)
+
+        session = create_vendor_checkout_session(request, vendor)
+        
+        # Return payment URL for frontend to redirect
+        if isinstance(session, Response):
+            # Handle Stripe creation failure
+            return session
+
+        # Return payment URL for frontend to redirect
+        return Response({
+            "checkout_url": session.url,
+            "session_id": session.id
+        }, status=status.HTTP_200_OK)
+        
+        

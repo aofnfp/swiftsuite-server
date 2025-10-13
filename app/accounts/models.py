@@ -6,7 +6,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length = 255, unique = True, verbose_name = _("Email Address"))
@@ -155,12 +154,48 @@ class Payment(models.Model):
         ('failed', 'Failed'),
     ]
     
+    TYPE_CHOICES = [
+        ('subscription', 'Subscription'),
+        ('one_time', 'One-Time'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tier = models.ForeignKey(Tier, on_delete=models.SET_NULL, null=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    payment_type = models.CharField(max_length=15, choices=TYPE_CHOICES, default='subscription')
+    vendor = models.ForeignKey('vendorActivities.Vendors', on_delete=models.SET_NULL, null=True, blank=True)
     stripe_session_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.email} - {self.tier.name} - {self.status}"    
+    
+
+class Charge(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    label = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+
+    base_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+
+    # Additional fees
+    charge_fixed = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    charge_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_amount(self):
+        """
+        Calculate total charge including Stripe-like fees.
+        Example: base_amount=190, charge_percent=2.9, charge_fixed=0.30
+        => total = 190 + (190*0.029 + 0.30)
+        """
+        percent_fee = (self.base_amount * (self.charge_percent / 100))
+        return round(self.base_amount + percent_fee + self.charge_fixed, 2)
+
+    def __str__(self):
+        return f"{self.label} (${self.total_amount})"
+    
