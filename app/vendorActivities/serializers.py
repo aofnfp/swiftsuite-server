@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Vendors
-
+from accounts.tasks import send_normal_email
 class VendorsSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         max_length=255, required=False, allow_null=True, allow_blank=True, write_only=True
@@ -38,5 +38,15 @@ class VendorRequestSerializer(serializers.ModelSerializer):
         validated_data['requested_by'] = user
 
         vendor = Vendors.objects.create(**validated_data)
+        context_user = {
+            'user': user.id,
+            'vendor': vendor.id,
+        }
+        send_normal_email.delay(context_user, file='user_notification.html')
+        context_admin = {
+            'vendor': vendor.id,
+            'to_email': 'support@swiftsuite.app'
+        }
+        send_normal_email.delay(context_admin, file='admin_notification.html')
         
         return vendor

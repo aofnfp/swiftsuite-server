@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from celery import shared_task
 import logging
+from datetime import datetime as dt
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,17 @@ def send_code_to_user(email):
 @shared_task(queue='default')
 def send_normal_email(data, file='reset_password.html'):
     try:
+        if data.get('user'):
+            user = User.objects.get(id=data['user'])
+            data['user'] = user
+            data['to_email'] = user.email
+        if data.get('vendor'):
+            from vendorActivities.models import Vendors
+            vendor = Vendors.objects.get(id=data['vendor'])
+            data['vendor'] = vendor
+        
+        data['current_year'] = dt.now().year
+        
         html_message = render_to_string(file, context=data)
         plain_message = strip_tags(html_message) 
 
