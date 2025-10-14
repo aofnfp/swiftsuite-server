@@ -41,11 +41,13 @@ class VendorRequestSerializer(serializers.ModelSerializer):
         context_user = {
             'user': user.id,
             'vendor': vendor.id,
+            'email_subject': 'Vendor Integration Request Received',
         }
         send_normal_email.delay(context_user, file='user_notification.html')
         context_admin = {
             'vendor': vendor.id,
-            'to_email': 'support@swiftsuite.app'
+            'to_email': 'support@swiftsuite.app',
+            'email_subject': 'New Vendor Integration Request Submitted',
         }
         send_normal_email.delay(context_admin, file='admin_notification.html')
         
