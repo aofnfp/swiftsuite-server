@@ -22,10 +22,10 @@ class VendorRequestSerializer(serializers.ModelSerializer):
         fields =  fields = [
             'id', 'name', 'address_street1', 'address_street2',
             'city', 'state', 'zip_code', 'country',
-            'integration_type', 'request_type', 'payment_status',
-            'api_object', 'host', 'ftp_username', 'ftp_password'
+            'integration_type', 'request_type',
+            'api_details', 'host', 'ftp_username', 'ftp_password'
         ]
-        read_only_fields = ['integration_type', 'payment_status']
+        read_only_fields = ['integration_type']
         
     def validate_request_type(self, value):
         if value not in ['regular', 'force']:

@@ -16,7 +16,7 @@ from .tasks import process_vendor_data
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from vendorActivities.payment_utils import create_vendor_checkout_session
-
+from accounts.models import Payment
 
 
 class VendorsViewSet(ModelViewSet):
@@ -92,8 +92,8 @@ class VendorPaymentInitView(APIView):
         if vendor.request_type != 'force':
             return Response({"error": "This vendor does not require payment."}, status=400)
 
-        if vendor.payment_status == 'paid':
-            return Response({"message": "Payment already completed."}, status=200)
+        if Payment.objects.filter(vendor=vendor, status='paid').exists():
+            return Response({"error": "Payment has already been completed for this vendor."}, status=400)
 
         session = create_vendor_checkout_session(request, vendor)
         
