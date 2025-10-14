@@ -20,11 +20,16 @@ from accounts.models import Payment
 
 
 class VendorsViewSet(ModelViewSet):
-    queryset = Vendors.objects.all()
+    queryset = Vendors.objects.all().filter()
     serializer_class = VendorsSerializer
     permission_classes = [IsSuperUser]
     parser_classes = (MultiPartParser, FormParser) 
     
+    def get_queryset(self):
+        queryset = Vendors.objects.all().order_by('-created_at')
+        queryset.exclude(integration_type='requested', available=False)
+        return queryset
+        
 class UploadVendorData(APIView):
     permission_classes = [IsSuperUser]
     
