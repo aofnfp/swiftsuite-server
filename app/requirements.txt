@@ -37,3 +37,4 @@ redis==6.4.0
 gevent
 woocommerce
 drf-extensions
+django-redis

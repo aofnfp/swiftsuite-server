@@ -210,3 +210,13 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": config("REDIS_CACHE_LOCATION"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

@@ -7,7 +7,7 @@ case "$1" in
         python manage.py migrate --noinput
 
         # python manage.py seed_module
-        python manage.py seed_charge
+        # python manage.py seed_charge
 
         echo "Starting Gunicorn..."
         exec gunicorn --bind 0.0.0.0:8000 swiftsuite.wsgi:application --workers 4
