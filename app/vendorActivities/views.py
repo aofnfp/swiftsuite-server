@@ -26,11 +26,15 @@ class VendorsViewSet(ModelViewSet):
     permission_classes = [IsSuperUser]
     parser_classes = (MultiPartParser, FormParser) 
     
-    @cache_response()
+    
     def get_queryset(self):
         queryset = Vendors.objects.all().order_by('-created_at')
         queryset = queryset.exclude(integration_type='requested', available=False)
         return queryset
+    
+    @cache_response()
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
         
 class UploadVendorData(APIView):
     permission_classes = [IsSuperUser]
