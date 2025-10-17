@@ -36,3 +36,4 @@ celery==5.5.3
 redis==6.4.0
 gevent
 woocommerce
+drf-extensions

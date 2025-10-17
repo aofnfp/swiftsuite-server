@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'cloudinary',
     'cloudinary_storage',
+    'rest_framework_extensions',
     'rest_framework_simplejwt.token_blacklist',
     'django_cleanup.apps.CleanupConfig'
 ]
@@ -101,6 +102,9 @@ REST_FRAMEWORK = {
     
 }
 
+REST_FRAMEWORK_EXTENSIONS = {
+    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 60*5,  # Cache timeout in seconds
+}
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),

@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from vendorActivities.payment_utils import create_vendor_checkout_session
 from accounts.models import Payment
+from rest_framework_extensions.cache.decorators import cache_response
 
 
 class VendorsViewSet(ModelViewSet):
@@ -25,6 +26,7 @@ class VendorsViewSet(ModelViewSet):
     permission_classes = [IsSuperUser]
     parser_classes = (MultiPartParser, FormParser) 
     
+    @cache_response()
     def get_queryset(self):
         queryset = Vendors.objects.all().order_by('-created_at')
         queryset = queryset.exclude(integration_type='requested', available=False)

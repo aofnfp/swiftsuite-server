@@ -29,6 +29,7 @@ from accounts.models import User
 from .utils import map_vendor_data_to_general, identifier_filter, with_module
 from django.db.models import Q
 from accounts.permissions import IsOwnerOrHasPermission
+from rest_framework_extensions.cache.decorators import cache_response
 
 # Create your views here.
 MODELS_MAPPING = {
