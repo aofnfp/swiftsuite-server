@@ -4,7 +4,7 @@ from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetS
 from rest_framework.response import Response
 from rest_framework import status
 from .tasks import send_code_to_user
-from .models import OneTimePassword, User, Tier, Subscription, Payment, SubAccountPermissions
+from .models import OneTimePassword, User, Tier, Subscription, Payment, SubAccountPermissions, Charge
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -23,9 +23,9 @@ from .permissions import CanCreateSubaccount, IsOwnerOrHasPermission
 from vendorActivities.permission import IsSuperUser
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import PermissionDenied
+from decimal import Decimal
 
-
-stripe.api_key = settings.STRIPE_SECRET_KEY 
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
@@ -306,7 +306,15 @@ class SubscriptionView(GenericAPIView):
             except stripe.error.InvalidRequestError:
                 pass
             
-                
+        amount = tier.price
+    
+        charge = Charge.objects.filter(key='subscription').first()
+        if charge:
+            fixed_fee = charge.charge_fixed
+            percent_fee = (charge.charge_percent / 100) * tier.price
+            amount += fixed_fee + percent_fee
+            
+            
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -316,7 +324,7 @@ class SubscriptionView(GenericAPIView):
                         'name': tier.name,
                         'description': tier.description,
                     },
-                    'unit_amount': int(tier.price * 100),
+                    'unit_amount': int(amount * 100),
                 },
                 'quantity': 1,
             }],
@@ -580,3 +588,5 @@ class DashboardAnalyticsView(GenericAPIView):
             "tier": tier_name,
             "days_remaining": days_remaining
         })
+        
+        

@@ -13,6 +13,14 @@ class Command(BaseCommand):
                 "base_amount": 190.00,
                 "charge_fixed": 0.30,
                 "charge_percent": 2.9,
+            },
+            {
+                'key': 'subscription',
+                'label': 'Subscription Charge',
+                'description': 'Standard subscription charge for users.',
+                'base_amount': 0.00,
+                'charge_fixed': 0.30,
+                'charge_percent': 2.9,
             }
         ]
         for charge in charge_data:
