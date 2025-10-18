@@ -273,6 +273,7 @@ class CatalogueBaseView(ListAPIView):
             return CwrUpdateSerializer
         return None
 
+    @cache_response()
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset() 
         params = self.request.query_params
@@ -354,6 +355,7 @@ class AllCatalogueView(ListAPIView):
     module_name = 'inventory'
     pagination_class = CustomOffsetPagination
 
+    @cache_response()
     def list(self, request, *args, **kwargs):
         user = request.user
         if user.is_subaccount:
@@ -556,6 +558,7 @@ class UserAccountEnrollmentsView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @with_module('inventory')
+@cache_response()
 def allEnrolledVendors(request):
     user = request.user
     if user.is_subaccount:

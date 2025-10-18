@@ -24,6 +24,7 @@ from vendorActivities.permission import IsSuperUser
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import PermissionDenied
 from decimal import Decimal
+from rest_framework_extensions.cache.decorators import cache_response
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -230,6 +231,10 @@ class TierViewSet(ModelViewSet):
     permission_classes = [IsSuperUser]
     serializer_class = TierSerializer
     queryset = Tier.objects.all()
+    
+    @cache_response()
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class SubscriptionView(GenericAPIView):
     permission_classes = [IsAuthenticated]
