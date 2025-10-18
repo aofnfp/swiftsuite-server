@@ -558,7 +558,6 @@ class UserAccountEnrollmentsView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @with_module('inventory')
-@cache_response()
 def allEnrolledVendors(request):
     user = request.user
     if user.is_subaccount:
