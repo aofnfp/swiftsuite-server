@@ -33,10 +33,10 @@ class MarketplaceEnronment(models.Model):
     access_token = models.TextField(null=False, unique=False)
     wc_map_enforcement = models.BooleanField(null=True, unique=False)
     wc_auto_populate_msrp = models.BooleanField(null=True, unique=False)
-    wc_consumer_url = models.TextField(null=True, unique=False)
-    wc_consumer_secret = models.TextField(null=True, unique=True)
-    wc_consumer_key = models.TextField(null=True, unique=True)
-    wc_product_status = models.TextField(null=True, unique=False)
+    wc_consumer_url = models.CharField(max_length=255, null=True, unique=False)
+    wc_consumer_secret = models.CharField(max_length=255, null=True, unique=False)
+    wc_consumer_key = models.CharField(max_length=255, null=True, unique=False)
+    wc_product_status = models.CharField(max_length=255, null=True, unique=False)
 
 
 class AuthorizationCode(models.Model):
