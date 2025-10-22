@@ -31,7 +31,13 @@ class MarketplaceEnronment(models.Model):
     payment_policy = models.TextField(null=True, unique=False)
     refresh_token = models.TextField(null=False, unique=False)
     access_token = models.TextField(null=False, unique=False)
-    
+    wc_map_enforcement = models.BooleanField(null=True, unique=False)
+    wc_auto_populate_msrp = models.BooleanField(null=True, unique=False)
+    wc_consumer_url = models.TextField(null=True, unique=False)
+    wc_consumer_secret = models.TextField(null=True, unique=True)
+    wc_consumer_key = models.TextField(null=True, unique=True)
+    wc_product_status = models.TextField(null=True, unique=False)
+
 
 class AuthorizationCode(models.Model):
     authorization_code = models.TextField(null=False, unique=False)

@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from .serializers import MarketplaceEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer
+from .serializers import MarketplaceEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer, WooComerceEnrolSerializer
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from .models import MarketplaceEnronment, UploadedProductImage
 from inventoryApp.models import InventoryModel
@@ -816,30 +816,62 @@ class Ebay(APIView):
 
 
 class WooCommerce(APIView):
-    # Set up the WooCommerce API client
-    wcapi = API(
-        url = config("WOOC_URL"), 
-        consumer_key = config("WOOC_CONSUMER_KEY"),  
-        consumer_secret = config("WOOC_CONSUMER_SECRET"), 
-        version = "wc/v3"                # API version
-    )
+    # Enroll Woocommerce marketplace
+    @api_view(['POST'])
+    def woocommerce_enrollment(request, userid):
+        # Pass request data to the dynamic serializer for validation
+        serializer = WooComerceEnrolSerializer(data=request.data)      
+        if serializer.is_valid():
+            # Save the enrollment data to the database
+            enrolment = serializer.save(user_id=userid)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        
+
+    # Update Woocommerce marketplace 
+    @api_view(['PUT'])
+    # @permission_classes([IsAuthenticated])
+    def update_woocommerce_enrolment(request, userid, market_name):
+        try:
+            enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
+            serializer = WooComerceEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+   
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
 
+    # Get all product categories
     @api_view(['GET'])
-    def get_product_category(request):
-        # Get all product categories
-        wcm = WooCommerce()
-        categories = wcm.wcapi.get("products/categories").json()
+    def get_product_category(request, userid, market_name):
+        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+        # Set up the WooCommerce API client
+        wcapi = API(
+            url = enrollment.wc_consumer_url, 
+            consumer_key = enrollment.wc_consumer_key,  
+            consumer_secret = enrollment.wc_consumer_secret, 
+            version = "wc/v3"
+        )
+        categories = wcapi.get("products/categories").json()
         return JsonResponse({"Product_categories":categories}, safe=False, status=status.HTTP_200_OK)
         # for cat in categories:
         #     print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
 
 
     # Helper function to get category ID by name
-    def get_category_id(self, category_name: str):
-        wcm = WooCommerce()
+    def get_category_id(self, category_name, url_, consumer_key_, consumer_secret_):
+       # Set up the WooCommerce API client
+        wcapi = API(
+            url = url_, 
+            consumer_key = consumer_key_,  
+            consumer_secret = consumer_secret_, 
+            version = "wc/v3"                # API version
+        )
         """Return the category ID for a given category name."""
-        categories = wcm.wcapi.get("products/categories").json()
+        categories = wcapi.get("products/categories").json()
 
         for cat in categories:
             if cat["name"].lower() == category_name.lower():
@@ -848,10 +880,18 @@ class WooCommerce(APIView):
         return None  # Not found
 
 
+    # List product on Woocommerce
     @api_view(['POST'])
     def list_product_on_woocommerce(request, userid, market_name, category_name):
         """Return the category ID for a given category name."""
-        wcm = WooCommerce()
+        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+        # Set up the WooCommerce API client
+        wcapi = API(
+            url = enrollment.wc_consumer_url, 
+            consumer_key = enrollment.wc_consumer_key,  
+            consumer_secret = enrollment.wc_consumer_secret, 
+            version = "wc/v3"
+        )
         eb = Ebay()
         # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
         DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_item_listing_fields_serializer()
@@ -877,30 +917,65 @@ class WooCommerce(APIView):
             "name": validated_data['title'],
             "type": "simple",
             "regular_price": validated_data['start_price'],
-            "description": (
-                validated_data['description']
-            ),
+            "description": validated_data['description'],
             "sku": validated_data['sku'],
             "stock_quantity": validated_data['quantity'],
             "manage_stock": True,
             "categories": [
-                {"id": wcm.get_category_id(category_name)}   # Category ID must exist in WooCommerce
+                {"id": WooCommerce.get_category_id(category_name, enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
             ],
             "images": [
                 {"src": validated_data['picture_detail']}
             ],
             "meta_data": [
                 {"key": "UPC", "value": validated_data['upc']},
+                {"key": "EAN", "value": validated_data['ean']},
+                {"key": "ISBN", "value": validated_data['isbn']},
+                {"key": "MPN", "value": validated_data['mpn']},
 
             ]
         }
         # Send POST request to WooCommerce to create the product
-        response = wcm.wcapi.post("products", product_data).json()
+        response = wcapi.post("products", product_data).json()
         if response.status_code == 201:
+            # Save the product to inventory table
+            item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(product_data["meta_data"]), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=True, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name']))
+            # Update the GeneralProduct table to set listed_market to true
+            Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product listing was successful {response.json()}", status=status.HTTP_200_OK)
         else:
             return Response(f"Failed to post: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
         
+
+    # Save product before listing on Woocommerce
+    @api_view(['POST'])
+    def save_product_before_listing(request, userid, market_name):
+        eb = Ebay()
+        # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
+        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_item_listing_fields_serializer()
+        # Pass request data to the dynamic serializer for validation
+        serializer = DynamicItemSpecificsSerializer(data=request.data)          
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+            # Get the calculated price of the product to list
+            try:
+                product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
+                enroll_id = product_details[0].get("enrollment_id")
+                minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+                if type(minimum_offer_price) != float:
+                    return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
+                # Save the product to inventory table
+                item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name']))
+                # Update the GeneralProduct table to set listed_market to true
+                Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
+                return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+       
+
+
     @api_view(['GET'])
     def get_listed_products(request):
         wcm = WooCommerce()
