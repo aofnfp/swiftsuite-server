@@ -421,13 +421,13 @@ class Ebay(APIView):
             upc_code = product_details[0].get("upc")
 
             # Update the price of product with the calculated selling price
-            # try:
-            #     start_price = eb.calculated_selling_price(enroll_id, product_details[0].get("total_product_cost"), product_details[0].get("id"), userid)
-            #     if type(start_price) != float:
-            #         return Response(f"Failed to compute price, no valid data", status=status.HTTP_400_BAD_REQUEST)
-            #     product_details[0]["selling_price"] = start_price
-            # except Exception as e:
-            #     return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+            try:
+                start_price = eb.calculated_selling_price(enroll_id, int(product_details[0].get("total_product_cost")), int(product_details[0].get("id")), userid)
+                if type(start_price) != float:
+                    return Response(f"Failed to compute price, no valid data", status=status.HTTP_400_BAD_REQUEST)
+                product_details[0]["selling_price"] = start_price
+            except Exception as e:
+                return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
             # Get the vendor's details of the product trying to list
             vendor_info[0]["vendor_location"] = list(Vendors.objects.all().filter(id=vendor_info[0].get("vendor_id")).values())
         except Exception as e:
