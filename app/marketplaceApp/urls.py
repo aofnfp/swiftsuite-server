@@ -1,4 +1,4 @@
-from .views import Ebay, WooCommerce
+from .views import Ebay, WooCommerce, listing_on_marketplace, save_product_before_listing_on_marketplace
 from django.urls import path
 
 urlpatterns = [
@@ -11,17 +11,15 @@ urlpatterns = [
     path('get_product_to_list_details/<int:userid>/<str:market_name>/<int:prod_id>/', Ebay.get_product_to_list_detail, name='get_product_to_list_details'),
     path('get_item_leaf_category/<int:userid>/<str:market_name>/<int:category_id>/', Ebay.get_leaf_category_id, name='get_item_leaf_category'),
     path('get_item_specific_fields/<int:userid>/<str:market_name>/<int:leaf_category_id>/', Ebay.get_item_specifics_fields, name='get_item_specific_fields'),
-    path('marketplace_product_listing/<int:userid>/<str:market_name>/<int:leaf_category_id>/', Ebay.product_listing_to_ebay, name='marketplace_product_listing'),
-    path('save_product_before_listing/<int:userid>/<int:leaf_category_id>/', Ebay.save_product_before_listing, name='save_product_before_listing'),
     path('upload_product_image/<int:productid>/<str:product_name>/<int:userid>/', Ebay.upload_product_image, name='upload_product_image'),
     path('upload_multiple_product_image/<int:productid>/<str:product_name>/<int:userid>/', Ebay.upload_multiple_product_images, name='upload_multiple_product_image'),
     path('get_uploaded_images/<int:productid>/<str:product_name>/<int:userid>/', Ebay.get_uploaded_image, name='get_uploaded_images'),
     path('delete_uploaded_images/<str:image_name>/<int:image_id>/', Ebay.delete_uploaded_image, name='delete_uploaded_images'),
     
+    path('marketplace_product_listing/<int:userid>/<str:market_name>/<str:category_id_or_name>/', listing_on_marketplace, name='marketplace_product_listing'),
+    path('save_product_before_listing/<int:userid>/<str:category_id_or_name>/', save_product_before_listing_on_marketplace, name='save_product_before_listing'),
+    
     path('woocommerce_enrolment/<int:userid>/', WooCommerce.woocommerce_enrollment, name='woocommerce_enrolment'),
     path('update_woocommerce_enrolment/<int:userid>/<str:market_name>/', WooCommerce.update_woocommerce_enrolment, name='update_woocommerce_enrolment'),
     path('get_product_category/<int:userid>/<str:market_name>/', WooCommerce.get_product_category, name='get_product_category'),
-    path('woocommerce_product_listing/<int:userid>/<str:market_name>/<str:category_name>/', WooCommerce.list_product_on_woocommerce, name='woocommerce_product_listing'),
-    path('woocommerce_save_before_listing/<int:userid>/<str:market_name>/', WooCommerce.save_product_before_listing, name='woocommerce_save_before_listing'),
-
 ]

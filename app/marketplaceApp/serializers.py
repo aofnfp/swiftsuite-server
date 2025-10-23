@@ -83,7 +83,7 @@ class ItemListingToEbaySerializer:
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
 		return DynamicSerializer, item_specifics_name, valid_choices_field
 	
-	def generate_item_listing_fields_serializer():
+	def generate_woocommerce_listing_fields_serializer():
 		# Create a dictionary for dynamic serializer fields
 		serializer_fields = {}
 		model_class = []
@@ -93,10 +93,10 @@ class ItemListingToEbaySerializer:
 				model = InventoryModel
 				exclude = [
 					'id',
-					'item_specific_fields',
 					'ebay_item_id',
 					'user',
-					]
+
+				]
 
 		# Extract model fields (excluding the ones already present in eBay item specifics)
 		for field_name, field_instance in ModelSerializer().get_fields().items():

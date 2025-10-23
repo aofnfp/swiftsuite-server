@@ -29,6 +29,40 @@ from decouple import config
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
+# Function to list product on marketplace
+def listing_on_marketplace(request, user_id, market_name, category_id_or_name):
+    eb = Ebay()
+    wooc = WooCommerce()
+    if market_name == "Ebay":
+        eb.product_listing_to_ebay(request, user_id, market_name, int(category_id_or_name))
+    elif market_name == "Woocommerce":
+        wooc.list_product_on_woocommerce(request, user_id, market_name, category_id_or_name)
+    elif market_name == "Shopify":
+        pass
+    elif market_name == "Amazon":
+        pass
+    elif market_name == "all":
+        eb.product_listing_to_ebay(request, user_id, market_name, int(category_id_or_name))
+        wooc.list_product_on_woocommerce(request, user_id, market_name, category_id_or_name)
+
+# Function to save product before listing on marketplace
+def save_product_before_listing_on_marketplace(request, user_id, category_id_or_name):
+    eb = Ebay()
+    wooc = WooCommerce()
+    if category_id_or_name == "Ebay":
+        eb.save_product_before_listing(request, user_id, int(category_id_or_name))
+    elif category_id_or_name == "Woocommerce":
+        wooc.save_product_before_listing(request, user_id, category_id_or_name)
+    elif category_id_or_name == "Shopify":
+        pass
+    elif category_id_or_name == "Amazon":
+        pass
+    elif category_id_or_name == "all":
+        eb.save_product_before_listing(request, user_id, int(category_id_or_name))
+        wooc.save_product_before_listing(request, user_id, category_id_or_name)
+
+
+
 class Ebay(APIView):
     permission_classes = [IsAuthenticated]
     def __init__(self):
@@ -894,7 +928,7 @@ class WooCommerce(APIView):
         )
         eb = Ebay()
         # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_item_listing_fields_serializer()
+        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_woocommerce_listing_fields_serializer()
         # Pass request data to the dynamic serializer for validation
         serializer = DynamicItemSpecificsSerializer(data=request.data)          
         if serializer.is_valid():
@@ -939,7 +973,7 @@ class WooCommerce(APIView):
         response = wcapi.post("products", product_data).json()
         if response.status_code == 201:
             # Save the product to inventory table
-            item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(product_data["meta_data"]), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=True, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name']))
+            item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(product_data["meta_data"]), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=True, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], woocommerce_category_name=category_name))
             # Update the GeneralProduct table to set listed_market to true
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product listing was successful {response.json()}", status=status.HTTP_200_OK)
@@ -949,10 +983,10 @@ class WooCommerce(APIView):
 
     # Save product before listing on Woocommerce
     @api_view(['POST'])
-    def save_product_before_listing(request, userid, market_name):
+    def save_product_before_listing(request, userid, category_name):
         eb = Ebay()
         # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_item_listing_fields_serializer()
+        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_woocommerce_listing_fields_serializer()
         # Pass request data to the dynamic serializer for validation
         serializer = DynamicItemSpecificsSerializer(data=request.data)          
         if serializer.is_valid():
@@ -965,7 +999,7 @@ class WooCommerce(APIView):
                 if type(minimum_offer_price) != float:
                     return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
                 # Save the product to inventory table
-                item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name']))
+                item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], woocommerce_category_name=category_name))
                 # Update the GeneralProduct table to set listed_market to true
                 Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
                 return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
