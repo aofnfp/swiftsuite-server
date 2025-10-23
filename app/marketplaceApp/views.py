@@ -418,6 +418,7 @@ class Ebay(APIView):
             enroll_id = product_details[0].get("enrollment_id")
             vendor_info = list(Enrollment.objects.all().filter(user_id=userid, id=enroll_id).values())
             ebay_info = list(MarketplaceEnronment.objects.all().filter(user_id=userid, marketplace_name=market_name).values())
+            print("product fetched from all tables successfully")
             upc_code = product_details[0].get("upc")
             
             # Update the price of product with the calculated selling price
