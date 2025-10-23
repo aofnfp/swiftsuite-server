@@ -428,7 +428,7 @@ class Ebay(APIView):
                 product_details[0]["selling_price"] = start_price
             except Exception as e:
                 return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
-            
+            print("price computed successfully")
             # Get the vendor's details of the product trying to list
             vendor_info[0]["vendor_location"] = list(Vendors.objects.all().filter(id=vendor_info[0].get("vendor_id")).values())
         except Exception as e:
