@@ -567,7 +567,7 @@ class Ebay(APIView):
     def calculated_minimum_offer_price(self, enroll_id, prod_id, start_price, min_profit_mergin, profit_margin, userid):
         eb = Ebay()
         try:
-            market_place = MarketplaceEnronment.objects.get(user_id=userid)
+            market_place = MarketplaceEnronment.objects.filter(user_id=userid)[0]
             selling_price = eb.calculated_selling_price(enroll_id, start_price, prod_id, userid)
             minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
         except Exception as e:
