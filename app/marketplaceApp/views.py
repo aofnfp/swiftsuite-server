@@ -408,20 +408,19 @@ class Ebay(APIView):
     # Create a connection to the eBay Trading API
     @api_view(['GET'])
     def get_product_to_list_detail(request, userid, market_name, prod_id):
+        print("testing for function activities")
         global product_id
         eb = Ebay()
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         try:
-            print("Access token refreshed successfully seleting product details started")
             # vendor_info = list(VendoEnronment.objects.all().filter(user_id=userid).values())
             product_details = list(Generalproducttable.objects.all().filter(id=prod_id, user_id=userid).values())
             enroll_id = product_details[0].get("enrollment_id")
             vendor_info = list(Enrollment.objects.all().filter(user_id=userid, id=enroll_id).values())
             ebay_info = list(MarketplaceEnronment.objects.all().filter(user_id=userid, marketplace_name=market_name).values())
-            print("product fetched from all tables successfully")
             upc_code = product_details[0].get("upc")
-            
+
             # Update the price of product with the calculated selling price
             try:
                 start_price = eb.calculated_selling_price(enroll_id, product_details[0].get("total_product_cost"), product_details[0].get("id"), userid)
@@ -430,7 +429,6 @@ class Ebay(APIView):
                 product_details[0]["selling_price"] = start_price
             except Exception as e:
                 return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
-            print("price computed successfully")
             # Get the vendor's details of the product trying to list
             vendor_info[0]["vendor_location"] = list(Vendors.objects.all().filter(id=vendor_info[0].get("vendor_id")).values())
         except Exception as e:
