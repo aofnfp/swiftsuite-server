@@ -413,6 +413,7 @@ class Ebay(APIView):
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         try:
+            print("Access token refreshed successfully seleting product details started")
             # vendor_info = list(VendoEnronment.objects.all().filter(user_id=userid).values())
             product_details = list(Generalproducttable.objects.all().filter(id=prod_id, user_id=userid).values())
             enroll_id = product_details[0].get("enrollment_id")
