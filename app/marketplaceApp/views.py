@@ -62,17 +62,17 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
     
     # Select the marketplace to list the product
-    if market_name == "Ebay":
-        eb.product_listing_to_ebay(request, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price)
-    elif market_name == "Woocommerce":
-        wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name, validated_data)
-    elif market_name == "Shopify":
-        pass
-    elif market_name == "Amazon":
-        pass
-    elif market_name == "all":
-        eb.product_listing_to_ebay(request, userid, market_name, int(category_id_or_name))
-        wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name)
+    # if market_name == "Ebay":
+    #     eb.product_listing_to_ebay(request, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price)
+    # elif market_name == "Woocommerce":
+    #     wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name, validated_data)
+    # elif market_name == "Shopify":
+    #     pass
+    # elif market_name == "Amazon":
+    #     pass
+    # elif market_name == "all":
+    #     eb.product_listing_to_ebay(request, userid, market_name, int(category_id_or_name))
+    #     wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name)
 
 # Function to save product before listing on marketplace
 def save_product_before_listing_on_marketplace(request, userid, category_id_or_name):
