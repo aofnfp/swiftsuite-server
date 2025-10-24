@@ -30,6 +30,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # Function to list product on marketplace
+@api_view(['POST'])
 def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     eb = Ebay()
     wooc = WooCommerce()
@@ -75,6 +76,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name)
 
 # Function to save product before listing on marketplace
+@api_view(['POST'])
 def save_product_before_listing_on_marketplace(request, userid, category_id_or_name):
     eb = Ebay()
     wooc = WooCommerce()
@@ -604,7 +606,6 @@ class Ebay(APIView):
         return round(minimum_offer_price, 2)
     
     # List product on Ebay
-    @api_view(['POST'])
     def product_listing_to_ebay(request, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price):
         eb = Ebay()
         # Root element for XML
