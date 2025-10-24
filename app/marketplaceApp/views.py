@@ -64,7 +64,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     
     # Select the marketplace to list the product
     if market_name == "Ebay":
-        eb.product_listing_to_ebay(request, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price)
+        eb.product_listing_to_ebay(userid, access_token, item_specifics_fields, validated_data, minimum_offer_price)
     elif market_name == "Woocommerce":
         wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name, validated_data)
     elif market_name == "Shopify":
@@ -606,7 +606,7 @@ class Ebay(APIView):
         return round(minimum_offer_price, 2)
     
     # List product on Ebay
-    def product_listing_to_ebay(request, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price):
+    def product_listing_to_ebay(self, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price):
         eb = Ebay()
         # Root element for XML
         root = Element('ItemSpecifics')
