@@ -29,7 +29,7 @@ class FrgxOrderApiClient:
 def place_order_fragrancex(request, userid, market_name, ebayorderid):
     # Get vendor enrollment details
     enrolment_details = Enrollment.objects.filter(
-        user=request.user, vendor__name__iexact='FragranceX'
+        user=request.user, vendor__name__iexact='Fragrancex'
     ).first()
 
     if not enrolment_details:
@@ -129,7 +129,7 @@ def getTracking_fragranceX(request, orderId):
     try:
         # Get vendor enrollment details
         enrolment_details = Enrollment.objects.filter(
-            user=request.user, vendor__name__iexact='FragranceX' 
+            user=request.user, vendor__name__iexact='Fragrancex' 
         ).first()
 
         if not enrolment_details:
@@ -138,8 +138,8 @@ def getTracking_fragranceX(request, orderId):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        apiAccessId = enrolment_details.apiAccessId
-        apiAccessKey = enrolment_details.apiAccessKey
+        apiAccessId = enrolment_details.vendor.api_access_id
+        apiAccessKey = enrolment_details.vendor.api_access_key
 
         # Get FragranceX token
         token = getFragranceXAuth(apiAccessId, apiAccessKey)

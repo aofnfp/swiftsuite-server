@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, parser_classes, permission_classes
-from Swiftsuite.marketplaceApp.views import Ebay
 from inventoryApp.models import InventoryModel
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ebaysdk.exception import ConnectionError
