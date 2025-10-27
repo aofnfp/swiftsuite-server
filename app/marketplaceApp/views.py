@@ -896,8 +896,8 @@ class WooCommerce(APIView):
             consumer_secret = enrolment_list.wc_consumer_secret, 
             version = "wc/v3"
         )
-        r = requests.get("https://sozooutlet.com/")
-        return Response(f"Error: {r.text}", status=status.HTTP_400_BAD_REQUEST)
+        r = requests.get("https://sozooutlet.com/", timeout=10)
+        return Response(f"{r.text}", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Get all product categories
