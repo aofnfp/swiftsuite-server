@@ -10,6 +10,7 @@ urlpatterns = [
     re_path(r'^marketplaceApp/', include("marketplaceApp.urls")),
     re_path(r'inventoryApp/', include("inventoryApp.urls")),
     re_path(r'orderApp/', include("orderApp.urls")),
+    re_path(r'reportApp/', include("reportApp.urls")),
     path('', landingPage, name="home"),
     path('api/v2/', include('vendorActivities.urls')),
     path('api/v2/', include('vendorEnrollment.urls')),

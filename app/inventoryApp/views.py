@@ -25,11 +25,12 @@ class MarketInventory(APIView):
     def __init__(self):
         super().__init__()
         # eBay Developer App credentials
-        self.client_id = "os.getenv('EBAY_CLIENT_ID')"
-        self.client_secret = "os.getenv('EBAY_CLIENT_SECRET')"
-        self.app_id = 'os.getenv('EBAY_CLIENT_ID')'
-        self.cert_id = 'os.getenv('EBAY_CLIENT_SECRET')'
-        self.dev_id = 'os.getenv('EBAY_DEV_ID')'
+        self.client_id = config("EB_CLIENT_ID")
+        self.client_secret = config("EB_CLIENT_SECRET")
+        self.app_id = config("EB_APP_ID")
+        self.cert_id = config("EB_CERT_ID")
+        self.dev_id = config("EB_DEV_ID")
+        self.ru_name = config("EB_RU_NAME")
         self.ru_name = "https://swiftsuite.app/"
         # eBay API endpoints
         self.authorization_base_url = os.getenv("pro_auth_base_url")
