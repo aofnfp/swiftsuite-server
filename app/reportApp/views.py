@@ -21,9 +21,7 @@ from marketplaceApp.views import Ebay
 
 
 # ==== GET INVENTORY ITEMS (Active Listings) ====
-def get_inventory_items(userId):
-    eb = Ebay()
-    access_token = eb.refresh_access_token(userId, "Ebay")
+def get_inventory_items(access_token):
     HEADERS = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -45,9 +43,8 @@ def get_inventory_items(userId):
     return items
 
 # ==== GET ORDERS ====
-def get_orders(userId, date_range='90'):
-    eb = Ebay()
-    access_token = eb.refresh_access_token(userId, "Ebay")
+def get_orders(access_token, date_range='90'):
+    
     HEADERS = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -81,10 +78,13 @@ def get_orders(userId, date_range='90'):
 
 
 # ==== CALCULATE STATISTICS ====
-def generate_report(userId, date_range):
-    print("Fetching data from eBay...")
-    inventory_items = get_inventory_items(userId)
-    orders = get_orders(userId, date_range)
+@api_view(['GET'])
+def generate_report(request, userId, date_range):
+    eb = Ebay()
+    access_token = eb.refresh_access_token(userId, "Ebay")
+
+    inventory_items = get_inventory_items(access_token)
+    orders = get_orders(access_token, date_range)
 
     # Inventory stats
     total_inventory = len(inventory_items)
