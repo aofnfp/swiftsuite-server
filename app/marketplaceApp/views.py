@@ -884,8 +884,10 @@ class WooCommerce(APIView):
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
+
     # Function to test your connection to Woocommerce
-    def test_woocommerce_connection(self, userid, market_name):
+    @api_view(['GET'])
+    def test_woocommerce_connection(request, userid, market_name):
         # enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
         # # Set up the WooCommerce API client
         # wcapi = API(
@@ -896,7 +898,6 @@ class WooCommerce(APIView):
         # )
         r = requests.get("https://sozooutlet.com/",)
         return Response(f"Error: {r.text}", status=status.HTTP_400_BAD_REQUEST)
-
 
 
     # Get all product categories
