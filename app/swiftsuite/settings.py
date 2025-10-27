@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "orderApp",
     "vendorActivities",
     "vendorEnrollment",
+    "reportApp",
     "rest_framework",
     "corsheaders",
     'cloudinary',
