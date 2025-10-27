@@ -896,8 +896,24 @@ class WooCommerce(APIView):
             consumer_secret = enrolment_list.wc_consumer_secret, 
             version = "wc/v3"
         )
-        r = requests.get("https://sozooutlet.com/", timeout=10)
-        return Response(f"{r.text}", status=status.HTTP_400_BAD_REQUEST)
+        # Step 3: Test WooCommerce REST endpoint
+        try:
+            response = wcapi.get("products").json()
+
+            if isinstance(response, dict) and response.get("code") == "woocommerce_rest_cannot_view":
+                return Response("Authentication failed: API key may not have permission.")
+            elif isinstance(response, dict) and response.get("data", {}).get("status") == 401:
+                return Response("Unauthorized: Check your Consumer Key/Secret.")
+            elif isinstance(response, list):
+                return Response(f"Credentials connected successfully!")
+            else:
+                return Response("Unexpected response:", response)
+        except requests.exceptions.SSLError as e:
+            return Response(f"SSL Error: {e}")
+        except requests.exceptions.ConnectionError as e:
+            return Response(f"Connection Error: {e}")
+        except Exception as e:
+            return Response(f"Other error: {e}")
 
 
     # Get all product categories
