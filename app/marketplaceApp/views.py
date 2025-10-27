@@ -856,18 +856,18 @@ class WooCommerce(APIView):
     @api_view(['POST'])
     def woocommerce_enrollment(request, userid):
         # Check if the user is already enrolled in WooCommerce
-        existing_enrollment = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name='WooCommerce')
-        if existing_enrollment:
-            return Response({"message": "User is already enrolled in WooCommerce"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Pass request data to the dynamic serializer for validation
-        serializer = WooComerceEnrolSerializer(data=request.data)      
-        if serializer.is_valid():
-            # Save the enrollment data to the database
-            enrolment = serializer.save(user_id=userid)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        try:
+            existing_enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name='WooCommerce')
+            return Response("User is already enrolled in WooCommerce marketplace.", status=status.HTTP_400_BAD_REQUEST)
+        except MarketplaceEnronment.DoesNotExist:
+            # Pass request data to the dynamic serializer for validation    
+            serializer = WooComerceEnrolSerializer(data=request.data)      
+            if serializer.is_valid():
+                # Save the enrollment data to the database
+                enrolment = serializer.save(user_id=userid)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
         
 
     # Update Woocommerce marketplace 
