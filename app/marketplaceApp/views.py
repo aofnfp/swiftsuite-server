@@ -888,15 +888,15 @@ class WooCommerce(APIView):
     # Function to test your connection to Woocommerce
     @api_view(['GET'])
     def test_woocommerce_connection(request, userid, market_name):
-        # enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
-        # # Set up the WooCommerce API client
-        # wcapi = API(
-        #     url = enrolment_list.wc_consumer_url, 
-        #     consumer_key = enrolment_list.wc_consumer_key,  
-        #     consumer_secret = enrolment_list.wc_consumer_secret, 
-        #     version = "wc/v3"
-        # )
-        r = requests.get("https://sozooutlet.com/",)
+        enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
+        # Set up the WooCommerce API client
+        wcapi = API(
+            url = enrolment_list.wc_consumer_url, 
+            consumer_key = enrolment_list.wc_consumer_key,  
+            consumer_secret = enrolment_list.wc_consumer_secret, 
+            version = "wc/v3"
+        )
+        r = requests.get("https://sozooutlet.com/")
         return Response(f"Error: {r.text}", status=status.HTTP_400_BAD_REQUEST)
 
 
