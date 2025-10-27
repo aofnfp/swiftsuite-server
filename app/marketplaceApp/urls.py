@@ -20,6 +20,7 @@ urlpatterns = [
     path('save_product_before_listing/<int:userid>/<str:category_id_or_name>/', save_product_before_listing_on_marketplace, name='save_product_before_listing'),
     
     path('woocommerce_enrolment/<int:userid>/', WooCommerce.woocommerce_enrollment, name='woocommerce_enrolment'),
+    path('test_woocommerce_connection/<int:userid>/<str:market_name>/', WooCommerce.test_woocommerce_connection, name='test_woocommerce_connection'),
     path('update_woocommerce_enrolment/<int:userid>/<str:market_name>/', WooCommerce.update_woocommerce_enrolment, name='update_woocommerce_enrolment'),
     path('get_product_category/<int:userid>/<str:market_name>/', WooCommerce.get_product_category, name='get_product_category'),
 ]
