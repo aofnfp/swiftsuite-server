@@ -17,6 +17,7 @@ from xml.etree import ElementTree as ET
 from ebaysdk.trading import Connection as Trading
 from datetime import datetime, timedelta
 from marketplaceApp.views import Ebay
+from django.db.models import Sum
 
 
 
@@ -109,7 +110,7 @@ def generate_report(request, userId, date_range):
 @api_view(['GET'])
 def sales_inventory_report(request, userId):
     inventory_report = InventoryModel.objects.filter(user_id=userId).values()
-    inventory_report = inventory_report.annotate(total_quantity=sum('quantity')).values('market_place', 'quantity')
+    inventory_report = (inventory_report.values('market_name').values('market_name').values('market_name').annotate(total_quantity=Sum('quantity')).values('market_name', 'quantity'))
     orders_report = OrdersOnEbayModel.objects.filter(user_id=userId).values()
-    orders_report = orders_report.annotate(total_sold_items=sum('quantity')).values('vendor_name', 'quantity')
+    orders_report = (orders_report.values('vendor_name').values('vendor_name').values('vendor_name').annotate(total_quantity=Sum('quantity')).values('vendor_name', 'quantity'))
     return JsonResponse({"inventory_report": list(inventory_report), "orders_report": list(orders_report)}, safe=False, status=status.HTTP_200_OK)
