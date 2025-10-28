@@ -108,7 +108,7 @@ def generate_report(request, userId, date_range):
 
 @api_view(['GET'])
 def sales_inventory_report(request, userId):
-    inventory_report = InventoryModel.objects.filter(userId=userId).values()
+    inventory_report = InventoryModel.objects.filter(user_id=userId).values()
     inventory_report = inventory_report.annotate(total_quantity=sum('quantity')).values('market_place', 'quantity')
     orders_report = OrdersOnEbayModel.objects.filter(user_id=userId).values()
     orders_report = orders_report.annotate(total_sold_items=sum('quantity')).values('vendor_name', 'quantity')
