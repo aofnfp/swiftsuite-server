@@ -102,5 +102,5 @@ def generate_report(request, userId, date_range):
         float(line.get("pricingSummary", {}).get("total", {}).get("value", 0))
         for line in orders
     )
-    return JsonResponse({"Active Listings": total_inventory, "Total Quantity in Inventory": total_quantity, f"Orders (Last {date_range} Days)": total_orders, "Total Items Sold": total_sold_items, "Total Sales": total_sales}, safe=False, status=status.HTTP_200_OK)
+    return JsonResponse({"Active Listings": total_inventory, "Total Quantity in Inventory": total_quantity, f"Orders (Last {date_range} Days)": total_orders, "Total Items Sold": total_sold_items, "Total Sales": round(total_sales, 4)}, safe=False, status=status.HTTP_200_OK)
 
