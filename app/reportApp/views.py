@@ -8,6 +8,7 @@ from rest_framework import status
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from inventoryApp.models import InventoryModel
+from orderApp.models import OrdersOnEbayModel
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ebaysdk.exception import ConnectionError
 from vendorEnrollment.models import Generalproducttable, Enrollment
@@ -104,3 +105,11 @@ def generate_report(request, userId, date_range):
     )
     return JsonResponse({"Active Listings": total_inventory, "Total Quantity in Inventory": total_quantity, f"Orders (Last {date_range} Days)": total_orders, "Total Items Sold": total_sold_items, "Total Sales": round(total_sales, 4)}, safe=False, status=status.HTTP_200_OK)
 
+
+@api_view(['GET'])
+def sales_inventory_report(request, userId):
+    inventory_report = InventoryModel.objects.filter(userId=userId).values()
+    inventory_report = inventory_report.annotate(total_quantity=sum('quantity')).values('market_place', 'quantity')
+    orders_report = OrdersOnEbayModel.objects.filter(user_id=userId).values()
+    orders_report = orders_report.annotate(total_sold_items=sum('quantity')).values('vendor_name', 'quantity')
+    return JsonResponse({"inventory_report": list(inventory_report), "orders_report": list(orders_report)}, safe=False, status=status.HTTP_200_OK)
