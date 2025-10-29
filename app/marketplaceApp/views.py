@@ -38,11 +38,12 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     if not access_token:
         return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)   
     # Fetch item specifics from eBay using the leaf category ID and generate the serializer
-    item_specifics_data = eb.get_item_specifics_from_ebay(access_token, int(category_id_or_name))
-    if not item_specifics_data:
-        return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
+    if market_name == "Ebay":
+        item_specifics_data = eb.get_item_specifics_from_ebay(access_token, int(category_id_or_name))
+        if not item_specifics_data:
+            return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
     
-    item_specifics = item_specifics_data.get('aspects', [])
+        item_specifics = item_specifics_data.get('aspects', [])
     # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
     DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
     # Pass request data to the dynamic serializer for validation
