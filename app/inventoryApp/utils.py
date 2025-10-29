@@ -281,7 +281,7 @@ def sync_ebay_items_with_local():
             all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
         for item in all_ebay_items:
             try:
-                item_exists = InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")))[0]
+                item_exists = InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")))[0]
                 # Fetch the item from the local vendor's table
                 vendor_list = ["FragrancexUpdate", "CwrUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
                 for vendor_db in vendor_list:
@@ -315,7 +315,7 @@ def sync_ebay_items_with_local():
                         # Create or update the product on GeneralProduct table
                         item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                         # Item exists, check if we need to update price or quantity
-                        InventoryModel.objects.filter(Q(ebay_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, ebay_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                        InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, market_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
                         # Update the VendorUpdate table to set listed_market to true
                         db_item.active = True
                         db_item.save()
@@ -343,7 +343,7 @@ def sync_ebay_items_with_local():
                              ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
                              ebay_mpn = specific.get("value") if specific.get("name") == "MPN" else product_details.get("mpn")
 
-                    item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, ebay_item_id=item.get("ebay_item_id"), defaults=dict(
+                    item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults=dict(
                         title=item.get("Title"),
                         description=json.dumps(product_details.get("shortDescription")),
                         location=product_details.get("itemLocation")["country"],
@@ -367,7 +367,7 @@ def sync_ebay_items_with_local():
                         categoryMappingAllowed="",
                         item_specific_fields=product_details.get("localizedAspects"),
                         market_logos=product_details.get("listingMarketplaceId"),
-                        ebay_item_id=item.get("ebay_item_id"),
+                        market_item_id=item.get("ebay_item_id"),
                         user_id=user.user_id,
                         date_created=product_details.get("itemCreationDate").split("T")[0],
                         active=True,
