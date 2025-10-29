@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from .serializers import MarketplaceEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer
+from .serializers import MarketplaceEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer, WooComerceEnrolSerializer
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from .models import MarketplaceEnronment, UploadedProductImage
 from inventoryApp.models import InventoryModel

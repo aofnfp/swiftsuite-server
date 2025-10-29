@@ -115,3 +115,15 @@ class UploadedProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadedProductImage
         fields = ['image_url']
+
+
+class WooComerceEnrolSerializer(serializers.ModelSerializer):
+	marketplace_name = serializers.CharField(required=False, allow_blank=True)
+
+	class Meta:
+		model = MarketplaceEnronment
+		exclude = ('_id', 'user', 'access_token', 'refresh_token', 'enable_charity', 'charity_id', 'donation_percentage', 'enable_best_offer', 'warn_copyright_complaints', 'warn_restriction_violation', 'shipping_policy', 'return_policy', 'payment_policy')
+
+	def update(self, instance, validated_data):
+		validated_data.pop('user_id', None)
+		return super().update(instance, validated_data)
