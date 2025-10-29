@@ -958,8 +958,7 @@ class WooCommerce(APIView):
 
 
     # List product on Woocommerce
-    @api_view(['POST'])
-    def list_product_on_woocommerce(request, userid, market_name, category_name, validated_data):
+    def list_product_on_woocommerce(self, userid, market_name, category_name, validated_data):
         """Return the category ID for a given category name."""
         enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
         # Set up the WooCommerce API client
