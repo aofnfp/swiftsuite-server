@@ -971,7 +971,7 @@ class WooCommerce(APIView):
 
         # Generate the meta_data values from item specifics
         meta_data = []
-        for key, value in validated_data["item_specific_fields"].items():
+        for key, value in json.loads(validated_data["item_specific_fields"]).items():
             meta_data.append({"key": key, "value": value})
 
         # Product payload mapped to WooCommerce
