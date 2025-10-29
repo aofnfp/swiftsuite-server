@@ -55,6 +55,8 @@ class InventoryModel(models.Model):
     charity_id = models.BigIntegerField(null=True, unique=False)
     donation_percentage = models.IntegerField(null=True, unique=False)
     vendor_name = models.TextField(null=True, unique=False)
-    # woocommerce_category_name = models.CharField(null=True, unique=False, max_length=100)
+    woocommerce_category_name = models.CharField(null=True, unique=False, max_length=100)
+    market_name = models.TextField(null=True, unique=False)
+
     
 
