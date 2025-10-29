@@ -45,8 +45,11 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
             return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
     
         item_specifics = item_specifics_data.get('aspects', [])
-    # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-    DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
+        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+    else:
+        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
+    
     # Pass request data to the dynamic serializer for validation
     serializer = DynamicItemSpecificsSerializer(data=request.data)      
     if serializer.is_valid():
