@@ -961,6 +961,7 @@ class WooCommerce(APIView):
     # List product on Woocommerce
     def list_product_on_woocommerce(self, userid, market_name, category_name, validated_data):
         """Return the category ID for a given category name."""
+        wooc = WooCommerce()
         enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
         # Set up the WooCommerce API client
         wcapi = API(
@@ -985,7 +986,7 @@ class WooCommerce(APIView):
             "stock_quantity": validated_data['quantity'],
             "manage_stock": True,
             "categories": [
-                {"id": WooCommerce.get_category_id(category_name, enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
+                {"id": wooc.get_category_id(category_name, enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
             ],
             "images": [
                 {"src": validated_data['picture_detail']}
