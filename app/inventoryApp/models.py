@@ -27,7 +27,7 @@ class InventoryModel(models.Model):
     categoryMappingAllowed = models.BooleanField(null=True, unique=False)
     item_specific_fields = models.TextField(null=False, unique=False)
     market_logos = models.TextField(null=True, unique=False)
-    ebay_item_id = models.CharField(null=True, unique=True, max_length=20)
+    market_item_id = models.CharField(null=True, unique=True, max_length=20)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     product = models.ForeignKey(Generalproducttable, on_delete=models.CASCADE, null=True)
     map_status = models.BooleanField(default=False, unique=False)
