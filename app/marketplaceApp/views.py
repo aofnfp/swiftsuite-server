@@ -994,7 +994,7 @@ class WooCommerce(APIView):
             "meta_data": meta_data
         }
         # Send POST request to WooCommerce to create the product
-        response = wcapi.post("products", product_data).json()
+        response = wcapi.post("products", product_data)
         return Response(f"Product listing response {response}", status=status.HTTP_200_OK)
         # if response["data"]["status"] == 201:
         #     # Save the product to inventory table
