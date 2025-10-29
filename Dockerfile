@@ -28,12 +28,11 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY ./app /app
  
- 
-# Expose port (CapRover will map this)
-
-EXPOSE 8000
- 
+# Copy entrypoint script and make it executable
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
+# Expose port (CapRover will map this)
+EXPOSE 8000
 ENTRYPOINT ["/app/entrypoint.sh"]
+# CMD ["gunicorn", "swiftsuite.wsgi:application", "--bind", "0.0.0.0:8000"]
