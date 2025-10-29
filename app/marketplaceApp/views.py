@@ -34,6 +34,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     eb = Ebay()
     wooc = WooCommerce()
+    item_specifics_fields = []
     access_token = eb.refresh_access_token(userid, market_name)
     if not access_token:
         return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)   
