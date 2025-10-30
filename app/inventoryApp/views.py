@@ -36,7 +36,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
             validated_data = serializer.validated_data
             # Select the marketplace to list the product
             if market_name == "Ebay":
-                response = mk.update_item_on_ebay(userid, validated_data, product_info)
+                response = mk.update_item_on_ebay(userid, validated_data, product_info.item_specific_fields)
                 # Check the response
                 if response.status_code == 200:
                     serializer.save()
@@ -44,7 +44,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 else:
                     return Response(f"Error:{response.text}", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Woocommerce":
-                response = wooc.update_woocommerce_product(userid, validated_data, product_info, market_name)
+                response = wooc.update_woocommerce_product(userid, validated_data, product_info.item_specific_fields, market_name, product_info.market_item_id)
                 if response.status_code == 200:
                     serializer.save()
                     return Response(f"Product updated successfully!: {response.json()}", status=status.HTTP_200_OK)
@@ -125,12 +125,12 @@ class MarketInventory(APIView):
 
 
     # Create a function to update item information on Ebay
-    def update_item_on_ebay(self, userId, product_info, validated_data):
+    def update_item_on_ebay(self, userId, item_specific_fields, validated_data):
         minv = MarketInventory()
         eb = Ebay()
         access_token = eb.refresh_access_token(userId, "Ebay")
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(product_info.item_specific_fields)
+        xml_item_specifics = minv.json_to_xml(item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
         try:
             product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userId).values()
@@ -375,7 +375,7 @@ class MarketInventory(APIView):
 
 class WooCommerce(APIView):
     # Function to update product on woocommerce store
-    def update_woocommerce_product(self, userid, validated_data, product_info, market_name):
+    def update_woocommerce_product(self, userid, validated_data, item_specific_fields, market_name, market_item_id):
         wooc = WooCommerce()
         try:
             enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
@@ -388,7 +388,7 @@ class WooCommerce(APIView):
             )
             # Generate the meta_data values from item specifics
             meta_data = []
-            for key, value in json.loads(validated_data["item_specific_fields"]).items():
+            for key, value in json.loads(item_specific_fields).items():
                 meta_data.append({"key": key, "value": value})
 
             # Product payload mapped to WooCommerce
@@ -410,7 +410,7 @@ class WooCommerce(APIView):
             }
 
             # --- MAKE THE UPDATE REQUEST ---
-            response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
+            response = wcapi.put(f"products/{market_item_id}", update_data)
             return response
         except ConnectionError as e:
             return Response(f"Error:{e}", status=status.HTTP_400_BAD_REQUEST)
