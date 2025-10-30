@@ -86,30 +86,44 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
 def save_product_before_listing_on_marketplace(request, market_name, userid, category_id_or_name):
     eb = Ebay()
     wooc = WooCommerce()
-
+    item_specifics_fields = []
     access_token = eb.refresh_access_token(userid, market_name)
     if not access_token:
         return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)   
-    # Fetch item specifics from eBay and generate the serializer
-    item_specifics_data = eb.get_item_specifics_from_ebay(access_token, category_id_or_name)
-    if not item_specifics_data:
-        return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
-        
-    item_specifics = item_specifics_data.get('aspects', [])
-    # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-    DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+    # Fetch item specifics from eBay using the leaf category ID and generate the serializer
+    if market_name == "Ebay":
+        item_specifics_data = eb.get_item_specifics_from_ebay(access_token, int(category_id_or_name))
+        if not item_specifics_data:
+            return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
+    
+        item_specifics = item_specifics_data.get('aspects', [])
+        # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
+        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+    else:
+        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
+    
     # Pass request data to the dynamic serializer for validation
     serializer = DynamicItemSpecificsSerializer(data=request.data)      
     if serializer.is_valid():
         validated_data = serializer.validated_data
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        
+    # Get the calculated price of the product to list
+    try:
+        product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
+        enroll_id = product_details[0].get("enrollment_id")
+        minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+        if type(minimum_offer_price) != float:
+            return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
     
     # Select the marketplace to list the product
     if market_name == "Ebay":
-        return eb.product_listing_to_ebay(userid, item_specifics_fields, validated_data)
+        return eb.save_product_before_listing(userid, item_specifics_fields, validated_data)
     elif market_name == "Woocommerce":
-        return wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name, validated_data)
+        return wooc.save_woocommerce_product_before_listing(userid, market_name, category_id_or_name, validated_data)
     elif market_name == "Shopify":
         pass
     elif market_name == "Amazon":
@@ -117,6 +131,7 @@ def save_product_before_listing_on_marketplace(request, market_name, userid, cat
     elif market_name == "all":
         eb.product_listing_to_ebay(request, userid, market_name, int(category_id_or_name))
         wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name)
+
 
 
 
@@ -757,22 +772,11 @@ class Ebay(APIView):
     # Function to save product for later listing
     @api_view(['POST'])
     def save_product_before_listing(self, userid, item_specifics_fields, validated_data):
-        eb = Ebay()
         custom_fields = {}
        
         # Put all the custom fields in the dictionary
         for value in item_specifics_fields:
             custom_fields[value] = validated_data[value]
-        
-        # Get the calculated price of the product to list
-        try:
-            product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
-            enroll_id = product_details[0].get("enrollment_id")
-            minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
-            if type(minimum_offer_price) != float:
-                return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
         
         try:
             item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(custom_fields), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name']))
@@ -1006,33 +1010,21 @@ class WooCommerce(APIView):
         
 
     # Save product before listing on Woocommerce
-    @api_view(['POST'])
-    def save_product_before_listing(request, userid, category_name):
-        eb = Ebay()
-        # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_woocommerce_listing_fields_serializer()
-        # Pass request data to the dynamic serializer for validation
-        serializer = DynamicItemSpecificsSerializer(data=request.data)          
-        if serializer.is_valid():
-            validated_data = serializer.validated_data
-            # Get the calculated price of the product to list
-            try:
-                product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
-                enroll_id = product_details[0].get("enrollment_id")
-                minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
-                if type(minimum_offer_price) != float:
-                    return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
-                # Save the product to inventory table
-                item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name']))
-                # Update the GeneralProduct table to set listed_market to true
-                Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
-                return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
-            except Exception as e:
-                return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
-       
+    def save_woocommerce_product_before_listing(self, userid, market_name, category_name, validated_data):
+        try:
+            # Generate the meta_data values from item specifics
+            meta_data = []
+            for key, value in ast.literal_eval(validated_data["item_specific_fields"]).items():
+                meta_data.append({"key": key, "value": value})
 
+            # Save the product to inventory table
+            item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(meta_data), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=True, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], market_name=market_name, woo_category_name=validated_data['woo_category_name']))
+            # Update the GeneralProduct table to set listed_market to true
+            Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
+            return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Fail to save product: {e}", status=status.HTTP_400_BAD_REQUEST)
+        
 
     @api_view(['GET'])
     def get_listed_products(request):
