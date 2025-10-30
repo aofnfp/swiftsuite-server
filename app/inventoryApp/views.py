@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from ebaysdk.exception import ConnectionError
 
-from Swiftsuite.marketplaceApp.models import MarketplaceEnronment
+from marketplaceApp.models import MarketplaceEnronment
 from .models import InventoryModel
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer
