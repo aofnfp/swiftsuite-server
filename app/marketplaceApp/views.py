@@ -83,7 +83,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
 
 # Function to save product before listing on marketplace
 @api_view(['POST'])
-def save_product_before_listing_on_marketplace(request, market_name, userid, category_id_or_name):
+def save_product_before_listing_on_marketplace(request, userid, market_name, category_id_or_name):
     eb = Ebay()
     wooc = WooCommerce()
     item_specifics_fields = []

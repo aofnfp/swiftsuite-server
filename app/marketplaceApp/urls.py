@@ -17,7 +17,7 @@ urlpatterns = [
     path('delete_uploaded_images/<str:image_name>/<int:image_id>/', Ebay.delete_uploaded_image, name='delete_uploaded_images'),
     
     path('marketplace_product_listing/<int:userid>/<str:market_name>/<str:category_id_or_name>/', listing_on_marketplace, name='marketplace_product_listing'),
-    path('save_product_before_listing/<int:userid>/<str:category_id_or_name>/', save_product_before_listing_on_marketplace, name='save_product_before_listing'),
+    path('save_product_before_listing/<int:userid>/<str:market_name>/<str:category_id_or_name>/', save_product_before_listing_on_marketplace, name='save_product_before_listing'),
     
     path('woocommerce_enrolment/<int:userid>/', WooCommerce.woocommerce_enrollment, name='woocommerce_enrolment'),
     path('test_woocommerce_connection/<int:userid>/<str:market_name>/', WooCommerce.test_woocommerce_connection, name='test_woocommerce_connection'),
