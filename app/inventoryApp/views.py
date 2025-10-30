@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from ebaysdk.exception import ConnectionError
+
+from Swiftsuite.marketplaceApp.models import MarketplaceEnronment
 from .models import InventoryModel
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer
@@ -17,8 +19,52 @@ from marketplaceApp.views import Ebay
 from .tasks import sync_ebay_inventory_task
 from woocommerce import API
 from decouple import config
+from marketplaceApp.views import WooCommerce
 
 
+
+# Function to update product across marketplaces
+@api_view(['PUT'])
+def update_product_on_marketplace(request, userid, market_name, inventory_id):
+    mk = MarketInventory()
+    wooc = WooCommerce()
+    try:
+        product_info = get_object_or_404(InventoryModel, id=inventory_id)
+        serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
+        if serializer.is_valid():
+            # Select the marketplace to list the product
+            if market_name == "Ebay":
+                response = mk.update_item_on_ebay(userid, serializer, product_info)
+                # Check the response
+                if response.status_code == 200:
+                    serializer.save()
+                    return Response(f"Success: {response.text}", status=status.HTTP_200_OK)
+                else:
+                    return Response(f"Error:{response.text}", status=status.HTTP_400_BAD_REQUEST)
+            elif market_name == "Woocommerce":
+                response = wooc.update_woocommerce_product(userid, serializer, product_info, market_name)
+                if response.status_code == 200:
+                    serializer.save()
+                    return Response(f"Product updated successfully!: {response.json()}", status=status.HTTP_200_OK)
+                elif response.status_code == 404:
+                    return Response(f"Product not found — check the product ID.:{response.json()}", status=status.HTTP_404_NOT_FOUND)
+                elif response.status_code == 401:
+                    return Response(f"Unauthorized — check your API credentials.:{response.json()}", status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    return Response(f"Unexpected error:{response.json()}", status=status.HTTP_400_BAD_REQUEST)
+            elif market_name == "Shopify":
+                pass
+            elif market_name == "Amazon":
+                pass
+            elif market_name == "all":
+                pass
+            
+        else:
+            return Response(f"Form not filled correctly. {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+
+    
 # Create your views here.
 class MarketInventory(APIView):
     permission_classes = [IsAuthenticated]
@@ -77,20 +123,12 @@ class MarketInventory(APIView):
 
 
     # Create a function to update item information on Ebay
-    @api_view(['PUT'])
-    def update_item_on_ebay(request, inventory_id, userId):
+    def update_item_on_ebay(self, userId, product_info, serializer):
         minv = MarketInventory()
         eb = Ebay()
         access_token = eb.refresh_access_token(userId, "Ebay")
-        try:
-            product_info = get_object_or_404(InventoryModel, id=inventory_id)
-            serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
-            if serializer.is_valid():
-                validated_data = serializer.validated_data
-            else:
-                return Response(f"Form not filled correctly. {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+        # get the serializer's data
+        validated_data = serializer.validated_data
         # convert item specific field into xml
         xml_item_specifics = minv.json_to_xml(product_info.item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
@@ -181,12 +219,7 @@ class MarketInventory(APIView):
                 </ReviseItemRequest>"""
             # Make the POST request
             response = requests.post(url, headers=headers, data=body)
-            # Check the response
-            if response.status_code == 200:
-                serializer.save()
-                return Response(f"Success: {response.text}", status=status.HTTP_200_OK)
-            else:
-                return Response(f"Error:{response.text}", status=status.HTTP_400_BAD_REQUEST)
+            return response
         except ConnectionError as e:
             return Response(f"Error:{e}", status=status.HTTP_400_BAD_REQUEST)
 
@@ -252,7 +285,7 @@ class MarketInventory(APIView):
             
     # Get all unmapped ebay product listing on local table
     @api_view(['GET'])
-    def get_unmapped_ebay_listing(request, userid):
+    def get_unmapped_listing_items(request, userid):
         try:
             unmapped_listing = InventoryModel.objects.all().filter(map_status=False, user_id=userid).values()
             return JsonResponse({"Unmapped_items":list(unmapped_listing)}, safe=False, status=status.HTTP_200_OK)
@@ -341,13 +374,49 @@ class MarketInventory(APIView):
 
 
 class WooCommerce(APIView):
-    # Set up the WooCommerce API client
-    wcapi = API(
-        url = config("WOOC_URL"), 
-        consumer_key = config("WOOC_CONSUMER_KEY"),  
-        consumer_secret = config("WOOC_CONSUMER_SECRET"), 
-        version = "wc/v3"                # API version
-    )
+    # Function to update product on woocommerce store
+    def update_woocommerce_product(self, userid, serializer, product_info, market_name):
+        wooc = WooCommerce()
+        # get the serializer's data
+        validated_data = serializer.validated_data
+        try:
+            enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+            # Set up the WooCommerce API client
+            wcapi = API(
+                url = enrollment.wc_consumer_url, 
+                consumer_key = enrollment.wc_consumer_key,  
+                consumer_secret = enrollment.wc_consumer_secret, 
+                version = "wc/v3"
+            )
+            # Generate the meta_data values from item specifics
+            meta_data = []
+            for key, value in json.loads(validated_data["item_specific_fields"]).items():
+                meta_data.append({"key": key, "value": value})
+
+            # Product payload mapped to WooCommerce
+            update_data = {
+                "name": validated_data['title'],
+                "type": "simple",
+                "regular_price": validated_data['start_price'],
+                "description": validated_data['description'],
+                "sku": validated_data['sku'],
+                "stock_quantity": validated_data['quantity'],
+                "manage_stock": True,
+                "categories": [
+                    {"id": wooc.get_category_id(validated_data['woo_category_name'], enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
+                ],
+                "images": [
+                    {"src": validated_data['picture_detail']}
+                ],
+                "meta_data": meta_data
+            }
+
+            # --- MAKE THE UPDATE REQUEST ---
+            response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
+            return response
+        except ConnectionError as e:
+            return Response(f"Error:{e}", status=status.HTTP_400_BAD_REQUEST)
+
 
 
     # Get all the products from the WooCommerce store
@@ -357,6 +426,16 @@ class WooCommerce(APIView):
         products = wcm.wcapi.get("products").json()  
         return JsonResponse({"products": products}, safe=False, status=status.HTTP_200_OK)
     
+
+    @api_view(['GET'])
+    def get_listed_products(request):
+        wcm = WooCommerce()
+        # Get all products
+        products = wcm.wcapi.get("products").json()
+        return JsonResponse({"Listed_products":products}, safe=False, status=status.HTTP_200_OK)
+    
+
+
 
 
 # Inventory background task invocation
