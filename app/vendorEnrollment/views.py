@@ -523,6 +523,7 @@ class ViewAllProducts(ListAPIView):
         maxQty = params.get('maxquantity')
         minprice = params.get('minprice')
         maxprice = params.get('maxprice')
+        vendor = params.get('vendor')
         
         if search:
             filters &= Q(upc__icontains=search) | Q(sku__icontains=search)  
@@ -534,7 +535,10 @@ class ViewAllProducts(ListAPIView):
             filters &= Q(price__gte=minprice)
         if maxprice:
             filters &= Q(price__lte=maxprice)
-        
+
+        if vendor:
+            filters &= Q(vendor_name__icontains=vendor)
+
         if filters:
             queryset = queryset.filter(filters)
         
