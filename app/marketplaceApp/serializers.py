@@ -63,7 +63,7 @@ class ItemListingToEbaySerializer:
 			    # Use CharField instead of ChoiceField to allow custom values
 				serializer_fields[aspect_name] = serializers.CharField(
                     required=is_required,
-                    allow_blank=not is_required
+                    allow_blank=is_required
                 )
 				item_specifics_name.append(aspect_name)
                 
