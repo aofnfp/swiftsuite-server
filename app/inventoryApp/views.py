@@ -151,9 +151,9 @@ class MarketInventory(APIView):
             'Content-Type': 'text/xml',
             'Authorization': f'Bearer {access_token}'
         }
-        # try:
+        try:
             # XML Body for ReviseItem request
-        body = f"""
+            body = f"""
             <?xml version="1.0" encoding="utf-8"?>
             <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
                 <RequesterCredentials>
@@ -218,10 +218,10 @@ class MarketInventory(APIView):
                 </Item>
                 </ReviseItemRequest>"""
             # Make the POST request
-        response = requests.post(url, headers=headers, data=body)
-        return response
-        # except ConnectionError as e:
-        #     return Response(f"Error:{e}", status=status.HTTP_400_BAD_REQUEST)
+            response = requests.post(url, headers=headers, data=body)
+            return response
+        except ConnectionError as e:
+            return Response(f"Error in payload:{e}", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to check if ebay item has ended
