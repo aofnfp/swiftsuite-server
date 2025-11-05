@@ -675,6 +675,7 @@ class Ebay(APIView):
                     SubElement(picture_details, 'PictureURL').text = img
             # Convert the ElementTree to an XML string
             item_image_url = tostring(picture_details, encoding='unicode')
+            print(item_image_url)
         except:
             return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
         
