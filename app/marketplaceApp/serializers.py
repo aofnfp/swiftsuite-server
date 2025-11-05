@@ -65,7 +65,7 @@ class ItemListingToEbaySerializer:
 			    # Use CharField instead of ChoiceField to allow custom values
 				serializer_fields[aspect_name] = serializers.CharField(
                     required=is_required,
-                    allow_blank=is_required
+                    allow_blank=not is_required
                 )
 				item_specifics_name.append(aspect_name)
                 
@@ -77,7 +77,7 @@ class ItemListingToEbaySerializer:
 				# Otherwise, use CharField for free text fields
 				serializer_fields[aspect_name] = serializers.CharField(
 					required=is_required,
-					allow_blank=is_required
+					allow_blank=not is_required
 				)
 				item_specifics_name.append(aspect_name)
 		
@@ -85,6 +85,7 @@ class ItemListingToEbaySerializer:
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
 		return DynamicSerializer, item_specifics_name, valid_choices_field
 	
+	# Serializer for other marketplaces without item specifics
 	def generate_other_marketplace_listing_fields_serializer():
 		# Create a dictionary for dynamic serializer fields
 		serializer_fields = {}
