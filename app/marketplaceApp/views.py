@@ -770,7 +770,7 @@ class Ebay(APIView):
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product listing was successful", status=status.HTTP_200_OK)
         except ConnectionError as e:       
-            return Response(f"Failed to post connection issue {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post connection issue {e} {item_image_url}", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:       
             return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
 	
