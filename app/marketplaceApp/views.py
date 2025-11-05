@@ -662,8 +662,8 @@ class Ebay(APIView):
                 value_element.text = validated_data[value]
             # Convert the ElementTree to an XML string
             xml_item_specifice = tostring(root, encoding='unicode')
-        except:
-            return Response(f"Failed to process item specifics:", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(f"Failed to process item specifics: {e}", status=status.HTTP_400_BAD_REQUEST)
         try:
             # Validate and format the thumbnail images for listing
             picture_details = Element('PictureDetails')
