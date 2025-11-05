@@ -769,12 +769,13 @@ class Ebay(APIView):
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product listing was successful", status=status.HTTP_200_OK)
         except ConnectionError as e:
+            clean_error = None
             match = re.search(r'Code:\s*\d+,\s*(.*)', str(e), re.DOTALL)
             if match:
                 clean_error = match.group(1).strip()           
             return Response(f"Failed to post connection issue {clean_error}", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:  
-            return Response(f"Failed to post {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post: Check your input data", status=status.HTTP_400_BAD_REQUEST)
                 
 	
     # Function to save product for later listing
