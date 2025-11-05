@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import webbrowser
 import requests
 import base64
-import os, json, random
+import os, json, random, re
 from urllib.parse import urlencode, urlparse, parse_qs
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -768,11 +768,14 @@ class Ebay(APIView):
             # Update the GeneralProduct table to set listed_market to true
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product listing was successful", status=status.HTTP_200_OK)
-        except ConnectionError as e:       
-            return Response(f"Failed to post connection issue {e}", status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:       
+        except ConnectionError as e:
+            match = re.search(r'Code:\s*\d+,\s*(.*)', e, re.DOTALL)
+            if match:
+                clean_error = match.group(1).strip()           
+            return Response(f"Failed to post connection issue {clean_error}", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:  
             return Response(f"Failed to post {e}", status=status.HTTP_400_BAD_REQUEST)
-	
+                
 	
     # Function to save product for later listing
     @api_view(['POST'])
