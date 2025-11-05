@@ -593,9 +593,25 @@ class Ebay(APIView):
             return response.json()
 
     
+    # Function to get default category tree ID for a given marketplace
+    def get_default_category_tree_id(self, oauth_token):
+        url = "https://api.ebay.com/commerce/taxonomy/v1/get_default_category_tree_id"
+        params = {"marketplace_id": "EBAY_US"}
+        headers = {
+            "Authorization": f"Bearer {oauth_token}",
+            "Accept": "application/json",
+        }
+
+        resp = requests.get(url, headers=headers, params=params)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["categoryTreeId"]
+
+
     # Function to get required item specifics for a given category
-    def get_required_fields_item(self, category_id: str, oauth_token: str):
-        category_tree_id = '0'
+    def get_required_fields_item(self, category_id: str, access_token: str):
+        eb = Ebay()
+        category_tree_id = eb.get_default_category_tree_id(access_token)
         url = (
             f"https://api.ebay.com/commerce/taxonomy/v1_beta/"
             f"category_tree/{category_tree_id}/get_item_aspects_for_category"
@@ -605,7 +621,7 @@ class Ebay(APIView):
             "marketplace_id": "EBAY_US"
         }
         headers = {
-            "Authorization": f"Bearer {oauth_token}",
+            "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
