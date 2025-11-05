@@ -75,7 +75,7 @@ class ItemListingToEbaySerializer:
 				# Otherwise, use CharField for free text fields
 				serializer_fields[aspect_name] = serializers.CharField(
 					required=is_required,
-					allow_blank=not is_required
+					allow_blank=is_required
 				)
 				item_specifics_name.append(aspect_name)
 		

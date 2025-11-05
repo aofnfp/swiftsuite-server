@@ -597,6 +597,7 @@ class Ebay(APIView):
         eb = Ebay()
         item_specifics_field = []
         choices_data = {}
+        required_item_specifics = []
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         if not access_token:
@@ -610,16 +611,35 @@ class Ebay(APIView):
         DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
-            if isinstance(field, serializers.BooleanField) and field_name in _fields:
-                item_specifics_field.append(field_name +" (Boolean field)")
-            else:
-                if field_name in _fields:
+            if field_name in _fields:
+                # Identify Boolean fields
+                if isinstance(field, serializers.BooleanField):
+                    item_specifics_field.append(f"{field_name} (Boolean field)")
+                else:
                     item_specifics_field.append(field_name)
-        # item_specifics_field.append(choices_data)
-        # For now, return the field names (you can replace this with form processing later)
+
+                # Check if the field is required
+                if getattr(field, 'required', False):
+                    required_item_specifics.append(field_name)
+
+        # Return the field names, valid choices, and required fields
         return Response({
-            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields
+            "item_specifics": item_specifics_field,
+            "valid_choices": valid_choices_fields,
+            "required_fields": required_item_specifics
         })
+        # # Extract choices from the ChoiceField fields
+        # for field_name, field in DynamicItemSpecificsSerializer().fields.items():
+        #     if isinstance(field, serializers.BooleanField) and field_name in _fields:
+        #         item_specifics_field.append(field_name +" (Boolean field)")
+        #     else:
+        #         if field_name in _fields:
+        #             item_specifics_field.append(field_name)
+        # # item_specifics_field.append(choices_data)
+        # # For now, return the field names (you can replace this with form processing later)
+        # return Response({
+        #     "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields
+        # })
     
     # Calculate the selling price of product going to ebay
     def calculated_selling_price(self, enroll_id=0, start_price=0, prod_id='', userid=0):
