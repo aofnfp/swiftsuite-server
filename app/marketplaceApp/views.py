@@ -66,7 +66,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Failed to fetch data check your enrollments:", status=status.HTTP_400_BAD_REQUEST)
     
     # Select the marketplace to list the product
     if market_name == "Ebay":
@@ -117,7 +117,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Failed to fetch data: Check your enrollments", status=status.HTTP_400_BAD_REQUEST)
     
     # Select the marketplace to list the product
     if market_name == "Ebay":
@@ -237,18 +237,18 @@ class Ebay(APIView):
         try:
             response = requests.post(eb.token_url, headers=headers, data=body)
             if response.status_code != 200:
-                return Response(f"Failed to obtain access token: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Failed to obtain access token:", status=status.HTTP_400_BAD_REQUEST)
             
             result = response.json()
             access_token = result.get('access_token')
             refresh_token = result.get('refresh_token')
             
             if not access_token:
-                return Response(f"Failed to obtain access token from response: {result}", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Failed to obtain access token from response", status=status.HTTP_400_BAD_REQUEST)
         except:
-            return Response(f"Failed to obtain access token: {response.text}", status=status.HTTP_400_BAD_REQUEST)
-        
-        obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":refresh_token})  
+            return Response(f"Failed to obtain access token:", status=status.HTTP_400_BAD_REQUEST)
+
+        obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":refresh_token})
         return access_token, refresh_token
 
     # Function to refresh the access token using the refresh token
@@ -257,7 +257,7 @@ class Ebay(APIView):
         try:
             connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
         except Exception as e:
-            return Response(f"Failed to fetch access token: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch access token", status=status.HTTP_400_BAD_REQUEST)
         
         access_token = connection.access_token
         refresh_token = connection.refresh_token
@@ -277,13 +277,13 @@ class Ebay(APIView):
 
         response = requests.post(eb.token_url, headers=headers, data=body)
         if response.status_code != 200:
-            return Response(f"Failed to refresh access token. Authorization code has expired: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
 
         result = response.json()
         access_token = result.get('access_token')
         
         if not access_token:
-            return Response(f"Failed to get access token from response{result}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
         MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
         return access_token
@@ -302,7 +302,7 @@ class Ebay(APIView):
         if response.status_code == 401:
             return JsonResponse({"Message":"Access token is invalid. Refreshing access token."}, status=status.HTTP_401_UNAUTHORIZED)
         elif response.status_code != 200:
-            return JsonResponse({"Message":f"Failed to fetch fulfillment policies: {response.text}"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"Message":f"Failed to fetch fulfillment policies."}, status=status.HTTP_400_BAD_REQUEST)
         
         return response.json()
 
@@ -321,7 +321,7 @@ class Ebay(APIView):
         if response.status_code == 401:
             return JsonResponse({"Message":"Access token is invalid. Refreshing access token."}, status=status.HTTP_401_UNAUTHORIZED)
         elif response.status_code != 200:
-            return JsonResponse({"Message":f"Failed to fetch payment policies: {response.text}"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"Message":f"Failed to fetch payment policies."}, status=status.HTTP_400_BAD_REQUEST)
 
         return response.json()
 
@@ -338,10 +338,10 @@ class Ebay(APIView):
 
         response = requests.get(eb.return_policy_url, headers=headers, params=params)
         if response.status_code == 401:
-            return JsonResponse({"Mesage":f"Access token is invalid. Refreshing access token. {response.text}"}, status=status.HTTP_401_UNAUTHORIZED)
+            return JsonResponse({"Message":f"Access token is invalid. Refreshing access token."}, status=status.HTTP_401_UNAUTHORIZED)
         elif response.status_code != 200:
-            return JsonResponse({"Message":f"Failed to fetch shipping policies: {response.text}"}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return JsonResponse({"Message":f"Failed to fetch shipping policies."}, status=status.HTTP_400_BAD_REQUEST)
+
         return response.json()
     
        
@@ -442,7 +442,7 @@ class Ebay(APIView):
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Error:", status=status.HTTP_400_BAD_REQUEST)
     
     # Get the enrolment detail from the enrolment table for editing
     @api_view(['GET'])
@@ -500,11 +500,11 @@ class Ebay(APIView):
                     return Response(f"Failed to compute price, no valid data", status=status.HTTP_400_BAD_REQUEST)
                 product_details[0]["selling_price"] = start_price
             except Exception as e:
-                return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
             # Get the vendor's details of the product trying to list
             vendor_info[0]["vendor_location"] = list(Vendors.objects.all().filter(id=vendor_info[0].get("vendor_id")).values())
         except Exception as e:
-            return JsonResponse({"Message":f"Failed to fetch product info: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"Message":f"Failed to fetch product information."}, status=status.HTTP_400_BAD_REQUEST)
         # Get the category id of the product
         category_info = eb.get_category_id_from_upc(upc_code, access_token)
         # Get all the policies for product listing
@@ -556,7 +556,7 @@ class Ebay(APIView):
 
         # Check for any errors
         if response.status_code != 200:
-            return JsonResponse({"Message":f"Failed to fetch leaf category: {response.content.decode()}"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"Message":f"Failed to fetch leaf category."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             data = response.json()
             # Loop through and find leaf categories
@@ -587,7 +587,7 @@ class Ebay(APIView):
 
         # Check for any errors
         if response.status_code != 200:
-            return JsonResponse({"Message":f"Failed to fetch item specific fields: {response.content.decode()}"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"Message":f"Failed to fetch item specific fields."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return response.json()
             
@@ -633,7 +633,7 @@ class Ebay(APIView):
                 if selling_price < float(product.map):
                     selling_price = float(product.map)
         except Exception as e:
-            return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(selling_price, 2)
         
     # Calculate the minimum offer price of product going to ebay
@@ -644,35 +644,40 @@ class Ebay(APIView):
             selling_price = eb.calculated_selling_price(enroll_id, start_price, prod_id, userid)
             minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
         except Exception as e:
-            return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(minimum_offer_price, 2)
     
     # List product on Ebay
     def product_listing_to_ebay(self, userid, access_token, item_specifics_fields, validated_data, minimum_offer_price):
         eb = Ebay()
         # Root element for XML
-        root = Element('ItemSpecifics')
-        # Create a separate section for eBay item specifics
-        for value in item_specifics_fields:
-            inner_root_element = SubElement(root, 'NameValueList')
-            name_element = SubElement(inner_root_element, 'Name')
-            name_element.text = value
-            value_element = SubElement(inner_root_element, 'Value')
-            value_element.text = validated_data[value]
-        # Convert the ElementTree to an XML string
-        xml_item_specifice = tostring(root, encoding='unicode')
+        try:
+            root = Element('ItemSpecifics')
+            # Create a separate section for eBay item specifics
+            for value in item_specifics_fields:
+                inner_root_element = SubElement(root, 'NameValueList')
+                name_element = SubElement(inner_root_element, 'Name')
+                name_element.text = value
+                value_element = SubElement(inner_root_element, 'Value')
+                value_element.text = validated_data[value]
+            # Convert the ElementTree to an XML string
+            xml_item_specifice = tostring(root, encoding='unicode')
+        except:
+            return Response(f"Failed to process item specifics:", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Validate and format the thumbnail images for listing
+            picture_details = Element('PictureDetails')
+            SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
+            if validated_data["thumbnailImage"] != "Null":
+                thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
+                thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+                for img in thumbnail_images:
+                    SubElement(picture_details, 'PictureURL').text = img
+            # Convert the ElementTree to an XML string
+            item_image_url = tostring(picture_details, encoding='unicode')
+        except:
+            return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
         
-        # format the thumbnail images for listing
-        picture_details = Element('PictureDetails')
-        SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-        if validated_data["thumbnailImage"] != "Null":
-            thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-            thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
-            for img in thumbnail_images:
-                SubElement(picture_details, 'PictureURL').text = img
-        # Convert the ElementTree to an XML string
-        item_image_url = tostring(picture_details, encoding='unicode')
-        print(item_image_url)
         # Create a connection to the eBay Trading API
         api = Trading(
             appid = eb.app_id,
@@ -762,11 +767,11 @@ class Ebay(APIView):
            
             # Update the GeneralProduct table to set listed_market to true
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
-            return Response(f"Product listing was successful {response.text}", status=status.HTTP_200_OK)
+            return Response(f"Product listing was successful", status=status.HTTP_200_OK)
         except ConnectionError as e:       
-            return Response(f"Failed to post connetion issue: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post connection issue", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:       
-            return Response(f"Failed to post: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
 	
 	
     # Function to save product for later listing
@@ -784,7 +789,7 @@ class Ebay(APIView):
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to post: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
  
         
         
@@ -795,17 +800,20 @@ class Ebay(APIView):
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
             if serializer.is_valid():
-                # Upload an image
-                image_file = request.FILES.get("image_url")
-                upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
-                # Optimize delivery by resizing and applying auto-format and auto-quality
-                optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
-                # Transform the image: auto-crop to square aspect_ratio
-                auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
-                save_image = UploadedProductImage(image_url=upload_result["secure_url"], image_name=upload_result["public_id"], product_id=productid, user_id=userid)
-                save_image.save()
-                return Response({"image_uploaded":upload_result}, status=201)
-        return Response(serializer.errors, status=400)
+                try:
+                    # Upload an image
+                    image_file = request.FILES.get("image_url")
+                    upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
+                    # Optimize delivery by resizing and applying auto-format and auto-quality
+                    optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
+                    # Transform the image: auto-crop to square aspect_ratio
+                    auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
+                    save_image = UploadedProductImage(image_url=upload_result["secure_url"], image_name=upload_result["public_id"], product_id=productid, user_id=userid)
+                    save_image.save()
+                    return Response({"image_uploaded":upload_result}, status=201)
+                except:
+                    return Response("Fail to upload image: Check your connection and try again.", status=400)
+        return Response("Fail to upload image: Check your image file and try again.", status=400)
 
     
     # Function to upload multiple images to cloudinary
@@ -816,48 +824,56 @@ class Ebay(APIView):
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
             if serializer.is_valid():
-                images = request.FILES.getlist("image_url")  # getlist() for multiple files
-                if not images:
-                    return Response({"error": "No images provided. Use key 'images' in form-data."}, status=400)
+                try:
+                    images = request.FILES.getlist("image_url")  # getlist() for multiple files
+                    if not images:
+                        return Response({"error": "No images provided. Use key 'images' in form-data."}, status=400)
 
-                for image_file in images:
-                    # Generat a unique index for each image
-                    gen_val = random.randint(100, 100000)
-                    upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
-                    # Optimize delivery by resizing and applying auto-format and auto-quality
-                    optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
-                    # Transform the image: auto-crop to square aspect_ratio
-                    auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
-                    # Append uploaded image details to list 
-                    uploaded_urls.append({"image_url": upload_result["secure_url"]})
-                
-                # Save images to the database
-                save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
-                save_image.save()
+                    for image_file in images:
+                        # Generat a unique index for each image
+                        gen_val = random.randint(100, 100000)
+                        upload_result = cloudinary.uploader.upload(image_file, public_id=f"{product_name}_{productid}_{gen_val}")
+                        # Optimize delivery by resizing and applying auto-format and auto-quality
+                        optimize_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", fetch_format="auto", quality="auto")
+                        # Transform the image: auto-crop to square aspect_ratio
+                        auto_crop_url, _ = cloudinary_url(f"{product_name}_{productid}_{gen_val}", width=500, height=500, crop="auto", gravity="auto")
+                        # Append uploaded image details to list 
+                        uploaded_urls.append({"image_url": upload_result["secure_url"]})
+                    
+                    # Save images to the database
+                    save_image = UploadedProductImage(image_url=json.dumps(uploaded_urls), image_name=product_name, product_id=productid, user_id=userid)
+                    save_image.save()
 
-                return Response({
-                    "message": "Images uploaded successfully",
-                    "product": product_name,
-                    "Total uploaded": len(uploaded_urls)
-                    }, status=201)
-            return Response(serializer.errors, status=400)
+                    return Response({
+                        "message": "Images uploaded successfully",
+                        "product": product_name,
+                        "Total uploaded": len(uploaded_urls)
+                        }, status=201)
+                except:
+                    return Response("Failed to upload image: Check your connection", status=400)
+            return Response("Fail to upload image: Check your image file and try again.", status=400)
 
 
     # Get thumbnail image details
     @api_view(['GET'])
     def get_uploaded_image(request, productid, product_name, userid):
-        save_image = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
-        return JsonResponse({"image_data":list(save_image)}, safe=False, status=status.HTTP_200_OK)
-
+        try:
+            save_image = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
+            return JsonResponse({"image_data":list(save_image)}, safe=False, status=status.HTTP_200_OK)
+        except:
+            return Response("Failed to retrieve image: Check your connection", status=400)
 
     # Delete thumbnail image
     @api_view(['GET'])
     def delete_uploaded_image(request, image_name, image_id):
-        # Delete the image from cloudinary first using the public ID of the image
-        response = cloudinary.uploader.destroy(image_name)
-        # Delete from the local table
-        UploadedProductImage.objects.filter(id=image_id).delete()
-        return Response(f"Image deleted successfully from thumbnail {response}", status=status.HTTP_200_OK)
+        try:
+            # Delete the image from cloudinary first using the public ID of the image
+            response = cloudinary.uploader.destroy(image_name)
+            # Delete from the local table
+            UploadedProductImage.objects.filter(id=image_id).delete()
+            return Response(f"Image deleted successfully from thumbnail", status=status.HTTP_200_OK)
+        except:
+            return Response("Failed to delete image: Check your connection", status=400)    
       
 
 
@@ -877,7 +893,7 @@ class WooCommerce(APIView):
                 enrolment = serializer.save(user_id=userid)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+                return Response("Failed to enroll in WooCommerce marketplace: Check your input data", status=status.HTTP_400_BAD_REQUEST)
         
 
     # Update Woocommerce marketplace 
@@ -892,7 +908,7 @@ class WooCommerce(APIView):
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Error: Update failed", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to test your connection to Woocommerce
@@ -919,94 +935,103 @@ class WooCommerce(APIView):
             else:
                 return Response("Unexpected response:", response)
         except requests.exceptions.SSLError as e:
-            return Response(f"SSL Error: {e}")
+            return Response(f"SSL Error")
         except requests.exceptions.ConnectionError as e:
-            return Response(f"Connection Error: {e}")
+            return Response(f"Connection Error")
         except Exception as e:
-            return Response(f"Other error: {e}")
+            return Response(f"An error occurred")
 
 
     # Get all product categories
     @api_view(['GET'])
     def get_product_category(request, userid, market_name):
-        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
-        # Set up the WooCommerce API client
-        wcapi = API(
-            url = enrollment.wc_consumer_url, 
-            consumer_key = enrollment.wc_consumer_key,  
-            consumer_secret = enrollment.wc_consumer_secret, 
-            version = "wc/v3"
-        )
-        categories = wcapi.get("products/categories").json()
-        return JsonResponse({"Product_categories":categories}, safe=False, status=status.HTTP_200_OK)
-        # for cat in categories:
-        #     print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
+        try:
+            enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+            # Set up the WooCommerce API client
+            wcapi = API(
+                url = enrollment.wc_consumer_url, 
+                consumer_key = enrollment.wc_consumer_key,  
+                consumer_secret = enrollment.wc_consumer_secret, 
+                version = "wc/v3"
+            )
+            categories = wcapi.get("products/categories").json()
+            return JsonResponse({"Product_categories":categories}, safe=False, status=status.HTTP_200_OK)
+            # for cat in categories:
+            #     print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
+        except Exception as e:
+            return Response("Failed to fetch categories: Check your connection or credentials", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Helper function to get category ID by name
     def get_category_id(self, category_name, url_, consumer_key_, consumer_secret_):
-       # Set up the WooCommerce API client
-        wcapi = API(
-            url = url_, 
-            consumer_key = consumer_key_,  
-            consumer_secret = consumer_secret_, 
-            version = "wc/v3"                # API version
-        )
-        """Return the category ID for a given category name."""
-        categories = wcapi.get("products/categories").json()
+        try:
+            # Set up the WooCommerce API client
+            wcapi = API(
+                url = url_, 
+                consumer_key = consumer_key_,  
+                consumer_secret = consumer_secret_, 
+                version = "wc/v3"                # API version
+            )
+            """Return the category ID for a given category name."""
+            categories = wcapi.get("products/categories").json()
 
-        for cat in categories:
-            if cat["name"].lower() == category_name.lower():
-                return cat["id"]
-        
-        return None  # Not found
+            for cat in categories:
+                if cat["name"].lower() == category_name.lower():
+                    return cat["id"]
+            
+            return None  # Not found
+        except Exception as e:
+            return Response("Failed to fetch categories: Check your connection or credentials", status=status.HTTP_400_BAD_REQUEST)
 
 
     # List product on Woocommerce
     def list_product_on_woocommerce(self, userid, market_name, category_name, validated_data):
         """Return the category ID for a given category name."""
         wooc = WooCommerce()
-        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
-        # Set up the WooCommerce API client
-        wcapi = API(
-            url = enrollment.wc_consumer_url, 
-            consumer_key = enrollment.wc_consumer_key,  
-            consumer_secret = enrollment.wc_consumer_secret, 
-            version = "wc/v3"
-        )
+        try:
+            enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+            # Set up the WooCommerce API client
+            wcapi = API(
+                url = enrollment.wc_consumer_url, 
+                consumer_key = enrollment.wc_consumer_key,  
+                consumer_secret = enrollment.wc_consumer_secret, 
+                version = "wc/v3"
+            )
 
-        # Generate the meta_data values from item specifics
-        meta_data = []
-        for key, value in ast.literal_eval(validated_data["item_specific_fields"]).items():
-            meta_data.append({"key": key, "value": value})
+            # Generate the meta_data values from item specifics
+            meta_data = []
+            for key, value in ast.literal_eval(validated_data["item_specific_fields"]).items():
+                meta_data.append({"key": key, "value": value})
 
-        # Product payload mapped to WooCommerce
-        product_data = {
-            "name": validated_data['title'],
-            "type": "simple",
-            "regular_price": validated_data['start_price'],
-            "description": validated_data['description'],
-            "sku": validated_data['sku'],
-            "stock_quantity": validated_data['quantity'],
-            "manage_stock": True,
-            "categories": [
-                {"id": wooc.get_category_id(category_name, enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
-            ],
-            "images": [
-                {"src": validated_data['picture_detail']}
-            ],
-            "meta_data": meta_data
-        }
-        # Send POST request to WooCommerce to create the product
-        response = wcapi.post("products", product_data)
-        if response.status_code == 201:
-            # Save the product to inventory table
-            item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(meta_data), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], market_name=market_name, woo_category_name=validated_data['woo_category_name'], market_item_id=response.json().get('id')))
-            # Update the GeneralProduct table to set listed_market to true
-            Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
-            return Response(f"Product listing was successful {response.json()}", status=status.HTTP_200_OK)
-        else:
-            return Response(f"Failed to post: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
+            # Product payload mapped to WooCommerce
+            product_data = {
+                "name": validated_data['title'],
+                "type": "simple",
+                "regular_price": validated_data['start_price'],
+                "description": validated_data['description'],
+                "sku": validated_data['sku'],
+                "stock_quantity": validated_data['quantity'],
+                "manage_stock": True,
+                "categories": [
+                    {"id": wooc.get_category_id(category_name, enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
+                ],
+                "images": [
+                    {"src": validated_data['picture_detail']}
+                ],
+                "meta_data": meta_data
+            }
+            # Send POST request to WooCommerce to create the product
+            response = wcapi.post("products", product_data)
+            if response.status_code == 201:
+                # Save the product to inventory table
+                item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(meta_data), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], market_name=market_name, woo_category_name=validated_data['woo_category_name'], market_item_id=response.json().get('id')))
+                # Update the GeneralProduct table to set listed_market to true
+                Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
+                return Response(f"Product listing was successful.", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Failed to post.", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(f"Failed to post: problem with your form fields", status=status.HTTP_400_BAD_REQUEST)
         
 
     # Save product before listing on Woocommerce
@@ -1023,7 +1048,7 @@ class WooCommerce(APIView):
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Fail to save product: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Fail to save product.", status=status.HTTP_400_BAD_REQUEST)
         
 
     

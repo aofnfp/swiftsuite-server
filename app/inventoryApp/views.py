@@ -244,7 +244,7 @@ class MarketInventory(APIView):
                 return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
 
         else:
-            return Response(f"ailed to fetch item data. {response.text}, tatus code: {response.status_code}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch item data.", status=status.HTTP_400_BAD_REQUEST)
             
     
     # Get all product already listed on Ebay from the inventory
@@ -263,7 +263,7 @@ class MarketInventory(APIView):
                 
             return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get items: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
     
     # Get all saved product yet to be listed on Ebay from the inventory
     @api_view(['GET'])
@@ -281,7 +281,7 @@ class MarketInventory(APIView):
             
             return JsonResponse({"Total_count":len(inventory_saved), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get items: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
             
     # Get all unmapped ebay product listing on local table
     @api_view(['GET'])
@@ -290,7 +290,7 @@ class MarketInventory(APIView):
             unmapped_listing = InventoryModel.objects.all().filter(map_status=False, user_id=userid).values()
             return JsonResponse({"Unmapped_items":list(unmapped_listing)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get items: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
     # Get saved product in the inventory for listing to ebay
     @api_view(['GET'])
@@ -299,7 +299,7 @@ class MarketInventory(APIView):
             saved_item = InventoryModel.objects.all().filter(id=inventoryid).values()
             return JsonResponse({"saved_items":list(saved_item)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get items: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
     # Delete product from inventory
     @api_view(['GET'])
@@ -310,7 +310,7 @@ class MarketInventory(APIView):
             invent_item.delete()
             return Response("Item deleted successfully", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to delect items: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
     
     # Function to end product listed on ebay and delete from inventory
     @api_view(['GET'])
@@ -353,10 +353,10 @@ class MarketInventory(APIView):
                 invent_item.delete()
                 return Response(f"Item ended from ebay successfully {response.text}", status=status.HTTP_200_OK)
             else:
-                return Response(f"Error ending item: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Error ending item:", status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
-            return Response(f"Failed to delect items: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
     
 
     # Function to test any api from ebay before implementation
