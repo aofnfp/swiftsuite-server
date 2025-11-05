@@ -40,9 +40,9 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 # Check the response
                 if response.status_code == 200:
                     serializer.save()
-                    return Response(f"Success: {response}", status=status.HTTP_200_OK)
+                    return Response(f"Success: {response.json()}", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Error:{response}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Error:{response.json()}", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Woocommerce":
                 response = wooc.update_woocommerce_product(userid, validated_data, product_info.item_specific_fields, market_name, product_info.market_item_id)
                 if response.status_code == 200:
@@ -137,9 +137,9 @@ class MarketInventory(APIView):
             enroll_id = product_details[0].get("enrollment_id")
             minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userId)
             if type(minimum_offer_price) != float:
-                return Response(f"Failed to fetch data:", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Price computation error", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(f"Failed to fetch data: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data", status=status.HTTP_400_BAD_REQUEST)
 
         # eBay Trading API endpoint
         url = 'https://api.ebay.com/ws/api.dll'
@@ -221,7 +221,7 @@ class MarketInventory(APIView):
             response = requests.post(url, headers=headers, data=body)
             return response
         except ConnectionError as e:
-            return Response(f"Error:{e}", status=status.HTTP_400_BAD_REQUEST)
+            return e
 
 
     # Function to check if ebay item has ended
