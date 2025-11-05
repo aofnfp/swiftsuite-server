@@ -608,7 +608,7 @@ class Ebay(APIView):
         item_specifics = data.get('aspects', [])
         
         # Generate the dynamic serializer
-        DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, _fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
             if field_name in _fields:
@@ -626,7 +626,7 @@ class Ebay(APIView):
         return Response({
             "item_specifics": item_specifics_field,
             "valid_choices": valid_choices_fields,
-            "required_fields": required_item_specifics
+            "required_fields": required_fields
         })
         # # Extract choices from the ChoiceField fields
         # for field_name, field in DynamicItemSpecificsSerializer().fields.items():
