@@ -670,7 +670,7 @@ class Ebay(APIView):
             SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
             if validated_data["thumbnailImage"] != "Null":
                 thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-                thumbnail_images = [url.strip() for url in thumbnail_images.split(',')]  # Split and clean URLs
+                thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
                 for img in thumbnail_images:
                     SubElement(picture_details, 'PictureURL').text = img
             # Convert the ElementTree to an XML string
