@@ -28,6 +28,7 @@ class ItemListingToEbaySerializer:
 		model_class = []
 		item_specifics_name = []
 		valid_choices_field = {}
+		is_required = False
 		# Create a ModelSerializer class for the model fields
 		class ModelSerializer(serializers.ModelSerializer):
 			class Meta:
@@ -49,7 +50,8 @@ class ItemListingToEbaySerializer:
 		for aspect in item_specifics:
 			aspect_name = aspect['localizedAspectName']
 			options = aspect.get('aspectValues', [])
-			is_required = aspect.get('aspectConstraint', {}).get('aspectUsage') == 'REQUIRED'
+			if aspect.get('aspectConstraint', {}).get('aspectUsage') == 'REQUIRED':
+				is_required = True
 			
 			# Skip if this field is already in the model fields to avoid duplication
 			if hasattr(model_class, aspect_name):
