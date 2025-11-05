@@ -670,12 +670,11 @@ class Ebay(APIView):
             SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
             if validated_data["thumbnailImage"] != "Null":
                 thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-                thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+                thumbnail_images = [url.strip() for url in thumbnail_images.split(',')]  # Split and clean URLs
                 for img in thumbnail_images:
                     SubElement(picture_details, 'PictureURL').text = img
             # Convert the ElementTree to an XML string
             item_image_url = tostring(picture_details, encoding='unicode')
-            print(item_image_url)
         except:
             return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
         
@@ -770,9 +769,9 @@ class Ebay(APIView):
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product listing was successful", status=status.HTTP_200_OK)
         except ConnectionError as e:       
-            return Response(f"Failed to post connection issue {e} {item_image_url}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post connection issue", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:       
-            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post {e}", status=status.HTTP_400_BAD_REQUEST)
 	
 	
     # Function to save product for later listing
