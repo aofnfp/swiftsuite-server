@@ -40,9 +40,9 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 # Check the response
                 if response.status_code == 200:
                     serializer.save()
-                    return Response(f"Success: {response.json()}", status=status.HTTP_200_OK)
+                    return Response(f"Success: {response.text}", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Error:{response.json()}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Error:{response.text}", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Woocommerce":
                 response = wooc.update_woocommerce_product(userid, validated_data, product_info.item_specific_fields, market_name, product_info.market_item_id)
                 if response.status_code == 200:
