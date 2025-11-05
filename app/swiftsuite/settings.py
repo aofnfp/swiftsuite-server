@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     'rest_framework_extensions',
+    'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     'django_cleanup.apps.CleanupConfig'
 ]
@@ -100,7 +101,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.AllowAny",  
     ),
-    
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 REST_FRAMEWORK_EXTENSIONS = {
@@ -114,6 +115,13 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'SwiftSuite Service API',
+    'DESCRIPTION': 'API documentation for SwiftSuite Service',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
