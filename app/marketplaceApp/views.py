@@ -591,55 +591,71 @@ class Ebay(APIView):
             return JsonResponse({"Message":f"Failed to fetch item specific fields."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return response.json()
-            
+
+    
+    # Function to get required item specifics for a given category
+    def get_required_fields_item(self, category_id: str, oauth_token: str):
+        category_tree_id = '0'
+        url = (
+            f"https://api.ebay.com/commerce/taxonomy/v1_beta/"
+            f"category_tree/{category_tree_id}/get_item_aspects_for_category"
+        )
+        params = {
+            "category_id": category_id,
+            "marketplace_id": "EBAY_US"
+        }
+        headers = {
+            "Authorization": f"Bearer {oauth_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+        
+        resp = requests.get(url, headers=headers, params=params)
+        resp.raise_for_status()
+        
+        data = resp.json()
+        required_aspects = []
+        
+        aspects = data.get("aspects", [])
+        for aspect in aspects:
+            constraint = aspect.get("aspectConstraint", {})
+            if constraint.get("aspectRequired", False):
+                required_aspects.append(aspect.get("localizedAspectName"))
+        
+        return required_aspects
+
+
+    # Function to generate dynamic serializer for item specifics fields     
     @api_view(['GET'])
     def get_item_specifics_fields(request, userid, market_name, leaf_category_id):
         eb = Ebay()
         item_specifics_field = []
         choices_data = {}
-        required_item_specifics = []
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         if not access_token:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
         # Fetch item specifics from eBay and generate the serializer
         data = eb.get_item_specifics_from_ebay(access_token, leaf_category_id)
+        
         # Pass the item specifics to the serializer generator function
         item_specifics = data.get('aspects', [])
         
         # Generate the dynamic serializer
-        DynamicItemSpecificsSerializer, _fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
-            if field_name in _fields:
-                # Identify Boolean fields
-                if isinstance(field, serializers.BooleanField):
-                    item_specifics_field.append(f"{field_name} (Boolean field)")
-                else:
+            if isinstance(field, serializers.BooleanField) and field_name in _fields:
+                item_specifics_field.append(field_name +" (Boolean field)")
+            else:
+                if field_name in _fields:
                     item_specifics_field.append(field_name)
-
-                # Check if the field is required
-                if getattr(field, 'required', False):
-                    required_item_specifics.append(field_name)
-
-        # Return the field names, valid choices, and required fields
+        # item_specifics_field.append(choices_data)
+        required_fields = eb.get_required_fields_item(leaf_category_id, access_token)
+        # For now, return the field names (you can replace this with form processing later)
         return Response({
-            "item_specifics": item_specifics_field,
-            "valid_choices": valid_choices_fields,
-            "required_fields": required_fields
+            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields, "required_fields": required_fields
         })
-        # # Extract choices from the ChoiceField fields
-        # for field_name, field in DynamicItemSpecificsSerializer().fields.items():
-        #     if isinstance(field, serializers.BooleanField) and field_name in _fields:
-        #         item_specifics_field.append(field_name +" (Boolean field)")
-        #     else:
-        #         if field_name in _fields:
-        #             item_specifics_field.append(field_name)
-        # # item_specifics_field.append(choices_data)
-        # # For now, return the field names (you can replace this with form processing later)
-        # return Response({
-        #     "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields
-        # })
     
     # Calculate the selling price of product going to ebay
     def calculated_selling_price(self, enroll_id=0, start_price=0, prod_id='', userid=0):
