@@ -39,7 +39,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 response = mk.update_item_on_ebay(userid, validated_data, product_info.item_specific_fields)
                 # Check the response
                 serializer.save()
-                return Response(f"{response.text}", status=status.HTTP_200_OK)
+                return Response(f"{response}", status=status.HTTP_200_OK)
                 # return Response(f"Failed to update product on eBay.", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Woocommerce":
                 response = wooc.update_woocommerce_product(userid, validated_data, product_info.item_specific_fields, market_name, product_info.market_item_id)
