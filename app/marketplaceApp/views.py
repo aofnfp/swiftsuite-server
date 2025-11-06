@@ -845,7 +845,7 @@ class Ebay(APIView):
             Generalproducttable.objects.filter(upc=validated_data['upc']).update(active=True)
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
  
         
         
