@@ -1104,7 +1104,7 @@ class WooCommerce(APIView):
             Generalproducttable.objects.filter((Q(upc=validated_data['upc']) | Q(sku=validated_data['sku'])) & Q(user_id=userid)).update(active=True)
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Fail to save product.: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Fail to save product.", status=status.HTTP_400_BAD_REQUEST)
         
 
     
