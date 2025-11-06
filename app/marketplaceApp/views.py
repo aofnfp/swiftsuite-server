@@ -832,7 +832,6 @@ class Ebay(APIView):
                 
 	
     # Function to save product for later listing
-    @api_view(['POST'])
     def save_product_before_listing(self, userid, item_specifics_fields, validated_data):
         custom_fields = {}
        
