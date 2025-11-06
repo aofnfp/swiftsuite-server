@@ -40,10 +40,10 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 # Check the response
                 if response.status_code == 200:
                     serializer.save()
-                    return Response(f"Product updated successfully", status=status.HTTP_200_OK)
+                    return Response(f"Product updated successfully: {response.json()}", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Error updating", status=status.HTTP_400_BAD_REQUEST)
-                
+                    return Response(f"Error updating: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
+
                 # if response == "success":
                 #     serializer.save()
                 #     return Response(f"Update was Successful", status=status.HTTP_200_OK)
