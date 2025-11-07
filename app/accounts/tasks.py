@@ -64,6 +64,15 @@ def send_normal_email(data, file='reset_password.html'):
         
         data['current_year'] = dt.now().year
         
+        
+        for key, value in {
+            "email_subject": data.get("email_subject"),
+            "to_email": data.get("to_email"),
+            "from_email": settings.DEFAULT_FROM_EMAIL,
+        }.items():
+            if isinstance(value, str) and '\xa0' in value:
+                logger.error(f"⚠️ Non-breaking space found in {key}: {repr(value)}")
+        
         # Clean potential non-ASCII characters from all text fields
         def clean_text(text):
             if isinstance(text, str):
