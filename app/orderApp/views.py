@@ -76,7 +76,7 @@ class OrderEbay(APIView):
             
             # Get details of product ordered using item legacy id
             items = order_details.get('lineItems', [])[0]
-            product_data = InventoryModel.objects.all().filter(ebay_item_id=items.get("legacyItemId")).values()
+            product_data = InventoryModel.objects.all().filter(market_item_id=items.get("legacyItemId")).values()
             
             return JsonResponse({"ordered_details":order_details, "product_data":list(product_data)}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.HTTPError as err:
