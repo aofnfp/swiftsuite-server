@@ -22,7 +22,7 @@ def send_code_to_user(email):
         subject = "One time passcode for Email Verification"
         otp_code =  generate_otp()
         user = User.objects.get(email=email)
-        from_email = f"Swift Suite <{settings.DEFAULT_FROM_EMAIL}>",
+        from_email =settings.DEFAULT_FROM_EMAIL
         OneTimePassword.objects.update_or_create(
             user=user,
             defaults={'code': otp_code}
@@ -80,7 +80,7 @@ def send_normal_email(data, file='reset_password.html'):
         email = EmailMultiAlternatives(
             subject= data['email_subject'],
             body = plain_message,
-            from_email = f"Swift Suite <{settings.DEFAULT_FROM_EMAIL}>",
+            from_email =settings.DEFAULT_FROM_EMAIL,
             to = [data['to_email']] 
         )
         email.attach_alternative(html_message, 'text/html')
