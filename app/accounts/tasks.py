@@ -64,10 +64,19 @@ def send_normal_email(data, file='reset_password.html'):
         
         data['current_year'] = dt.now().year
         
+        # Clean potential non-ASCII characters from all text fields
+        def clean_text(text):
+            if isinstance(text, str):
+                return text.replace('\xa0', ' ').encode('utf-8', errors='ignore').decode('utf-8')
+            return text
+
+        data['email_subject'] = clean_text(data.get('email_subject', ''))
+        data['to_email'] = clean_text(data.get('to_email', ''))
+
         html_message = render_to_string(file, context=data)
-        plain_message = strip_tags(html_message) 
-
-
+        html_message = clean_text(html_message)
+        plain_message = strip_tags(html_message)
+ 
         email = EmailMultiAlternatives(
             subject= data['email_subject'],
             body = plain_message,
