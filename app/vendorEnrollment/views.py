@@ -273,7 +273,7 @@ class CatalogueBaseView(ListAPIView):
             return CwrUpdateSerializer
         return None
 
-    @cache_response()
+    
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset() 
         params = self.request.query_params
@@ -286,17 +286,33 @@ class CatalogueBaseView(ListAPIView):
         
         
         if search:
-            filters &= Q(product__upc__icontains=search) | Q(product__sku__icontains=search)  
+            filters &= (Q(product__upc__icontains=search) | Q(product__sku__icontains=search) | Q(**{f'product__{self.product_name_field}__icontains': search}))  
         if minQty:
-            filters &= Q(quantity__gte=minQty)
+            try:
+                minQty = int(minQty)
+                filters &= Q(quantity__gte=minQty)
+            except ValueError:
+                pass
         if maxQty:
-            filters &= Q(quantity__lte=maxQty)
+            try:
+                maxQty = int(maxQty)
+                filters &= Q(quantity__lte=maxQty)
+            except ValueError:
+                pass
         if minprice:   
-            filters &= Q(price__gte=minprice)
+            try:
+                minprice = float(minprice)
+                filters &= Q(price__gte=minprice)
+            except ValueError:
+                pass
         if maxprice:
-            filters &= Q(price__lte=maxprice)
+            try:
+                maxprice = float(maxprice)
+                filters &= Q(price__lte=maxprice)
+            except ValueError:
+                pass
         
-        if filters:
+        if filters != Q():
             queryset = queryset.filter(filters)
         
         if not queryset.exists():
@@ -330,25 +346,32 @@ class CatalogueFragrancexView(CatalogueBaseView):
     model = Fragrancex
     vendor_name = 'FragranceX'
     updateModel = FragrancexUpdate
+    product_name_field = 'productName'
 class CatalogueZandersView(CatalogueBaseView):
     model = Zanders
     vendor_name = 'Zanders'
     updateModel = ZandersUpdate
+    product_name_field = 'desc1'
 class CatalogueLipseyView(CatalogueBaseView):
     model = Lipsey
     vendor_name = 'Lipsey'
     updateModel = LipseyUpdate
+    product_name_field = 'description1'
 class CatalogueSsiView(CatalogueBaseView):
     model = Ssi
-    vendor_name = 'SSI'   
+    vendor_name = 'SSI' 
+    updateModel = None  # No update model for SSI
+    product_name_field = 'description'  
 class CatalogueCwrView(CatalogueBaseView):
     model = Cwr
     vendor_name = 'CWR'
-    updateModel = CwrUpdate  
+    updateModel = CwrUpdate
+    product_name_field = 'title'  
 class CatalogueRsrView(CatalogueBaseView):
     model = Rsr
     vendor_name = 'RSR'
     updateModel = RsrUpdate
+    product_name_field = 'title'
 
 class AllCatalogueView(ListAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
