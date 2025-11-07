@@ -53,7 +53,7 @@ class OrderEbay(APIView):
             item_details = response.json()
             return item_details
         else:
-            print("Item not found:", response.text)
+            pass
 
 
     # Function to get ordered details of an item
@@ -80,9 +80,9 @@ class OrderEbay(APIView):
             
             return JsonResponse({"ordered_details":order_details, "product_data":list(product_data)}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.HTTPError as err:
-            return Response(f"HTTP error occurred: {err}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Connection error occurred", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(f"An error occurred: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"An error occurred, contact support team", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to cancel an order from ebay
@@ -114,11 +114,11 @@ class OrderEbay(APIView):
             cancellation_details = response.json()
             return JsonResponse(cancellation_details, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.HTTPError as err:
-            return Response(f"HTTP error occurred.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Connection error occurred.", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(f"An error occurred.", status=status.HTTP_400_BAD_REQUEST)
-            
-            
+            return Response(f"An error occurred, contact support team.", status=status.HTTP_400_BAD_REQUEST)
+
+
 # Order background task invocation
 sync_ebay_order_task.delay()
     

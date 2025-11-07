@@ -75,7 +75,8 @@ def get_orders(access_token, date_range='90'):
             break
         offset += limit
 
-    return all_orders
+    # return all_orders, start_time
+    return JsonResponse({"days": start_time}, safe=False, status=status.HTTP_200_OK)
 
 
 # ==== CALCULATE STATISTICS ====
