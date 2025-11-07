@@ -5,7 +5,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from celery import shared_task
-import logging
+import logging, json
 from datetime import datetime as dt
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,9 @@ def send_normal_email(data, file='reset_password.html'):
         for key in list(data.keys()):
             data[key] = clean_text(data[key])
             
+        logger.debug(f"Email data before sending: {json.dumps(data, default=str, ensure_ascii=False)}")
+
+            
         html_message = render_to_string(file, context=data)
         html_message = clean_text(html_message)
         plain_message = strip_tags(html_message)
@@ -88,4 +91,4 @@ def send_normal_email(data, file='reset_password.html'):
         email.encoding = "utf-8"
         email.send(fail_silently=False)
     except Exception as e:
-        logger.error(f"Error sending email to {data['to_email']}: {e}")
+        logger.error(f"Error sending email to {data['to_email']}: {e}", exc_info=True)
