@@ -65,23 +65,15 @@ def send_normal_email(data, file='reset_password.html'):
         data['current_year'] = dt.now().year
         
         
-        for key, value in {
-            "email_subject": data.get("email_subject"),
-            "to_email": data.get("to_email"),
-            "from_email": settings.DEFAULT_FROM_EMAIL,
-        }.items():
-            if isinstance(value, str) and '\xa0' in value:
-                logger.error(f"⚠️ Non-breaking space found in {key}: {repr(value)}")
-        
-        # Clean potential non-ASCII characters from all text fields
-        def clean_text(text):
-            if isinstance(text, str):
-                return text.replace('\xa0', ' ').encode('utf-8', errors='ignore').decode('utf-8')
-            return text
+        def clean_text(value):
+            if isinstance(value, str):
+                return value.replace('\xa0', ' ').encode('utf-8', errors='ignore').decode('utf-8')
+            return value
 
-        data['email_subject'] = clean_text(data.get('email_subject', ''))
-        data['to_email'] = clean_text(data.get('to_email', ''))
-
+        # Clean all string data
+        for key in list(data.keys()):
+            data[key] = clean_text(data[key])
+            
         html_message = render_to_string(file, context=data)
         html_message = clean_text(html_message)
         plain_message = strip_tags(html_message)
