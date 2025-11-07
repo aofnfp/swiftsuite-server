@@ -75,7 +75,7 @@ def get_orders(access_token, date_range='90'):
             break
         offset += limit
 
-    return all_orders, start_time
+    return all_orders
 
 
 # ==== CALCULATE STATISTICS ====
@@ -95,7 +95,7 @@ def generate_report(request, userId, date_range):
     )
 
     # Order stats
-    total_orders = len(orders[0])
+    total_orders = len(orders)
     total_sold_items = sum(
         line["lineItems"][0].get("quantity", 0)
         for line in orders if "lineItems" in line and line["lineItems"]
@@ -104,7 +104,7 @@ def generate_report(request, userId, date_range):
         float(line.get("pricingSummary", {}).get("total", {}).get("value", 0))
         for line in orders
     )
-    return JsonResponse({"Active Listings": total_inventory, "Total Quantity in Inventory": total_quantity, f"Orders (Last {date_range} Days)": total_orders, "Total Items Sold": total_sold_items, "Total Sales": round(total_sales, 4), "Date Range": orders[1]}, safe=False, status=status.HTTP_200_OK)
+    return JsonResponse({"Active Listings": total_inventory, "Total Quantity in Inventory": total_quantity, f"Orders (Last {date_range} Days)": total_orders, "Total Items Sold": total_sold_items, "Total Sales": round(total_sales, 4)}, safe=False, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

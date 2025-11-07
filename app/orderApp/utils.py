@@ -5,6 +5,7 @@ from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
 from .models import OrdersOnEbayModel
 from inventoryApp.models import InventoryModel
+from datetime import datetime, timedelta
 
 
 
@@ -49,40 +50,79 @@ def refresh_access_token_for_sync(market_id, market_name):
 
 # Function to retrieve all fulfilment orders from Ebay
 def get_product_ordered_from_background(access_token):
-    
+
     # Set eBay API endpoint and headers
     try:
-        url = "https://api.ebay.com/sell/fulfillment/v1/order"
-        headers = {
+        HEADERS = {
             "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
-        }
-        orders = []
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+            }   
+        all_orders = []
+        base_url = "https://api.ebay.com/sell/fulfillment/v1/order"
+        limit = 100
         offset = 0
-        limit = 50  # Adjust the limit as needed
-        
+
+        # Custom date range
+        start_time = (datetime.utcnow() - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+        params = {
+            "filter": f"creationdate:[{start_time}..]",
+            "limit": limit
+        }
+
         while True:
-            params = {
-                "limit": limit,
-                "offset": offset
-            }
-            
-            response = requests.get(url, headers=headers, params=params)
-            
+            params["offset"] = offset
+            response = requests.get(base_url, headers=HEADERS, params=params)
             if response.status_code == 200:
                 data = response.json()
-                orders.extend(data.get('orders', []))
-                
-                if len(data.get('orders', [])) < limit:
-                    break  # No more orders to fetch
+                if "orders" not in data:
+                    break
+                orders = data["orders"]
+                all_orders.extend(orders)
+                if len(orders) < limit:
+                    break
                 offset += limit
             else:
                 print(f"Failed to retrieve orders: {response.text}")
-        
-        return orders  
+                return None
+        return all_orders 
     except Exception as e:
         print(f'Could not fetch ordered items from ebay Error: {e}')
         return None
+
+    
+    # try:
+    #     url = "https://api.ebay.com/sell/fulfillment/v1/order"
+    #     headers = {
+    #         "Authorization": f"Bearer {access_token}",
+    #         "Content-Type": "application/json"
+    #     }
+    #     orders = []
+    #     offset = 0
+    #     limit = 50  # Adjust the limit as needed
+        
+    #     while True:
+    #         params = {
+    #             "limit": limit,
+    #             "offset": offset
+    #         }
+            
+    #         response = requests.get(url, headers=headers, params=params)
+            
+    #         if response.status_code == 200:
+    #             data = response.json()
+    #             orders.extend(data.get('orders', []))
+                
+    #             if len(data.get('orders', [])) < limit:
+    #                 break  # No more orders to fetch
+    #             offset += limit
+    #         else:
+    #             print(f"Failed to retrieve orders: {response.text}")
+        
+    #     return orders  
+    # except Exception as e:
+    #     print(f'Could not fetch ordered items from ebay Error: {e}')
+    #     return None
         
 
 # Function to get details of specific item ordered on ebay

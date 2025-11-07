@@ -53,7 +53,7 @@ class OrderEbay(APIView):
             item_details = response.json()
             return item_details
         else:
-            pass
+            return None
 
 
     # Function to get ordered details of an item
