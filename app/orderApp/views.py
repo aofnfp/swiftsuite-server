@@ -24,7 +24,7 @@ class OrderEbay(APIView):
     @api_view(['GET'])
     def get_product_ordered(request, userid, page_number, num_per_page):
         try:
-            order_items = OrdersOnEbayModel.objects.all().filter(user_id=userid).values().order_by('creationDate')
+            order_items = OrdersOnEbayModel.objects.all().filter(user_id=userid).values().order_by('creationDate').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(order_items, int(num_per_page))
             try:
