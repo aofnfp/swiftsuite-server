@@ -15,53 +15,41 @@ from django.db.models import Q
 # Function to refresh the access token using the refresh token
 @sleep_and_retry
 @limits(calls=5, period=1)
-def refresh_access_token_for_sync(market_id, market_name):
+def refresh_access_token_for_sync(userid, market_name):
     eb = Ebay()
     try:
-        connection = MarketplaceEnronment.objects.all().get(_id=market_id, marketplace_name=market_name)
+        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
     except Exception as e:
-        print(f"Failed to fetch access token in inventory: {e}")
+        print(f"Failed to fetch data from enrollment table: {e}")
         return None
-        
-    try:
-        access_token = connection.access_token
-        refresh_token = connection.refresh_token
+    access_token = connection.access_token
+    refresh_token = connection.refresh_token
 
-        credentials = f"{eb.client_id}:{eb.client_secret}"
-        credentials_base64 = base64.b64encode(credentials.encode()).decode()
-        
-        headers = {
-            "Authorization": f"Basic {credentials_base64}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        body = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-        }
-            
-        response = requests.post(eb.token_url, headers=headers, data=body)
-        if response.status_code == 429:  # Rate limit hit
-            retry_after = int(response.headers.get('Retry-After', 2))
-            time.sleep(retry_after)
-            return refresh_access_token_for_sync(market_id, "Ebay")
-            
-        if response.status_code != 200:
-            print(f"Failed to refresh access token. Authorization code has expired: {response.text}")
-            return None
+    credentials = f"{eb.client_id}:{eb.client_secret}"
+    credentials_base64 = base64.b64encode(credentials.encode()).decode()
+    
+    headers = {
+        "Authorization": f"Basic {credentials_base64}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    body = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
+    }
 
-        result = response.json()
-        access_token = result.get('access_token')
-        
-        if not access_token:
-            print(f"Failed to get access token in inventory from response{result}")
-            return None
+    response = requests.post(eb.token_url, headers=headers, data=body)
+    if response.status_code != 200:
+        print(f"Failed to refresh access token. Authorization code has expired")
 
-        MarketplaceEnronment.objects.filter(_id=market_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-        return access_token
-    except Exception as e:
-        print(f"Failed to refresh access token in inventoryApp: {e}")
-        return None
+    result = response.json()
+    access_token = result.get('access_token')
+    
+    if not access_token:
+        print(f"Failed to get access token from response")
+
+    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+    return access_token
     
 
 # Create a function to update items quantity and price at the background on Ebay
@@ -271,7 +259,7 @@ def sync_ebay_items_with_local():
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
-        access_token = refresh_access_token_for_sync(user._id, "Ebay")
+        access_token = refresh_access_token_for_sync(user.user_id, "Ebay")
         if not access_token:
             print(f"Failed to refresh access token. Access token returns none in inventoryapp {user._id}")   
             continue
