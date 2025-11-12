@@ -10,10 +10,10 @@ from datetime import datetime, timedelta
 
 
 # Function to refresh the access token using the refresh token
-def refresh_access_token_for_sync(userid, market_name):
+def refresh_access_token_for_sync(enrol_id, market_name):
     eb = Ebay()
     try:
-        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+        connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
     except Exception as e:
         print(f"Failed to fetch data from enrollment table: {e}")
         return None
@@ -36,14 +36,16 @@ def refresh_access_token_for_sync(userid, market_name):
     response = requests.post(eb.token_url, headers=headers, data=body)
     if response.status_code != 200:
         print(f"Failed to refresh access token. Authorization code has expired")
+        return None
 
     result = response.json()
     access_token = result.get('access_token')
     
     if not access_token:
         print(f"Failed to get access token from response")
+        return None
 
-    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+    MarketplaceEnronment.objects.filter(_id=enrol_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
     return access_token
 
 

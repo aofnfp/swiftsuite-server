@@ -397,12 +397,14 @@ class MarketInventory(APIView):
         response = requests.post(eb.token_url, headers=headers, data=body)
         if response.status_code != 200:
             print(f"Failed to refresh access token. Authorization code has expired")
+            return None
 
         result = response.json()
         access_token = result.get('access_token')
         
         if not access_token:
             print(f"Failed to get access token from response")
+            return None
 
         MarketplaceEnronment.objects.filter(_id=enrol_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
         
