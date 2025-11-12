@@ -371,10 +371,10 @@ class MarketInventory(APIView):
 
     # Function to test any api from ebay before implementation
     @api_view(['GET'])
-    def function_to_test_api(request, userid, market_name):
+    def function_to_test_api(request, enrol_id, market_name):
         eb = Ebay()
         try:
-            connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+            connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
         except Exception as e:
             print(f"Failed to fetch data from enrollment table: {e}")
             return None
@@ -404,7 +404,7 @@ class MarketInventory(APIView):
         if not access_token:
             print(f"Failed to get access token from response")
 
-        MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+        MarketplaceEnronment.objects.filter(_id=enrol_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
         
         return JsonResponse({"access_token": access_token, "refresh_token": refresh_token}, status=status.HTTP_200_OK)
 

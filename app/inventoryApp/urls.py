@@ -11,5 +11,5 @@ urlpatterns = [
     path('delete_product_from_inventory/<int:inventoryid>/', MarketInventory.delete_product_from_inventory, name='delete_product_from_inventory'),
     path('update_item_details_on_marketplace/<int:userid>/<str:market_name>/<int:inventory_id>/', update_product_on_marketplace, name='update_item_details_on_marketplace'),
     path('end_and_delete_product_from_ebay/<int:userid>/<int:inventoryid>/', MarketInventory.end_delete_product_from_ebay, name='end_and_delete_product_from_ebay'),
-    path('test_api_function/<int:userid>/<str:market_name>/', MarketInventory.function_to_test_api, name='test_api_function'),
+    path('test_api_function/<int:enrol_id>/<str:market_name>/', MarketInventory.function_to_test_api, name='test_api_function'),
 ]
