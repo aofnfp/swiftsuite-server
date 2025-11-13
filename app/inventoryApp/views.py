@@ -131,17 +131,23 @@ class MarketInventory(APIView):
 
 
     # Create a function to update item information on Ebay
-    def update_item_on_ebay(self, userId, item_specific_fields, validated_data):
+    @api_view(['PUT'])
+    def update_item_on_ebay(request, userid, market_name, inventory_id):
         minv = MarketInventory()
         eb = Ebay()
-        access_token = eb.refresh_access_token(userId, "Ebay")
+        access_token = eb.refresh_access_token(userid, "Ebay")
+        product_info = get_object_or_404(InventoryModel, id=inventory_id)
+        serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
+        if serializer.is_valid():
+            # get the serializer's data
+            validated_data = serializer.validated_data
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(item_specific_fields)
+        xml_item_specifics = minv.json_to_xml(validated_data.item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
         try:
-            product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userId).values()
+            product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
             enroll_id = product_details[0].get("enrollment_id")
-            minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userId)
+            minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
             if type(minimum_offer_price) != float:
                 return Response(f"Failed to fetch data:", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
