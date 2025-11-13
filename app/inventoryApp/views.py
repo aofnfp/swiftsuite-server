@@ -142,7 +142,7 @@ class MarketInventory(APIView):
             # get the serializer's data
             validated_data = serializer.validated_data
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(validated_data.item_specific_fields)
+        xml_item_specifics = minv.json_to_xml(product_info.item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
         try:
             product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
