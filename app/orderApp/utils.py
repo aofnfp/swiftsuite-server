@@ -159,9 +159,10 @@ def get_item_ordered_details(access_token, item_id):
 def sync_ebay_order_with_local():
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
+        print(f"Syncing orders for user {user._id} on {user.marketplace_name}")
         if user.marketplace_name == "Ebay":
             # Get access_token
-            access_token = refresh_access_token_for_sync(user._id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+            access_token = refresh_access_token_for_sync(user._id, user.marketplace_name) #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
             if not access_token:
                 print(f"Failed to refresh access token. Access token returns none in orderapp")
                 continue
