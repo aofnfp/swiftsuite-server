@@ -1,4 +1,4 @@
-from logging import config
+from decouple import config
 import requests, time
 import base64
 from marketplaceApp.views import Ebay

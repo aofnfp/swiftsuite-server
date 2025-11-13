@@ -1,5 +1,5 @@
 import json, requests, time
-from logging import config
+from decouple import config
 import base64
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
