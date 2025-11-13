@@ -425,6 +425,8 @@ class WooCommerceInventory(APIView):
         if serializer.is_valid():
             # get the serializer's data
             validated_data = serializer.validated_data
+        else:
+            return Response(f"Form not filled correctly.", status=status.HTTP_400_BAD_REQUEST)
         # Generate the meta_data values from item specifics
         meta_data = []
         for key, value in json.loads(product_info.item_specific_fields)[0].items():
