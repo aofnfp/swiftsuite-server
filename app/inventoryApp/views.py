@@ -451,13 +451,16 @@ class WooCommerceInventory(APIView):
         # --- MAKE THE UPDATE REQUEST ---
         response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
         if response.status_code == 200:
-            return "Success"
-        elif response.status_code == 404:
-            return "Product not found — check the product ID."
-        elif response.status_code == 401:
-            return "Unauthorized — check your API credentials."
+            return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
         else:
-            return "Unexpected error"
+            return Response(f"Unexpected error: {response}", status=status.HTTP_400_BAD_REQUEST)
+        #     return "Success"
+        # elif response.status_code == 404:
+        #     return "Product not found — check the product ID."
+        # elif response.status_code == 401:
+        #     return "Unauthorized — check your API credentials."
+        # else:
+        #     return "Unexpected error"
         # except ConnectionError as e:
         #     return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
 
