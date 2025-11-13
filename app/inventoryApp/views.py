@@ -43,7 +43,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                     serializer.save()
                     return Response(f"Product updated successfully: {response}", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Error updating: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Error updating: {response}", status=status.HTTP_400_BAD_REQUEST)
 
                 # if response == "success":
                 #     serializer.save()
