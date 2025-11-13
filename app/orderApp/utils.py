@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 def refresh_access_token_for_sync(enrol_id, market_name):
     eb = Ebay()
     try:
-        connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
-        print(connection.user_id, connection._id)
+        connection = MarketplaceEnronment.objects.get(_id=enrol_id, marketplace_name=market_name)
+        print(f"user id: {connection.user_id}, enrolmet id:{connection._id}")
     except Exception as e:
         print(f"Failed to fetch data from enrollment table: {e}")
         return None
@@ -159,7 +159,6 @@ def get_item_ordered_details(access_token, item_id):
 def sync_ebay_order_with_local():
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
-        print(f"Syncing orders for user {user._id} on {user.marketplace_name}")
         if user.marketplace_name == "Ebay":
             # Get access_token
             access_token = refresh_access_token_for_sync(user._id, user.marketplace_name) #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
