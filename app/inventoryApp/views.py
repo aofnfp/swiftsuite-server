@@ -410,55 +410,55 @@ class WooCommerceInventory(APIView):
     # Function to update product on woocommerce store
     def update_woocommerce_product(self, request, userid, inventory_id, market_name):
         wooc = WooCommerce()
-        try:
-            enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
-            # Set up the WooCommerce API client
-            wcapi = API(
-                url = enrollment.wc_consumer_url, 
-                consumer_key = enrollment.wc_consumer_key,  
-                consumer_secret = enrollment.wc_consumer_secret, 
-                version = "wc/v3"
-            )
-            product_info = get_object_or_404(InventoryModel, id=inventory_id)
-            serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
-            if serializer.is_valid():
-                # get the serializer's data
-                validated_data = serializer.validated_data
-            # Generate the meta_data values from item specifics
-            meta_data = []
-            for key, value in json.loads(product_info.item_specific_fields).items():
-                meta_data.append({"key": key, "value": value})
+        # try:
+        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+        # Set up the WooCommerce API client
+        wcapi = API(
+            url = enrollment.wc_consumer_url, 
+            consumer_key = enrollment.wc_consumer_key,  
+            consumer_secret = enrollment.wc_consumer_secret, 
+            version = "wc/v3"
+        )
+        product_info = get_object_or_404(InventoryModel, id=inventory_id)
+        serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
+        if serializer.is_valid():
+            # get the serializer's data
+            validated_data = serializer.validated_data
+        # Generate the meta_data values from item specifics
+        meta_data = []
+        for key, value in json.loads(product_info.item_specific_fields).items():
+            meta_data.append({"key": key, "value": value})
 
-            # Product payload mapped to WooCommerce
-            update_data = {
-                "name": validated_data['title'],
-                "type": "simple",
-                "regular_price": validated_data['start_price'],
-                "description": validated_data['description'],
-                "sku": validated_data['sku'],
-                "stock_quantity": validated_data['quantity'],
-                "manage_stock": True,
-                "categories": [
-                    {"id": wooc.get_category_id(validated_data['woo_category_name'], enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
-                ],
-                "images": [
-                    {"src": validated_data['picture_detail']}
-                ],
-                "meta_data": meta_data
-            }
+        # Product payload mapped to WooCommerce
+        update_data = {
+            "name": validated_data['title'],
+            "type": "simple",
+            "regular_price": validated_data['start_price'],
+            "description": validated_data['description'],
+            "sku": validated_data['sku'],
+            "stock_quantity": validated_data['quantity'],
+            "manage_stock": True,
+            "categories": [
+                {"id": wooc.get_category_id(validated_data['woo_category_name'], enrollment.wc_consumer_url, enrollment.wc_consumer_key, enrollment.wc_consumer_secret)}   # Category ID must exist in WooCommerce
+            ],
+            "images": [
+                {"src": validated_data['picture_detail']}
+            ],
+            "meta_data": meta_data
+        }
 
-            # --- MAKE THE UPDATE REQUEST ---
-            response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
-            if response.status_code == 200:
-                return "Success"
-            elif response.status_code == 404:
-                return "Product not found — check the product ID."
-            elif response.status_code == 401:
-                return "Unauthorized — check your API credentials."
-            else:
-                return "Unexpected error"
-        except ConnectionError as e:
-            return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
+        # --- MAKE THE UPDATE REQUEST ---
+        response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
+        if response.status_code == 200:
+            return "Success"
+        elif response.status_code == 404:
+            return "Product not found — check the product ID."
+        elif response.status_code == 401:
+            return "Unauthorized — check your API credentials."
+        else:
+            return "Unexpected error"
+        # except ConnectionError as e:
+        #     return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
 
 
 
