@@ -14,7 +14,7 @@ def refresh_access_token_for_sync(enrol_id, market_name):
     eb = Ebay()
     try:
         connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
-        print(connection.values())
+        print(connection.user_id, connection._id)
     except Exception as e:
         print(f"Failed to fetch data from enrollment table: {e}")
         return None
