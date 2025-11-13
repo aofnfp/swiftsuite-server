@@ -28,14 +28,11 @@ from marketplaceApp.views import WooCommerce
 @api_view(['PUT'])
 def update_product_on_marketplace(request, userid, market_name, inventory_id):
     mk = MarketInventory()
-    wooc = WooCommerce()
+    wooc = WooCommerceInventory()
     try:
         product_info = get_object_or_404(InventoryModel, id=inventory_id)
         serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
         if serializer.is_valid():
-            # get the serializer's data
-            validated_data = serializer.validated_data
-            # Select the marketplace to list the product
             if market_name == "Ebay":
                 response = mk.update_item_on_ebay(request, userid, inventory_id)
                 # Check the response
@@ -46,16 +43,12 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                     return Response(f"Failed to update product on eBay.", status=status.HTTP_400_BAD_REQUEST)
 
             elif market_name == "Woocommerce":
-                response = wooc.update_woocommerce_product(userid, validated_data, product_info.item_specific_fields, market_name, product_info.market_item_id)
-                if response.status_code == 200:
+                response = wooc.update_woocommerce_product(request, userid, inventory_id, market_name)
+                if response == "Success":
                     serializer.save()
                     return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
-                elif response.status_code == 404:
-                    return Response(f"Product not found — check the product ID.", status=status.HTTP_404_NOT_FOUND)
-                elif response.status_code == 401:
-                    return Response(f"Unauthorized — check your API credentials.", status=status.HTTP_401_UNAUTHORIZED)
                 else:
-                    return Response(f"Unexpected error", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Unexpected error: {response}", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Shopify":
                 pass
             elif market_name == "Amazon":
@@ -413,9 +406,9 @@ class MarketInventory(APIView):
 
 
 
-class WooCommerce(APIView):
+class WooCommerceInventory(APIView):
     # Function to update product on woocommerce store
-    def update_woocommerce_product(self, userid, validated_data, item_specific_fields, market_name, market_item_id):
+    def update_woocommerce_product(self, request, userid, inventory_id, market_name):
         wooc = WooCommerce()
         try:
             enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
@@ -426,9 +419,14 @@ class WooCommerce(APIView):
                 consumer_secret = enrollment.wc_consumer_secret, 
                 version = "wc/v3"
             )
+            product_info = get_object_or_404(InventoryModel, id=inventory_id)
+            serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
+            if serializer.is_valid():
+                # get the serializer's data
+                validated_data = serializer.validated_data
             # Generate the meta_data values from item specifics
             meta_data = []
-            for key, value in json.loads(item_specific_fields).items():
+            for key, value in json.loads(product_info.item_specific_fields).items():
                 meta_data.append({"key": key, "value": value})
 
             # Product payload mapped to WooCommerce
@@ -450,10 +448,17 @@ class WooCommerce(APIView):
             }
 
             # --- MAKE THE UPDATE REQUEST ---
-            response = wcapi.put(f"products/{market_item_id}", update_data)
-            return response
+            response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
+            if response.status_code == 200:
+                return "Success"
+            elif response.status_code == 404:
+                return "Product not found — check the product ID."
+            elif response.status_code == 401:
+                return "Unauthorized — check your API credentials."
+            else:
+                return "Unexpected error"
         except ConnectionError as e:
-            return Response(f"Error:{e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
 
 
 
