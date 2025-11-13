@@ -172,7 +172,7 @@ class MarketInventory(APIView):
                 <eBayAuthToken>{access_token}</eBayAuthToken>
             </RequesterCredentials>
             <Item>
-                <ItemID>{validated_data['ebay_item_id']}</ItemID>
+                <ItemID>{validated_data['market_item_id']}</ItemID>
                 <Title><![CDATA[{validated_data['title']}]]></Title>
                 <Description><![CDATA[
                     {validated_data['description']}
