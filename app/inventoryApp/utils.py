@@ -1,4 +1,5 @@
 import json, requests, time
+from logging import config
 import base64
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
@@ -17,6 +18,8 @@ from django.db.models import Q
 @limits(calls=5, period=1)
 def refresh_access_token_for_sync(enrol_id, market_name):
     eb = Ebay()
+    client_id = config("EB_CLIENT_ID")
+    client_secret = config("EB_CLIENT_SECRET")
     try:
         connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
     except Exception as e:
@@ -25,7 +28,7 @@ def refresh_access_token_for_sync(enrol_id, market_name):
     access_token = connection.access_token
     refresh_token = connection.refresh_token
 
-    credentials = f"{eb.client_id}:{eb.client_secret}"
+    credentials = f"{client_id}:{client_secret}"
     credentials_base64 = base64.b64encode(credentials.encode()).decode()
     
     headers = {

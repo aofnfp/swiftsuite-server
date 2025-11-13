@@ -1,3 +1,4 @@
+from logging import config
 import requests, time
 import base64
 from marketplaceApp.views import Ebay
@@ -12,16 +13,17 @@ from datetime import datetime, timedelta
 # Function to refresh the access token using the refresh token
 def refresh_access_token_for_sync(enrol_id, market_name):
     eb = Ebay()
+    client_id = config("EB_CLIENT_ID")
+    client_secret = config("EB_CLIENT_SECRET")
     try:
         connection = MarketplaceEnronment.objects.get(_id=enrol_id, marketplace_name=market_name)
-        print(f"user id: {connection.user_id}, enrolmet id:{connection._id}")
     except Exception as e:
         print(f"Failed to fetch data from enrollment table: {e}")
         return None
     access_token = connection.access_token
     refresh_token = connection.refresh_token
 
-    credentials = f"{eb.client_id}:{eb.client_secret}"
+    credentials = f"{client_id}:{client_secret}"
     credentials_base64 = base64.b64encode(credentials.encode()).decode()
     
     headers = {
