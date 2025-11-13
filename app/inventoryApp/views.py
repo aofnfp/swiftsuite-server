@@ -41,9 +41,9 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 # Check the response
                 if response.status_code == 200:
                     serializer.save()
-                    return Response(f"Product updated successfully: {response}", status=status.HTTP_200_OK)
+                    return Response(f"Product updated successfully: {response.json()}", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Error updating: {response}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Error updating: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
 
                 # if response == "success":
                 #     serializer.save()
@@ -131,23 +131,17 @@ class MarketInventory(APIView):
 
 
     # Create a function to update item information on Ebay
-    @api_view(['PUT'])
-    def update_item_on_ebay(request, userid, market_name, inventory_id):
+    def update_item_on_ebay(self, userId, item_specific_fields, validated_data):
         minv = MarketInventory()
         eb = Ebay()
-        access_token = eb.refresh_access_token(userid, "Ebay")
-        product_info = get_object_or_404(InventoryModel, id=inventory_id)
-        serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
-        if serializer.is_valid():
-            # get the serializer's data
-            validated_data = serializer.validated_data
+        access_token = eb.refresh_access_token(userId, "Ebay")
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(product_info.item_specific_fields)
+        xml_item_specifics = minv.json_to_xml(item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
         try:
-            product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
+            product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userId).values()
             enroll_id = product_details[0].get("enrollment_id")
-            minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+            minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userId)
             if type(minimum_offer_price) != float:
                 return Response(f"Failed to fetch data:", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -163,81 +157,81 @@ class MarketInventory(APIView):
             'Content-Type': 'text/xml',
             'Authorization': f'Bearer {access_token}'
         }
-        # try:
-        # XML Body for ReviseItem request
-        body = f"""
-        <?xml version="1.0" encoding="utf-8"?>
-        <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>{access_token}</eBayAuthToken>
-            </RequesterCredentials>
-            <Item>
-                <ItemID>{validated_data['market_item_id']}</ItemID>
-                <Title><![CDATA[{validated_data['title']}]]></Title>
-                <Description><![CDATA[
-                    {validated_data['description']}
-                ]]></Description>
-                <globalId>EBAY-US</globalId>
-                <PrimaryCategory>
-                    <CategoryID>{validated_data['category_id']}</CategoryID>
-                </PrimaryCategory>
-                <ConditionID>1000</ConditionID>
-                <SKU>{validated_data['sku']}</SKU>
-                <ProductListingDetails>
-                    <UPC>{validated_data['upc']}</UPC>
-                </ProductListingDetails>
-                <PictureDetails>
-                    <PictureURL>{validated_data['picture_detail']}</PictureURL>
-                    <!-- ... more PictureURL values allowed here ... -->
-                </PictureDetails>
-                
-                <!-- ... Item specifics are placed here ... -->
-                {xml_item_specifics}
-                
-                <autoPay>false</autoPay>
-                <PostalCode>{validated_data['postal_code']}</PostalCode>
-                <Location>{validated_data['location']}</Location>
-                <Country>US</Country>
-                <Currency>USD</Currency>
-                <ListingDuration>GTC</ListingDuration>
-                <SellerProfiles>
-                    <SellerPaymentProfile>
-                        <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
-                    </SellerPaymentProfile>
-                    <SellerReturnProfile>
-                        <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
-                    </SellerReturnProfile>
-                    <SellerShippingProfile>
-                        <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
-                    </SellerShippingProfile>
-                </SellerProfiles>
-                <StartPrice>{validated_data['start_price']}</StartPrice>
-                <Quantity>{validated_data['quantity']}</Quantity>
-                <ListingDetails>
-                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                </ListingDetails>
-                <listingInfo>
-                    <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
-                    <buyItNowAvailable>false</buyItNowAvailable>
-                    <listingType>{validated_data['listingType']}</listingType>
-                    <gift>{validated_data['gift']}</gift>
-                    <watchCount>6</watchCount>
-                </listingInfo>
-                <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
-                <IsMultiVariationListing>true</IsMultiVariationListing>
-                <TopRatedListing>false</TopRatedListing>
-            </Item>
-            </ReviseItemRequest>"""
-        # Make the POST request
-        response = requests.post(url, headers=headers, data=body)
-        # return response
-        if response.status_code == 200:
-            return Response(f"Product updated successfully:", status=status.HTTP_200_OK)
-        else:
-            return Response(f"Error updating: {response}", status=status.HTTP_400_BAD_REQUEST)
-        # except ConnectionError as e:
-        #     return Response(f"Error in payload:{e}", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # XML Body for ReviseItem request
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{validated_data['market_item_id']}</ItemID>
+                    <Title><![CDATA[{validated_data['title']}]]></Title>
+                    <Description><![CDATA[
+                        {validated_data['description']}
+                    ]]></Description>
+                    <globalId>EBAY-US</globalId>
+                    <PrimaryCategory>
+                        <CategoryID>{validated_data['category_id']}</CategoryID>
+                    </PrimaryCategory>
+                    <ConditionID>1000</ConditionID>
+                    <SKU>{validated_data['sku']}</SKU>
+                    <ProductListingDetails>
+                      <UPC>{validated_data['upc']}</UPC>
+                    </ProductListingDetails>
+                    <PictureDetails>
+                        <PictureURL>{validated_data['picture_detail']}</PictureURL>
+                        <!-- ... more PictureURL values allowed here ... -->
+                    </PictureDetails>
+                    
+                    <!-- ... Item specifics are placed here ... -->
+                    {xml_item_specifics}
+                    
+                    <autoPay>false</autoPay>
+                    <PostalCode>{validated_data['postal_code']}</PostalCode>
+                    <Location>{validated_data['location']}</Location>
+                    <Country>US</Country>
+                    <Currency>USD</Currency>
+                    <ListingDuration>GTC</ListingDuration>
+                    <SellerProfiles>
+                        <SellerPaymentProfile>
+                            <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
+                        </SellerPaymentProfile>
+                        <SellerReturnProfile>
+                            <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
+                        </SellerReturnProfile>
+                        <SellerShippingProfile>
+                            <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
+                        </SellerShippingProfile>
+                    </SellerProfiles>
+                    <StartPrice>{validated_data['start_price']}</StartPrice>
+                    <Quantity>{validated_data['quantity']}</Quantity>
+                    <ListingDetails>
+                      <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
+                      <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
+                    </ListingDetails>
+                    <listingInfo>
+                        <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
+                        <buyItNowAvailable>false</buyItNowAvailable>
+                        <listingType>{validated_data['listingType']}</listingType>
+                        <gift>{validated_data['gift']}</gift>
+                        <watchCount>6</watchCount>
+                    </listingInfo>
+                    <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
+                    <IsMultiVariationListing>true</IsMultiVariationListing>
+                    <TopRatedListing>false</TopRatedListing>
+                </Item>
+                </ReviseItemRequest>"""
+            # Make the POST request
+            response = requests.post(url, headers=headers, data=body)
+            return response
+            # if response.status_code == 200:
+            #     return Response(f"Product updated successfully", status=status.HTTP_200_OK)
+            # else:
+            #     return Response(f"Error updating: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+        except ConnectionError as e:
+            return Response(f"Error in payload:{e}", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to check if ebay item has ended
