@@ -227,9 +227,9 @@ class MarketInventory(APIView):
         response = requests.post(url, headers=headers, data=body)
         # return response
         if response.status_code == 200:
-            return Response(f"Product updated successfully: {response.text}", status=status.HTTP_200_OK)
+            return Response(f"Product updated successfully:", status=status.HTTP_200_OK)
         else:
-            return Response(f"Error updating: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Error updating: {response}", status=status.HTTP_400_BAD_REQUEST)
         # except ConnectionError as e:
         #     return Response(f"Error in payload:{e}", status=status.HTTP_400_BAD_REQUEST)
 
