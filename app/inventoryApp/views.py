@@ -59,7 +59,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
         else:
             return Response(f"Form not filled correctly.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f"Error", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
     
 # Create your views here.
