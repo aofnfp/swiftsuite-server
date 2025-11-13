@@ -41,25 +41,21 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 # Check the response
                 if response.status_code == 200:
                     serializer.save()
-                    return Response(f"Product updated successfully: {response.json()}", status=status.HTTP_200_OK)
+                    return Response(f"Product updated successfully", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Error updating: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Failed to update product on eBay.", status=status.HTTP_400_BAD_REQUEST)
 
-                # if response == "success":
-                #     serializer.save()
-                #     return Response(f"Update was Successful", status=status.HTTP_200_OK)
-                # return Response(f"Failed to update product on eBay.", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Woocommerce":
                 response = wooc.update_woocommerce_product(userid, validated_data, product_info.item_specific_fields, market_name, product_info.market_item_id)
                 if response.status_code == 200:
                     serializer.save()
-                    return Response(f"Product updated successfully!: {response.json()}", status=status.HTTP_200_OK)
+                    return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
                 elif response.status_code == 404:
-                    return Response(f"Product not found — check the product ID.:{response.json()}", status=status.HTTP_404_NOT_FOUND)
+                    return Response(f"Product not found — check the product ID.", status=status.HTTP_404_NOT_FOUND)
                 elif response.status_code == 401:
-                    return Response(f"Unauthorized — check your API credentials.:{response.json()}", status=status.HTTP_401_UNAUTHORIZED)
+                    return Response(f"Unauthorized — check your API credentials.", status=status.HTTP_401_UNAUTHORIZED)
                 else:
-                    return Response(f"Unexpected error:{response.json()}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Unexpected error", status=status.HTTP_400_BAD_REQUEST)
             elif market_name == "Shopify":
                 pass
             elif market_name == "Amazon":
@@ -68,9 +64,9 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                 pass
             
         else:
-            return Response(f"Form not filled correctly. {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Form not filled correctly.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Error", status=status.HTTP_400_BAD_REQUEST)
 
     
 # Create your views here.
