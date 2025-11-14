@@ -37,6 +37,7 @@ def refresh_access_token_for_sync(enrol_id, market_name):
     }
 
     response = requests.post(eb.token_url, headers=headers, data=body)
+    print(response.text)
     if response.status_code != 200:
         print(f"Failed to refresh access token. Authorization code has expired")
         return None
