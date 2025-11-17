@@ -1,5 +1,4 @@
 import json, requests, time
-from decouple import config
 import base64
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
@@ -12,49 +11,6 @@ from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
 from django.db.models import Q
 
-
-# Function to refresh the access token using the refresh token
-@sleep_and_retry
-@limits(calls=5, period=1)
-def refresh_access_token_for_sync(enrol_id, market_name):
-    eb = Ebay()
-    client_id = config("EB_CLIENT_ID")
-    client_secret = config("EB_CLIENT_SECRET")
-    try:
-        connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
-    except Exception as e:
-        print(f"Failed to fetch data from enrollment table: {e}")
-        return None
-    access_token = connection.access_token
-    refresh_token = connection.refresh_token
-
-    credentials = f"{client_id}:{client_secret}"
-    credentials_base64 = base64.b64encode(credentials.encode()).decode()
-    
-    headers = {
-        "Authorization": f"Basic {credentials_base64}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    body = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-        "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-    }
-
-    response = requests.post(eb.token_url, headers=headers, data=body)
-    if response.status_code != 200:
-        print(f"Failed to refresh access token. Authorization code has expired")
-        return None
-
-    result = response.json()
-    access_token = result.get('access_token')
-    
-    if not access_token:
-        print(f"Failed to get access token from response")
-        return None
-
-    MarketplaceEnronment.objects.filter(_id=enrol_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-    return access_token
 
 # Create a function to update items quantity and price at the background on Ebay
 def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantity, market_id):
@@ -258,13 +214,14 @@ def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
 # Map items on ebay with the one on local database for updates
 # @api_view(['GET'])
 def sync_ebay_items_with_local():
+    eb = Ebay()
     all_ebay_items = []
     db_items = None
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         if user.marketplace_name == "Ebay":
-            access_token = refresh_access_token_for_sync(user._id, "Ebay")
+            access_token = eb.refresh_access_token(user.user_id, "Ebay")
             if not access_token:
                 print(f"Failed to refresh access token. Access token returns none in marketplace id: {user._id}")   
                 continue
