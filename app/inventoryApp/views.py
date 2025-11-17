@@ -366,46 +366,15 @@ class MarketInventory(APIView):
     # Function to test any api from ebay before implementation
     @api_view(['GET'])
     def function_to_test_api(request, userid, market_name):
-        eb = Ebay()
-        access_token = eb.refresh_access_token(userid, market_name)
-        try:
-            HEADERS = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-                }   
-            all_orders = []
-            base_url = "https://api.ebay.com/sell/fulfillment/v1/order"
-            limit = 100
-            offset = 0
-
-            # Custom date range
-            start_time = (datetime.utcnow() - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
-            params = {
-                "filter": f"creationdate:[{start_time}..]",
-                "limit": limit
-            }
-
-            while True:
-                params["offset"] = offset
-                response = requests.get(base_url, headers=HEADERS, params=params)
-                if response.status_code == 200:
-                    data = response.json()
-                    if "orders" not in data:
-                        break
-                    orders = data["orders"]
-                    all_orders.extend(orders)
-                    if len(orders) < limit:
-                        break
-                    offset += limit
-                else:
-                    print(f"Failed to retrieve orders: {response.text}")
-                    return None
-            return JsonResponse({"All orders": all_orders}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(f"Error: {all_orders}", status=status.HTTP_400_BAD_REQUEST)
-
-
+        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+        wcapi = API(
+            url = enrollment.wc_consumer_url, 
+            consumer_key = enrollment.wc_consumer_key,  
+            consumer_secret = enrollment.wc_consumer_secret, 
+            version = "wc/v3"
+        )
+        products = wcapi.get("products").json()  
+        return JsonResponse({"Listed_products":products}, safe=False, status=status.HTTP_200_OK)
 
 class WooCommerceInventory(APIView):
     # Function to update product on woocommerce store
@@ -461,16 +430,7 @@ class WooCommerceInventory(APIView):
         except ConnectionError as e:
             return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
 
-
-
-    # Get all the products from the WooCommerce store
-    @api_view(['GET'])
-    def get_all_existing_products(request):
-        wcm = WooCommerce()
-        products = wcm.wcapi.get("products").json()  
-        return JsonResponse({"products": products}, safe=False, status=status.HTTP_200_OK)
-    
-
+    # Get all existing listed product on woocommerce
     @api_view(['GET'])
     def get_listed_products(request):
         wcm = WooCommerce()
