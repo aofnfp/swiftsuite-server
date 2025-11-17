@@ -88,6 +88,7 @@ def get_all_items_on_ebay(user_id):
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
     access_token = eb.refresh_access_token(user_id, "Ebay")
+    print(f"Access token in inventoryApp utils: {access_token}")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
         return None

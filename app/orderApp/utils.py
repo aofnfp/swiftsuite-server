@@ -13,6 +13,7 @@ def get_product_ordered_from_background(user_id):
     eb = Ebay()
     # Get access_token
     access_token = eb.refresh_access_token(user_id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+    print(f"Access token in orderApp utils: {access_token}")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in orderapp")
         return None
