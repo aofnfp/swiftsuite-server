@@ -119,7 +119,7 @@ def sync_ebay_order_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":
             # Get access_token
-            access_token = eb.refresh_access_token(user.user_id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+            access_token = eb.refresh_access_token(3, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
             if not access_token:
                 print(f"Failed to refresh access token. Access token returns none in orderapp")
                 continue
