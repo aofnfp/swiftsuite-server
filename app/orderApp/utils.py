@@ -9,7 +9,9 @@ from datetime import datetime, timedelta
 
 
 # Function to retrieve all fulfilment orders from Ebay
-def get_product_ordered_from_background(access_token):
+def get_product_ordered_from_background(user_id):
+    eb = Ebay()
+    access_token = eb.refresh_access_token(user_id, "Ebay")
     # Set eBay API endpoint and headers
     try:
         HEADERS = {
@@ -117,15 +119,9 @@ def sync_ebay_order_with_local():
     eb = Ebay()
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
-        if user.marketplace_name == "Ebay":
-            # Get access_token
-            access_token = eb.refresh_access_token(3, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
-            if not access_token:
-                print(f"Failed to refresh access token. Access token returns none in orderapp")
-                continue
-                
+        if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
-            ebay_orders = get_product_ordered_from_background(access_token)
+            ebay_orders = get_product_ordered_from_background(user.user_id)
             if ebay_orders == None:
                 print(f"Failed to fetch ordered items from ebay for user {user.user_id}")
                 continue
