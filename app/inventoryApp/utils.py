@@ -10,7 +10,7 @@ from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, R
 from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
 from django.db.models import Q
-from .views import WooCommerceInventory
+# from .views import WooCommerceInventory
 from woocommerce import API
 
 
