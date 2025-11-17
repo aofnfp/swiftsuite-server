@@ -82,10 +82,15 @@ def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantit
 
 
 # Get all products already listed on Ebay using sku
-def get_all_items_on_ebay(access_token):
+def get_all_items_on_ebay(user_id):
+    eb = Ebay()
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
+    access_token = eb.refresh_access_token(user_id, "Ebay")
+    if not access_token:
+        print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
+        return None
     try:
         url = "https://api.ebay.com/ws/api.dll"
         headers = {
@@ -167,8 +172,14 @@ def get_all_items_on_ebay(access_token):
 # Limit to 5 calls per second (eBay's typical limit)
 @sleep_and_retry
 @limits(calls=5, period=1)
-def get_item_details(access_token, item_id):
+def get_item_details(user_id, item_id):
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
+    eb = Ebay()
+    access_token = eb.refresh_access_token(user_id, "Ebay")
+    if not access_token:
+        print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
+        return None
+    
     # Set up the headers with the access token
     headers = {
         'Authorization': f'Bearer {access_token}',
@@ -221,12 +232,8 @@ def sync_ebay_items_with_local():
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         if user.marketplace_name == "Ebay":
-            access_token = eb.refresh_access_token(user.user_id, "Ebay")
-            if not access_token:
-                print(f"Failed to refresh access token. Access token returns none in marketplace id: {user._id}")   
-                continue
             # Fetch all item from eBay
-            ebay_items = get_all_items_on_ebay(access_token)
+            ebay_items = get_all_items_on_ebay(user.user_id)
             for item in ebay_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
             for item in all_ebay_items:
@@ -284,7 +291,7 @@ def sync_ebay_items_with_local():
                     # If item does not exist, insert new item
                     try:
                         # Get product details from eBay
-                        product_details = get_item_details(access_token, item.get("ebay_item_id"))
+                        product_details = get_item_details(user.user_id, item.get("ebay_item_id"))
                         if product_details == None:
                             continue
                         else:
