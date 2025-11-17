@@ -670,7 +670,7 @@ class Ebay(APIView):
         # required_fields = eb.get_required_fields_item(leaf_category_id, access_token)
         # For now, return the field names (you can replace this with form processing later)
         return Response({
-            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields, "required_fields": is_required
+            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields #, "required_fields": is_required
         })
     
     # Calculate the selling price of product going to ebay
