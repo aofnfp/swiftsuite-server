@@ -28,7 +28,7 @@ class ItemListingToEbaySerializer:
 		model_class = []
 		item_specifics_name = []
 		valid_choices_field = {}
-		is_required = False
+		is_required = []
 		# Create a ModelSerializer class for the model fields
 		class ModelSerializer(serializers.ModelSerializer):
 			class Meta:
@@ -51,7 +51,7 @@ class ItemListingToEbaySerializer:
 			aspect_name = aspect['localizedAspectName']
 			options = aspect.get('aspectValues', [])
 			if aspect.get('aspectConstraint', {}).get('aspectUsage') == 'REQUIRED':
-				is_required = True
+				is_required.append(aspect_name)
 			
 			# Skip if this field is already in the model fields to avoid duplication
 			if hasattr(model_class, aspect_name):
@@ -64,26 +64,26 @@ class ItemListingToEbaySerializer:
 				valid_choices_field[aspect_name] = [opt['localizedValue'] for opt in options]
 			    # Use CharField instead of ChoiceField to allow custom values
 				serializer_fields[aspect_name] = serializers.CharField(
-                    required=is_required,
-                    allow_blank=not is_required
+                    required=False,
+                    allow_blank=True
                 )
 				item_specifics_name.append(aspect_name)
                 
 			# If there are no options but it's a yes/no field, use BooleanField
 			elif 'Yes' in [v['localizedValue'] for v in aspect.get('aspectValues', [])] and 'No' in [v['localizedValue'] for v in aspect.get('aspectValues', [])]:
-				serializer_fields[aspect_name] = serializers.BooleanField(required=is_required)
+				serializer_fields[aspect_name] = serializers.BooleanField(required=False)
 				item_specifics_name.append(aspect_name)
 			else:
 				# Otherwise, use CharField for free text fields
 				serializer_fields[aspect_name] = serializers.CharField(
-					required=is_required,
-					allow_blank=not is_required
+					required=False,
+					allow_blank=True
 				)
 				item_specifics_name.append(aspect_name)
 		
 		# Dynamically create a Serializer class combining eBay specifics and model fields
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
-		return DynamicSerializer, item_specifics_name, valid_choices_field
+		return DynamicSerializer, item_specifics_name, valid_choices_field, is_required
 	
 	# Serializer for other marketplaces without item specifics
 	def generate_other_marketplace_listing_fields_serializer():
