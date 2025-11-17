@@ -21,7 +21,7 @@ from .tasks import sync_ebay_inventory_task
 from woocommerce import API
 from decouple import config
 from marketplaceApp.views import WooCommerce
-
+from datetime import datetime, timedelta
 
 
 # Function to update product across marketplaces
@@ -365,44 +365,45 @@ class MarketInventory(APIView):
 
     # Function to test any api from ebay before implementation
     @api_view(['GET'])
-    def function_to_test_api(request, enrol_id, market_name):
+    def function_to_test_api(request, userid, market_name):
         eb = Ebay()
+        access_token = eb.refresh_access_token(userid, market_name)
         try:
-            connection = MarketplaceEnronment.objects.all().get(_id=enrol_id, marketplace_name=market_name)
+            HEADERS = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+                }   
+            all_orders = []
+            base_url = "https://api.ebay.com/sell/fulfillment/v1/order"
+            limit = 100
+            offset = 0
+
+            # Custom date range
+            start_time = (datetime.utcnow() - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+            params = {
+                "filter": f"creationdate:[{start_time}..]",
+                "limit": limit
+            }
+
+            while True:
+                params["offset"] = offset
+                response = requests.get(base_url, headers=HEADERS, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    if "orders" not in data:
+                        break
+                    orders = data["orders"]
+                    all_orders.extend(orders)
+                    if len(orders) < limit:
+                        break
+                    offset += limit
+                else:
+                    print(f"Failed to retrieve orders: {response.text}")
+                    return None
+            return JsonResponse({"All orders": all_orders}, status=status.HTTP_200_OK)
         except Exception as e:
-            print(f"Failed to fetch data from enrollment table: {e}")
-            return None
-        access_token = connection.access_token
-        refresh_token = connection.refresh_token
-
-        credentials = f"{eb.client_id}:{eb.client_secret}"
-        credentials_base64 = base64.b64encode(credentials.encode()).decode()
-        
-        headers = {
-            "Authorization": f"Basic {credentials_base64}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        body = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-        }
-
-        response = requests.post(eb.token_url, headers=headers, data=body)
-        if response.status_code != 200:
-            print(f"Failed to refresh access token. Authorization code has expired")
-            return None
-
-        result = response.json()
-        access_token = result.get('access_token')
-        
-        if not access_token:
-            print(f"Failed to get access token from response")
-            return None
-
-        MarketplaceEnronment.objects.filter(_id=enrol_id, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-        
-        return JsonResponse({"access_token": access_token, "refresh_token": refresh_token}, status=status.HTTP_200_OK)
+            return Response(f"Error: {all_orders}", status=status.HTTP_400_BAD_REQUEST)
 
 
 
