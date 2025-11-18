@@ -1,0 +1,1264 @@
+{
+    "Listed_products": [
+        {
+            "id": 2703,
+            "name": "Clean Blossom by Clean Eau De Parfum Spray (Unboxed) 2.14 oz for Women",
+            "slug": "clean-blossom-by-clean-eau-de-parfum-spray-unboxed-2-14-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/clean-blossom-by-clean-eau-de-parfum-spray-unboxed-2-14-oz-for-women/",
+            "date_created": "2025-11-15T09:41:52",
+            "date_created_gmt": "2025-11-15T09:41:52",
+            "date_modified": "2025-11-15T09:41:52",
+            "date_modified_gmt": "2025-11-15T09:41:52",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>As the name promises, clean blossom, launched by clean in 2016, provides wearer with a light, sweet floral experience that embraces everything women love about the modern perfume experience. This fragrances top notes include tunisian neroli, lilac and yellow freesia. These are met with core middle notes of orange blossom, lily, dianthus and magnolia, which are then in turn combined down into base notes of musk, cottonwood and sandalwood, which serve to mellow out the sweet florals of the other heavy notes used in the mixture.</p>\n",
+            "short_description": "",
+            "sku": "566174",
+            "price": "40.08",
+            "regular_price": "40.08",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 1,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2702,
+                    "date_created": "2025-11-15T09:41:52",
+                    "date_created_gmt": "2025-11-15T09:41:52",
+                    "date_modified": "2025-11-15T09:41:52",
+                    "date_modified_gmt": "2025-11-15T09:41:52",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/CLECW2146S.jpg",
+                    "name": "CLECW2146S.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>40.08</bdi></span>",
+            "related_ids": [
+                926,
+                2668,
+                2666,
+                933,
+                940
+            ],
+            "meta_data": [
+                {
+                    "id": 12162,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2703",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2695,
+            "name": "Clean Rain Reserve Blend by Clean Hair Fragrance 1.7 oz for Women",
+            "slug": "clean-rain-reserve-blend-by-clean-hair-fragrance-1-7-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/clean-rain-reserve-blend-by-clean-hair-fragrance-1-7-oz-for-women/",
+            "date_created": "2025-11-14T20:44:32",
+            "date_created_gmt": "2025-11-14T20:44:32",
+            "date_modified": "2025-11-14T20:44:32",
+            "date_modified_gmt": "2025-11-14T20:44:32",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Purifying and fresh, clean rain reserve blend is a spring and summertime fragrance with elements of rainwater, salt, citrus and flowers. The opening is a bright, elegantly aromatic effusion of bergamot. Clean, subtly aquatic white florals emerge at the heart, fusing jasmine with lovely lily-of-the-valley.</p>\n",
+            "short_description": "",
+            "sku": "555321",
+            "price": "44.04",
+            "regular_price": "44.04",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 25,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2694,
+                    "date_created": "2025-11-14T20:44:31",
+                    "date_created_gmt": "2025-11-14T20:44:31",
+                    "date_modified": "2025-11-14T20:44:32",
+                    "date_modified_gmt": "2025-11-14T20:44:32",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/CLECWXH.jpg",
+                    "name": "CLECWXH.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>44.04</bdi></span>",
+            "related_ids": [
+                959,
+                938,
+                926,
+                939,
+                2650
+            ],
+            "meta_data": [
+                {
+                    "id": 12139,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2695",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2693,
+            "name": "Jardins De Bagatelle by Guerlain Eau De Parfum Spray 2.5 oz for Women",
+            "slug": "jardins-de-bagatelle-by-guerlain-eau-de-parfum-spray-2-5-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/jardins-de-bagatelle-by-guerlain-eau-de-parfum-spray-2-5-oz-for-women/",
+            "date_created": "2025-11-14T20:40:08",
+            "date_created_gmt": "2025-11-14T20:40:08",
+            "date_modified": "2025-11-14T20:40:08",
+            "date_modified_gmt": "2025-11-14T20:40:08",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>A very feminine floral scent, jardins de bagatelle was first introduced in 1963 by the design house of guerlain. This scent is absolutely perfect for the woman who is daring, joyful and luminous. The top notes are aldehydes, jasmine, lemon, bergamot, and violet.</p>\n",
+            "short_description": "",
+            "sku": "414313",
+            "price": "169.21",
+            "regular_price": "169.21",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 16,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2692,
+                    "date_created": "2025-11-14T20:40:08",
+                    "date_created_gmt": "2025-11-14T20:40:08",
+                    "date_modified": "2025-11-14T20:40:08",
+                    "date_modified_gmt": "2025-11-14T20:40:08",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/63459.jpg",
+                    "name": "63459.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>169.21</bdi></span>",
+            "related_ids": [
+                2668,
+                959,
+                945,
+                2703,
+                932
+            ],
+            "meta_data": [
+                {
+                    "id": 12163,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2693",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2688,
+            "name": "Jardins De Bagatelle by Guerlain Eau De Toilette Spray 2.5 oz for Women",
+            "slug": "jardins-de-bagatelle-by-guerlain-eau-de-toilette-spray-2-5-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/jardins-de-bagatelle-by-guerlain-eau-de-toilette-spray-2-5-oz-for-women/",
+            "date_created": "2025-11-13T05:39:39",
+            "date_created_gmt": "2025-11-13T05:39:39",
+            "date_modified": "2025-11-13T05:39:39",
+            "date_modified_gmt": "2025-11-13T05:39:39",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>A very feminine floral scent, jardins de bagatelle was first introduced in 1963 by the design house of guerlain. This scent is absolutely perfect for the woman who is daring, joyful and luminous. The top notes are aldehydes, jasmine, lemon, bergamot, and violet.</p>\n",
+            "short_description": "",
+            "sku": "567321",
+            "price": "110.17",
+            "regular_price": "110.17",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 73,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2687,
+                    "date_created": "2025-11-13T05:39:39",
+                    "date_created_gmt": "2025-11-13T05:39:39",
+                    "date_modified": "2025-11-13T05:39:39",
+                    "date_modified_gmt": "2025-11-13T05:39:39",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/JARGWW.jpg",
+                    "name": "JARGWW.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>110.17</bdi></span>",
+            "related_ids": [
+                958,
+                2674,
+                938,
+                933,
+                942
+            ],
+            "meta_data": [
+                {
+                    "id": 12077,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2688",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2686,
+            "name": "Aqua Allegoria Forte Nerolia Vetiver by Guerlain Eau De Toilette Spray (Unisex",
+            "slug": "aqua-allegoria-forte-nerolia-vetiver-by-guerlain-eau-de-toilette-spray-unisex",
+            "permalink": "https://sozooutlet.com/product/aqua-allegoria-forte-nerolia-vetiver-by-guerlain-eau-de-toilette-spray-unisex/",
+            "date_created": "2025-11-13T05:35:26",
+            "date_created_gmt": "2025-11-13T05:35:26",
+            "date_modified": "2025-11-13T05:35:26",
+            "date_modified_gmt": "2025-11-13T05:35:26",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Aqua Allegoria Forte Nerolia Vetiver Cologne by Guerlain</p>\n",
+            "short_description": "",
+            "sku": "566968",
+            "price": "52.3",
+            "regular_price": "52.3",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 94,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 41,
+                    "name": "Rimfire Rifles",
+                    "slug": "rimfire-rifles"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2685,
+                    "date_created": "2025-11-13T05:35:26",
+                    "date_created_gmt": "2025-11-13T05:35:26",
+                    "date_modified": "2025-11-13T05:35:26",
+                    "date_modified_gmt": "2025-11-13T05:35:26",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/AQUGMA.jpg",
+                    "name": "AQUGMA.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>52.30</bdi></span>",
+            "related_ids": [
+                2672,
+                2678,
+                2664,
+                931,
+                2658
+            ],
+            "meta_data": [
+                {
+                    "id": 12078,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2686",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2684,
+            "name": "Shalimar by Guerlain Body Cream 7 oz for Women",
+            "slug": "shalimar-by-guerlain-body-cream-7-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/shalimar-by-guerlain-body-cream-7-oz-for-women/",
+            "date_created": "2025-11-08T11:34:30",
+            "date_created_gmt": "2025-11-08T11:34:30",
+            "date_modified": "2025-11-14T18:41:07",
+            "date_modified_gmt": "2025-11-14T18:41:07",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Launched by the design house of guerlain way back in 1925, shalimar is classified as a refined, oriental fragrance that serves as one of the great icons of early 20th-century perfumery. It's a feminine scent possessing a blend of balsamic and citrus accords, and it's recommended particularly for evening wear. The citrus notes appear in the top notes, specifically mandarin, bergamot, and lemon, as well as a cedar note.</p>\n",
+            "short_description": "",
+            "sku": "401498",
+            "price": "97.61",
+            "regular_price": "97.61",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 500,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2683,
+                    "date_created": "2025-11-08T11:34:29",
+                    "date_created_gmt": "2025-11-08T11:34:29",
+                    "date_modified": "2025-11-08T11:34:30",
+                    "date_modified_gmt": "2025-11-08T11:34:30",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/XWSHALIBC.jpg",
+                    "name": "XWSHALIBC.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>97.61</bdi></span>",
+            "related_ids": [
+                940,
+                927,
+                2674,
+                945,
+                959
+            ],
+            "meta_data": [
+                {
+                    "id": 12033,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2684",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2682,
+            "name": "La Petite Robe Noire by Guerlain Eau De Toilette Spray 1.6 oz for Women",
+            "slug": "la-petite-robe-noire-by-guerlain-eau-de-toilette-spray-1-6-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/la-petite-robe-noire-by-guerlain-eau-de-toilette-spray-1-6-oz-for-women/",
+            "date_created": "2025-11-07T11:26:09",
+            "date_created_gmt": "2025-11-07T11:26:09",
+            "date_modified": "2025-11-07T11:26:09",
+            "date_modified_gmt": "2025-11-07T11:26:09",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>What is more indispensible to a woman's wardrobe than a little black dress (la petite robe noire translated from the french )? named after the one article of clothing that always is appropriate, this is a fruity floral fragrance for women. The perfume opens with a cherry like fruity note with counter-balanced by a modern woodsy base and a violet-floral note reminiscent of rose-scented macaroons.</p>\n",
+            "short_description": "",
+            "sku": "543435",
+            "price": "44.81",
+            "regular_price": "44.81",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 500,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2681,
+                    "date_created": "2025-11-07T11:26:09",
+                    "date_created_gmt": "2025-11-07T11:26:09",
+                    "date_modified": "2025-11-07T11:26:09",
+                    "date_modified_gmt": "2025-11-07T11:26:09",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/LAPR16EDTW.jpg",
+                    "name": "LAPR16EDTW.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>44.81</bdi></span>",
+            "related_ids": [
+                2674,
+                960,
+                2532,
+                944,
+                961
+            ],
+            "meta_data": [
+                {
+                    "id": 12004,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2682",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2680,
+            "name": "Cool Water by Davidoff After Shave 4.2 oz for Men",
+            "slug": "cool-water-by-davidoff-after-shave-4-2-oz-for-men",
+            "permalink": "https://sozooutlet.com/product/cool-water-by-davidoff-after-shave-4-2-oz-for-men/",
+            "date_created": "2025-11-06T20:42:55",
+            "date_created_gmt": "2025-11-06T20:42:55",
+            "date_modified": "2025-11-06T20:42:55",
+            "date_modified_gmt": "2025-11-06T20:42:55",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Davidoff launched the legendary fragrance Davidoff Cool Water for men in 1988. This scent revolutionized men’s fragrances thanks to the air of freshness injected into the mixture. This sharp and intense cologne manages to combine a crispness that resonates with men from all walks of life.</p>\n",
+            "short_description": "",
+            "sku": "402068",
+            "price": "26.92",
+            "regular_price": "26.92",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 500,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2679,
+                    "date_created": "2025-11-06T20:42:55",
+                    "date_created_gmt": "2025-11-06T20:42:55",
+                    "date_modified": "2025-11-06T20:42:55",
+                    "date_modified_gmt": "2025-11-06T20:42:55",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/XMCOOLWAS.jpg",
+                    "name": "XMCOOLWAS.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>26.92</bdi></span>",
+            "related_ids": [
+                942,
+                944,
+                933,
+                941,
+                961
+            ],
+            "meta_data": [
+                {
+                    "id": 12029,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2680",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2678,
+            "name": "Shalimar by Guerlain Eau De Parfum Spray 3 oz for Women",
+            "slug": "shalimar-by-guerlain-eau-de-parfum-spray-3-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/shalimar-by-guerlain-eau-de-parfum-spray-3-oz-for-women/",
+            "date_created": "2025-11-06T20:41:43",
+            "date_created_gmt": "2025-11-06T20:41:43",
+            "date_modified": "2025-11-06T20:41:43",
+            "date_modified_gmt": "2025-11-06T20:41:43",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Launched by the design house of guerlain way back in 1925, shalimar is classified as a refined, oriental fragrance that serves as one of the great icons of early 20th-century perfumery. It's a feminine scent possessing a blend of balsamic and citrus accords, and it's recommended particularly for evening wear. The citrus notes appear in the top notes, specifically mandarin, bergamot, and lemon, as well as a cedar note.</p>\n",
+            "short_description": "",
+            "sku": "482714",
+            "price": "158.58",
+            "regular_price": "158.58",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 169,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 41,
+                    "name": "Rimfire Rifles",
+                    "slug": "rimfire-rifles"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2677,
+                    "date_created": "2025-11-06T20:41:42",
+                    "date_created_gmt": "2025-11-06T20:41:42",
+                    "date_modified": "2025-11-06T20:41:43",
+                    "date_modified_gmt": "2025-11-06T20:41:43",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/SWEDP3.jpg",
+                    "name": "SWEDP3.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>158.58</bdi></span>",
+            "related_ids": [
+                937,
+                941,
+                2686,
+                931,
+                2664
+            ],
+            "meta_data": [
+                {
+                    "id": 12030,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2678",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2676,
+            "name": "Shalimar by Guerlain Eau De Toilette Spray 1.7 oz for Women",
+            "slug": "shalimar-by-guerlain-eau-de-toilette-spray-1-7-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/shalimar-by-guerlain-eau-de-toilette-spray-1-7-oz-for-women/",
+            "date_created": "2025-11-06T19:41:32",
+            "date_created_gmt": "2025-11-06T19:41:32",
+            "date_modified": "2025-11-14T18:41:22",
+            "date_modified_gmt": "2025-11-14T18:41:22",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Launched by the design house of guerlain way back in 1925, shalimar is classified as a refined, oriental fragrance that serves as one of the great icons of early 20th-century perfumery. It's a feminine scent possessing a blend of balsamic and citrus accords, and it's recommended particularly for evening wear. The citrus notes appear in the top notes, specifically mandarin, bergamot, and lemon, as well as a cedar note.</p>\n",
+            "short_description": "",
+            "sku": "401519",
+            "price": "4",
+            "regular_price": "4",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 1,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2675,
+                    "date_created": "2025-11-06T19:41:31",
+                    "date_created_gmt": "2025-11-06T19:41:31",
+                    "date_modified": "2025-11-06T19:41:32",
+                    "date_modified_gmt": "2025-11-06T19:41:32",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/SHATS17.jpg",
+                    "name": "SHATS17.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>4.00</bdi></span>",
+            "related_ids": [
+                941,
+                926,
+                960,
+                959,
+                938
+            ],
+            "meta_data": [
+                {
+                    "id": 12031,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2676",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        }
+    ]
+}

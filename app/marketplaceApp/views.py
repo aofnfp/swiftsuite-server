@@ -37,28 +37,30 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     eb = Ebay()
     wooc = WooCommerce()
     item_specifics_fields = []
-    access_token = eb.refresh_access_token(userid, market_name)
-    if not access_token:
-        return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)   
-    # Fetch item specifics from eBay using the leaf category ID and generate the serializer
-    if market_name == "Ebay":
-        item_specifics_data = eb.get_item_specifics_from_ebay(access_token, int(category_id_or_name))
-        if not item_specifics_data:
-            return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
-    
-        item_specifics = item_specifics_data.get('aspects', [])
-        # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
-    else:
-        DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
-    
-    # Pass request data to the dynamic serializer for validation
-    serializer = DynamicItemSpecificsSerializer(data=request.data)      
-    if serializer.is_valid():
-        validated_data = serializer.validated_data
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+    try:
+        access_token = eb.refresh_access_token(userid, market_name)
+        if not access_token:
+            return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)   
+        # Fetch item specifics from eBay using the leaf category ID and generate the serializer
+        if market_name == "Ebay":
+            item_specifics_data = eb.get_item_specifics_from_ebay(access_token, int(category_id_or_name))
+            if not item_specifics_data:
+                return Response({"error": "Failed to fetch item specifics from eBay."}, status=status.HTTP_400_BAD_REQUEST)
         
+            item_specifics = item_specifics_data.get('aspects', [])
+            # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
+            DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        else:
+            DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
+        
+        # Pass request data to the dynamic serializer for validation
+        serializer = DynamicItemSpecificsSerializer(data=request.data)      
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+    except Exception as e:
+        return Response(f"Error error occurred in the form.", status=status.HTTP_400_BAD_REQUEST)     
     # Get the calculated price of the product to list
     try:
         product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
@@ -658,7 +660,7 @@ class Ebay(APIView):
         item_specifics = data.get('aspects', [])
         
         # Generate the dynamic serializer
-        DynamicItemSpecificsSerializer, _fields, valid_choices_fields, is_required = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
             if isinstance(field, serializers.BooleanField) and field_name in _fields:

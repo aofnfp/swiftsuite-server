@@ -83,7 +83,7 @@ class ItemListingToEbaySerializer:
 		
 		# Dynamically create a Serializer class combining eBay specifics and model fields
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
-		return DynamicSerializer, item_specifics_name, valid_choices_field, is_required
+		return DynamicSerializer, item_specifics_name, valid_choices_field
 	
 	# Serializer for other marketplaces without item specifics
 	def generate_other_marketplace_listing_fields_serializer():
