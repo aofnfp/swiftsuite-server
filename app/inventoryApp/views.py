@@ -376,8 +376,10 @@ class MarketInventory(APIView):
         products = wcapi.get("products").json()  
         return JsonResponse({"Listed_products":products}, safe=False, status=status.HTTP_200_OK)
 
+
 class WooCommerceInventory(APIView):
     # Function to update product on woocommerce store
+    @api_view(['PUT'])
     def update_woocommerce_product(self, request, userid, market_name, inventory_id):
         wooc = WooCommerce()
         try:
@@ -420,13 +422,13 @@ class WooCommerceInventory(APIView):
             # --- MAKE THE UPDATE REQUEST ---
             response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
             if response.status_code == 200:
-                return "Success"
+                return Response("Update was successful", safe=False, status=status.HTTP_200_OK)
             elif response.status_code == 404:
-                return "Product not found — check the product ID."
+                return Response("Product not found — check the product ID.", status=status.HTTP_404_NOT_FOUND)
             elif response.status_code == 401:
-                return "Unauthorized — check your API credentials."
+                return Response("Unauthorized — check your API credentials.", status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return "Unexpected error"
+                return Response("Unexpected error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except ConnectionError as e:
             return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
 
