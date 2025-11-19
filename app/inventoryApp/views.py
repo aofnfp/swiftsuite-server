@@ -380,7 +380,7 @@ class MarketInventory(APIView):
 class WooCommerceInventory(APIView):
     # Function to update product on woocommerce store
     @api_view(['PUT'])
-    def update_woocommerce_product(self, request, userid, market_name, inventory_id):
+    def update_woocommerce_product(request, userid, market_name, inventory_id):
         wooc = WooCommerce()
         try:
             enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
