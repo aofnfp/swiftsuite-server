@@ -56,8 +56,6 @@ class ItemListingToEbaySerializer:
 			if is_required:
 				required_fields.append(aspect_name)
 
-
-
 			# Skip if this field is already in the model fields to avoid duplication
 			if hasattr(model_class, aspect_name):
 				continue
