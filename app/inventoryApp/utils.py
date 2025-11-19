@@ -237,7 +237,36 @@ def get_woocommerce_existing_products(user_id):
     )
     products = wcapi.get("products").json()  
     return products
-        
+
+
+# Function to update product on woocommerce store
+def update_woocommerce_product_from_background(self, market_item_id, selling_price, quantity, userid):
+    try:
+        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
+        # Set up the WooCommerce API client
+        wcapi = API(
+            url = enrollment.wc_consumer_url, 
+            consumer_key = enrollment.wc_consumer_key,  
+            consumer_secret = enrollment.wc_consumer_secret, 
+            version = "wc/v3"
+        )
+        # Product payload mapped to WooCommerce
+        update_data = {
+            "type": "simple",
+            "regular_price": selling_price,
+            "stock_quantity": quantity,
+            "manage_stock": True,
+        }
+
+        # --- MAKE THE UPDATE REQUEST ---
+        response = wcapi.put(f"products/{market_item_id}", update_data)
+        if response.status_code == 200:
+            return "Success"
+        else:
+            print("Error: Woocommerce update fails.")
+    except Exception as e:
+        print("Error: Error from the try block woocommerce update.")
+        return None
 
 # Map items on ebay with the one on local database for updates
 # @api_view(['GET'])
@@ -318,41 +347,8 @@ def sync_ebay_items_with_local():
                                 ebay_mpn = specific.get("value") if specific.get("name") == "MPN" else product_details.get("mpn")
 
                         item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults=dict(
-                            title=item.get("Title"),
-                            description=json.dumps(product_details.get("shortDescription")),
-                            location=product_details.get("itemLocation")["country"],
-                            category_id=product_details.get("categoryId"),
-                            sku=item.get("ebay_sku"),
-                            upc=ebay_upc,
-                            mpn=ebay_mpn,
-                            start_price=product_details.get("price")["value"],
-                            picture_detail=product_details.get("image")["imageUrl"],
-                            postal_code=product_details.get("itemLocation")["postalCode"],
-                            quantity=item.get("ebay_quantity"),
-                            return_profileID=item.get('ReturnProfileID'),
-                            return_profileName=item.get('ReturnProfileName'),
-                            payment_profileID=item.get('PaymentProfileID'),
-                            payment_profileName=item.get('PaymentProfileName'),
-                            shipping_profileID=item.get('ShippingProfileID'),
-                            shipping_profileName=item.get('ShippingProfileName'),
-                            bestOfferEnabled=True,
-                            listingType=item.get('ListingType'),
-                            gift="",
-                            categoryMappingAllowed="",
-                            item_specific_fields=product_details.get("localizedAspects"),
-                            market_logos=product_details.get("listingMarketplaceId"),
-                            market_item_id=item.get("ebay_item_id"),
-                            user_id=user.user_id,
-                            date_created=product_details.get("itemCreationDate").split("T")[0],
-                            active=True,
-                            category=product_details.get("categoryPath"),
-                            city=product_details.get("itemLocation")["city"],
-                            cost=product_details.get("price")["value"],
-                            country=product_details.get("itemLocation")["country"],
-                            price=product_details.get("price")["value"],
-                            thumbnailImage=product_details.get("additionalImages"),
-                            vendor_name="Not Found",
-                            map_status=False))
+                            title=item.get("Title"), description=json.dumps(product_details.get("shortDescription")), location=product_details.get("itemLocation")["country"], category_id=product_details.get("categoryId"), sku=item.get("ebay_sku"), upc=ebay_upc, mpn=ebay_mpn, start_price=product_details.get("price")["value"], picture_detail=product_details.get("image")["imageUrl"], postal_code=product_details.get("itemLocation")["postalCode"], quantity=item.get("ebay_quantity"), return_profileID=item.get('ReturnProfileID'), return_profileName=item.get('ReturnProfileName'), payment_profileID=item.get('PaymentProfileID'), payment_profileName=item.get('PaymentProfileName'), shipping_profileID=item.get('ShippingProfileID'), shipping_profileName=item.get('ShippingProfileName'), bestOfferEnabled=True, listingType=item.get('ListingType'),
+                            gift="", categoryMappingAllowed="", item_specific_fields=product_details.get("localizedAspects"), market_logos=product_details.get("listingMarketplaceId"),  market_item_id=item.get("ebay_item_id"), user_id=user.user_id, date_created=product_details.get("itemCreationDate").split("T")[0], active=True, category=product_details.get("categoryPath"), city=product_details.get("itemLocation")["city"], cost=product_details.get("price")["value"], country=product_details.get("itemLocation")["country"], price=product_details.get("price")["value"], thumbnailImage=product_details.get("additionalImages"), vendor_name="Not Found", map_status=False))
 
                     except Exception as e:
                         print(f"Product failed to insert into inventory {e}")
@@ -364,14 +360,14 @@ def sync_ebay_items_with_local():
             for item in all_woocommercer_items:
                 wooc_items.append({"wooc_item_id":item.get("id"), "wooc_sku":item.get("sku"), "name":item.get("name"), "wooc_price":item.get("price"), "wooc_quantity":item.get("stock_quantity"), "PictureDetails":item.get("images")[0].get("src"), "woo_category_name":item.get("categories")[0].get("name"), "market_name":"Woocommerce"})
                 try:
-                    item_exists = InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")))[0]
+                    item_exists = InventoryModel.objects.filter(Q(market_item_id=item.get("wooc_item_id")) | Q(sku=item.get("wooc_sku")))[0]
                     # Fetch the item from the local vendor's table
                     vendor_list = ["FragrancexUpdate", "CwrUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
                     for vendor_db in vendor_list:
                         try:
                             # Get the actual model class from the string name
                             model_class = globals()[vendor_db]
-                            db_items = model_class.objects.filter(Q(sku=item.get("ebay_sku")) & (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
+                            db_items = model_class.objects.filter(Q(sku=item.get("wooc_sku")))
                             if not db_items.exists():
                                 continue
                             
@@ -396,24 +392,30 @@ def sync_ebay_items_with_local():
                                 continue
                             selling_price, total_product_cost = cost_computation
                             # Create or update the product on GeneralProduct table
-                            item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, upc=item_exists.upc, map=db_item.product.map, mpn=item_exists.mpn, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
+                            item_product, created = Generalproducttable.objects.update_or_create(user_id=user.user_id, sku=db_item.sku, defaults=dict(active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, market_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                            InventoryModel.objects.filter(Q(market_item_id=wooc_items.get("wooc_item_id")) | Q(sku=wooc_items.get("wooc_sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, market_item_id=wooc_items.get("wooc_item_id"), vendor_name=db_item.vendor.name)
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
                             
                             # Check if there is a price and quantity update, then update on Ebay
-                            # if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
-                            #     # Update the product on Ebay
-                            #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
-                            #     print("product updated on ebay successful.")
+                            if wooc_items["wooc_price"] != selling_price or wooc_items["wooc_quantity"] != db_item.quantity:
+                                # Update the product on WooCommerce
+                                response = update_woocommerce_product_from_background(item["wooc_item_id"], selling_price, db_item.quantity, user.user_id)
+                                print("product updated on woocommerce successful.")
                             db_items = None
                         except Exception as e:
                             print(f"Product processing failed with error: {e}")
                             continue
                 except Exception as e:
-                    pass
+                     # If item does not exist, insert new item
+                    try:
+                        item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(
+                            title=item.get("name"), description=json.dumps(item.get("description")), category_id=item.get("categories")[0]["id"], sku=item.get("sku"), start_price=item.get("price"), picture_detail=item.get("image")[0].get("src"), quantity=item.get("quantity"), return_profileID="Null", return_profileName="Null" payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", market_item_id=item.get("id"), user_id=user.user_id date_created=item.get("date_created"), active=True, category=item.get("categories")[0].get("name"), price=item.get("price"), thumbnailImage="Null", vendor_name="Not Found", enable_charity=True, woo_category_name=item.get("categories")[0].get("name"), market_name="Woocommerce", map_status=False))
+
+                    except Exception as e:
+                        print(f"Product failed to insert into inventory {e}")
                 
 
 
