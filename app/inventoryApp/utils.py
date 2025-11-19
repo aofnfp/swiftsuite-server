@@ -240,7 +240,7 @@ def get_woocommerce_existing_products(user_id):
 
 
 # Function to update product on woocommerce store
-def update_woocommerce_product_from_background(self, market_item_id, selling_price, quantity, userid):
+def update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid):
     try:
         enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
         # Set up the WooCommerce API client
@@ -354,7 +354,6 @@ def sync_ebay_items_with_local():
                         print(f"Ebay Product failed to insert into inventory {e}")
 
         elif user.marketplace_name == "Woocommerce":
-            wooc_items = []
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             for item in all_woocommercer_items:
@@ -408,13 +407,12 @@ def sync_ebay_items_with_local():
                             print(f"Product processing failed with error: {e}")
                             continue
                 except Exception as e:
-                    pass
                     # If item does not exist, insert new item
-                    # try:
-                    #     item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name"), description=json.dumps(item.get("description")), category_id=item.get("categories")[0]["id"], sku=item.get("sku"), start_price=item.get("price"), picture_detail=item.get("image")[0].get("src"), quantity=item.get("quantity"), return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", market_item_id=item.get("id"), user_id=user.user_id, date_created=item.get("date_created"), active=True, category=item.get("categories")[0].get("name"), price=item.get("price"), thumbnailImage="Null", vendor_name="Not Found", enable_charity=True, woo_category_name=item.get("categories")[0].get("name"), market_name="Woocommerce", map_status=False))
+                    try:
+                        item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name"), description=json.dumps(item.get("description")), category_id=item.get("categories")[0]["id"], sku=item.get("sku"), start_price=item.get("price"), picture_detail=item.get("image")[0].get("src"), quantity=item.get("quantity"), return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", market_item_id=item.get("id"), user_id=user.user_id, date_created=item.get("date_created"), active=True, category=item.get("categories")[0].get("name"), price=item.get("price"), thumbnailImage="Null", vendor_name="Not Found", enable_charity=True, woo_category_name=item.get("categories")[0].get("name"), market_name="Woocommerce", map_status=False))
 
-                    # except Exception as e:
-                    #     print(f"Woocommerce Product failed to insert into inventory {e}")
+                    except Exception as e:
+                        print(f"Woocommerce Product failed to insert into inventory {e}")
                 
 
 
