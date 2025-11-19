@@ -374,7 +374,8 @@ class MarketInventory(APIView):
             version = "wc/v3"
         )
         products = wcapi.get("products").json()  
-        return JsonResponse({"Listed_products":products}, safe=False, status=status.HTTP_200_OK)
+        products = products[0]
+        return JsonResponse({"Categories":products.get("categories")[0]["id"]}, safe=False, status=status.HTTP_200_OK)
 
 
 class WooCommerceInventory(APIView):
