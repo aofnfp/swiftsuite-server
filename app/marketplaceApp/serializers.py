@@ -65,19 +65,21 @@ class ItemListingToEbaySerializer:
 			    # Use CharField instead of ChoiceField to allow custom values
 				serializer_fields[aspect_name] = serializers.CharField(
                     required=False,
-                    allow_blank=True
+                    allow_blank=True,
+					allow_null=True
                 )
 				item_specifics_name.append(aspect_name)
                 
 			# If there are no options but it's a yes/no field, use BooleanField
 			elif 'Yes' in [v['localizedValue'] for v in aspect.get('aspectValues', [])] and 'No' in [v['localizedValue'] for v in aspect.get('aspectValues', [])]:
-				serializer_fields[aspect_name] = serializers.BooleanField(required=False)
+				serializer_fields[aspect_name] = serializers.BooleanField(required=False, allow_null=True)
 				item_specifics_name.append(aspect_name)
 			else:
 				# Otherwise, use CharField for free text fields
 				serializer_fields[aspect_name] = serializers.CharField(
 					required=False,
-					allow_blank=True
+					allow_blank=True,
+					allow_null=True
 				)
 				item_specifics_name.append(aspect_name)
 		
