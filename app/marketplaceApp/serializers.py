@@ -59,7 +59,7 @@ class ItemListingToEbaySerializer:
 			# Skip if this field is already in the model fields to avoid duplication
 			if hasattr(model_class, aspect_name):
 				continue
-			
+			upc = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 			# If there are predefined options, use ChoiceField
 			if options:
 				choices = [(opt['localizedValue'], opt['localizedValue']) for opt in options]
