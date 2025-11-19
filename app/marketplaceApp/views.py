@@ -49,7 +49,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         
             item_specifics = item_specifics_data.get('aspects', [])
             # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-            DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+            DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         else:
             DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
         
@@ -101,7 +101,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
     
         item_specifics = item_specifics_data.get('aspects', [])
         # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
     else:
         DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
     
@@ -660,7 +660,7 @@ class Ebay(APIView):
         item_specifics = data.get('aspects', [])
         
         # Generate the dynamic serializer
-        DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, _fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
             if isinstance(field, serializers.BooleanField) and field_name in _fields:
@@ -668,11 +668,10 @@ class Ebay(APIView):
             else:
                 if field_name in _fields:
                     item_specifics_field.append(field_name)
-        # item_specifics_field.append(choices_data)
-        # required_fields = eb.get_required_fields_item(leaf_category_id, access_token)
-        # For now, return the field names (you can replace this with form processing later)
+        
+        # return the field names and their choices and required fields
         return Response({
-            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields #, "required_fields": is_required
+            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields , "required_fields": required_fields
         })
     
     # Calculate the selling price of product going to ebay

@@ -28,7 +28,7 @@ class ItemListingToEbaySerializer:
 		model_class = []
 		item_specifics_name = []
 		valid_choices_field = {}
-		is_required = []
+		required_fields = []
 		# Create a ModelSerializer class for the model fields
 		class ModelSerializer(serializers.ModelSerializer):
 			class Meta:
@@ -50,9 +50,14 @@ class ItemListingToEbaySerializer:
 		for aspect in item_specifics:
 			aspect_name = aspect['localizedAspectName']
 			options = aspect.get('aspectValues', [])
-			if aspect.get('aspectConstraint', {}).get('aspectUsage') == 'REQUIRED':
-				is_required.append(aspect_name)
-			
+			# get required fields and store in a list
+			constraints = aspect.get("aspectConstraints", {})
+			is_required = constraints.get("aspectRequired", False)
+			if is_required:
+				required_fields.append(aspect_name)
+
+
+
 			# Skip if this field is already in the model fields to avoid duplication
 			if hasattr(model_class, aspect_name):
 				continue
@@ -85,7 +90,7 @@ class ItemListingToEbaySerializer:
 		
 		# Dynamically create a Serializer class combining eBay specifics and model fields
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
-		return DynamicSerializer, item_specifics_name, valid_choices_field
+		return DynamicSerializer, item_specifics_name, valid_choices_field, required_fields
 	
 	# Serializer for other marketplaces without item specifics
 	def generate_other_marketplace_listing_fields_serializer():
