@@ -373,9 +373,24 @@ class MarketInventory(APIView):
             consumer_secret = enrollment.wc_consumer_secret, 
             version = "wc/v3"
         )
-        products = wcapi.get("products").json()  
-        products = products[0]
-        return JsonResponse({"Categories":products.get("categories")[0]["id"]}, safe=False, status=status.HTTP_200_OK)
+        page = 1
+        all_orders = []
+
+        while True:
+            response = wcapi.get("orders", params={"per_page": 100, "page": page})
+
+            if response.status_code != 200:
+                print("Error fetching orders:", response.json())
+                return []
+
+            orders = response.json()
+
+            if not orders:  # no more pages
+                break
+
+            all_orders.extend(orders)
+            page += 1
+        return JsonResponse({"All Orders": all_orders}, safe=False, status=status.HTTP_200_OK)
 
 
 class WooCommerceInventory(APIView):

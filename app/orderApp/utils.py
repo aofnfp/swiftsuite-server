@@ -6,6 +6,7 @@ from ratelimit import limits, sleep_and_retry
 from .models import OrdersOnEbayModel
 from inventoryApp.models import InventoryModel
 from datetime import datetime, timedelta
+from woocommerce import API
 
 
 # Function to retrieve all fulfilment orders from Ebay
@@ -118,6 +119,39 @@ def get_item_ordered_details(access_token, item_id):
         return None
         
 
+# --- GET ALL WOOCOMMERCE ORDERS ---
+def get_all_woocommerce_orders(userid):
+    enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
+    # Set up the WooCommerce API client
+    wcapi = API(
+        url = enrollment.wc_consumer_url, 
+        consumer_key = enrollment.wc_consumer_key,  
+        consumer_secret = enrollment.wc_consumer_secret, 
+        version = "wc/v3",
+        timeout=30
+    )
+
+    page = 1
+    all_orders = []
+
+    while True:
+        response = wcapi.get("orders", params={"per_page": 100, "page": page})
+
+        if response.status_code != 200:
+            print("Error fetching orders:", response.json())
+            return []
+
+        orders = response.json()
+
+        if not orders:  # no more pages
+            break
+
+        all_orders.extend(orders)
+        page += 1
+
+    return all_orders
+
+
 # Update orders on ebay to the one on local database at the background
 # @api_view(["GET"])
 def sync_ebay_order_with_local():
@@ -166,7 +200,9 @@ def sync_ebay_order_with_local():
                         save_order.save()
                     except Exception as e:
                         print(f"Ordered item insert error {e} ")
-                        
+        elif user.marketplace_name == "WooCommerce":
+            all_orders = get_all_woocommerce_orders(user.user_id)
+                
 
 
 
