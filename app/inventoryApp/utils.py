@@ -14,7 +14,12 @@ from woocommerce import API
 
 
 # Create a function to update items quantity and price at the background on Ebay
-def update_items_quantity_or_price_on_ebay(access_token, item_id, price, quantity, market_id):
+def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, market_id):
+    eb = Ebay()
+    access_token = eb.refresh_access_token(user_id, "Ebay")
+    if not access_token:
+        print(f"Failed to refresh access token. Access token returns none in inventory with user id: {user_id}")   
+        return None
     # eBay Trading API endpoint
     url = 'https://api.ebay.com/ws/api.dll'
 
@@ -89,7 +94,6 @@ def get_all_items_on_ebay(user_id):
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
     access_token = eb.refresh_access_token(user_id, "Ebay")
-    print(f"Access token in inventoryApp utils: {access_token}")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
         return None
@@ -325,7 +329,7 @@ def sync_ebay_items_with_local():
                             # Check if there is a price and quantity update, then update on Ebay
                             # if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
                             #     # Update the product on Ebay
-                            #     response = update_items_quantity_or_price_on_ebay(access_token, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
+                            #     response = update_items_quantity_or_price_on_ebay(user.user_id, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
                             #     print("product updated on ebay successful.")
                             db_items = None
                         except Exception as e:

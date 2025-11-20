@@ -255,7 +255,7 @@ class Ebay(APIView):
         return access_token, refresh_token
 
     # Function to refresh the access token using the refresh token
-    def refresh_access_token(request, userid, market_name):
+    def refresh_access_token(self, userid, market_name):
         eb = Ebay()
         try:
             connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
