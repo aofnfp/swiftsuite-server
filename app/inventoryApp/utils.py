@@ -406,7 +406,7 @@ def sync_ebay_items_with_local():
                             print(f"Product processing failed with error: {e}")
                             continue
                 except Exception as e:
-                    print(f"Woocommerce items fetched: {len(item)}")
+                    print(f"Woocommerce items fetched: {item}")
                     # If item does not exist, insert new item
                     try:
                         item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name"), description=json.dumps(item.get("description")), category_id=item.get("categories")[0]["id"], sku=item.get("sku"), start_price=item.get("price"), picture_detail=item.get("image")[0].get("src"), quantity=item.get("stock_quantity"), return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", market_item_id=item.get("id"), user_id=user.user_id, date_created=item.get("date_created"), active=True, category=item.get("categories")[0].get("name"), price=item.get("price"), thumbnailImage="Null", vendor_name="Not Found", enable_charity=True, woo_category_name=item.get("categories")[0].get("name"), market_name="Woocommerce", map_status=False))
