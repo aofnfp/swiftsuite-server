@@ -377,10 +377,9 @@ class MarketInventory(APIView):
         all_orders = []
 
         while True:
-            response = wcapi.get("orders", params={"per_page": 100, "page": page})
+            response = wcapi.get("orders", params={"per_page": 100, "page": page, "status": "any"})
 
             if response.status_code != 200:
-                print()
                 return Response(f"Error fetching orders: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
 
 
