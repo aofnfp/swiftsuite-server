@@ -9,11 +9,52 @@ from datetime import datetime, timedelta
 from woocommerce import API
 
 
+
+# Function to refresh the access token using the refresh token
+def refresh_access_token_in_order(userid, market_name):
+    eb = Ebay()
+    try:
+        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token = connection.access_token
+    refresh_token = connection.refresh_token
+
+    credentials = f"{eb.client_id}:{eb.client_secret}"
+    credentials_base64 = base64.b64encode(credentials.encode()).decode()
+    
+    headers = {
+        "Authorization": f"Basic {credentials_base64}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    body = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
+    }
+
+    response = requests.post(eb.token_url, headers=headers, data=body)
+    if response.status_code != 200:
+        print(f"Failed to refresh access token. Authorization code has expired")
+        return None
+
+    result = response.json()        
+    access_token = result.get('access_token')
+    refresh_token = result.get('refresh_token')
+    if not access_token:
+        print(f"Failed to get access token from response")
+        return None
+
+    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+    return access_token
+
+
 # Function to retrieve all fulfilment orders from Ebay
 def get_product_ordered_from_background(user_id):
-    eb = Ebay()
     # Get access_token
-    access_token = eb.refresh_access_token(user_id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+    access_token = refresh_access_token_in_order(user_id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in orderapp")
         return None
@@ -154,7 +195,6 @@ def get_all_woocommerce_orders(userid):
 # Update orders on ebay to the one on local database at the background
 # @api_view(["GET"])
 def sync_ebay_order_with_local():
-    eb = Ebay()
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
         if user.marketplace_name == "Ebay":    
