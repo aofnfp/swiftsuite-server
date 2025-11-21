@@ -7,6 +7,7 @@ from inventoryApp.models import InventoryModel
 from datetime import datetime, timedelta
 from woocommerce import API
 from decouple import config
+import base64
 
 
 # Function to refresh the access token using the refresh token
