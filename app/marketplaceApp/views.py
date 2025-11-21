@@ -283,7 +283,6 @@ class Ebay(APIView):
             return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
 
         result = response.json()
-        refresh_token = result.get('refresh_token')
         access_token = result.get('access_token')
         
         if not access_token:
