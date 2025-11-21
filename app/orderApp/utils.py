@@ -13,15 +13,12 @@ from woocommerce import API
 def get_product_ordered_from_background(enroll_id):
     # Get access_token
     try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
     except Exception as e:
         print(f"Failed to fetch access token")
         return None
     
     access_token =  user_data.access_token
-    if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in inventory with user id: {enroll_id}")   # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
-        return None
     
     # Set eBay API endpoint and headers
     try:
@@ -59,8 +56,10 @@ def get_product_ordered_from_background(enroll_id):
                 return None
         return all_orders 
     except Exception as e:
-        print(f'Could not fetch ordered items from ebay Error: {e}')
-        return None
+        if e.get('errors')[0]['errorId'] == 1001:
+            return None
+        else:
+            return "Error"
 
     
     # try:
@@ -160,13 +159,17 @@ def get_all_woocommerce_orders(userid):
 # Update orders on ebay to the one on local database at the background
 # @api_view(["GET"])
 def sync_ebay_order_with_local():
+    eb = Ebay()
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
             ebay_orders = get_product_ordered_from_background(user._id)
             if ebay_orders == None:
-                print(f"Failed to fetch ordered items from ebay for user {user._id}")
+                token = eb.refresh_access_token(user.user_id, "Ebay")
+                ebay_orders = get_product_ordered_from_background(user._id)
+            elif ebay_orders == "Error":
+                print(f"Failed to fetch all orders from ebay for user {user.user_id}.")
                 continue
             
             for order in ebay_orders:

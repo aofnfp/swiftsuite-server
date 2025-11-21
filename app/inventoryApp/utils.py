@@ -21,9 +21,6 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
         return None
     
     access_token =  user_data.access_token
-    if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in inventory with user id: {enroll_id}")   
-        return None
     
     # eBay Trading API endpoint
     url = 'https://api.ebay.com/ws/api.dll'
@@ -99,8 +96,10 @@ def get_all_items_on_ebay(enroll_id):
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
-        print(f"Failed to fetch access token")
-        return None
+        if e.get('errors')[0]['errorId'] == 1001:
+            return None
+        else:
+            return "Error"
     
     access_token =  user_data.access_token
     try:
@@ -176,7 +175,10 @@ def get_all_items_on_ebay(enroll_id):
             page_number += 1
             
     except Exception as e:
-        print(f"Failed to get products: {e}")
+        if e.get('errors')[0]['errorId'] == 1001:
+            return None
+        else:
+            return "Error"
     
     return ebay_items
     
@@ -193,9 +195,6 @@ def get_item_details(enroll_id, item_id):
         return None
     
     access_token =  user_data.access_token
-    if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in marketplace id: {enroll_id}")   
-        return None
     
     # Set up the headers with the access token
     headers = {
@@ -216,10 +215,12 @@ def get_item_details(enroll_id, item_id):
             return product_data
         else:
             print(f"Failed to retrieve details for inventory for Item ID {item_id}: {response.text}")
-            return None
+            return "Error"
     except Exception as e:
-        print(f"Failed to retrieve item details for inventory: {e}")
-        return None
+        if e.get('errors')[0]['errorId'] == 1001:
+            return None
+        else:
+            return "Error"
             
 
 # Calculate the selling price of product going to ebay
@@ -285,6 +286,7 @@ def update_woocommerce_product_from_background(market_item_id, selling_price, qu
 # Map items on ebay with the one on local database for updates
 # @api_view(['GET'])
 def sync_ebay_items_with_local():
+    eb = Ebay()
     all_ebay_items = []
     db_items = None
     # Get all user with ebay marketplace to sync their products
@@ -293,6 +295,14 @@ def sync_ebay_items_with_local():
         if user.marketplace_name == "Ebay":
             # Fetch all item from eBay
             ebay_items = get_all_items_on_ebay(user._id)
+            # If fetching items failed due to invalid token, try refreshing token once and fetch again
+            if ebay_items == None:
+                token = eb.refresh_access_token(user.user_id, "Ebay")
+                ebay_items = get_all_items_on_ebay(user._id)
+            elif ebay_items == "Error":
+                print(f"Failed to fetch all items from ebay for user {user.user_id}.")
+                continue
+
             for item in ebay_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
             for item in all_ebay_items:
@@ -352,6 +362,11 @@ def sync_ebay_items_with_local():
                         # Get product details from eBay
                         product_details = get_item_details(user._id, item.get("ebay_item_id"))
                         if product_details == None:
+                            # If fetching items failed due to invalid token, try refreshing token once and fetch again
+                            token = eb.refresh_access_token(user.user_id, "Ebay")
+                            product_details = get_item_details(user._id, item.get("ebay_item_id"))
+                        elif product_details == "Error":
+                            print(f"Failed to fetch item details from ebay for item {item.get('ebay_item_id')} for user {user.user_id}.")
                             continue
                         else:
                             # Get the upc and also mpn if no main mpn field does not exist
