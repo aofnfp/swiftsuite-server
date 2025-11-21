@@ -175,7 +175,7 @@ def sync_ebay_order_with_local():
                     lineItems = order.get('lineItems', [])[0]
                     ebay_order_id = order.get("orderId")
                     exist_order = OrdersOnEbayModel.objects.get(orderId=ebay_order_id)
-                    product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId"))
+                    product_data = InventoryModel.objects.all().filter(market_id=lineItems.get("legacyItemId"))
                     if len(product_data) == 0:
                         product_data = {"vendor_name":""}
                     else:
@@ -184,9 +184,9 @@ def sync_ebay_order_with_local():
                 except:
                     try:
                         lineItems = order.get('lineItems', [])[0]
-                        product_data = InventoryModel.objects.all().filter(ebay_item_id=lineItems.get("legacyItemId"))
+                        product_data = InventoryModel.objects.all().filter(market_id=lineItems.get("legacyItemId"))
                         if len(product_data) == 0:
-                            print(f"product details returned None in orderApp for item with item_id {order.get('ebay_item_id')}")
+                            print(f"product details returned None in orderApp for item with item_id: {lineItems.get('legacyItemId')}")
                             continue
                         else:
                             product_data = product_data.values()[0]
