@@ -6,60 +6,23 @@ from .models import OrdersOnEbayModel
 from inventoryApp.models import InventoryModel
 from datetime import datetime, timedelta
 from woocommerce import API
-from decouple import config
-import base64
 
 
-# Function to refresh the access token using the refresh token
-def refresh_access_token_in_order(userid, market_name):
-    eb = Ebay()
-    client_id = config("EB_CLIENT_ID")
-    client_secret = config("EB_CLIENT_SECRET")
+
+# Function to retrieve all fulfilment orders from Ebay
+def get_product_ordered_from_background(enroll_id):
+    # Get access_token
     try:
-        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
         print(f"Failed to fetch access token")
         return None
     
-    access_token = connection.access_token
-    refresh_token = connection.refresh_token
-
-    credentials = f"{client_id}:{client_secret}"
-    credentials_base64 = base64.b64encode(credentials.encode()).decode()
+    access_token =  user_data.access_token
+    if not access_token:
+        print(f"Failed to refresh access token. Access token returns none in inventory with user id: {enroll_id}")   # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+        return None
     
-    headers = {
-        "Authorization": f"Basic {credentials_base64}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    body = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-        "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-    }
-
-    response = requests.post(eb.token_url, headers=headers, data=body)
-    if response.status_code != 200:
-        print(f"Failed to refresh access token. Authorization code has expired")
-        return None
-
-    result = response.json()        
-    access_token = result.get('access_token')
-    refresh_token = result.get('refresh_token')
-    if not access_token:
-        print(f"Failed to get access token from response")
-        return None
-
-    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-    return access_token
-
-
-# Function to retrieve all fulfilment orders from Ebay
-def get_product_ordered_from_background(user_id):
-    # Get access_token
-    access_token = refresh_access_token_in_order(user_id, "Ebay") #requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
-    if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in orderapp")
-        return None
     # Set eBay API endpoint and headers
     try:
         HEADERS = {
@@ -201,9 +164,9 @@ def sync_ebay_order_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
-            ebay_orders = get_product_ordered_from_background(user.user_id)
+            ebay_orders = get_product_ordered_from_background(user._id)
             if ebay_orders == None:
-                print(f"Failed to fetch ordered items from ebay for user {user.user_id}")
+                print(f"Failed to fetch ordered items from ebay for user {user._id}")
                 continue
             
             for order in ebay_orders:
