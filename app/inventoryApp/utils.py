@@ -13,10 +13,52 @@ from django.db.models import Q
 from woocommerce import API
 
 
+
+# Function to refresh the access token using the refresh token
+def refresh_access_token_in_util(userid, market_name):
+    eb = Ebay()
+    try:
+        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token = connection.access_token
+    refresh_token = connection.refresh_token
+
+    credentials = f"{eb.client_id}:{eb.client_secret}"
+    credentials_base64 = base64.b64encode(credentials.encode()).decode()
+    
+    headers = {
+        "Authorization": f"Basic {credentials_base64}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    body = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
+    }
+
+    response = requests.post(eb.token_url, headers=headers, data=body)
+    if response.status_code != 200:
+        print(f"Failed to refresh access token. Authorization code has expired")
+        return None
+
+    result = response.json()        
+    access_token = result.get('access_token')
+    refresh_token = result.get('refresh_token')
+    if not access_token:
+        print(f"Failed to get access token from response")
+        return None
+
+    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+    return access_token
+
+
 # Create a function to update items quantity and price at the background on Ebay
 def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, market_id):
-    eb = Ebay()
-    access_token = eb.refresh_access_token(user_id, "Ebay")
+
+    access_token = refresh_access_token_in_util(user_id, "Ebay")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in inventory with user id: {user_id}")   
         return None
@@ -89,11 +131,10 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, ma
 
 # Get all products already listed on Ebay using sku
 def get_all_items_on_ebay(user_id):
-    eb = Ebay()
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
-    access_token = eb.refresh_access_token(user_id, "Ebay")
+    access_token = refresh_access_token_in_util(user_id, "Ebay")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
         return None
@@ -180,8 +221,7 @@ def get_all_items_on_ebay(user_id):
 @limits(calls=5, period=1)
 def get_item_details(user_id, item_id):
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
-    eb = Ebay()
-    access_token = eb.refresh_access_token(user_id, "Ebay")
+    access_token = refresh_access_token_in_util(user_id, "Ebay")
     if not access_token:
         print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
         return None
@@ -274,7 +314,6 @@ def update_woocommerce_product_from_background(market_item_id, selling_price, qu
 # Map items on ebay with the one on local database for updates
 # @api_view(['GET'])
 def sync_ebay_items_with_local():
-    eb = Ebay()
     all_ebay_items = []
     db_items = None
     # Get all user with ebay marketplace to sync their products
