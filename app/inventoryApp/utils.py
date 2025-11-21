@@ -1,6 +1,4 @@
 import json, requests, time
-from decouple import config
-import base64
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from ebaysdk.exception import ConnectionError
@@ -14,57 +12,19 @@ from django.db.models import Q
 from woocommerce import API
 
 
-
-# Function to refresh the access token using the refresh token
-def refresh_access_token_in_util(userid, market_name):
-    eb = Ebay()
-    client_id = config("EB_CLIENT_ID")
-    client_secret = config("EB_CLIENT_SECRET")
+# Create a function to update items quantity and price at the background on Ebay
+def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id):
     try:
-        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
         print(f"Failed to fetch access token")
         return None
     
-    access_token = connection.access_token
-    refresh_token = connection.refresh_token
-
-    credentials = f"{client_id}:{client_secret}"
-    credentials_base64 = base64.b64encode(credentials.encode()).decode()
+    access_token =  user_data.access_token
+    if not access_token:
+        print(f"Failed to refresh access token. Access token returns none in inventory with user id: {enroll_id}")   
+        return None
     
-    headers = {
-        "Authorization": f"Basic {credentials_base64}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    body = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-        "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-    }
-
-    response = requests.post(eb.token_url, headers=headers, data=body)
-    if response.status_code != 200:
-        print(f"Failed to refresh access token. Authorization code has expired")
-        return None
-
-    result = response.json()        
-    access_token = result.get('access_token')
-    refresh_token = result.get('refresh_token')
-    if not access_token:
-        print(f"Failed to get access token from response")
-        return None
-
-    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-    return access_token
-
-
-# Create a function to update items quantity and price at the background on Ebay
-def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, market_id):
-
-    access_token = refresh_access_token_in_util(user_id, "Ebay")
-    if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in inventory with user id: {user_id}")   
-        return None
     # eBay Trading API endpoint
     url = 'https://api.ebay.com/ws/api.dll'
 
@@ -75,7 +35,6 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, ma
         'Content-Type': 'text/xml',
         'Authorization': f'Bearer {access_token}'
     }
-    user_data = MarketplaceEnronment.objects.get(_id=market_id, marketplace_name="Ebay")
     try:
         # XML Body for ReviseItem request
         if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
@@ -133,14 +92,17 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, ma
 
 
 # Get all products already listed on Ebay using sku
-def get_all_items_on_ebay(user_id):
+def get_all_items_on_ebay(enroll_id):
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
-    access_token = refresh_access_token_in_util(user_id, "Ebay")
-    if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
         return None
+    
+    access_token =  user_data.access_token
     try:
         url = "https://api.ebay.com/ws/api.dll"
         headers = {
@@ -222,11 +184,17 @@ def get_all_items_on_ebay(user_id):
 # Limit to 5 calls per second (eBay's typical limit)
 @sleep_and_retry
 @limits(calls=5, period=1)
-def get_item_details(user_id, item_id):
+def get_item_details(enroll_id, item_id):
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
-    access_token = refresh_access_token_in_util(user_id, "Ebay")
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token =  user_data.access_token
     if not access_token:
-        print(f"Failed to refresh access token. Access token returns none in marketplace id: {user_id}")   
+        print(f"Failed to refresh access token. Access token returns none in marketplace id: {enroll_id}")   
         return None
     
     # Set up the headers with the access token
@@ -324,7 +292,7 @@ def sync_ebay_items_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":
             # Fetch all item from eBay
-            ebay_items = get_all_items_on_ebay(user.user_id)
+            ebay_items = get_all_items_on_ebay(user._id)
             for item in ebay_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
             for item in all_ebay_items:
@@ -382,7 +350,7 @@ def sync_ebay_items_with_local():
                     # If item does not exist, insert new item
                     try:
                         # Get product details from eBay
-                        product_details = get_item_details(user.user_id, item.get("ebay_item_id"))
+                        product_details = get_item_details(user._id, item.get("ebay_item_id"))
                         if product_details == None:
                             continue
                         else:
