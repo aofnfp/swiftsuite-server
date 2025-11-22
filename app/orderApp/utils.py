@@ -52,14 +52,13 @@ def get_product_ordered_from_background(enroll_id):
                     break
                 offset += limit
             else:
-                print(f"Failed to retrieve orders: {response.text}")
-                return None
+                if response.json().get('errors')[0]['errorId'] == 1001:
+                    return None
+                else:
+                    return "Error"
         return all_orders 
     except Exception as e:
-        if e.get('errors')[0]['errorId'] == 1001:
-            return None
-        else:
-            return "Error"
+        print(f'Could not fetch ordered items from ebay Error: {e}')
 
     
     # try:
@@ -166,6 +165,8 @@ def sync_ebay_order_with_local():
             # Fetch all orders from eBay
             ebay_orders = get_product_ordered_from_background(user._id)
             if ebay_orders == None:
+                # Refresh access token and retry fetching orders
+                print(f"Access token expired for user {user.user_id}, refreshing token.")
                 token = eb.refresh_access_token(user.user_id, "Ebay")
                 ebay_orders = get_product_ordered_from_background(user._id)
             elif ebay_orders == "Error":
