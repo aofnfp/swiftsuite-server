@@ -59,6 +59,7 @@ def get_product_ordered_from_background(enroll_id):
         return all_orders 
     except Exception as e:
         print(f'Could not fetch ordered items from ebay Error: {e}')
+        return "Error"
 
     
     # try:
@@ -167,8 +168,7 @@ def sync_ebay_order_with_local():
             if ebay_orders == None:
                 # Refresh access token and retry fetching orders
                 print(f"Access token expired for user {user.user_id}, refreshing token.")
-                token = eb.refresh_access_token(user.user_id, "Ebay")
-                ebay_orders = get_product_ordered_from_background(user._id)
+                continue
             elif ebay_orders == "Error":
                 print(f"Failed to fetch all orders from ebay for user {user.user_id}.")
                 continue
