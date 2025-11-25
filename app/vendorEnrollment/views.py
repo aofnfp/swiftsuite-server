@@ -505,17 +505,17 @@ def removeProduct(request, productId):
             return JsonResponse({'message': f'Unsupported vendor: {vendor_name}'}, status=400)
 
         # Mark vendor product as inactive
-        try:
-            updated_count = product_model.objects.filter(
-                product__id=product_id,
-                account__user=user
-            ).update(active=False)
+        updated_count = product_model.objects.filter(
+            product__id=product_id,
+            account__user=user
+        ).update(active=False)
             
-            # Delete the general product AFTER marking vendor updates inactive
-            product.delete()
-            
-        except updated_count == 0:
+        if updated_count == 0:
             return JsonResponse({'message': 'Associated vendor product not found'}, status=404)
+        
+        # Delete the general product AFTER marking vendor updates inactive
+        product.delete()
+            
 
         return JsonResponse({'message': 'Product deleted successfully'})
 
