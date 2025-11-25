@@ -497,7 +497,6 @@ def removeProduct(request, productId):
         # Extract data BEFORE deletion
         product_id = product.product_id
         vendor_name = product.enrollment.vendor.name
-        product.delete()
 
         # Look up the correct update model
         product_model = UPDATE_MODELS_MAPPING.get(vendor_name.lower())
