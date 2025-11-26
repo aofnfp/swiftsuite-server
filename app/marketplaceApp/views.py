@@ -756,7 +756,7 @@ class Ebay(APIView):
                 <SKU>{validated_data['sku']}</SKU>
                 {f'''<ProductListingDetails>
                   <UPC>{validated_data['upc']}</UPC>
-                </ProductListingDetails>'''if validated_data['upc']=='null' else ''}
+                </ProductListingDetails>'''if validated_data['upc']!='null' else ''}
                 
                 <!-- ... more PictureURL values allowed here ... -->
                 {item_image_url}
