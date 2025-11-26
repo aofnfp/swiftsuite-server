@@ -754,9 +754,10 @@ class Ebay(APIView):
                 </PrimaryCategory>
                 <ConditionID>1000</ConditionID>
                 <SKU>{validated_data['sku']}</SKU>
-                <ProductListingDetails>
+                {f'''<ProductListingDetails>
                   <UPC>{validated_data['upc']}</UPC>
-                </ProductListingDetails>
+                </ProductListingDetails>'''if validated_data['upc'] else ''}
+                <PictureDetails>
                 
                 <!-- ... more PictureURL values allowed here ... -->
                 {item_image_url}
