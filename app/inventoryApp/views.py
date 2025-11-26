@@ -21,7 +21,8 @@ from .tasks import sync_ebay_inventory_task
 from woocommerce import API
 from decouple import config
 from marketplaceApp.views import WooCommerce
-from datetime import datetime, timedelta
+from xml.etree.ElementTree import Element, tostring, SubElement
+from xml.etree import ElementTree as ET
 
 
 # Function to update product across marketplaces
@@ -152,6 +153,20 @@ class MarketInventory(APIView):
             'Authorization': f'Bearer {access_token}'
         }
         try:
+            # Validate and format the thumbnail images for listing
+            picture_details = Element('PictureDetails')
+            SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
+            if validated_data["thumbnailImage"] != "Null":
+                thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
+                thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+                for img in thumbnail_images:
+                    SubElement(picture_details, 'PictureURL').text = img
+            # Convert the ElementTree to an XML string
+            item_image_url = tostring(picture_details, encoding='unicode')
+        except:
+            return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
             # XML Body for ReviseItem request
             body = f"""
             <?xml version="1.0" encoding="utf-8"?>
@@ -171,13 +186,11 @@ class MarketInventory(APIView):
                     </PrimaryCategory>
                     <ConditionID>1000</ConditionID>
                     <SKU>{validated_data['sku']}</SKU>
-                    <ProductListingDetails>
+                    {f'''<ProductListingDetails>
                         <UPC>{validated_data['upc']}</UPC>
-                    </ProductListingDetails>
-                    <PictureDetails>
-                        <PictureURL>{validated_data['picture_detail']}</PictureURL>
-                        <!-- ... more PictureURL values allowed here ... -->
-                    </PictureDetails>
+                    </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
+                    <!-- ... more PictureURL values allowed here ... -->
+                    {item_image_url}
                     
                     <!-- ... Item specifics are placed here ... -->
                     {xml_item_specifics}

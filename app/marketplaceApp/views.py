@@ -853,7 +853,7 @@ class Ebay(APIView):
         for value in item_specifics_fields:
             custom_fields[value] = validated_data[value]
         
-         # if upc is null, set it to empty string
+        # if upc is null, set it to empty string
         if validated_data['upc'] == 'Null':
             validated_data['upc'] = ''
         try:
