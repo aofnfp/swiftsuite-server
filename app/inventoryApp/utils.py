@@ -314,7 +314,12 @@ def sync_ebay_items_with_local():
                         try:
                             # Get the actual model class from the string name
                             model_class = globals()[vendor_db]
-                            db_items = model_class.objects.filter(Q(sku=item.get("ebay_sku")) & (Q(mpn=item_exists.mpn) | Q(upc=item_exists.upc)))
+                            conditions = Q()
+                            if item_exists.upc:
+                                conditions |= Q(upc=item_exists.upc)
+                            if item_exists.mpn:
+                                conditions |= Q(mpn=item_exists.mpn)  
+                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("ebay_sku")))
                             if not db_items.exists():
                                 continue
                             

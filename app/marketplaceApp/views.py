@@ -826,12 +826,13 @@ class Ebay(APIView):
             item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(custom_fields), market_item_id=ebay_itemID, user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=True, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], fixed_percentage_markup=validated_data['fixed_percentage_markup'], shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], enable_charity=validated_data['enable_charity'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], market_name="Ebay"))
 
             # Update the GeneralProduct table to set listed_market to true
-            filters = Q(user_id=userid)
+            conditions = Q()
             if validated_data['upc']:
-                filters &= Q(upc=validated_data['upc'])
+                conditions |= Q(upc=validated_data['upc'])
             if validated_data['sku']:
-                filters &= Q(sku=validated_data['sku']) 
-            Generalproducttable.objects.filter(filters).update(active=True)
+                conditions |= Q(sku=validated_data['sku'])
+
+            Generalproducttable.objects.filter(conditions & Q(user_id=userid)).update(active=True)
             # Generalproducttable.objects.filter((Q(upc=validated_data['upc']) | Q(sku=validated_data['sku'])) & Q(user_id=userid)).update(active=True)
             return Response(f"Product listing was successful", status=status.HTTP_200_OK)
         except ConnectionError as e:
@@ -858,12 +859,14 @@ class Ebay(APIView):
         try:
             item_listing, created = InventoryModel.objects.update_or_create(user_id=userid, sku=validated_data['sku'], defaults=dict(title=validated_data['title'], description=validated_data['description'], location=validated_data['location'], upc=validated_data['upc'], category_id=validated_data['category_id'], start_price=validated_data['start_price'], picture_detail=validated_data['picture_detail'], postal_code=validated_data['postal_code'], quantity=validated_data['quantity'], return_profileID=validated_data['return_profileID'], return_profileName=validated_data['return_profileName'], payment_profileID=validated_data['payment_profileID'], payment_profileName=validated_data['payment_profileName'], shipping_profileID=validated_data['shipping_profileID'], shipping_profileName=validated_data['shipping_profileName'], bestOfferEnabled=validated_data['bestOfferEnabled'], listingType=validated_data['listingType'], gift=validated_data['gift'], categoryMappingAllowed=validated_data['categoryMappingAllowed'], item_specific_fields=json.dumps(custom_fields), user_id=userid, product_id=validated_data['product'].id,  map_status=True, active=False, category=validated_data['category'], market_logos=validated_data['market_logos'], city=validated_data['city'], cost=validated_data['cost'], country=validated_data['country'], model=validated_data['model'], msrp=validated_data['msrp'], price=validated_data['price'], fixed_markup=validated_data['fixed_markup'], percentage_markup=validated_data['percentage_markup'], fixed_percentage_markup=validated_data['fixed_percentage_markup'],  shipping_cost=validated_data['shipping_cost'], shipping_height=validated_data['shipping_height'], shipping_width=validated_data['shipping_width'], thumbnailImage=validated_data['thumbnailImage'], total_product_cost=validated_data['total_product_cost'], us_size=validated_data['us_size'], min_profit_mergin=validated_data['min_profit_mergin'], profit_margin=validated_data['profit_margin'], enable_charity=validated_data['enable_charity'], charity_id=validated_data['charity_id'], donation_percentage=validated_data['donation_percentage'], vendor_name=validated_data['vendor_name'], market_name="Ebay"))
             # Update the GeneralProduct table to set listed_market to true
-            filters = Q(user_id=userid)
+            conditions = Q()
             if validated_data['upc']:
-                filters &= Q(upc=validated_data['upc'])
+                conditions |= Q(upc=validated_data['upc'])
             if validated_data['sku']:
-                filters &= Q(sku=validated_data['sku'])
-            Generalproducttable.objects.filter(filters).update(active=True)
+                conditions |= Q(sku=validated_data['sku'])
+
+            Generalproducttable.objects.filter(conditions & Q(user_id=userid)).update(active=True)
+
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
