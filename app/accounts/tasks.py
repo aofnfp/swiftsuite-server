@@ -120,7 +120,7 @@ def send_normal_email(data, file='reset_password.html'):
  
         send_graph_email(
             data['to_email'], 
-            data['subject'], 
+            data['email_subject'], 
             html_message, 
             plain_message
         )
