@@ -7,8 +7,53 @@ from django.utils.html import strip_tags
 from celery import shared_task
 import logging, json
 from datetime import datetime as dt
+from O365 import Account, FileSystemTokenBackend
 
 logger = logging.getLogger(__name__)
+
+credentials = (
+    settings.O365_CLIENT_ID, 
+    settings.O365_CLIENT_SECRET
+)
+
+token_backend = FileSystemTokenBackend(
+    token_path='.', 
+    token_filename='o365_token.txt'
+)
+
+account = Account(credentials, token_backend=token_backend)
+
+def get_graph_account():
+    """
+    Returns an authenticated Microsoft Graph Account.
+    Refreshes the token automatically if expired.
+    """
+    account = Account(
+        credentials,
+        auth_flow_type='credentials',
+        tenant_id=settings.O365_TENANT_ID,
+        token_backend=token_backend
+    )
+    if not account.is_authenticated:
+        # For client-credential flow, authenticate() happens automatically.
+        account.authenticate()
+    return account
+
+
+def send_graph_email(to, subject, html_body, plain_body):
+    """
+    Sends email via Microsoft Graph API.
+    """
+    account = get_graph_account()
+    mailbox = account.mailbox(resource=settings.DEFAULT_FROM_EMAIL)
+
+    message = mailbox.new_message()
+    message.to.add(to)
+    message.subject = subject
+    message.body = html_body
+    message.body_type = "html"
+
+    message.send()
 
 def generate_otp():
     totp = pyotp.TOTP('base32secret3232')
@@ -37,16 +82,8 @@ def send_code_to_user(email):
         html_message = render_to_string('verify_email.html', context=context)
         plain_message = strip_tags(html_message)
 
-
-        d_email = EmailMultiAlternatives(
-            subject=subject,
-            body=plain_message,
-            from_email=from_email,
-            to=[email]
-        )
-
-        d_email.attach_alternative(html_message, 'text/html')
-        d_email.send(fail_silently=False)
+        send_graph_email(email, subject, html_message, plain_message)
+        
     except Exception as e:
         logger.error(f"Error sending OTP email to {email}: {e}")
 
@@ -81,14 +118,11 @@ def send_normal_email(data, file='reset_password.html'):
         html_message = clean_text(html_message)
         plain_message = strip_tags(html_message)
  
-        email = EmailMultiAlternatives(
-            subject= data['email_subject'],
-            body = plain_message,
-            from_email =settings.DEFAULT_FROM_EMAIL,
-            to = [data['to_email']] 
+        send_graph_email(
+            data['to_email'], 
+            data['subject'], 
+            html_message, 
+            plain_message
         )
-        email.attach_alternative(html_message, 'text/html')
-        email.encoding = "utf-8"
-        email.send(fail_silently=False)
     except Exception as e:
         logger.error(f"Error sending email to {data['to_email']}: {e}", exc_info=True)
