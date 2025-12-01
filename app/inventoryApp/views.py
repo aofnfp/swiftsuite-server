@@ -380,7 +380,7 @@ class MarketInventory(APIView):
     # Function to test any api from ebay before implementation
     @api_view(['GET'])
     def function_to_test_api(request, userid, market_name):
-        enrollment = Enrollment.objects.filter(user_id=userid).values()
+        enrollment = Enrollment.objects.filter(user_id=userid)
         # vendor_list = [vendor_name.get("name")+"Update" for vendor_name in enrollment]        
         return JsonResponse({"Vendor name": list(enrollment)}, safe=False, status=status.HTTP_200_OK)
 
