@@ -336,7 +336,7 @@ class MarketInventory(APIView):
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
-            invent_item = InventoryModel.objects.filter(id=inventoryid)
+            invent_item = InventoryModel.objects.get(id=inventoryid)
             # end item on ebay listing
             url = "https://api.ebay.com/ws/api.dll"
             headers = {
@@ -352,7 +352,7 @@ class MarketInventory(APIView):
                 <RequesterCredentials>
                     <eBayAuthToken>{access_token}</eBayAuthToken>
                 </RequesterCredentials>
-                <ItemID>{invent_item.values()[0].get('ebay_item_id')}</ItemID>
+                <ItemID>{invent_item.market_item_id}</ItemID>
                 <EndingReason>NotAvailable</EndingReason>
             </EndFixedPriceItemRequest>
             """
@@ -367,7 +367,7 @@ class MarketInventory(APIView):
             ack = root.find('ns:Ack', namespace).text
             
             if response.status_code == 200 and ack == "Success":
-                Generalproducttable.objects.filter(id=invent_item.values()[0].get('product_id')).update(active=False)
+                Generalproducttable.objects.filter(id=invent_item.product_id).update(active=False)
                 invent_item.delete()
                 return Response(f"Item ended from ebay successfully {response.text}", status=status.HTTP_200_OK)
             else:
