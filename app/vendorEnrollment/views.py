@@ -136,9 +136,9 @@ class AccountViewset(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({"message": "Account, Vendor data and enrollments deleted successfully."},status=status.HTTP_200_OK)
   
+@with_module('inventory')
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-@with_module('inventory')
 def update_enrolment(request, identifier):
     user = request.user
     if user.is_subaccount:
@@ -155,9 +155,9 @@ def update_enrolment(request, identifier):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@with_module('inventory')
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-@with_module('inventory')
 def delete_enrolment(request, identifier):
     user = request.user
     if user.is_subaccount:
@@ -168,9 +168,9 @@ def delete_enrolment(request, identifier):
     
     return Response({"message":"Enrollment Deleted Successfully"}, status=status.HTTP_200_OK)
 
+@with_module('inventory')
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-@with_module('inventory')
 def getEnrollmentWithIdentifier(request, identifier):
     user = request.user
     if user.is_subaccount:
@@ -482,9 +482,9 @@ class AddProductView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@with_module('inventory')
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-@with_module('inventory')
 def removeProduct(request, productId):
     try:
         # Try to fetch the product
