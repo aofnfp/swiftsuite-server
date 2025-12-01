@@ -489,6 +489,12 @@ class ManageSubAccountsView(GenericAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        search = self.request.query_params.get('search', None)
+        if search == 'pending':
+            if user.is_subaccount:
+                return User.objects.filter(parent=user.parent, is_verified=False)
+            return User.objects.filter(parent=user, is_verified=False)
+        
         if user.is_subaccount:
             return User.objects.filter(parent=user.parent)
         return User.objects.filter(parent=user)
@@ -518,6 +524,23 @@ class ManageSubAccountsView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+    
+class SendReminder(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = "accounts"
+
+    def get(self, request, pk):
+        try:
+            subaccount = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "Subaccount not found."}, status=404)
+        
+        if subaccount.is_verified:
+            return Response({"detail": "Subaccount is already verified."}, status=400)
+        
+        from .serializers import create_reset_link
+        create_reset_link(subaccount, 'subaccount', parent_name=request.user.get_full_name)
+        return Response({"message": "Reminder sent successfully."}, status=status.HTTP_200_OK)
 
 class DeleteSubAccountView(GenericAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
