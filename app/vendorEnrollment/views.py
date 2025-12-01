@@ -581,9 +581,9 @@ class UserAccountEnrollmentsView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+@with_module('inventory')
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-@with_module('inventory')
 def allEnrolledVendors(request):
     user = request.user
     if user.is_subaccount:
