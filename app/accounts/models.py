@@ -146,6 +146,13 @@ class Subscription(models.Model):
     def is_active(self):
         return timezone.now() < self.expires_at
     
+    @property
+    def subaccount_left(self):
+        if self.tier.max_subaccounts is None:
+            return None  # Unlimited
+        used = self.user.subaccounts.count()
+        return max(0, self.tier.max_subaccounts - used)
+    
     
 class Payment(models.Model):
     STATUS_CHOICES = [
