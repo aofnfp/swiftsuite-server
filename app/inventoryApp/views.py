@@ -382,7 +382,7 @@ class MarketInventory(APIView):
     def function_to_test_api(request, userid, market_name):
         enrollment = Enrollment.objects.filter(user_id=userid)
         vendor_list = [vendor_name.vendor.name+"Update" for vendor_name in enrollment]        
-        return JsonResponse({"Vendor name": vendor_list}, safe=False, status=status.HTTP_200_OK)
+        return Response(vendor_list, status=status.HTTP_200_OK)
 
 
 class WooCommerceInventory(APIView):
