@@ -1,11 +1,16 @@
 from . import models as _
 import pandas as pd
 from django.db import transaction
+from functools import wraps
 
 def with_module(module_name):
     def decorator(view_func):
-        view_func.module_name = module_name
-        return view_func
+        @wraps(view_func)
+        def wrapped_view(*args, **kwargs):
+            return view_func(*args, **kwargs)
+
+        wrapped_view.module_name = module_name  # attach here
+        return wrapped_view
     return decorator
 
 
