@@ -224,17 +224,15 @@ def get_item_details(enroll_id, item_id):
             
 
 # Calculate the selling price of product going to ebay
-def calculated_selling_price(enroll_id, market_id, start_price, userid, map=""):
+def calculated_selling_price(market_id, total_product_cost, userid, map=""):
     try:
         market_place = MarketplaceEnronment.objects.get(_id=market_id)
-        enrollment = get_object_or_404(Enrollment, id=enroll_id, user_id=userid)
-        total_product_cost = float(start_price) + float(enrollment.fixed_markup) + ((int(enrollment.percentage_markup)/100) * float(start_price))
         selling_price = total_product_cost + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) * total_product_cost) + ((float(market_place.profit_margin)/100) * total_product_cost)
         if map:
             if selling_price < float(map):
                 selling_price = float(map)
     except Exception as e:
-        print(f"Failed to compute price due to missing data with user id {userid}, enroll_id {enroll_id}, start_price {start_price}: {e}")
+        print(f"Failed to compute price due to missing data with user id {userid}, total_product_cost {total_product_cost}: {e}")
         return None
 
     return round(selling_price, 2), round(total_product_cost, 2)
@@ -308,8 +306,9 @@ def sync_ebay_items_with_local():
             for item in all_ebay_items:
                 try:
                     item_exists = InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")))[0]
-                    # Fetch the item from the local vendor's table
-                    vendor_list = ["FragrancexUpdate", "CwrUpdate", "LipseyUpdate", "RsrUpdate", "SsiUpdate", "ZandersUpdate"]
+                    # Get list of vendors registered by the user
+                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
+                    vendor_list = [vendor_name.name+"Update" for vendor_name in enrollment]
                     for vendor_db in vendor_list:
                         try:
                             # Get the actual model class from the string name
@@ -339,7 +338,7 @@ def sync_ebay_items_with_local():
                     if db_item:
                         try:
                             # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(enroll_id=db_item.enrollment_id, market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                            cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.product.map)
                             if cost_computation == None:
                                 continue
                             selling_price, total_product_cost = cost_computation
@@ -355,7 +354,7 @@ def sync_ebay_items_with_local():
                             if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
                                 # Update the product on Ebay
                                 response = update_items_quantity_or_price_on_ebay(user.user_id, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
-                                print("product updated on ebay successful.")
+  
                             db_items = None
                         except Exception as e:
                             print(f"Product processing failed with error: {e}")

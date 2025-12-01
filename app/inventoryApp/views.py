@@ -23,6 +23,7 @@ from decouple import config
 from marketplaceApp.views import WooCommerce
 from xml.etree.ElementTree import Element, tostring, SubElement
 from xml.etree import ElementTree as ET
+from vendorEnrollment.models import Enrollment
 
 
 # Function to update product across marketplaces
@@ -379,31 +380,9 @@ class MarketInventory(APIView):
     # Function to test any api from ebay before implementation
     @api_view(['GET'])
     def function_to_test_api(request, userid, market_name):
-        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
-        wcapi = API(
-            url = enrollment.wc_consumer_url, 
-            consumer_key = enrollment.wc_consumer_key,  
-            consumer_secret = enrollment.wc_consumer_secret, 
-            version = "wc/v3"
-        )
-        page = 1
-        all_orders = []
-
-        while True:
-            response = wcapi.get("orders", params={"per_page": 100, "page": page, "status": "any"})
-
-            if response.status_code != 200:
-                return Response(f"Error fetching orders: {response.json()}", status=status.HTTP_400_BAD_REQUEST)
-
-
-            orders = response.json()
-
-            if not orders:  # no more pages
-                break
-
-            all_orders.extend(orders)
-            page += 1
-        return JsonResponse({"All Orders": all_orders}, safe=False, status=status.HTTP_200_OK)
+        enrollment = Enrollment.objects.filter(user_id=userid)
+        vendor_list = [vendor_name.name+"Update" for vendor_name in enrollment]        
+        return JsonResponse({"Vendor name": vendor_list}, safe=False, status=status.HTTP_200_OK)
 
 
 class WooCommerceInventory(APIView):
