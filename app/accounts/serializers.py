@@ -207,6 +207,8 @@ class RegisterSubaccountSerializer(serializers.ModelSerializer):
         validated_data['parent'] = parent
 
         user = User.objects.create_user(**validated_data)
+        user.is_verified = False
+        user.save()
         create_reset_link(user, 'subaccount', parent_name=parent.get_full_name)
         return user
     
