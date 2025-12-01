@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .tasks import send_code_to_user
 
 
-def create_reset_link(user):
+def create_reset_link(user, type='default', parent_name = None):
     uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
     token = PasswordResetTokenGenerator().make_token(user)
     site_domain = 'https://swiftsuite.app'
@@ -24,8 +24,11 @@ def create_reset_link(user):
         "to_email":user.email,
         'first_name':user.first_name
     }
-
-    send_normal_email.delay(data)
+    if type == 'default':
+        send_normal_email.delay(data)
+    else:
+        data['parent_name'] = parent_name
+        send_normal_email.delay(data, 'subaccount_reset.html')
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length = 68, min_length = 6, write_only = True)
@@ -204,7 +207,7 @@ class RegisterSubaccountSerializer(serializers.ModelSerializer):
         validated_data['parent'] = parent
 
         user = User.objects.create_user(**validated_data)
-        create_reset_link(user)
+        create_reset_link(user, 'subaccount', parent_name=parent.get_full_name)
         return user
     
 class TierSerializer(serializers.ModelSerializer):

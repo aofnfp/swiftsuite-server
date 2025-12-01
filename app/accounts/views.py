@@ -579,6 +579,8 @@ class DashboardAnalyticsView(GenericAPIView):
                 subscription_status = "expired"
                 days_remaining = 0
             tier_name = subscription.tier.name
+            subaccount_left = subscription.subaccount_left
+            
         except Subscription.DoesNotExist:
             subscription_status = "none"
             days_remaining = 0
@@ -591,7 +593,8 @@ class DashboardAnalyticsView(GenericAPIView):
             "pending_subaccounts": pending_subaccounts,
             "subscription_status": subscription_status,
             "tier": tier_name,
-            "days_remaining": days_remaining
+            "days_remaining": days_remaining,
+            "subaccounts_left": subaccount_left,
         })
         
         
