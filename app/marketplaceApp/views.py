@@ -523,6 +523,13 @@ class Ebay(APIView):
     def get_product_to_list_detail(request, userid, market_name, prod_id):
         global product_id
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         try:
