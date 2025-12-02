@@ -125,6 +125,13 @@ class MarketInventory(APIView):
     def update_item_on_ebay(self, request, userid, inventory_id):
         minv = MarketInventory()
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         product_info = get_object_or_404(InventoryModel, id=inventory_id)
         serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
         if serializer.is_valid():
@@ -269,6 +276,13 @@ class MarketInventory(APIView):
     @api_view(['GET'])
     def get_all_inventory_items(request, userid, page_number, num_per_page):
         try:
+            
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+            
             inventory_listing = InventoryModel.objects.all().filter(user_id=userid, active=True).values().order_by('id').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
@@ -287,6 +301,12 @@ class MarketInventory(APIView):
     @api_view(['GET'])
     def get_all_saved_inventory_items(request, userid, page_number, num_per_page):
         try:
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+            
             inventory_saved = InventoryModel.objects.all().filter(user_id=userid, active=False).values().order_by('id').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_saved, int(num_per_page))
@@ -305,6 +325,12 @@ class MarketInventory(APIView):
     @api_view(['GET'])
     def get_unmapped_listing_items(request, userid):
         try:
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+            
             unmapped_listing = InventoryModel.objects.all().filter(map_status=False, user_id=userid).values()
             return JsonResponse({"Unmapped_items":list(unmapped_listing)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
@@ -334,6 +360,13 @@ class MarketInventory(APIView):
     @api_view(['GET'])
     def end_delete_product_from_ebay(request, userid, inventoryid):
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
             invent_item = InventoryModel.objects.get(id=inventoryid)
@@ -380,6 +413,12 @@ class MarketInventory(APIView):
     # Function to test any api from ebay before implementation
     @api_view(['GET'])
     def function_to_test_api(request, userid, market_name):
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+            
         enrollment = Enrollment.objects.filter(user_id=userid)
         vendor_list = [vendor_name.vendor.name+"Update" for vendor_name in enrollment]        
         return Response(vendor_list, status=status.HTTP_200_OK)
