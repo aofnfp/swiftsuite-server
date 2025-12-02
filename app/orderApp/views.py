@@ -11,16 +11,20 @@ from .models import OrdersOnEbayModel
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventoryApp.models import InventoryModel
 from .tasks import sync_ebay_order_task
+from accounts.permissions import IsOwnerOrHasPermission
+from vendorEnrollment.utils import with_module
 
 
 # Create your views here.
-class OrderEbay(APIView):
-    # permission_classes = [IsAuthenticated]
+class OrderEbay:
+    
     def __init__(self):
         super().__init__()
     
 
     # Function to retrieve all fulfilment orders from Ebay
+    @with_module('orders')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_product_ordered(request, userid, page_number, num_per_page):
         try:
@@ -57,6 +61,8 @@ class OrderEbay(APIView):
 
 
     # Function to get ordered details of an item
+    @with_module('orders')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_ordered_item_details(request, userid, market_name, ebayorderid):
         eb = OrderEbay()
@@ -86,6 +92,8 @@ class OrderEbay(APIView):
 
 
     # Function to cancel an order from ebay
+    @with_module('orders')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def cancel_order_from_ebay(request, userid, market_name, ebayorderid):
         # Get access_token
