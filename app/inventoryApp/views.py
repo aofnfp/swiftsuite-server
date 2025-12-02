@@ -24,9 +24,13 @@ from marketplaceApp.views import WooCommerce
 from xml.etree.ElementTree import Element, tostring, SubElement
 from xml.etree import ElementTree as ET
 from vendorEnrollment.models import Enrollment
+from vendorEnrollment.utils import with_module
+from accounts.permissions import IsOwnerOrHasPermission
 
 
 # Function to update product across marketplaces
+@with_module('inventory')
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['PUT'])
 def update_product_on_marketplace(request, userid, market_name, inventory_id):
     mk = MarketInventory()
@@ -65,8 +69,8 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
 
     
 # Create your views here.
-class MarketInventory(APIView):
-    permission_classes = [IsAuthenticated]
+class MarketInventory:
+
     def __init__(self):
         super().__init__()
         # eBay Developer App credentials
@@ -273,6 +277,8 @@ class MarketInventory(APIView):
             
     
     # Get all product already listed on Ebay from the inventory
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_all_inventory_items(request, userid, page_number, num_per_page):
         try:
@@ -298,6 +304,8 @@ class MarketInventory(APIView):
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
     
     # Get all saved product yet to be listed on Ebay from the inventory
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_all_saved_inventory_items(request, userid, page_number, num_per_page):
         try:
@@ -322,6 +330,8 @@ class MarketInventory(APIView):
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
             
     # Get all unmapped ebay product listing on local table
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_unmapped_listing_items(request, userid):
         try:
@@ -337,6 +347,8 @@ class MarketInventory(APIView):
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
     # Get saved product in the inventory for listing to ebay
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_saved_product_for_listing(request, inventoryid):
         try:
@@ -346,6 +358,8 @@ class MarketInventory(APIView):
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
     # Delete product from inventory
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def delete_product_from_inventory(request, inventoryid):
         try:
@@ -357,6 +371,8 @@ class MarketInventory(APIView):
             return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
     
     # Function to end product listed on ebay and delete from inventory
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def end_delete_product_from_ebay(request, userid, inventoryid):
         eb = Ebay()
@@ -411,6 +427,8 @@ class MarketInventory(APIView):
     
 
     # Function to test any api from ebay before implementation
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, market_name):
         user = request.user
@@ -424,7 +442,7 @@ class MarketInventory(APIView):
         return Response(vendor_list, status=status.HTTP_200_OK)
 
 
-class WooCommerceInventory(APIView):
+class WooCommerceInventory:
     # Function to update product on woocommerce store
     def update_woocommerce_product(self, request, userid, market_name, inventory_id):
         wooc = WooCommerce()
@@ -485,6 +503,8 @@ class WooCommerceInventory(APIView):
             return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
 
     # Get all existing listed product on woocommerce
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_listed_products(request):
         wcm = WooCommerce()
