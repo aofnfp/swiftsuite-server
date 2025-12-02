@@ -429,6 +429,12 @@ class WooCommerceInventory(APIView):
     def update_woocommerce_product(self, request, userid, market_name, inventory_id):
         wooc = WooCommerce()
         try:
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+                
             enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
             # Set up the WooCommerce API client
             wcapi = API(
