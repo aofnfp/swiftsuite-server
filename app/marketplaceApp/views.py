@@ -272,12 +272,6 @@ class Ebay(APIView):
     def refresh_access_token(self, userid, market_name):
         eb = Ebay()
         
-        user = request.user
-        if user:
-            if user.is_subaccount:
-                user = user.parent
-            userid = user.id
-        
         try:
             connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
         except Exception as e:
