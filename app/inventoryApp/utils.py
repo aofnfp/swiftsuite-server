@@ -12,82 +12,6 @@ from django.db.models import Q
 from woocommerce import API
 
 
-# Create a function to update items quantity and price at the background on Ebay
-def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id):
-    try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
-    except Exception as e:
-        print(f"Failed to fetch access token")
-        return None
-    
-    access_token =  user_data.access_token
-    
-    # eBay Trading API endpoint
-    url = 'https://api.ebay.com/ws/api.dll'
-
-    headers = {
-        'X-EBAY-API-CALL-NAME': 'ReviseItem',
-        'X-EBAY-API-SITEID': '0',  # Change this to your site ID, 0 is for US
-        'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',  # eBay API version
-        'Content-Type': 'text/xml',
-        'Authorization': f'Bearer {access_token}'
-    }
-    try:
-        # XML Body for ReviseItem request
-        if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>{price,}</StartPrice>
-                    <Quantity>{quantity}</Quantity>
-                </Item>
-            </ReviseItemRequest>
-            """
-        elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>{price}</StartPrice>
-                </Item>
-            </ReviseItemRequest>
-            """
-        elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <Quantity>{quantity}</Quantity>
-                </Item>
-            </ReviseItemRequest>
-            """
-        else:
-            return None
-        
-        # Make the POST request
-        response = requests.post(url, headers=headers, data=body)
-        # Check the response
-        if response.status_code == 200:
-            return f"Success: {response.text}"
-        else:
-            return f"Error:{response.text}"
-    except ConnectionError as e:
-        return f'Error: {e}'
-
-
 # Get all products already listed on Ebay using sku
 def get_all_items_on_ebay(enroll_id):
     ebay_items = []
@@ -252,35 +176,6 @@ def get_woocommerce_existing_products(user_id):
     return products
 
 
-# Function to update product on woocommerce store
-def update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid):
-    try:
-        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
-        # Set up the WooCommerce API client
-        wcapi = API(
-            url = enrollment.wc_consumer_url, 
-            consumer_key = enrollment.wc_consumer_key,  
-            consumer_secret = enrollment.wc_consumer_secret, 
-            version = "wc/v3"
-        )
-        # Product payload mapped to WooCommerce
-        update_data = {
-            "type": "simple",
-            "regular_price": selling_price,
-            "stock_quantity": quantity,
-            "manage_stock": True,
-        }
-
-        # --- MAKE THE UPDATE REQUEST ---
-        response = wcapi.put(f"products/{market_item_id}", update_data)
-        if response.status_code == 200:
-            return "Success"
-        else:
-            print("Error: Woocommerce update fails.")
-    except Exception as e:
-        print("Error: Error from the try block woocommerce update.")
-        return None
-
 # An helper function to filter product by upc or mpn and sku
 def query_product_filter(upc=None, mpn=None):
     # Ensure at least one identifier is provided
@@ -368,11 +263,6 @@ def sync_ebay_items_with_local():
                             db_item.active = True
                             db_item.save()
                             
-                            # Check if there is a price and quantity update, then update on Ebay
-                            if item["ebay_price"] != selling_price or item["ebay_quantity"] != db_item.quantity:
-                                # Update the product on Ebay
-                                response = update_items_quantity_or_price_on_ebay(user.user_id, item["ebay_item_id"], selling_price, db_item.quantity, user._id)
-  
                             db_items = None
                         except Exception as e:
                             print(f"Product processing failed with error: {e}")

@@ -204,7 +204,7 @@ def sync_ebay_order_with_local():
                                                         listingMarketplaceId=lineItems.get("listingMarketplaceId"), purchaseMarketplaceId=lineItems.get("purchaseMarketplaceId"),
                                                         itemLocation=lineItems.get("itemLocation"), legacyItemId=lineItems.get('legacyItemId'), image=product_data.get("picture_detail"),
                                                         additionalImages=product_data.get("thumbnailImage"), description=product_data.get("description"), categoryId=product_data.get("category_id"),
-                                                        ebayItemId=product_data.get("ebay_item_id"), localizeAspects=product_data.get("item_specific_fields"), vendor_name=product_data.get('vendor_name'))
+                                                        ebayItemId=product_data.get("market_item_id"), localizeAspects=product_data.get("item_specific_fields"), vendor_name=product_data.get('vendor_name'))
                             save_order.save()
                         except Exception as e:
                             print(f"Ordered item insert error {e} ")

@@ -17,7 +17,7 @@ from .serializer import InventoryModelUpdateSerializer
 from vendorEnrollment.models import Generalproducttable
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
-from .tasks import sync_ebay_inventory_task
+from .tasks import sync_ebay_inventory_task, update_ebay_price_quantity_inventory_task
 from woocommerce import API
 from decouple import config
 from marketplaceApp.views import WooCommerce
@@ -453,3 +453,4 @@ class WooCommerceInventory(APIView):
 
 # Inventory background task invocation
 sync_ebay_inventory_task.delay()
+update_ebay_price_quantity_inventory_task.delay()
