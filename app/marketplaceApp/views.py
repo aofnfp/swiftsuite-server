@@ -907,7 +907,7 @@ class Ebay:
             match = re.search(r'Code:\s*\d+,\s*(.*)', str(e), re.DOTALL)
             if match:
                 clean_error = match.group(1).strip()           
-            return Response(f"Failed to post connection issue {clean_error}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post connection issue {e}", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:  
             return Response(f"Failed to post: Check your input data", status=status.HTTP_400_BAD_REQUEST)
                 
