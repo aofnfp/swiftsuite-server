@@ -69,7 +69,6 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         return Response(f"Error error occurred in the form.", status=status.HTTP_400_BAD_REQUEST)     
     # Get the calculated price of the product to list
     try:
-        product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
         minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
@@ -121,9 +120,8 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
         
     # Get the calculated price of the product to list
     try:
-        product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
-        enroll_id = product_details[0].get("enrollment_id")
-        minimum_offer_price = eb.calculated_minimum_offer_price(enroll_id, validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+        # product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
+        minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -754,25 +752,25 @@ class Ebay:
     
     # Calculate the selling price of product going to marketplace
     def calculated_selling_price(self, start_price, prod_id, userid):
-        # try:
-        market_place = MarketplaceEnronment.objects.filter(user_id=userid)[0]
-        product = Generalproducttable.objects.get(id=prod_id, user_id=userid)
-        selling_price = float(start_price) + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) *  float(start_price)) + ((float(market_place.profit_margin)/100) * float(start_price))
-        if product.map:
-            if selling_price < float(product.map):
-                selling_price = float(product.map)
-        # except Exception as e:
-            # return Response(f"Failed to fetch data: Check your enrollment details {e}", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            market_place = MarketplaceEnronment.objects.filter(user_id=userid)[0]
+            product = Generalproducttable.objects.get(id=prod_id, user_id=userid)
+            selling_price = float(start_price) + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) *  float(start_price)) + ((float(market_place.profit_margin)/100) * float(start_price))
+            if product.map:
+                if selling_price < float(product.map):
+                    selling_price = float(product.map)
+        except Exception as e:
+            return Response(f"Failed to fetch data: Check your enrollment details {e}", status=status.HTTP_400_BAD_REQUEST)
         return round(selling_price, 2)
         
     # Calculate the minimum offer price of product going to ebay
     def calculated_minimum_offer_price(self, prod_id, start_price, min_profit_mergin, profit_margin, userid):
         eb = Ebay()
-        # try:
-        selling_price = eb.calculated_selling_price(start_price, prod_id, userid)
-        minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
-        # except Exception as e:
-        #     return Response(f"Failed to fetch data: Check your enrollment details {e}", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            selling_price = eb.calculated_selling_price(start_price, prod_id, userid)
+            minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
+        except Exception as e:
+            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(minimum_offer_price, 2)
     
     # List product on Ebay
