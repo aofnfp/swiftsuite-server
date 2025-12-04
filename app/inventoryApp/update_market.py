@@ -126,12 +126,16 @@ def update_ebay_price_quantity():
             all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay")
                 
             for item in all_ebay_items:
+                # Check if the item has a vendor mapped to it
+                if item.vendor_name == "Not found":
+                    continue
                 try:
                     conditions = Q()
                     if item.upc:
                         conditions |= Q(upc=item.upc)
                     if item.mpn:
                         conditions |= Q(sku=item.mpn)
+                    
                     # Get the updated price and quantity from the vendor
                     model_class = globals()[item.vendor_name.capitalize()+"Update"]
                     vendor_item = model_class.objects.filter(conditions & Q(sku=item.sku))
@@ -157,7 +161,10 @@ def update_ebay_price_quantity():
             # Fetch all item from Woocommerce
             all_woocommercer_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
             for item in all_woocommercer_items:
-                    # try:
+                # Check if the item has a vendor mapped to it
+                if item.vendor_name == "Not found":
+                    continue
+                try:
                     conditions = Q()
                     if item.upc:
                         conditions |= Q(upc=item.upc)
@@ -180,6 +187,6 @@ def update_ebay_price_quantity():
                     # Update the product on Woocommerce
                     response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
                 
-                # except Exception as e:
-                #     print(f"Product fails to update price and quantity on Woocommerce: {e}")
-                #     continue
+                except Exception as e:
+                    print(f"Product fails to update price and quantity on Woocommerce: {e}")
+                    continue
