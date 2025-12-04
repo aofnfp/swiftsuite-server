@@ -133,7 +133,7 @@ def update_ebay_price_quantity():
                     if item.mpn:
                         conditions |= Q(sku=item.mpn)
                     # Get the updated price and quantity from the vendor
-                    model_class = globals()[item.vendor_name.lower()+"update"]
+                    model_class = globals()[item.vendor_name.capitalize()+"Update"]
                     vendor_item = model_class.objects.filter(conditions & Q(sku=item.sku))
                     if not vendor_item.exists():
                         continue
@@ -164,7 +164,7 @@ def update_ebay_price_quantity():
                     if item.mpn:
                         conditions |= Q(sku=item.mpn)
                     # Get the updated price and quantity from the vendor
-                    model_class = globals()[item.vendor_name.lower()+"update"]
+                    model_class = globals()[item.vendor_name.capitalize()+"Update"]
                     vendor_item = model_class.objects.filter(conditions & Q(sku=item.sku))
                     if not vendor_item.exists():
                         continue
