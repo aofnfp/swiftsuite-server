@@ -128,9 +128,9 @@ def update_ebay_price_quantity():
             for item in all_ebay_items:
                 try:
                     conditions = Q()
-                    if item.get("upc"):
+                    if item.upc:
                         conditions |= Q(upc=item.upc)
-                    if item.get("mpn"):
+                    if item.mpn:
                         conditions |= Q(sku=item.mpn)
                     # Get the updated price and quantity from the vendor
                     model_class = globals()[item.vendor_name+"update"]
@@ -159,9 +159,9 @@ def update_ebay_price_quantity():
             for item in all_woocommercer_items:
                 try:
                     conditions = Q()
-                    if item.get("upc"):
+                    if item.upc:
                         conditions |= Q(upc=item.upc)
-                    if item.get("mpn"):
+                    if item.mpn:
                         conditions |= Q(sku=item.mpn)
                     # Get the updated price and quantity from the vendor
                     model_class = globals()[item.vendor_name+"update"]
