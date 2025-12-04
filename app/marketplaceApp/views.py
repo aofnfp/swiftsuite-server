@@ -757,7 +757,7 @@ class Ebay:
                 if selling_price < float(product.map):
                     selling_price = float(product.map)
         except Exception as e:
-            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
+            return e #Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(selling_price, 2)
         
     # Calculate the minimum offer price of product going to ebay
