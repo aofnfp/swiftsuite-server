@@ -767,8 +767,7 @@ class Ebay:
             selling_price = eb.calculated_selling_price(start_price, prod_id, userid)
             minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
         except Exception as e:
-            print(e)
-            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
+            return e #Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(minimum_offer_price, 2)
     
     # List product on Ebay
