@@ -127,7 +127,7 @@ def update_ebay_price_quantity():
                 
             for item in all_ebay_items:
                 # Check if the item has a vendor mapped to it
-                if item.vendor_name == "Not found":
+                if item.vendor_name.lower() == "not found":
                     continue
                 try:
                     conditions = Q()
@@ -162,7 +162,7 @@ def update_ebay_price_quantity():
             all_woocommercer_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
             for item in all_woocommercer_items:
                 # Check if the item has a vendor mapped to it
-                if item.vendor_name == "Not found":
+                if item.vendor_name.lower() == "not found":
                     continue
                 try:
                     conditions = Q()

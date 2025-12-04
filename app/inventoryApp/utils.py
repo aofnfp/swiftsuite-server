@@ -209,6 +209,9 @@ def sync_ebay_items_with_local():
             elif ebay_items == "Error":
                 print(f"Failed to fetch all items from ebay for user {user.user_id}.")
                 continue
+            # Get list of vendors registered by the user
+            enrollment = Enrollment.objects.filter(user_id=user.user_id)
+            vendor_list = [vendor_name.vendor.name.capitalize()+"Update" for vendor_name in enrollment]
 
             for item in ebay_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
@@ -222,9 +225,7 @@ def sync_ebay_items_with_local():
                     if item.get("ebay_sku"):
                         conditions |= Q(sku=item.get("ebay_sku"))
                     item_exists = InventoryModel.objects.filter(conditions & Q(user_id=user.user_id))[0]
-                    # Get list of vendors registered by the user
-                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
-                    vendor_list = [vendor_name.vendor.name+"update" for vendor_name in enrollment]
+                   
                     for vendor_db in vendor_list:
                         try:
                             # Get the actual model class from the string name
@@ -250,7 +251,7 @@ def sync_ebay_items_with_local():
                     if db_item:
                         try:
                             # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                            cost_computation = calculated_selling_price(market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
                             if cost_computation == None:
                                 continue
                             selling_price, total_product_cost = cost_computation
@@ -258,7 +259,7 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": total_product_cost, "map": db_item.product.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.total_price, "vendor_name": db_item.vendor.name})
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, market_item_id=item.get("ebay_item_id"), vendor_name=db_item.vendor.name)
+                            InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(map_status=True, market_item_id=item.get("ebay_item_id"), product_id=item_product.id, vendor_name=db_item.vendor.name)
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
@@ -298,6 +299,10 @@ def sync_ebay_items_with_local():
         elif user.marketplace_name == "Woocommerce":
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
+            # Fetch the item from the local vendor's table
+            enrollment = Enrollment.objects.filter(user_id=user.user_id)
+            vendor_list = [vendor_name.vendor.name.capitalize()+"Update" for vendor_name in enrollment]
+
             for item in all_woocommercer_items:
                 try:
                     # verify if item already existing on inventory
@@ -308,27 +313,17 @@ def sync_ebay_items_with_local():
                     if item.get("sku"):
                         conditions |= Q(sku=item.get("sku"))
                     item_exists = InventoryModel.objects.filter(conditions & Q(user_id=user.user_id))[0]
-                    # Fetch the item from the local vendor's table
-                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
-                    vendor_list = [vendor_name.vendor.name+"update" for vendor_name in enrollment]
+                    
                     for vendor_db in vendor_list:
                         try:
                             # Get the actual model class from the string name
                             model_class = globals()[vendor_db]
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("ebay_sku")))
+                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
                             if not db_items.exists():
                                 continue
                             
                             db_item = db_items[0]                 
-                            # # Ensure the item belongs to the same user we are processing currently
-                            # for item_match in db_items:
-                            #     enrollment = Enrollment.objects.get(id=item_match.enrollment_id)
-                            #     if enrollment.user_id == user.user_id:
-                            #         db_item = item_match
-                            #         print(f'product found for vendor: {vendor_db}')
-                            #         break
-
                             break                    
                         except Exception as ea:
                             continue
@@ -344,16 +339,11 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults=dict(active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.filter(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku"))).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost, map_status=True, product_id=item_product.id, market_item_id=item.get("id"), vendor_name=db_item.vendor.name)
+                            InventoryModel.objects.filter(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku"))).update(map_status=True, product_id=item_product.id, market_item_id=item.get("id"), vendor_name=db_item.vendor.name)
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
                             
-                            # Check if there is a price and quantity update, then update on Ebay
-                            if item["price"] != selling_price or item["quantity"] != db_item.quantity:
-                                # Update the product on WooCommerce
-                                response = update_woocommerce_product_from_background(item["id"], selling_price, db_item.quantity, user.user_id)
-                                print("product updated on woocommerce successful.")
                             db_items = None
                         except Exception as e:
                             print(f"Product processing failed with error: {e}")
