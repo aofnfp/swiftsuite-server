@@ -141,8 +141,6 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
 
 
 
-
-
 class Ebay:
     
     def __init__(self):
@@ -537,11 +535,11 @@ class Ebay:
         global product_id
         eb = Ebay()
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
         
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
@@ -765,11 +763,11 @@ class Ebay:
     # Calculate the minimum offer price of product going to ebay
     def calculated_minimum_offer_price(self, prod_id, start_price, min_profit_mergin, profit_margin, userid):
         eb = Ebay()
-        try:
-            selling_price = eb.calculated_selling_price(start_price, prod_id, userid)
-            minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
-        except Exception as e:
-            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        selling_price = eb.calculated_selling_price(start_price, prod_id, userid)
+        minimum_offer_price = selling_price + float(profit_margin) + ((int(min_profit_mergin)/100) * selling_price)
+        # except Exception as e:
+        #     return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(minimum_offer_price, 2)
     
     # List product on Ebay
