@@ -157,7 +157,7 @@ def update_ebay_price_quantity():
             # Fetch all item from Woocommerce
             all_woocommercer_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
             for item in all_woocommercer_items:
-                try:
+                    # try:
                     conditions = Q()
                     if item.upc:
                         conditions |= Q(upc=item.upc)
@@ -180,6 +180,6 @@ def update_ebay_price_quantity():
                     # Update the product on Woocommerce
                     response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
                 
-                except Exception as e:
-                    print(f"Product fails to update price and quantity on Woocommerce: {e}")
-                    continue
+                # except Exception as e:
+                #     print(f"Product fails to update price and quantity on Woocommerce: {e}")
+                #     continue
