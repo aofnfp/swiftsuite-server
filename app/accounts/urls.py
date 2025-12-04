@@ -28,6 +28,7 @@ urlpatterns = [
     re_path(r'^subaccounts(?:/(?P<pk>\d+))?/$', vw.ManageSubAccountsView.as_view(), name='manage-subaccounts'),
     path('delete-subaccount/<int:pk>/', vw.DeleteSubAccountView.as_view(), name='delete-subaccount'),
     path('subaccount-activation/<int:pk>/', vw.SubaccountActivationView.as_view(), name='subaccount-activation'),
+    path('send-reminder/<int:pk>/', vw.SendReminder.as_view(), name='send-reminder'),
 
     path('dashboard-analytics/', vw.DashboardAnalyticsView.as_view(), name='dashboard-analytics'),
 

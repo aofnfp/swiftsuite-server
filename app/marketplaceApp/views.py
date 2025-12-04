@@ -30,9 +30,14 @@ from decouple import config
 from rest_framework.parsers import MultiPartParser, FormParser
 import ast
 from django.db.models import Q
+from accounts.permissions import IsOwnerOrHasPermission
+from vendorEnrollment.utils import with_module
+
 
 
 # Function to list product on marketplace
+@with_module('inventory')
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['POST'])
 def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     eb = Ebay()
@@ -85,6 +90,8 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         wooc.list_product_on_woocommerce(request, userid, market_name, category_id_or_name)
 
 # Function to save product before listing on marketplace
+@with_module('inventory')
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['POST'])
 def save_product_before_listing_on_marketplace(request, userid, market_name, category_id_or_name):
     eb = Ebay()
@@ -139,8 +146,8 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
 
 
 
-class Ebay(APIView):
-    permission_classes = [IsAuthenticated]
+class Ebay:
+    
     def __init__(self):
         super().__init__()
         # eBay Developer App credentials
@@ -203,9 +210,18 @@ class Ebay(APIView):
         # Redirect the user to the authorization URL
         # return JsonResponse({"message": "Please complete the authorization in your browser."})
 
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def oauth_callback(request, userid, market_name):
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         # Validate the code using the serializer
         serializer = GetAuthCodeSerializer(data=request.data)
         if not serializer.is_valid():
@@ -224,6 +240,13 @@ class Ebay(APIView):
 
     def get_access_token(request, authorization_code, userid, market_name):
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         credentials = f"{eb.client_id}:{eb.client_secret}"
         credentials_base64 = base64.b64encode(credentials.encode()).decode()
         
@@ -257,6 +280,7 @@ class Ebay(APIView):
     # Function to refresh the access token using the refresh token
     def refresh_access_token(self, userid, market_name):
         eb = Ebay()
+        
         try:
             connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
         except Exception as e:
@@ -397,9 +421,18 @@ class Ebay(APIView):
             
 
     # Create a function to collect all the required policies from Ebay.
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def refresh_connection_and_get_policy(request, userid, market_name):
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         marketplace_id = "EBAY_US"
         all_policy = {}
         access_token = eb.refresh_access_token(userid, market_name)
@@ -434,10 +467,18 @@ class Ebay(APIView):
 
     
     # Enroll new marketplace 
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
-    # @permission_classes([IsAuthenticated])
     def complete_enrolment_or_update(request, userid, market_name):
         try:
+            
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+            
             enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
             serializer = MarketplaceEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
             # serializer = MarketplaceEnrolSerializer(data=request.data)
@@ -449,9 +490,18 @@ class Ebay(APIView):
             return Response(f"Error:", status=status.HTTP_400_BAD_REQUEST)
     
     # Get the enrolment detail from the enrolment table for editing
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_enrolment_detail(request, userid, market_name):
         try:
+            
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+                
             ebay_info = list(MarketplaceEnronment.objects.all().filter(user_id=userid, marketplace_name=market_name).values())
         except Exception as e:
             return Response("User not register yet", status=status.HTTP_400_BAD_REQUEST)
@@ -483,10 +533,19 @@ class Ebay(APIView):
         
 
     # Create a connection to the eBay Trading API
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_product_to_list_detail(request, userid, market_name, prod_id):
         global product_id
         eb = Ebay()
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         try:
@@ -539,12 +598,21 @@ class Ebay(APIView):
             return response_data
 
     # Function to retrieve leaf categories for a given category ID
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_leaf_category_id(request, userid, market_name, category_id):
         # Use '0' for the default US marketplace category tree
         eb = Ebay()
         category_tree_id = '0'
         leaf_category = []
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+    
         access_token = eb.refresh_access_token(userid, market_name)
         # eBay Taxonomy API endpoint to get subcategories
         url = f'https://api.ebay.com/commerce/taxonomy/v1/category_tree/{category_tree_id}/get_category_subtree?category_id={category_id}'
@@ -644,12 +712,21 @@ class Ebay(APIView):
         return required_aspects
 
 
-    # Function to generate dynamic serializer for item specifics fields     
+    # Function to generate dynamic serializer for item specifics fields 
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])    
     @api_view(['GET'])
     def get_item_specifics_fields(request, userid, market_name, leaf_category_id):
         eb = Ebay()
         item_specifics_field = []
         choices_data = {}
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+            
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         if not access_token:
@@ -869,9 +946,18 @@ class Ebay(APIView):
         
         
     # Function to upload thumbnail image to cloudinary
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def upload_product_image(request, productid, product_name, userid):
         gen_val = random.randint(100, 100000)
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+    
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
             if serializer.is_valid():
@@ -892,10 +978,19 @@ class Ebay(APIView):
 
     
     # Function to upload multiple images to cloudinary
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     @parser_classes([MultiPartParser, FormParser])
     def upload_multiple_product_images(request, productid, product_name, userid):
         uploaded_urls = []
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
             if serializer.is_valid():
@@ -930,15 +1025,26 @@ class Ebay(APIView):
 
 
     # Get thumbnail image details
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_uploaded_image(request, productid, product_name, userid):
         try:
+            
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+            
             save_image = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
             return JsonResponse({"image_data":list(save_image)}, safe=False, status=status.HTTP_200_OK)
         except:
             return Response("Failed to retrieve image: Check your connection", status=400)
 
     # Delete thumbnail image
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def delete_uploaded_image(request, image_name, image_id):
         try:
@@ -952,11 +1058,20 @@ class Ebay(APIView):
       
 
 
-class WooCommerce(APIView):
+class WooCommerce:
     # Enroll Woocommerce marketplace
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def woocommerce_enrollment(request, userid):
         # Check if the user is already enrolled in WooCommerce
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         try:
             existing_enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name='WooCommerce')
             return Response("User is already enrolled in WooCommerce marketplace.", status=status.HTTP_400_BAD_REQUEST)
@@ -972,10 +1087,19 @@ class WooCommerce(APIView):
         
 
     # Update Woocommerce marketplace 
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
     # @permission_classes([IsAuthenticated])
     def update_woocommerce_enrolment(request, userid, market_name):
         try:
+            
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+            
             enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
             serializer = WooComerceEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
             if serializer.is_valid():
@@ -987,8 +1111,17 @@ class WooCommerce(APIView):
 
 
     # Function to test your connection to Woocommerce
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def test_woocommerce_connection(request, userid, market_name):
+        
+        user = request.user
+        if user:
+            if user.is_subaccount:
+                user = user.parent
+            userid = user.id
+        
         enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
         # Set up the WooCommerce API client
         wcapi = API(
@@ -1018,10 +1151,19 @@ class WooCommerce(APIView):
 
 
     # Get all product categories
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_product_category(request, userid, market_name):
         try:
+            user = request.user
+            if user:
+                if user.is_subaccount:
+                    user = user.parent
+                userid = user.id
+                
             enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
+            
             # Set up the WooCommerce API client
             wcapi = API(
                 url = enrollment.wc_consumer_url, 
