@@ -127,7 +127,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f"Failed to fetch data: Check your enrollments", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Failed to fetch data: Check your enrollments {e}", status=status.HTTP_400_BAD_REQUEST)
     
     # Select the marketplace to list the product
     if market_name == "Ebay":
@@ -548,26 +548,26 @@ class Ebay:
         
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
-        # try:
-        # vendor_info = list(VendoEnronment.objects.all().filter(user_id=userid).values())
-        product_details = list(Generalproducttable.objects.all().filter(id=prod_id, user_id=userid).values())
-        enroll_id = product_details[0].get("enrollment_id")
-        vendor_info = list(Enrollment.objects.all().filter(user_id=userid, id=enroll_id).values())
-        ebay_info = list(MarketplaceEnronment.objects.all().filter(user_id=userid, marketplace_name=market_name).values())
-        upc_code = product_details[0].get("upc")
-
-        # Update the price of product with the calculated selling price
         try:
-            start_price = eb.calculated_selling_price(product_details[0].get("total_product_cost"), product_details[0].get("id"), userid)
-            if type(start_price) != float:
-                return Response(f"Failed to compute price, no valid data", status=status.HTTP_400_BAD_REQUEST)
-            product_details[0]["selling_price"] = start_price
+            # vendor_info = list(VendoEnronment.objects.all().filter(user_id=userid).values())
+            product_details = list(Generalproducttable.objects.all().filter(id=prod_id, user_id=userid).values())
+            enroll_id = product_details[0].get("enrollment_id")
+            vendor_info = list(Enrollment.objects.all().filter(user_id=userid, id=enroll_id).values())
+            ebay_info = list(MarketplaceEnronment.objects.all().filter(user_id=userid, marketplace_name=market_name).values())
+            upc_code = product_details[0].get("upc")
+
+            # Update the price of product with the calculated selling price
+            try:
+                start_price = eb.calculated_selling_price(product_details[0].get("total_product_cost"), product_details[0].get("id"), userid)
+                if type(start_price) != float:
+                    return Response(f"Failed to compute price, no valid data", status=status.HTTP_400_BAD_REQUEST)
+                product_details[0]["selling_price"] = start_price
+            except Exception as e:
+                return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
+            # Get the vendor's details of the product trying to list
+            vendor_info[0]["vendor_location"] = list(Vendors.objects.all().filter(id=vendor_info[0].get("vendor_id")).values())
         except Exception as e:
-            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
-        # Get the vendor's details of the product trying to list
-        vendor_info[0]["vendor_location"] = list(Vendors.objects.all().filter(id=vendor_info[0].get("vendor_id")).values())
-        # except Exception as e:
-        #     return JsonResponse({"Message":f"Failed to fetch product information."}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"Message":f"Failed to fetch product information."}, status=status.HTTP_400_BAD_REQUEST)
         # Get the category id of the product
         category_info = eb.get_category_id_from_upc(upc_code, access_token)
         # Get all the policies for product listing
