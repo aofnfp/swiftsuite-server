@@ -151,7 +151,7 @@ def get_item_details(enroll_id, item_id):
 def calculated_selling_price(market_id, total_product_cost, userid, map=""):
     try:
         market_place = MarketplaceEnronment.objects.get(_id=market_id)
-        selling_price = total_product_cost + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) * total_product_cost) + ((float(market_place.profit_margin)/100) * total_product_cost)
+        selling_price = float(total_product_cost) + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) * float(total_product_cost)) + ((float(market_place.profit_margin)/100) * float(total_product_cost))
         if map:
             if selling_price < float(map):
                 selling_price = float(map)
