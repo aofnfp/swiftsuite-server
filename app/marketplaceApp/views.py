@@ -71,9 +71,9 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
     try:
         minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
         if type(minimum_offer_price) != float:
-            return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data: minimum offer price error. {minimum_offer_price}", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f"Failed to fetch data check your enrollments: {e}", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Failed to fetch data check your enrollments.", status=status.HTTP_400_BAD_REQUEST)
     
     # Select the marketplace to list the product
     if market_name == "Ebay":
