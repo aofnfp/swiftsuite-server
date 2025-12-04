@@ -140,7 +140,7 @@ def update_ebay_price_quantity():
                     
                     db_item = vendor_item[0]  
                     # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
                     if cost_computation == None:
                         continue
                     selling_price, total_product_cost = cost_computation
@@ -171,7 +171,7 @@ def update_ebay_price_quantity():
                     
                     db_item = vendor_item[0]  
                     # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
                     if cost_computation == None:
                         continue
                     selling_price, total_product_cost = cost_computation
