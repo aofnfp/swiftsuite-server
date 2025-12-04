@@ -120,7 +120,6 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
         
     # Get the calculated price of the product to list
     try:
-        # product_details = Generalproducttable.objects.all().filter(id=validated_data['product'].id, user_id=userid).values()
         minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
@@ -760,7 +759,7 @@ class Ebay:
                 if selling_price < float(product.map):
                     selling_price = float(product.map)
         except Exception as e:
-            return Response(f"Failed to fetch data: Check your enrollment details {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(selling_price, 2)
         
     # Calculate the minimum offer price of product going to ebay
