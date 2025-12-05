@@ -251,7 +251,7 @@ def sync_ebay_items_with_local():
                     if db_item:
                         try:
                             # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                            cost_computation = calculated_selling_price(market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.map)
                             if cost_computation == None:
                                 continue
                             selling_price, total_product_cost = cost_computation
@@ -331,7 +331,7 @@ def sync_ebay_items_with_local():
                     if db_item:
                         try:
                             # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.product.map)
+                            cost_computation = calculated_selling_price(market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.map)
                             if cost_computation == None:
                                 continue
                             selling_price, total_product_cost = cost_computation
