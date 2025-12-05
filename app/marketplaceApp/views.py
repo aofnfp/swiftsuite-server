@@ -40,6 +40,12 @@ from vendorEnrollment.utils import with_module
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['POST'])
 def listing_on_marketplace(request, userid, market_name, category_id_or_name):
+    # check if user is subaccount
+    user = request.user
+    if user:
+        if user.parent_id:
+            userid = user.parent_id
+            
     eb = Ebay()
     wooc = WooCommerce()
     item_specifics_fields = []
@@ -93,6 +99,12 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['POST'])
 def save_product_before_listing_on_marketplace(request, userid, market_name, category_id_or_name):
+    # check if user is subaccount
+    user = request.user
+    if user:
+        if user.parent_id:
+            userid = user.parent_id
+
     eb = Ebay()
     wooc = WooCommerce()
     item_specifics_fields = []
@@ -210,13 +222,12 @@ class Ebay:
     @api_view(['POST'])
     def oauth_callback(request, userid, market_name):
         eb = Ebay()
-        
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
-        
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+
         # Validate the code using the serializer
         serializer = GetAuthCodeSerializer(data=request.data)
         if not serializer.is_valid():
@@ -235,12 +246,6 @@ class Ebay:
 
     def get_access_token(request, authorization_code, userid, market_name):
         eb = Ebay()
-        
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
         
         credentials = f"{eb.client_id}:{eb.client_secret}"
         credentials_base64 = base64.b64encode(credentials.encode()).decode()
@@ -422,11 +427,11 @@ class Ebay:
     def refresh_connection_and_get_policy(request, userid, market_name):
         eb = Ebay()
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         
         marketplace_id = "EBAY_US"
         all_policy = {}
@@ -468,22 +473,26 @@ class Ebay:
     def complete_enrolment_or_update(request, userid, market_name):
         try:
             
-            # user = request.user
-            # if user:
-            #     if user.is_subaccount:
-            #         user = user.parent
-            #     userid = user.id
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
             
             enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
             serializer = MarketplaceEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
-            # serializer = MarketplaceEnrolSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                valid_data = serializer.validated_data
+                inventory_data = InventoryModel.objects.filter(user_id=userid, marketplace_name=market_name)
+                for item in inventory_data:
+                    item_updated, created = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"))
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Error:", status=status.HTTP_400_BAD_REQUEST)
     
+
     # Get the enrolment detail from the enrolment table for editing
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -491,11 +500,11 @@ class Ebay:
     def get_enrolment_detail(request, userid, market_name):
         try:
             
-            # user = request.user
-            # if user:
-            #     if user.is_subaccount:
-            #         user = user.parent
-            #     userid = user.id
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
                 
             ebay_info = list(MarketplaceEnronment.objects.all().filter(user_id=userid, marketplace_name=market_name).values())
         except Exception as e:
@@ -534,12 +543,11 @@ class Ebay:
     def get_product_to_list_detail(request, userid, market_name, prod_id):
         global product_id
         eb = Ebay()
-        
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
@@ -602,11 +610,11 @@ class Ebay:
         category_tree_id = '0'
         leaf_category = []
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
     
         access_token = eb.refresh_access_token(userid, market_name)
         # eBay Taxonomy API endpoint to get subcategories
@@ -716,11 +724,11 @@ class Ebay:
         item_specifics_field = []
         choices_data = {}
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
             
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
@@ -947,11 +955,11 @@ class Ebay:
     def upload_product_image(request, productid, product_name, userid):
         gen_val = random.randint(100, 100000)
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
     
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
@@ -980,11 +988,11 @@ class Ebay:
     def upload_multiple_product_images(request, productid, product_name, userid):
         uploaded_urls = []
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         
         if request.method == 'POST':
             serializer = UploadedProductImageSerializer(data=request.data)
@@ -1026,11 +1034,11 @@ class Ebay:
     def get_uploaded_image(request, productid, product_name, userid):
         try:
             
-            # user = request.user
-            # if user:
-            #     if user.is_subaccount:
-            #         user = user.parent
-            #     userid = user.id
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
             
             save_image = UploadedProductImage.objects.filter(user_id=userid, product_id=productid).values()
             return JsonResponse({"image_data":list(save_image)}, safe=False, status=status.HTTP_200_OK)
@@ -1059,14 +1067,14 @@ class WooCommerce:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def woocommerce_enrollment(request, userid):
+        
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+        
         # Check if the user is already enrolled in WooCommerce
-        
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
-        
         try:
             existing_enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name='WooCommerce')
             return Response("User is already enrolled in WooCommerce marketplace.", status=status.HTTP_400_BAD_REQUEST)
@@ -1089,11 +1097,11 @@ class WooCommerce:
     def update_woocommerce_enrolment(request, userid, market_name):
         try:
             
-            # user = request.user
-            # if user:
-            #     if user.is_subaccount:
-            #         user = user.parent
-            #     userid = user.id
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
             
             enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
             serializer = WooComerceEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
@@ -1111,11 +1119,11 @@ class WooCommerce:
     @api_view(['GET'])
     def test_woocommerce_connection(request, userid, market_name):
         
-        # user = request.user
-        # if user:
-        #     if user.is_subaccount:
-        #         user = user.parent
-        #     userid = user.id
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         
         enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
         # Set up the WooCommerce API client
@@ -1151,11 +1159,11 @@ class WooCommerce:
     @api_view(['GET'])
     def get_product_category(request, userid, market_name):
         try:
-            # user = request.user
-            # if user:
-            #     if user.is_subaccount:
-            #         user = user.parent
-            #     userid = user.id
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
                 
             enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name=market_name)
             
