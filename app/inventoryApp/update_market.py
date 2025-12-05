@@ -1,7 +1,9 @@
+import json, time
+from ratelimit import limits, sleep_and_retry
 import requests
 from rest_framework.decorators import api_view, permission_classes
 from ebaysdk.exception import ConnectionError
-from .models import InventoryModel
+from .models import InventoryModel, UpdateLogModel
 from marketplaceApp.views import Ebay
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate
 from marketplaceApp.models import MarketplaceEnronment
@@ -11,6 +13,9 @@ from .utils import calculated_selling_price
 
 
 # Create a function to update items quantity and price at the background on Ebay
+# Limit to 5 calls per second (eBay's typical limit)
+@sleep_and_retry
+@limits(calls=5, period=1)
 def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id):
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
@@ -77,6 +82,10 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
         
         # Make the POST request
         response = requests.post(url, headers=headers, data=body)
+        if response.status_code == 429:  # Rate limit hit
+            retry_after = int(response.headers.get('Retry-After', 2))
+            time.sleep(retry_after)
+            return update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id)
         # Check the response
         if response.status_code == 200:
             return f"Success: {response.text}"
@@ -87,6 +96,9 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
     
 
 # Function to update product on woocommerce store
+# Limit to 5 calls per second (eBay's typical limit)
+@sleep_and_retry
+@limits(calls=5, period=1)
 def update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid):
     try:
         enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
@@ -107,12 +119,16 @@ def update_woocommerce_product_from_background(market_item_id, selling_price, qu
 
         # --- MAKE THE UPDATE REQUEST ---
         response = wcapi.put(f"products/{market_item_id}", update_data)
+        if response.status_code == 429:  # Rate limit hit
+            retry_after = int(response.headers.get('Retry-After', 2))
+            time.sleep(retry_after)
+            return update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid)
         if response.status_code == 200:
             return "Success"
         else:
-            print("Error: Woocommerce update fails.")
+            print(f"Error: Woocommerce update fails. Status code: {response.status_code}, Response: {response.text}")
     except Exception as e:
-        print("Error: Error from the try block woocommerce update.")
+        print(f"Error: Error from the try block woocommerce update. {e}")
         return None
 
 
@@ -152,6 +168,8 @@ def update_ebay_price_quantity():
                     InventoryModel.objects.filter(Q(market_item_id=item.market_item_id) | Q(sku=item.sku)).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
                     # Update the product on Ebay
                     response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, selling_price, db_item.quantity, user._id)
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
+                    
 
                 except Exception as e:
                     print(f"Product fails to update price and quantity on ebay: {e}")
@@ -186,6 +204,7 @@ def update_ebay_price_quantity():
                     InventoryModel.objects.filter(Q(market_item_id=item.market_item_id) | Q(sku=item.sku)).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
                     # Update the product on Woocommerce
                     response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")

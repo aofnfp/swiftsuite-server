@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from ebaysdk.exception import ConnectionError
 
 from marketplaceApp.models import MarketplaceEnronment
-from .models import InventoryModel
+from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer
 from vendorEnrollment.models import Generalproducttable
@@ -67,7 +67,32 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
     except Exception as e:
         return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
-    
+# class that takes any other operation not link to any marketplace
+class General_operations:
+    # Function to get log update
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_all_log_update(request, userid):
+        try:
+            log_item = UpdateLogModel.objects.all().filter(user_id=userid).values()
+            return JsonResponse({"log_items":list(log_item)}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # Function to get log update
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_log_update_item_details(request, userid, inventoryid):
+        try:
+            log_item_details = InventoryModel.objects.all().filter(user_id=userid, id=inventoryid).values()
+            return JsonResponse({"log_items_details":list(log_item_details)}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
+
+
 # Create your views here.
 class MarketInventory:
 

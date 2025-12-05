@@ -59,4 +59,11 @@ class InventoryModel(models.Model):
     market_name = models.TextField(null=True, unique=False)
 
     
-
+class UpdateLogModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False)
+    inventory = models.ForeignKey(InventoryModel, on_delete=models.CASCADE, unique=False)
+    market_name = models.TextField(null=False, unique=False)
+    vendor_name = models.TextField(null=False, unique=False)
+    updated_item = models.CharField(null=False, unique=False, max_length=25)
+    last_updated = models.DateTimeField(auto_now_add=True, unique=False, null=False)
+    log_description = models.TextField(null=True, unique=False)

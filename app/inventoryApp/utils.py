@@ -2,7 +2,7 @@ import json, requests, time
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from ebaysdk.exception import ConnectionError
-from .models import InventoryModel
+from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
 from marketplaceApp.views import Ebay
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Generalproducttable, Enrollment
@@ -263,6 +263,7 @@ def sync_ebay_items_with_local():
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
+                            # item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Ebay", vendor_name=db_item.vendor.name, updated_item=item.get("ebay_sku"), log_description=f"Item with {item.get("ebay_sku")} mapped to vendor {db_item.vendor.name}"))
                             
                             db_items = None
                         except Exception as e:
@@ -343,6 +344,7 @@ def sync_ebay_items_with_local():
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
+                            # item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Woocommerce", vendor_name=db_item.vendor.name, updated_item=item.get("sku"), log_description=f"Item with {item.get("sku")} mapped to vendor {db_item.vendor.name}"))
                             
                             db_items = None
                         except Exception as e:
