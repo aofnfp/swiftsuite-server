@@ -7,6 +7,7 @@ from .utils import VendorDataMixin
 from celery import shared_task
 import logging
 from inventoryApp.models import InventoryModel
+from inventoryApp.utils import calculated_selling_price
 
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
@@ -236,11 +237,47 @@ def update_all_enrollments():
             task.save()
         
 @shared_task(queue='default')        
-def update_inventory_shippingPrice(enrollment_id):
+def update_inventory(enrollment_id):
     try:
         enrollment = Enrollment.objects.get(id = enrollment_id)
+        shipping_cost = float(enrollment.shipping_cost) if enrollment.shipping_cost else 0.00
+        fixed_markup = float(enrollment.fixed_markup) if enrollment.fixed_markup else 0.00
+        percentage_markup = float(enrollment.percentage_markup) if enrollment.percentage_markup else 0.00
+        
         for item in InventoryModel.objects.filter(product__enrollment=enrollment):
-            item.shipping_cost = enrollment.shipping_cost
+            
+            if enrollment.vendor.name.lower() == 'fragrancex':
+                product = FragrancexUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+            elif enrollment.vendor.name.lower() == 'rsr':
+                product = RsrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+            elif enrollment.vendor.name.lower() == 'lipsey':
+                product = LipseyUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+            elif enrollment.vendor.name.lower() == 'cwr':
+                product = CwrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+            elif enrollment.vendor.name.lower() == 'zanders':
+                product = ZandersUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+            else:
+                product = None
+                
+            if not product:
+                continue
+            
+            price = float(product.price) if product.price else 0.00   
+
+            # update total product cost and price
+            total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost, 2)
+            
+            
+            item.total_product_cost = total_price
+            item.shipping_cost = shipping_cost
+            item.price = price
+            map = product.map
+            start_price = float(total_price) + float(item.fixed_markup) + ((float(item.fixed_percentage_markup)/100) * float(total_price)) + ((float(item.profit_margin)/100) * float(total_price))
+            if map:
+                if start_price < float(map):
+                    start_price = float(map)
+                    
+            item.start_price = round(start_price, 2)   
             item.save()
         
     except Exception as e:
