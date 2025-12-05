@@ -6,6 +6,7 @@ from vendorActivities.apiSupplier import getFragranceXData, getRSR
 from .utils import VendorDataMixin
 from celery import shared_task
 import logging
+from inventoryApp.models import InventoryModel
 
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
@@ -234,3 +235,13 @@ def update_all_enrollments():
         finally:
             task.save()
         
+@shared_task(queue='default')        
+def update_inventory_shippingPrice(enrollment_id):
+    try:
+        enrollment = Enrollment.objects.get(id = enrollment_id)
+        for item in InventoryModel.objects.filter(product__enrollment=enrollment):
+            item.shipping_cost = enrollment.shipping_cost
+            item.save()
+        
+    except Exception as e:
+        print(f"Error updating shipping price for enrollment {enrollment_id}: {e}")

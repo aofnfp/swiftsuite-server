@@ -202,3 +202,5 @@ class Generalproducttable(models.Model):
     features = models.TextField(db_column='Features', blank=True, null=True)  
     active = models.BooleanField(default=False)
     total_product_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

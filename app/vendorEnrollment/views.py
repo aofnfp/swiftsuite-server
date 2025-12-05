@@ -20,7 +20,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .tasks import  update_vendor_data
+from .tasks import  update_vendor_data, update_inventory_shippingPrice
 from rest_framework.decorators import api_view, permission_classes
 from vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
 from rest_framework.generics import ListAPIView
@@ -151,6 +151,7 @@ def update_enrolment(request, identifier):
         # Start the update process in a separate thread
         updated_enrollment = serializer.instance
         update_vendor_data.delay(updated_enrollment.id)
+        update_inventory_shippingPrice.delay(updated_enrollment.id)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
