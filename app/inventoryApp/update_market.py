@@ -153,7 +153,7 @@ def update_ebay_price_quantity():
                     InventoryModel.objects.filter(Q(market_item_id=item.market_item_id) | Q(sku=item.sku)).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
                     # Update the product on Ebay
                     response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, selling_price, db_item.quantity, user._id)
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.market_item_id, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                     
 
                 except Exception as e:
@@ -189,7 +189,7 @@ def update_ebay_price_quantity():
                     InventoryModel.objects.filter(Q(market_item_id=item.market_item_id) | Q(sku=item.sku)).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
                     # Update the product on Woocommerce
                     response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.market_item_id, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
