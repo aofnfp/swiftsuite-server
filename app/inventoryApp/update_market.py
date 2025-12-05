@@ -112,8 +112,8 @@ def update_woocommerce_product_from_background(market_item_id, selling_price, qu
         # Product payload mapped to WooCommerce
         update_data = {
             "type": "simple",
-            "regular_price": selling_price,
-            "stock_quantity": quantity,
+            "regular_price": str(selling_price),
+            "stock_quantity": str(quantity),
             "manage_stock": True,
         }
 
@@ -197,3 +197,4 @@ def update_ebay_price_quantity():
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
                     continue
+

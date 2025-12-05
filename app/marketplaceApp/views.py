@@ -1168,8 +1168,7 @@ class WooCommerce:
             )
             categories = wcapi.get("products/categories").json()
             return JsonResponse({"Product_categories":categories}, safe=False, status=status.HTTP_200_OK)
-            # for cat in categories:
-            #     print(f"ID: {cat['id']} | Name: {cat['name']} | Parent: {cat['parent']}")
+        
         except Exception as e:
             return Response("Failed to fetch categories: Check your connection or credentials", status=status.HTTP_400_BAD_REQUEST)
 
