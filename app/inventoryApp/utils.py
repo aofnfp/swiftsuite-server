@@ -263,7 +263,7 @@ def sync_ebay_items_with_local():
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
-                            item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Ebay", vendor_name=db_item.vendor.name, updated_item=item.get("ebay_sku"), log_description=f"Item with {item.get("ebay_sku")} mapped to vendor {db_item.vendor.name}"))
+                            # item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Ebay", vendor_name=db_item.vendor.name, updated_item=item.get("ebay_sku"), log_description=f"Item with {item.get("ebay_sku")} mapped to vendor {db_item.vendor.name}"))
                             
                             db_items = None
                         except Exception as e:
@@ -344,7 +344,7 @@ def sync_ebay_items_with_local():
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
-                            item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Woocommerce", vendor_name=db_item.vendor.name, updated_item=item.get("sku"), log_description=f"Item with {item.get("sku")} mapped to vendor {db_item.vendor.name}"))
+                            # item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Woocommerce", vendor_name=db_item.vendor.name, updated_item=item.get("sku"), log_description=f"Item with {item.get("sku")} mapped to vendor {db_item.vendor.name}"))
                             
                             db_items = None
                         except Exception as e:
