@@ -57,6 +57,7 @@ class InventoryModel(models.Model):
     vendor_name = models.TextField(null=True, unique=False)
     woo_category_name = models.CharField(null=True, unique=False, max_length=100)
     market_name = models.TextField(null=True, unique=False)
+    last_updated = models.DateTimeField(auto_now=True, unique=False, null=False)
 
     
 class UpdateLogModel(models.Model):
@@ -65,5 +66,5 @@ class UpdateLogModel(models.Model):
     market_name = models.TextField(null=False, unique=False)
     vendor_name = models.TextField(null=False, unique=False)
     updated_item = models.CharField(null=False, unique=False, max_length=25)
-    last_updated = models.DateTimeField(auto_now_add=True, unique=False, null=False)
+    last_updated = models.DateTimeField(auto_now=True, unique=False, null=False)
     log_description = models.TextField(null=True, unique=False)

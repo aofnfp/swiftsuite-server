@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from ebaysdk.exception import ConnectionError
 from .models import InventoryModel, UpdateLogModel
 from marketplaceApp.views import Ebay
-from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate
+from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, Generalproducttable, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate
 from marketplaceApp.models import MarketplaceEnronment
 from django.db.models import Q
 from woocommerce import API
@@ -112,8 +112,8 @@ def update_woocommerce_product_from_background(market_item_id, selling_price, qu
         # Product payload mapped to WooCommerce
         update_data = {
             "type": "simple",
-            "regular_price": selling_price,
-            "stock_quantity": quantity,
+            "regular_price": str(selling_price),
+            "stock_quantity": str(quantity),
             "manage_stock": True,
         }
 
@@ -146,26 +146,21 @@ def update_ebay_price_quantity():
                 if item.vendor_name.lower() == "not found":
                     continue
                 try:
-                    conditions = Q()
-                    if item.upc:
-                        conditions |= Q(upc=item.upc)
-                    if item.mpn:
-                        conditions |= Q(sku=item.mpn)
-                    
-                    # Get the updated price and quantity from the vendor
-                    model_class = globals()[item.vendor_name.capitalize()+"Update"]
-                    vendor_item = model_class.objects.filter(conditions & Q(sku=item.sku))
-                    if not vendor_item.exists():
+                    # Get updated price and quantity from the product table
+                    try:
+                        db_item = Generalproducttable.objects.get(id=item.product_id)
+                    except Exception as e:
+                        print(f"item not found on product table: {e}")
                         continue
                     
-                    db_item = vendor_item[0]  
                     # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
+                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_product_cost, userid=user.user_id, map=db_item.map)
                     if cost_computation == None:
                         continue
                     selling_price, total_product_cost = cost_computation
                     # Item exists, check if we need to update price or quantity
-                    InventoryModel.objects.filter(Q(market_item_id=item.market_item_id) | Q(sku=item.sku)).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
+                    if item.market_item_id:
+                        InventoryModel.objects.filter(id=item.id).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
                     # Update the product on Ebay
                     response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, selling_price, db_item.quantity, user._id)
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
@@ -183,29 +178,25 @@ def update_ebay_price_quantity():
                 if item.vendor_name.lower() == "not found":
                     continue
                 try:
-                    conditions = Q()
-                    if item.upc:
-                        conditions |= Q(upc=item.upc)
-                    if item.mpn:
-                        conditions |= Q(sku=item.mpn)
-                    # Get the updated price and quantity from the vendor
-                    model_class = globals()[item.vendor_name.capitalize()+"Update"]
-                    vendor_item = model_class.objects.filter(conditions & Q(sku=item.sku))
-                    if not vendor_item.exists():
-                        continue
-                    
-                    db_item = vendor_item[0]  
+                    # Get updated price and quantity from the product table
+                    try:
+                        db_item = Generalproducttable.objects.get(id=item.product_id)
+                    except Exception as e:
+                        print(f"item not found on product table: {e}")
+                        continue 
                     # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
+                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_product_cost, userid=user.user_id, map=db_item.map)
                     if cost_computation == None:
                         continue
                     selling_price, total_product_cost = cost_computation
                     # Item exists, check if we need to update price or quantity
-                    InventoryModel.objects.filter(Q(market_item_id=item.market_item_id) | Q(sku=item.sku)).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
+                    InventoryModel.objects.filter(id=item.id).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
                     # Update the product on Woocommerce
-                    response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
+                    if item.market_item_id:
+                        response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
                     continue
+
