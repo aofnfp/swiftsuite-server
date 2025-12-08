@@ -467,26 +467,64 @@ class MarketInventory:
     def function_to_test_api(request, userid, item_id):
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
-        url = f"https://api.ebay.com/buy/browse/v1/item/{item_id}"
+        url = "https://api.ebay.com/ws/api.dll"
         headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
+            "X-EBAY-API-CALL-NAME": "GetItem",
+            "X-EBAY-API-SITEID": "0",
+            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+            "X-EBAY-API-IAF-TOKEN": access_token,
+            "Content-Type": "text/xml"
         }
-    
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                status = data.get("availability", {}).get("pickupOptions", [{}])[0].get("availabilityType", "")
-                end_date = data.get("itemEndDate", "")
-                title = data.get("title", "Unknown Title")
 
+        body = f"""
+        <?xml version="1.0" encoding="utf-8"?>
+        <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            <RequesterCredentials>
+                <eBayAuthToken>{access_token}</eBayAuthToken>
+            </RequesterCredentials>
+            <ItemID>{item_id}</ItemID>
+            <DetailLevel>ReturnAll</DetailLevel>
+        </GetItemRequest>
+        """
 
-                return Response(f"Resonse Data: {data}", status=status.HTTP_200_OK)
-                # return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
+        response = requests.post(url, headers=headers, data=body)
 
-        except Exception as e:
-            return Response(f"Failed to fetch item data. {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+        if response.status_code != 200:
+            return JsonResponse({
+                "status": "error",
+                "message": f"HTTP Error: {response.status_code}",
+                "raw": response.text
+            }, safe=False, status=status.HTTP_200_OK)
+
+        xml = response.text
+
+        # --- SIMPLE TEXT CHECKS ---
+        if "<Ack>Failure</Ack>" in xml:
+            return JsonResponse({
+                "status": "error",
+                "message": "Invalid ItemID or listing not accessible",
+                "raw": xml
+            }, safe=False, status=status.HTTP_200_OK)
+        
+        if "<ListingStatus>Active</ListingStatus>" in xml:
+            return JsonResponse({
+                "status": "active",
+                "message": "Listing is still active",
+                "raw": xml
+            }, safe=False, status=status.HTTP_200_OK)
+
+        if "<ListingStatus>Ended</ListingStatus>" in xml:
+            return JsonResponse({
+                "status": "ended",
+                "message": "Listing has already ended",
+                "raw": xml
+            }, safe=False, status=status.HTTP_200_OK)
+        # fallback
+        return JsonResponse({
+            "status": "unknown",
+            "message": "Could not determine listing status",
+            "raw": xml
+        }, safe=False, status=status.HTTP_200_OK)
 
 
 class WooCommerceInventory:
