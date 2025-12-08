@@ -481,9 +481,9 @@ class MarketInventory:
                 end_date = data.get("itemEndDate", "")
                 title = data.get("title", "Unknown Title")
 
-                if "UNAVAILABLE" in status.upper():
-                    return Response(f"Resonse Data: {data}", status=status.HTTP_200_OK)
-                    # return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
+
+                return Response(f"Resonse Data: {data}", status=status.HTTP_200_OK)
+                # return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(f"Failed to fetch item data. {str(e)}", status=status.HTTP_400_BAD_REQUEST)
