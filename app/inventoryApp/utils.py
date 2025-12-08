@@ -253,7 +253,7 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": total_product_cost, "map": db_item.product.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.total_price, "vendor_name": db_item.vendor.name})
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.filter(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku"))).update(map_status=True, market_item_id=item.get("ebay_item_id"), product_id=item_product.id, vendor_name=db_item.vendor.name)
+                            InventoryModel.objects.update_or_create(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")), defaults={"map_status": True, "market_item_id": item.get("ebay_item_id"), "product_id": item_product.id, "vendor_name": db_item.vendor.name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
@@ -261,7 +261,7 @@ def sync_ebay_items_with_local():
                             
                             db_items = None
                         except Exception as e:
-                            print(f"Product processing failed with error: {e}")
+                            print(f"Ebay Product processing failed with error: {e}")
                             continue
                         
                 except Exception as e:
@@ -334,7 +334,7 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults=dict(active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.filter(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku"))).update(map_status=True, product_id=item_product.id, market_item_id=item.get("id"), vendor_name=db_item.vendor.name)
+                            InventoryModel.objects.update_or_create(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku")), defaults={"map_status": True, "product_id": item_product.id, "market_item_id": item.get("id"), "vendor_name": db_item.vendor.name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
@@ -342,7 +342,7 @@ def sync_ebay_items_with_local():
                             
                             db_items = None
                         except Exception as e:
-                            print(f"Product processing failed with error: {e}")
+                            print(f" Woocommerce Product processing failed with error: {e}")
                             continue
                 except Exception as e:
                     # If item does not exist, insert new item
