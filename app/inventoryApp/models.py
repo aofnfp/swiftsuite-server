@@ -58,6 +58,8 @@ class InventoryModel(models.Model):
     woo_category_name = models.CharField(null=True, unique=False, max_length=100)
     market_name = models.TextField(null=True, unique=False)
     last_updated = models.DateTimeField(auto_now=True, unique=False, null=False)
+    ends_status = models.CharField(null=True, unique=False, max_length=20)
+    
 
     
 class UpdateLogModel(models.Model):

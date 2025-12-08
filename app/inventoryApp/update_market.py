@@ -93,7 +93,53 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
             return f"Error:{response.text}"
     except ConnectionError as e:
         return f'Error: {e}'
+
+
+# Function to check if ebay item has ended
+# Limit to 5 calls per second (eBay's typical limit)
+@sleep_and_retry
+@limits(calls=5, period=1)
+def check_if_ebay_item_has_ended(item_id, userid):
+    eb = Ebay()
+    access_token = eb.refresh_access_token(userid, "Ebay")
+    url = "https://api.ebay.com/ws/api.dll"
+    headers = {
+        "X-EBAY-API-CALL-NAME": "GetItem",
+        "X-EBAY-API-SITEID": "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        "X-EBAY-API-IAF-TOKEN": access_token,
+        "Content-Type": "text/xml"
+    }
+
+    body = f"""
+    <?xml version="1.0" encoding="utf-8"?>
+    <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+        <RequesterCredentials>
+            <eBayAuthToken>{access_token}</eBayAuthToken>
+        </RequesterCredentials>
+        <ItemID>{item_id}</ItemID>
+        <DetailLevel>ReturnAll</DetailLevel>
+    </GetItemRequest>
+    """
+
+    response = requests.post(url, headers=headers, data=body)
+    if response.status_code == 429:  # Rate limit hit
+        retry_after = int(response.headers.get('Retry-After', 2))
+        time.sleep(retry_after)
+        return check_if_ebay_item_has_ended(item_id, userid)
     
+    if response.status_code != 200:
+        return None
+
+    xml = response.text
+    if "<ListingStatus>Completed</ListingStatus>" in xml:
+        # Check if it sold
+        if "<SellingStatus>" in xml and "<QuantitySold>0</QuantitySold>" not in xml:
+            return "sold out"
+        else:
+            return "Deleted"
+    return "active"
+
 
 # Function to update product on woocommerce store
 # Limit to 5 calls per second (eBay's typical limit)
@@ -200,3 +246,27 @@ def update_ebay_price_quantity():
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
                     continue
 
+
+# function to check and update ended ebay items in the inventory
+def check_and_update_ended_ebay_items():
+    # Get all user with ebay marketplace to sync their products
+    user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
+    for user in user_token:
+        if user.marketplace_name == "Ebay":
+            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay")
+                
+            for item in all_ebay_items:
+                # Check if the item has a vendor mapped to it
+                if item.market_item_id == "":
+                    continue
+                try:
+                    # Check if ebay item has ended
+                    ends_status = check_if_ebay_item_has_ended(item.market_item_id, user.user_id)
+                    InventoryModel.objects.filter(id=item.id).update(ends_status=ends_status)
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item status changed to {ends_status}"))
+                except Exception as e:
+                    print(f"Failed to check and update ended ebay items: {e}")
+                    continue
+        
+        elif user.marketplace_name == "Woocommerce":
+            pass

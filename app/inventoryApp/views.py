@@ -286,30 +286,7 @@ class MarketInventory:
                 return "Error updating"
         except ConnectionError as e:
             return Response(f"Error in payload", status=status.HTTP_400_BAD_REQUEST)
-
-
-    # Function to check if ebay item has ended
-    def check_if_ebay_item_has_ended(self, item_id, access_token):
-        url = f"https://api.ebay.com/buy/browse/v1/item/{item_id}"
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-        }
-    
-        response = requests.get(url, headers=headers)
-    
-        if response.status_code == 200:
-            data = response.json()
-            status = data.get("availability", {}).get("pickupOptions", [{}])[0].get("availabilityType", "")
-            end_date = data.get("itemEndDate", "")
-            title = data.get("title", "Unknown Title")
-
-            if "UNAVAILABLE" in status.upper():
-                return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
-
-        else:
-            return Response(f"Failed to fetch item data.", status=status.HTTP_400_BAD_REQUEST)
-            
+     
     
     # Get all product already listed on Ebay from the inventory
     @with_module('inventory')
@@ -461,8 +438,8 @@ class MarketInventory:
     
 
     # Function to test any api from ebay before implementation
-    # @with_module('inventory')
-    # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
         eb = Ebay()
@@ -497,35 +474,20 @@ class MarketInventory:
             }, safe=False, status=status.HTTP_200_OK)
 
         xml = response.text
-
-        # --- SIMPLE TEXT CHECKS ---
-        if "<Ack>Failure</Ack>" in xml:
-            return JsonResponse({
-                "status": "error",
-                "message": "Invalid ItemID or listing not accessible",
-                "raw": xml
-            }, safe=False, status=status.HTTP_200_OK)
-        
-        if "<ListingStatus>Active</ListingStatus>" in xml:
-            return JsonResponse({
-                "status": "active",
-                "message": "Listing is still active",
-                "raw": xml
-            }, safe=False, status=status.HTTP_200_OK)
-
-        if "<ListingStatus>Ended</ListingStatus>" in xml:
-            return JsonResponse({
-                "status": "ended",
-                "message": "Listing has already ended",
-                "raw": xml
-            }, safe=False, status=status.HTTP_200_OK)
-        # fallback
-        return JsonResponse({
-            "status": "unknown",
-            "message": "Could not determine listing status",
-            "raw": xml
-        }, safe=False, status=status.HTTP_200_OK)
-
+        if "<ListingStatus>Completed</ListingStatus>" in xml:
+            # Check if it sold
+            if "<SellingStatus>" in xml and "<QuantitySold>0</QuantitySold>" not in xml:
+                return JsonResponse({
+                    "status": "sold",
+                    "description": "Listing is ended & item was sold",
+                    "raw": xml
+                }, safe=False, status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({
+                    "status": "ended",
+                    "description": "Listing is ended (unsold, deleted, or manually ended)",
+                    "raw": xml
+                }, safe=False, status=status.HTTP_200_OK)
 
 class WooCommerceInventory:
     # Function to update product on woocommerce store
