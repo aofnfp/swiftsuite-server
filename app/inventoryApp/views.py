@@ -465,15 +465,25 @@ class MarketInventory:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, market_name):
-        # check if user is subaccount
-        user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
-            
-        enrollment = Enrollment.objects.filter(user_id=userid)
-        vendor_list = [vendor_name.vendor.name+"Update" for vendor_name in enrollment]        
-        return Response(vendor_list, status=status.HTTP_200_OK)
+        url = f"https://api.ebay.com/buy/browse/v1/item/{item_id}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+    
+        response = requests.get(url, headers=headers)
+    
+        if response.status_code == 200:
+            data = response.json()
+            status = data.get("availability", {}).get("pickupOptions", [{}])[0].get("availabilityType", "")
+            end_date = data.get("itemEndDate", "")
+            title = data.get("title", "Unknown Title")
+
+            if "UNAVAILABLE" in status.upper():
+                return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
+
+        else:
+            return Response(f"Failed to fetch item data.", status=status.HTTP_400_BAD_REQUEST)
 
 
 class WooCommerceInventory:
