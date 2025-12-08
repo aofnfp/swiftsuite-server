@@ -252,11 +252,9 @@ def sync_ebay_items_with_local():
                             selling_price, total_product_cost = cost_computation
                             # Create or update the product on GeneralProduct table
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                            item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": total_product_cost, "map": db_item.product.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.total_price, "vendor_name": db_item.vendor.name})
-                            # Check if ebay item has ended
-                            ends_status = check_if_ebay_item_has_ended(market_item_id=item.get("ebay_item_id"), userid=user.user_id)
+                            item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": total_product_cost, "map": db_item.product.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.total_price, "vendor_name": db_item.vendor.name})                           
                             # Item exists, check if we need to update price or quantity
-                            inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")), defaults={"map_status": True, "market_item_id": item.get("ebay_item_id"), "product_id": item_product.id, "vendor_name": db_item.vendor.name, "ends_status":ends_status})
+                            inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")), defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
@@ -336,7 +334,7 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults=dict(active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                             # Item exists, check if we need to update price or quantity
-                            inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku")), defaults={"map_status": True, "product_id": item_product.id, "market_item_id": item.get("id"), "vendor_name": db_item.vendor.name})
+                            inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku")), defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
