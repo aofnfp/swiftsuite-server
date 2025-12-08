@@ -237,15 +237,7 @@ def sync_ebay_items_with_local():
                             if not db_items.exists():
                                 continue
                             
-                            db_item = db_items[0]                 
-                            # # Ensure the item belongs to the same user we are processing currently
-                            # for item_match in db_items:
-                            #     enrollment = Enrollment.objects.get(id=item_match.enrollment_id)
-                            #     if enrollment.user_id == user.user_id:
-                            #         db_item = item_match
-                            #         print(f'product found for vendor: {vendor_db}')
-                            #         break
-
+                            db_item = db_items[0]        
                             break                    
                         except Exception as ea:
                             continue
@@ -253,7 +245,7 @@ def sync_ebay_items_with_local():
                     if db_item:
                         try:
                             # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(market_id=user._id, start_price=db_item.total_price, userid=user.user_id, map=db_item.map)
+                            cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
                             if cost_computation == None:
                                 continue
                             selling_price, total_product_cost = cost_computation

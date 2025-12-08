@@ -465,28 +465,31 @@ class MarketInventory:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
-        eb = Ebay()
-        access_token = eb.refresh_access_token(userid, "Ebay")
-        url = f"https://api.ebay.com/buy/browse/v1/item/{item_id}"
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-        }
+        enrollment = Enrollment.objects.filter(user_id=user.user_id)
+        vendor_list = [vendor_name.vendor.name.capitalize()+"Update" for vendor_name in enrollment]
+        return JsonResponse({"Vendors":vendor_list}, safe=False, status=status.HTTP_200_OK)
+        # eb = Ebay()
+        # access_token = eb.refresh_access_token(userid, "Ebay")
+        # url = f"https://api.ebay.com/buy/browse/v1/item/{item_id}"
+        # headers = {
+        #     "Authorization": f"Bearer {access_token}",
+        #     "Content-Type": "application/json",
+        # }
     
-        response = requests.get(url, headers=headers)
-    
-        if response.status_code == 200:
-            data = response.json()
-            status = data.get("availability", {}).get("pickupOptions", [{}])[0].get("availabilityType", "")
-            end_date = data.get("itemEndDate", "")
-            title = data.get("title", "Unknown Title")
+        # try:
+        #     response = requests.get(url, headers=headers)
+        #     if response.status_code == 200:
+        #         data = response.json()
+        #         status = data.get("availability", {}).get("pickupOptions", [{}])[0].get("availabilityType", "")
+        #         end_date = data.get("itemEndDate", "")
+        #         title = data.get("title", "Unknown Title")
 
-            if "UNAVAILABLE" in status.upper():
-                return Response(f"Resonse Data: {data}", status=status.HTTP_200_OK)
-                # return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
+        #         if "UNAVAILABLE" in status.upper():
+        #             return Response(f"Resonse Data: {data}", status=status.HTTP_200_OK)
+        #             # return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
 
-        else:
-            return Response(f"Failed to fetch item data.", status=status.HTTP_400_BAD_REQUEST)
+        # except Exception as e:
+        #     return Response(f"Failed to fetch item data. {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
 
 class WooCommerceInventory:
