@@ -461,11 +461,11 @@ class MarketInventory:
     
 
     # Function to test any api from ebay before implementation
-    @with_module('inventory')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    # @with_module('inventory')
+    # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
-        enrollment = Enrollment.objects.filter(user_id=user.user_id)
+        enrollment = Enrollment.objects.filter(user_id=userid)
         vendor_list = [vendor_name.vendor.name.capitalize()+"Update" for vendor_name in enrollment]
         return JsonResponse({"Vendors":vendor_list}, safe=False, status=status.HTTP_200_OK)
         # eb = Ebay()
