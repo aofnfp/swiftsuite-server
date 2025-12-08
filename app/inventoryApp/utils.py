@@ -97,7 +97,9 @@ def get_all_items_on_ebay(enroll_id):
         
             # Increment the page number for the next iteration
             page_number += 1
-            
+
+    except requests.exceptions.ConnectTimeout as e:
+        return "Error"        
     except Exception as e:
         if e.get('errors')[0]['errorId'] == 1001:
             return None
