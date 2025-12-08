@@ -253,7 +253,7 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": total_product_cost, "map": db_item.product.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.total_price, "vendor_name": db_item.vendor.name})
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.update_or_create(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")), defaults={"map_status": True, "market_item_id": item.get("ebay_item_id"), "product_id": item_product.id, "vendor_name": db_item.vendor.name})
+                            inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")), defaults={"map_status": True, "market_item_id": item.get("ebay_item_id"), "product_id": item_product.id, "vendor_name": db_item.vendor.name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
@@ -282,7 +282,7 @@ def sync_ebay_items_with_local():
                                 ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
                                 ebay_mpn = specific.get("value") if specific.get("name") == "MPN" else product_details.get("mpn")
 
-                        InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults={"title": item.get("Title"), "description": json.dumps(product_details.get("shortDescription")), "location": product_details.get("itemLocation")["country"], "category_id": product_details.get("categoryId"), "sku": item.get("ebay_sku"), "upc": ebay_upc, "mpn": ebay_mpn, "start_price": product_details.get("price")["value"], "picture_detail": product_details.get("image")["imageUrl"], "postal_code": product_details.get("itemLocation")["postalCode"],
+                        inentory, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults={"title": item.get("Title"), "description": json.dumps(product_details.get("shortDescription")), "location": product_details.get("itemLocation")["country"], "category_id": product_details.get("categoryId"), "sku": item.get("ebay_sku"), "upc": ebay_upc, "mpn": ebay_mpn, "start_price": product_details.get("price")["value"], "picture_detail": product_details.get("image")["imageUrl"], "postal_code": product_details.get("itemLocation")["postalCode"],
                         "quantity": item.get("ebay_quantity"), "return_profileID": item.get("ReturnProfileID"), "return_profileName": item.get("ReturnProfileName"), "payment_profileID": item.get("PaymentProfileID"), "payment_profileName": item.get("PaymentProfileName"), "shipping_profileID": item.get("ShippingProfileID"), "shipping_profileName": item.get("ShippingProfileName"), "bestOfferEnabled": True, "listingType": item.get("ListingType"), "gift": "", "categoryMappingAllowed": "",
                         "item_specific_fields": product_details.get("localizedAspects"), "market_logos": product_details.get("listingMarketplaceId"), "date_created": product_details.get("itemCreationDate").split("T")[0], "active": True, "category": product_details.get("categoryPath"), "city": product_details.get("itemLocation")["city"], "cost": product_details.get("price")["value"],
                         "country": product_details.get("itemLocation")["country"], "price": product_details.get("price")["value"], "thumbnailImage": product_details.get("additionalImages"), "vendor_name": "Not Found", "map_status": False, "market_name": "Ebay"})
@@ -292,12 +292,11 @@ def sync_ebay_items_with_local():
                         print(f"Ebay Product failed to insert into inventory {e}")
 
         elif user.marketplace_name == "Woocommerce":
-            # Fetch all item from Woocommerce
-            all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
-            # Fetch the item from the local vendor's table
+            # Get list of vendors registered by the user
             enrollment = Enrollment.objects.filter(user_id=user.user_id)
             vendor_list = [vendor_name.vendor.name.capitalize()+"Update" for vendor_name in enrollment]
-
+            # Fetch all item from Woocommerce
+            all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             for item in all_woocommercer_items:
                 try:
                     # verify if item already existing on inventory
@@ -334,7 +333,7 @@ def sync_ebay_items_with_local():
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults=dict(active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name))
                             # Item exists, check if we need to update price or quantity
-                            InventoryModel.objects.update_or_create(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku")), defaults={"map_status": True, "product_id": item_product.id, "market_item_id": item.get("id"), "vendor_name": db_item.vendor.name})
+                            inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("id")) | Q(sku=item.get("sku")), defaults={"map_status": True, "product_id": item_product.id, "market_item_id": item.get("id"), "vendor_name": db_item.vendor.name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
