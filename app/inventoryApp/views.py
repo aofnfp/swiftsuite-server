@@ -464,7 +464,9 @@ class MarketInventory:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
-    def function_to_test_api(request, userid, market_name):
+    def function_to_test_api(request, userid, item_id):
+        eb = Ebay()
+        access_token = eb.refresh_access_token(userid, "Ebay")
         url = f"https://api.ebay.com/buy/browse/v1/item/{item_id}"
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -480,7 +482,8 @@ class MarketInventory:
             title = data.get("title", "Unknown Title")
 
             if "UNAVAILABLE" in status.upper():
-                return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
+                return Response(f"Resonse Data: {data}", status=status.HTTP_200_OK)
+                # return Response(f"The item has ended or is no longer available. Ended date was: {end_date}", status=status.HTTP_200_OK)
 
         else:
             return Response(f"Failed to fetch item data.", status=status.HTTP_400_BAD_REQUEST)
