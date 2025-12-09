@@ -200,17 +200,16 @@ def update_ebay_price_quantity():
                         continue
                     
                     # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_product_cost, userid=user.user_id, map=db_item.map)
-                    if cost_computation == None:
-                        continue
-                    selling_price, total_product_cost = cost_computation
-                    # Item exists, check if we need to update price or quantity
+                    selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
+                    if db_item.map:
+                        if selling_price < float(db_item.map):
+                            selling_price = float(db_item.map)
                     if item.market_item_id:
-                        InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost))
-                    # Update the product on Ebay
-                    response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, selling_price, db_item.quantity, user._id)
+                        # Update the product on Ebay
+                        response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, selling_price, db_item.quantity, user._id)
+                    # update inventory with the new price and quantity and log the update
+                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=selling_price, quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-                    
 
                 except Exception as e:
                     print(f"Product fails to update price and quantity on ebay: {e}")
@@ -230,18 +229,19 @@ def update_ebay_price_quantity():
                     except Exception as e:
                         print(f"item not found on product table: {e}")
                         continue 
+                    
                     # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_product_cost, userid=user.user_id, map=db_item.map)
-                    if cost_computation == None:
-                        continue
-                    selling_price, total_product_cost = cost_computation
-                    # Item exists, check if we need to update price or quantity
-                    InventoryModel.objects.filter(id=item.id).update(start_price=selling_price, quantity=db_item.quantity, total_product_cost=total_product_cost)
+                    selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
+                    if db_item.map:
+                        if selling_price < float(db_item.map):
+                            selling_price = float(db_item.map)
+                
                     # Update the product on Woocommerce
                     if item.market_item_id:
                         response = update_woocommerce_product_from_background(item.market_item_id, selling_price, db_item.quantity, user.user_id)
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-                
+                    # update inventory with the new price and quantity and log the update
+                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=selling_price, quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))                
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
                     continue
@@ -262,8 +262,8 @@ def check_and_update_ended_ebay_items():
                 try:
                     # Check if ebay item has ended
                     ends_status = check_if_ebay_item_has_ended(item.market_item_id, user.user_id)
-                    InventoryModel.objects.filter(id=item.id).update(ends_status=ends_status)
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item status changed to {ends_status}"))
+                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(ends_status=ends_status))
+                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item availability status changed to {ends_status}"))
                 except Exception as e:
                     print(f"Failed to check and update ended ebay items: {e}")
                     continue
