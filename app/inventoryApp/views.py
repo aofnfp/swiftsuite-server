@@ -344,7 +344,7 @@ class MarketInventory:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
-    def get_unmapped_listing_items(request, userid):
+    def get_unmapped_listing_items(request, userid, page_number, num_per_page):
         try:
             # check if user is subaccount
             user = request.user
@@ -352,8 +352,17 @@ class MarketInventory:
                 if user.parent_id:
                     userid = user.parent_id
             
-            unmapped_listing = InventoryModel.objects.all().filter(map_status=False, user_id=userid).values()
-            return JsonResponse({"Unmapped_items":list(unmapped_listing)}, safe=False, status=status.HTTP_200_OK)
+            unmapped_item = InventoryModel.objects.all().filter(user_id=userid, map_status=False).values().order_by('id').reverse()
+            page = request.GET.get('page', int(page_number))
+            paginator = Paginator(unmapped_item, int(num_per_page))
+            try:
+                inventory_objects = paginator.page(page)
+            except PageNotAnInteger:
+                inventory_objects = paginator.page(1)
+            except EmptyPage:
+                inventory_objects = paginator.page(paginator.num_pages)
+            
+            return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
