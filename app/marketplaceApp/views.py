@@ -754,7 +754,7 @@ class Ebay:
         
         # return the field names and their choices and required fields
         return Response({
-            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields , "required_fields": required_fields, "user_id": request.user.id
+            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields , "required_fields": required_fields, "user_id": userid
         })
     
 
