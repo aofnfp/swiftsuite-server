@@ -484,7 +484,7 @@ class Ebay:
             if serializer.is_valid():
                 serializer.save()
                 valid_data = serializer.validated_data
-                # inventory_data = InventoryModel.objects.filter(user_id=userid, marketplace_name=market_name)
+                inventory_data = InventoryModel.objects.filter(user_id=userid, marketplace_name=market_name)
                 # for item in inventory_data:
                 #     item_updated, created = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"))
    
