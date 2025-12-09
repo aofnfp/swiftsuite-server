@@ -100,14 +100,17 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
 @sleep_and_retry
 @limits(calls=5, period=1)
 def check_if_ebay_item_has_ended(item_id, userid):
-    eb = Ebay()
-    access_token = eb.refresh_access_token(userid, "Ebay")
+    try:
+        user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
     url = "https://api.ebay.com/ws/api.dll"
     headers = {
         "X-EBAY-API-CALL-NAME": "GetItem",
         "X-EBAY-API-SITEID": "0",
         "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-        "X-EBAY-API-IAF-TOKEN": access_token,
+        "X-EBAY-API-IAF-TOKEN": user_data.access_token,
         "Content-Type": "text/xml"
     }
 
@@ -115,7 +118,7 @@ def check_if_ebay_item_has_ended(item_id, userid):
     <?xml version="1.0" encoding="utf-8"?>
     <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
         <RequesterCredentials>
-            <eBayAuthToken>{access_token}</eBayAuthToken>
+            <eBayAuthToken>{user_data.access_token}</eBayAuthToken>
         </RequesterCredentials>
         <ItemID>{item_id}</ItemID>
         <DetailLevel>ReturnAll</DetailLevel>
