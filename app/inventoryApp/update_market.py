@@ -264,8 +264,9 @@ def check_and_update_ended_ebay_items():
                 
             for item in all_ebay_items:
                 # Modify selling price before updating on ebay 
-                selling_price = float(item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(user.profit_margin)/100) * float(item.total_product_cost))
-                inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=selling_price))
+                if item.total_product_cost:
+                    selling_price = float(item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(user.profit_margin)/100) * float(item.total_product_cost))
+                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=selling_price))
                 # Check if the item has a vendor mapped to it
                 if item.market_item_id == "":
                     continue
