@@ -485,10 +485,10 @@ class Ebay:
             if serializer.is_valid():
                 serializer.save()
                 valid_data = serializer.validated_data
-                inventory_data = InventoryModel.objects.filter(user_id=userid, market_name=market_name)
-                for item in inventory_data:
-                    selling_price, total_product_cost = eb.calculated_selling_price(item.total_product_cost, item.product_id, userid)
-                    item_updated = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"), selling_price=selling_price)
+                # inventory_data = InventoryModel.objects.filter(user_id=userid, market_name=market_name)
+                # for item in inventory_data:
+                #     selling_price, total_product_cost = eb.calculated_selling_price(item.total_product_cost, item.product_id, userid)
+                #     item_updated = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"), selling_price=selling_price)
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
