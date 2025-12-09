@@ -125,23 +125,27 @@ def check_if_ebay_item_has_ended(item_id, userid):
     </GetItemRequest>
     """
 
-    response = requests.post(url, headers=headers, data=body)
-    if response.status_code == 429:  # Rate limit hit
-        retry_after = int(response.headers.get('Retry-After', 2))
-        time.sleep(retry_after)
-        return check_if_ebay_item_has_ended(item_id, userid)
-    
-    if response.status_code != 200:
-        return None
+    try:
+        response = requests.post(url, headers=headers, data=body)
+        if response.status_code == 429:  # Rate limit hit
+            retry_after = int(response.headers.get('Retry-After', 2))
+            time.sleep(retry_after)
+            return check_if_ebay_item_has_ended(item_id, userid)
+        
+        if response.status_code != 200:
+            return None
 
-    xml = response.text
-    if "<ListingStatus>Completed</ListingStatus>" in xml:
-        # Check if it sold
-        if "<SellingStatus>" in xml and "<QuantitySold>0</QuantitySold>" not in xml:
-            return "sold out"
-        else:
-            return "Deleted"
-    return "active"
+        xml = response.text
+        if "<ListingStatus>Completed</ListingStatus>" in xml:
+            # Check if it sold
+            if "<SellingStatus>" in xml and "<QuantitySold>0</QuantitySold>" not in xml:
+                return "sold out"
+            else:
+                return "Deleted"
+        return "active"
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 
 # Function to update product on woocommerce store
@@ -265,6 +269,8 @@ def check_and_update_ended_ebay_items():
                 try:
                     # Check if ebay item has ended
                     ends_status = check_if_ebay_item_has_ended(item.market_item_id, user.user_id)
+                    if ends_status is None:
+                        continue
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(ends_status=ends_status))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item availability status changed to {ends_status}"))
                 except Exception as e:
