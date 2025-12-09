@@ -492,7 +492,7 @@ class Ebay:
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Error: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Error", status=status.HTTP_400_BAD_REQUEST)
     
 
     # Get the enrolment detail from the enrolment table for editing
