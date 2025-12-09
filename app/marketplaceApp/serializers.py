@@ -13,12 +13,14 @@ class MarketplaceEnrolSerializer(serializers.ModelSerializer):
 		validated_data.pop('user_id', None)
 		return super().update(instance, validated_data)
 	
+	
 class GetAuthCodeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = AuthorizationCode
 		fields = [
 			"authorization_code"
 		]
+
 
 class ItemListingToEbaySerializer:
     
