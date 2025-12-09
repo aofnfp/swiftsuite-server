@@ -471,6 +471,7 @@ class Ebay:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
     def complete_enrolment_or_update(request, userid, market_name):
+        eb = Ebay()
         try:
             
             # check if user is subaccount
@@ -486,7 +487,8 @@ class Ebay:
                 valid_data = serializer.validated_data
                 inventory_data = InventoryModel.objects.filter(user_id=userid, market_name=market_name)
                 for item in inventory_data:
-                    item_updated = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"))
+                    selling_price, total_product_cost = eb.calculated_selling_price(item.total_product_cost, item.product_id, userid)
+                    item_updated = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"), selling_price=selling_price)
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
