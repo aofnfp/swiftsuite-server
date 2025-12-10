@@ -522,19 +522,19 @@ class Ebay:
         fulfillment_policies = eb.fetch_fulfillment_policies(access_token, marketplace_id)
         if type(fulfillment_policies) != dict:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
-        all_policy.update(fulfillment_policies=fulfillment_policies)
+        all_policy.update(fulfillment_policy=fulfillment_policies)
         
         # Fetch payment policies
         payment_policies = eb.fetch_payment_policies(access_token, marketplace_id)
         if type(payment_policies) != dict:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
-        all_policy.update(payment_policies=payment_policies)
+        all_policy.update(payment_policy=payment_policies)
         
         # Fetch return policies
         return_policies = eb.fetch_return_policies(access_token, marketplace_id)
         if type(return_policies) != dict:
            return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
-        all_policy.update(return_policies=return_policies)
+        all_policy.update(return_policy=return_policies)
         return all_policy
         
 
