@@ -1,4 +1,3 @@
-import base64
 import os, requests, json
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,7 +13,7 @@ from marketplaceApp.models import MarketplaceEnronment
 from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer
-from vendorEnrollment.models import Generalproducttable
+from vendorEnrollment.models import FragrancexUpdate, Generalproducttable
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
 from .tasks import check_ebay_item_ended_task, sync_ebay_inventory_task, update_ebay_price_quantity_inventory_task
@@ -23,7 +22,6 @@ from decouple import config
 from marketplaceApp.views import WooCommerce
 from xml.etree.ElementTree import Element, tostring, SubElement
 from xml.etree import ElementTree as ET
-from vendorEnrollment.models import Enrollment
 from vendorEnrollment.utils import with_module
 from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
@@ -392,7 +390,7 @@ class MarketInventory:
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_name.capitalize()+"Update"]
                         conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
-                        db_items = model_class.objects.filter(conditions & Q(sku=prod.get("sku")))
+                        db_items = FragrancexUpdate.objects.filter(conditions & Q(sku=prod.get("sku")))
                         if not db_items.exists():
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
