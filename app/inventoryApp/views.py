@@ -26,6 +26,8 @@ from xml.etree import ElementTree as ET
 from vendorEnrollment.models import Enrollment
 from vendorEnrollment.utils import with_module
 from accounts.permissions import IsOwnerOrHasPermission
+from django.db.models import Q
+from .utils import calculated_selling_price, query_product_filter
 
 
 # Function to update product across marketplaces
@@ -367,7 +369,7 @@ class MarketInventory:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
 
-    # # Map an item to the right vendor and add to product table
+    # Map an item to the right vendor and add to product table
     # @with_module('inventory')
     # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     # @api_view(['PUT'])
@@ -387,9 +389,9 @@ class MarketInventory:
     #             for prod in json.loads(product_objects):
     #                 try:
     #                     # Get the actual model class from the string name
-    #                     model_class = globals()[vendor_db]
-    #                     conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-    #                     db_items = model_class.objects.filter(conditions & Q(sku=item.get("ebay_sku")))
+    #                     model_class = globals()[vendor_name.capitalize()+"Update"]
+    #                     conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
+    #                     db_items = model_class.objects.filter(conditions & Q(sku=prod.get("ebay_sku")))
     #                     if not db_items.exists():
     #                         continue
                         

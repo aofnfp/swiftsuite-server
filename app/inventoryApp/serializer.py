@@ -13,6 +13,6 @@ class InventoryModelUpdateSerializer(serializers.ModelSerializer):
 		return super().update(instance, validated_data)
 	
 
-class MappingToVendorSerializer(serializers.Serializer):
-	vendor_name = serializers.CharField()
-	product_objects = serializers.TextField()
+# class MappingToVendorSerializer(serializers.Serializer):
+# 	vendor_name = serializers.CharField()
+# 	product_objects = serializers.TextField()
