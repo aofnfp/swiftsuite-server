@@ -10,6 +10,7 @@ from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
 from django.db.models import Q
 from woocommerce import API
+from django.apps import apps
 
 
 # Get all products already listed on Ebay using sku
@@ -230,8 +231,9 @@ def sync_ebay_items_with_local():
                    
                     for vendor_db in vendor_list:
                         try:
+                            model_name = vendor_db.capitalize() + "Update"
                             # Get the actual model class from the string name
-                            model_class = globals()[vendor_db+"Update"]
+                            model_class = apps.get_model('vendorEnrollment', model_name)
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             db_items = model_class.objects.filter(conditions & Q(sku=item.get("ebay_sku")))
                             if not db_items.exists():
@@ -310,8 +312,9 @@ def sync_ebay_items_with_local():
                     
                     for vendor_db in vendor_list:
                         try:
+                            model_name = vendor_db.capitalize() + "Update"
                             # Get the actual model class from the string name
-                            model_class = globals()[vendor_db+"Update"]
+                            model_class = apps.get_model('vendorEnrollment', model_name)
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
                             db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
                             if not db_items.exists():
