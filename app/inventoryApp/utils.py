@@ -231,7 +231,7 @@ def sync_ebay_items_with_local():
                    
                     for vendor_db in vendor_list:
                         try:
-                            model_name = vendor_db.capitalize() + "Update"
+                            model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)
@@ -312,7 +312,7 @@ def sync_ebay_items_with_local():
                     
                     for vendor_db in vendor_list:
                         try:
-                            model_name = vendor_db.capitalize() + "Update"
+                            model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
                             conditions = query_product_filter(item_exists.upc, item_exists.mpn)

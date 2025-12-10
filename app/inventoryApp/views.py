@@ -13,7 +13,7 @@ from marketplaceApp.models import MarketplaceEnronment
 from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer
-from vendorEnrollment.models import FragrancexUpdate, Generalproducttable
+from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
 from .tasks import check_ebay_item_ended_task, sync_ebay_inventory_task, update_ebay_price_quantity_inventory_task
@@ -400,7 +400,7 @@ class MarketInventory:
                         
                         db_item = db_items[0]                          
                     except Exception as ea:
-                        prod["error(ea)"] = str(ea)
+                        prod["error"] = str(ea)
                         unmapped_items.append(prod)
                         continue
                     
@@ -422,7 +422,7 @@ class MarketInventory:
                             db_item.save()
                             
                         except Exception as e:
-                            prod["error(e)"] = str(e)
+                            prod["error"] = str(e)
                             unmapped_items.append(prod)
                             continue
                 
@@ -438,7 +438,9 @@ class MarketInventory:
     def get_unmapped_product_details(request, userid, inventoryid):
         try:
             unmapped_item = InventoryModel.objects.all().filter(id=inventoryid).values()
-            return JsonResponse({"item_details":list(unmapped_item)}, safe=False, status=status.HTTP_200_OK)
+            enrollment = Enrollment.objects.filter(user_id=userid)
+            vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+            return JsonResponse({"item_details":list(unmapped_item), "vendor_list": vendor_list}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
