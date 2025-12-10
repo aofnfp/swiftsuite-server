@@ -11,3 +11,8 @@ class InventoryModelUpdateSerializer(serializers.ModelSerializer):
 	def update(self, instance, validated_data):
 		validated_data.pop('user_id', None)
 		return super().update(instance, validated_data)
+	
+
+class MappingToVendorSerializer(serializers.Serializer):
+	vendor_name = serializers.CharField()
+	product_objects = serializers.TextField()
