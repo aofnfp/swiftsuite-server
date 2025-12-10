@@ -390,7 +390,7 @@ class MarketInventory:
                         # Get the actual model class from the string name
                         model_class = globals()[vendor_name.capitalize()+"Update"]
                         conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
-                        db_items = FragrancexUpdate.objects.filter(conditions & Q(sku=prod.get("sku")))
+                        db_items = vendor_name.capitalize()+"Update".objects.filter(conditions & Q(sku=prod.get("sku")))
                         if not db_items.exists():
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
