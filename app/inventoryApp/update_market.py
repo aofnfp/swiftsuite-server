@@ -211,8 +211,8 @@ def update_ebay_price_quantity():
                     if db_item.map:
                         if selling_price < float(db_item.map):
                             selling_price = float(db_item.map)
+                    # Update the product on Ebay
                     if item.market_item_id:
-                        # Update the product on Ebay
                         response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, selling_price, db_item.quantity, user._id)
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=selling_price, quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
@@ -238,10 +238,11 @@ def update_ebay_price_quantity():
                         continue 
                     
                     # Modify selling price before updating on ebay 
-                    selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
-                    if db_item.map:
-                        if selling_price < float(db_item.map):
-                            selling_price = float(db_item.map)
+                    if item.total_product_cost:
+                        selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
+                        if db_item.map:
+                            if selling_price < float(db_item.map):
+                                selling_price = float(db_item.map)
                 
                     # Update the product on Woocommerce
                     if item.market_item_id:

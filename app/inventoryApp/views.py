@@ -370,64 +370,75 @@ class MarketInventory:
 
 
     # Map an item to the right vendor and add to product table
-    # @with_module('inventory')
-    # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    # @api_view(['PUT'])
-    # def map_inventory_item_to_vendor(request, userid, inventoryid):
-    #     try:
-    #         # check if user is subaccount
-    #         user = request.user
-    #         if user:
-    #             if user.parent_id:
-    #                 userid = user.parent_id
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['PUT'])
+    def map_inventory_item_to_vendor(request, userid):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
             
-    #         serializer = MappingToVendorSerializer(data=request.data)
-    #         if serializer.is_valid():
-    #             serializer_data = serializer.validated_data
-    #             vendor_name = serializer_data['vendor_name']
-    #             product_objects = serializer_data['product_objects']
-    #             for prod in json.loads(product_objects):
-    #                 try:
-    #                     # Get the actual model class from the string name
-    #                     model_class = globals()[vendor_name.capitalize()+"Update"]
-    #                     conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
-    #                     db_items = model_class.objects.filter(conditions & Q(sku=prod.get("ebay_sku")))
-    #                     if not db_items.exists():
-    #                         continue
+            serializer = MappingToVendorSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer_data = serializer.validated_data
+                vendor_name = serializer_data['vendor_name']
+                product_objects = serializer_data['product_objects']
+                unmapped_items = []
+                for prod in product_objects:
+                    try:
+                        # Get the actual model class from the string name
+                        model_class = globals()[vendor_name.capitalize()+"Update"]
+                        conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
+                        db_items = model_class.objects.filter(conditions & Q(sku=prod.get("sku")))
+                        if not db_items.exists():
+                            unmapped_items.append(prod)
+                            continue
                         
-    #                     db_item = db_items[0]        
-    #                     break                    
-    #                 except Exception as ea:
-    #                     continue
+                        db_item = db_items[0]                          
+                    except Exception as ea:
+                        unmapped_items.append(prod)
+                        continue
                     
-    #                 if db_item:
-    #                     try:
-    #                         # Modify selling price before updating on ebay 
-    #                         cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
-    #                         if cost_computation == None:
-    #                             continue
-    #                         selling_price, total_product_cost = cost_computation
-    #                         # Create or update the product on GeneralProduct table
-    #                         conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-    #                         item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": total_product_cost, "map": db_item.product.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.total_price, "vendor_name": db_item.vendor.name})                           
-    #                         # Item exists, check if we need to update price or quantity
-    #                         inentory, created = InventoryModel.objects.update_or_create(Q(market_item_id=item.get("ebay_item_id")) | Q(sku=item.get("ebay_sku")), defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name})
-    #                         # Update the VendorUpdate table to set listed_market to true
-    #                         db_item.active = True
-    #                         db_item.save()
-    #                         # item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=item_exists.id, defaults=dict(market_name="Ebay", vendor_name=db_item.vendor.name, updated_item=item.get("ebay_sku"), log_description=f"Item with {item.get("ebay_sku")} mapped to vendor {db_item.vendor.name}"))
+                    if db_item:
+                        try:
+                            market_enrollment = MarketplaceEnronment.objects.get(user_id=userid)[0]
+                            # Modify selling price before updating on ebay 
+                            selling_price = float(db_item.total_price) + float(market_enrollment.fixed_markup) + ((float(market_enrollment.fixed_percentage_markup)/100) * float(db_item.total_price)) + ((float(market_enrollment.profit_margin)/100) * float(db_item.total_price))
+                            if db_item.map:
+                                if selling_price < float(db_item.map):
+                                    selling_price = float(db_item.map)
+                            # Create or update the product on GeneralProduct table
+                            conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
+                            item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": db_item.total_price, "map": db_item.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.price, "vendor_name": vendor_name})                           
+                            # Item exists, check if we need to update price or quantity
+                            inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "quantity": db_item.quantity, "vendor_name": db_item.vendor.name})
+                            # Update the VendorUpdate table to set listed_market to true
+                            db_item.active = True
+                            db_item.save()
                             
-    #                         db_items = None
-    #                     except Exception as e:
-    #                         print(f"Ebay Product processing failed with error: {e}")
-    #                         continue
+                        except Exception as e:
+                            unmapped_items.append(prod)
+                            continue
+                
+                return JsonResponse({"Message": "Items mapped successfully", "Failed to map items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to map item.", status=status.HTTP_400_BAD_REQUEST)
 
-    #             return Response("Item mapped successfully", status=status.HTTP_200_OK)
-    #         else:
-    #             return Response(f"Form not filled correctly.", status=status.HTTP_400_BAD_REQUEST)
-    #     except Exception as e:
-    #         return Response(f"Failed to map item.", status=status.HTTP_400_BAD_REQUEST)
-
+    
+    # Get umapped product details in the inventory for mapping to vendor
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_unmapped_product_details(request, userid, inventoryid):
+        try:
+            unmapped_item = InventoryModel.objects.all().filter(id=inventoryid).values()
+            vendor_enrolled = Enrollment.objects.all().filter(user_id=userid).values()
+            return JsonResponse({"item_details":list(unmapped_item)}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
     # Get saved product in the inventory for listing to ebay
     @with_module('inventory')

@@ -14,6 +14,8 @@ class InventoryModelUpdateSerializer(serializers.ModelSerializer):
 	
 
 class MappingToVendorSerializer(serializers.Serializer):
-	pass
-# 	vendor_name = serializers.CharField()
-# 	product_objects = serializers.TextField()
+	vendor_name = serializers.CharField(required=True)
+	product_objects = serializers.ListField(
+        child=serializers.DictField(),
+        required=True
+    )
