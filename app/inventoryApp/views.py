@@ -25,7 +25,8 @@ from xml.etree import ElementTree as ET
 from vendorEnrollment.utils import with_module
 from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
-from .utils import calculated_selling_price, query_product_filter
+from .utils import query_product_filter
+from django.apps import apps
 
 
 # Function to update product across marketplaces
@@ -387,10 +388,11 @@ class MarketInventory:
                 unmapped_items = []
                 for prod in product_objects:
                     try:
+                        model_name = vendor_name.capitalize() + "Update"
                         # Get the actual model class from the string name
-                        model_class = globals()[vendor_name.capitalize()+"Update"]
+                        model_class = apps.get_model('vendorEnrollment', model_name)
                         conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
-                        db_items = vendor_name.capitalize()+"Update".objects.filter(conditions & Q(sku=prod.get("sku")))
+                        db_items = model_class.objects.filter(conditions & Q(sku=prod.get("sku")))
                         if not db_items.exists():
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
