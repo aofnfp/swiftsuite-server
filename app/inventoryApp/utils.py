@@ -165,7 +165,7 @@ def calculated_selling_price(market_id, total_product_cost, userid, map=""):
     return round(selling_price, 2), round(total_product_cost, 2)
 
 
-# Get all existing listed products on Woocommerce store.
+# Get all existing listed products on Woocommerce store for a specific user.
 def get_woocommerce_existing_products(user_id):
     enrollment = MarketplaceEnronment.objects.get(user_id=user_id, marketplace_name="Woocommerce")
     # Set up the WooCommerce API client
