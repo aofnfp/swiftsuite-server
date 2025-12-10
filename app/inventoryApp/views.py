@@ -394,11 +394,13 @@ class MarketInventory:
                         conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
                         db_items = model_class.objects.filter(conditions & Q(sku=prod.get("sku")))
                         if not db_items.exists():
+                            prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
                             continue
                         
                         db_item = db_items[0]                          
                     except Exception as ea:
+                        prod["error"] = str(ea)
                         unmapped_items.append(prod)
                         continue
                     
@@ -420,6 +422,7 @@ class MarketInventory:
                             db_item.save()
                             
                         except Exception as e:
+                            prod["error"] = str(e)
                             unmapped_items.append(prod)
                             continue
                 
@@ -435,10 +438,10 @@ class MarketInventory:
     def get_unmapped_product_details(request, userid, inventoryid):
         try:
             unmapped_item = InventoryModel.objects.all().filter(id=inventoryid).values()
-            vendor_enrolled = Enrollment.objects.all().filter(user_id=userid).values()
             return JsonResponse({"item_details":list(unmapped_item)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+
 
     # Get saved product in the inventory for listing to ebay
     @with_module('inventory')
