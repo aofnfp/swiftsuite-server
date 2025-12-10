@@ -400,7 +400,7 @@ class MarketInventory:
                         
                         db_item = db_items[0]                          
                     except Exception as ea:
-                        prod["error"] = str(ea)
+                        prod["error(ea)"] = str(ea)
                         unmapped_items.append(prod)
                         continue
                     
@@ -422,7 +422,7 @@ class MarketInventory:
                             db_item.save()
                             
                         except Exception as e:
-                            prod["error"] = str(e)
+                            prod["error(e)"] = str(e)
                             unmapped_items.append(prod)
                             continue
                 
