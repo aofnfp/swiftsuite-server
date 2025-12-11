@@ -530,6 +530,11 @@ class MarketInventory:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         url = "https://api.ebay.com/ws/api.dll"
@@ -562,20 +567,7 @@ class MarketInventory:
             }, safe=False, status=status.HTTP_200_OK)
 
         xml = response.text
-        if "<ListingStatus>Completed</ListingStatus>" in xml:
-            # Check if it sold
-            if "<SellingStatus>" in xml and "<QuantitySold>0</QuantitySold>" not in xml:
-                return JsonResponse({
-                    "status": "sold",
-                    "description": "Listing is ended & item was sold",
-                    "raw": xml
-                }, safe=False, status=status.HTTP_200_OK)
-            else:
-                return JsonResponse({
-                    "status": "ended",
-                    "description": "Listing is ended (unsold, deleted, or manually ended)",
-                    "raw": xml
-                }, safe=False, status=status.HTTP_200_OK)
+        return Response(xml, status=status.HTTP_200_OK)
 
 class WooCommerceInventory:
     # Function to update product on woocommerce store
@@ -652,6 +644,6 @@ class WooCommerceInventory:
 
 
 # Inventory background task invocation
-# sync_ebay_inventory_task.delay()
-# update_ebay_price_quantity_inventory_task.delay()
-# check_ebay_item_ended_task.delay()
+sync_ebay_inventory_task.delay()
+update_ebay_price_quantity_inventory_task.delay()
+check_ebay_item_ended_task.delay()
