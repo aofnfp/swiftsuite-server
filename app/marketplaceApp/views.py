@@ -1094,9 +1094,7 @@ class WooCommerce:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
-    # @permission_classes([IsAuthenticated])
     def update_woocommerce_enrolment(request, userid, market_name):
-        eb = Ebay()
         try:            
             # check if user is subaccount
             user = request.user
