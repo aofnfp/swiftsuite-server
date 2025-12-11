@@ -283,6 +283,13 @@ def check_and_update_ended_ebay_items():
                     continue
         
         elif user.marketplace_name == "Woocommerce":
-            pass
+            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
+                
+            for item in all_ebay_items:
+                # Modify selling price before updating on ebay 
+                if item.total_product_cost:
+                    selling_price = float(item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(user.profit_margin)/100) * float(item.total_product_cost))
+                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2)))
+                # Check if the item has a vendor mapped to it
 
 
