@@ -568,6 +568,7 @@ class MarketInventory:
 
         xml = response.text
         return Response(xml, status=status.HTTP_200_OK)
+    
 
 class WooCommerceInventory:
     # Function to update product on woocommerce store
