@@ -213,10 +213,7 @@ def sync_ebay_items_with_local():
             elif ebay_items == "Error":
                 print(f"Failed to fetch all items from ebay for user {user.user_id}.")
                 continue
-            # Get list of vendors registered by the user
-            enrollment = Enrollment.objects.filter(user_id=user.user_id)
-            vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
-
+            
             for item in ebay_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13]})
             for item in all_ebay_items:
@@ -230,6 +227,10 @@ def sync_ebay_items_with_local():
                         conditions |= Q(sku=item.get("ebay_sku"))
                     item_exists = InventoryModel.objects.filter(conditions & Q(user_id=user.user_id))[0]
                    
+                   # Get list of vendors registered by the user
+                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
+                    vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+
                     for vendor_db in vendor_list:
                         try:
                             model_name = vendor_db + "Update"
@@ -293,9 +294,6 @@ def sync_ebay_items_with_local():
                         print(f"Ebay Product failed to insert into inventory {e}")
 
         elif user.marketplace_name == "Woocommerce":
-            # Get list of vendors registered by the user
-            enrollment = Enrollment.objects.filter(user_id=user.user_id)
-            vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             for item in all_woocommercer_items:
@@ -309,6 +307,9 @@ def sync_ebay_items_with_local():
                         conditions |= Q(sku=item.get("sku"))
                     item_exists = InventoryModel.objects.filter(conditions & Q(user_id=user.user_id))[0]
                     
+                    # Get list of vendors registered by the user
+                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
+                    vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
                     for vendor_db in vendor_list:
                         try:
                             model_name = vendor_db + "Update"
