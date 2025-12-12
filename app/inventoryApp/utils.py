@@ -248,7 +248,7 @@ def sync_ebay_items_with_local():
                                 continue
                             selling_price, total_product_cost = cost_computation
                             # Check if the product exists in GeneralProduct table
-                            item_product = Generalproducttable.objects.filter(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku))
+                            item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id)
                             if not item_product.exists():
                                 item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
                             # Item exists, check if we need to update price or quantity
@@ -322,7 +322,7 @@ def sync_ebay_items_with_local():
                                 continue
                             selling_price, total_product_cost = cost_computation
                             # Check if the product exists in GeneralProduct table
-                            item_product = Generalproducttable.objects.filter(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku))
+                            item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id)
                             if not item_product.exists():
                                 item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
                             # insert mapped item into inventory
