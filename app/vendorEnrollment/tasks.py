@@ -182,6 +182,8 @@ def update_vendor_data(enrollment_id):
         if file_path and os.path.exists(file_path):
             os.remove(file_path)
             print(f"Deleted file: {file_path}")
+            
+    return enrollment_id
 
 def process_lipsey(file_path, enrollment):
     mixin.process_vendor_update(
