@@ -204,6 +204,7 @@ def sync_ebay_items_with_local():
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         if user.marketplace_name == "Ebay":
+            db_item = None
             # Fetch all item from eBay
             ebay_items = get_all_items_on_ebay(user._id)
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
@@ -289,6 +290,7 @@ def sync_ebay_items_with_local():
                         print(f"Ebay Product failed to insert into inventory {e}")
 
         elif user.marketplace_name == "Woocommerce":
+            db_item = None
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             for item in all_woocommercer_items:
