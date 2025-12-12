@@ -300,19 +300,19 @@ def sync_ebay_items_with_local():
                     enrollment = Enrollment.objects.filter(user_id=user.user_id)
                     vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
                     for vendor_db in vendor_list:
-                        # try:
-                        model_name = vendor_db + "Update"
-                        # Get the actual model class from the string name
-                        model_class = apps.get_model('vendorEnrollment', model_name)
-                        conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                        db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
-                        if not db_items.exists():
+                        try:
+                            model_name = vendor_db + "Update"
+                            # Get the actual model class from the string name
+                            model_class = apps.get_model('vendorEnrollment', model_name)
+                            conditions = query_product_filter(item_exists.upc, item_exists.mpn)
+                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
+                            if not db_items.exists():
+                                continue
+                            
+                            db_item = db_items[0]                 
+                            break                    
+                        except Exception as ea:
                             continue
-                        
-                        db_item = db_items[0]                 
-                        break                    
-                        # except Exception as ea:
-                        #     continue
 
                     if db_item:
                         try:
