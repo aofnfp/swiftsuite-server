@@ -235,26 +235,37 @@ def update_all_enrollments():
             logger.error(task.result)
         finally:
             task.save()
+
+
+def to_float(value, default=0.0):
+    try:
+        return float(value) if value is not None else default
+    except:
+        return default
+
         
 @shared_task(queue='default')        
 def update_inventory(enrollment_id):
     try:
-        enrollment = Enrollment.objects.get(id = enrollment_id)
-        shipping_cost = float(enrollment.shipping_cost) if enrollment.shipping_cost else 0.00
-        fixed_markup = float(enrollment.fixed_markup) if enrollment.fixed_markup else 0.00
-        percentage_markup = float(enrollment.percentage_markup) if enrollment.percentage_markup else 0.00
+        enrollment = Enrollment.objects.get(id=enrollment_id)
+        print(f"Updating inventory for enrollment {enrollment_id}")
+
+        shipping_cost = to_float(enrollment.shipping_cost)
+        fixed_markup = to_float(enrollment.fixed_markup)
+        percentage_markup = to_float(enrollment.percentage_markup)
         
         for item in InventoryModel.objects.filter(product__enrollment=enrollment):
-            
-            if enrollment.vendor.name.lower() == 'fragrancex':
+
+            vendor_name = enrollment.vendor.name.lower()
+            if vendor_name == 'fragrancex':
                 product = FragrancexUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif enrollment.vendor.name.lower() == 'rsr':
+            elif vendor_name == 'rsr':
                 product = RsrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif enrollment.vendor.name.lower() == 'lipsey':
+            elif vendor_name == 'lipsey':
                 product = LipseyUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif enrollment.vendor.name.lower() == 'cwr':
+            elif vendor_name == 'cwr':
                 product = CwrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif enrollment.vendor.name.lower() == 'zanders':
+            elif vendor_name == 'zanders':
                 product = ZandersUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
             else:
                 product = None
@@ -262,22 +273,34 @@ def update_inventory(enrollment_id):
             if not product:
                 continue
             
-            price = float(product.price) if product.price else 0.00   
+            price = to_float(product.price)
 
-            # update total product cost and price
-            total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost, 2)
-            
+            total_price = round(
+                price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost,
+                2
+            )
             
             item.total_product_cost = total_price
             item.shipping_cost = shipping_cost
             item.price = price
-            map = product.map
-            start_price = float(total_price) + float(item.fixed_markup) + ((float(item.fixed_percentage_markup)/100) * float(total_price)) + ((float(item.profit_margin)/100) * float(total_price))
-            if map:
-                if start_price < float(map):
-                    start_price = float(map)
-                    
-            item.start_price = round(start_price, 2)   
+            
+            map_value = to_float(product.map)
+
+            item_fixed = to_float(item.fixed_markup)
+            item_pct = to_float(item.fixed_percentage_markup)
+            item_profit = to_float(item.profit_margin)
+
+            start_price = (
+                total_price +
+                item_fixed +
+                ((item_pct / 100) * total_price) +
+                ((item_profit / 100) * total_price)
+            )
+
+            if map_value:
+                start_price = max(start_price, map_value)
+
+            item.start_price = round(start_price, 2)
             item.save()
         
     except Exception as e:
