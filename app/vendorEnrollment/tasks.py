@@ -248,7 +248,7 @@ def to_float(value, default=0.0):
 def update_inventory(enrollment_id):
     try:
         enrollment = Enrollment.objects.get(id=enrollment_id)
-        print(f"Updating inventory for enrollment {enrollment_id}")
+        logger.info(f"Updating inventory for enrollment {enrollment_id}-{enrollment.identifier}")
 
         shipping_cost = to_float(enrollment.shipping_cost)
         fixed_markup = to_float(enrollment.fixed_markup)
