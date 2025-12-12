@@ -335,7 +335,7 @@ def sync_ebay_items_with_local():
                             
                             db_items = None
                         except Exception as e:
-                            print(f" Woocommerce Product processing failed with error: {e}")
+                            print(f" Woocommerce Product processing failed with error model is {model_class.__name__}: {e}")
                             continue
                 except Exception as e:
                     print(f" Woocommerce Product processing in first try block failed: {e}")
