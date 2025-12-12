@@ -263,6 +263,7 @@ def sync_ebay_items_with_local():
                             continue
                         
                 except Exception as e:
+                    print(f"Ebay Product processing in first try block failed with error: {e}")
                     # If item does not exist, insert new item
                     try:
                         # Get product details from eBay
@@ -291,61 +292,62 @@ def sync_ebay_items_with_local():
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             for item in all_woocommercer_items:
-                # try:
-                # verify if item already existing on inventory
-                item_exists = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("id"))
+                try:
+                    # verify if item already existing on inventory
+                    item_exists = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("id"))
 
-                # Get list of vendors registered by the user
-                enrollment = Enrollment.objects.filter(user_id=user.user_id)
-                vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
-                for vendor_db in vendor_list:
-                    # try:
-                    model_name = vendor_db + "Update"
-                    # Get the actual model class from the string name
-                    model_class = apps.get_model('vendorEnrollment', model_name)
-                    conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                    db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
-                    if not db_items.exists():
-                        continue
-                    
-                    db_item = db_items[0]                 
-                    break                    
-                    # except Exception as ea:
-                    #     continue
+                    # Get list of vendors registered by the user
+                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
+                    vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+                    for vendor_db in vendor_list:
+                        # try:
+                        model_name = vendor_db + "Update"
+                        # Get the actual model class from the string name
+                        model_class = apps.get_model('vendorEnrollment', model_name)
+                        conditions = query_product_filter(item_exists.upc, item_exists.mpn)
+                        db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
+                        if not db_items.exists():
+                            continue
+                        
+                        db_item = db_items[0]                 
+                        break                    
+                        # except Exception as ea:
+                        #     continue
 
-                if db_item:
-                    # try:
-                    # Modify selling price before updating on ebay 
-                    cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
-                    if cost_computation == None:
-                        continue
-                    selling_price, total_product_cost = cost_computation
-                    # Check if the product exists in GeneralProduct table
-                    item_product = Generalproducttable.objects.filter(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku))
-                    if not item_product.exists():
-                        item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
-                    # insert mapped item into inventory
-                    inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
-                    # Update the VendorUpdate table to set listed_market to true
-                    db_item.active = True
-                    db_item.save()
-                    
-                    db_items = None
-                    # except Exception as e:
-                    #     print(f" Woocommerce Product processing failed with error: {e}")
-                    #     continue
-                # except Exception as e:
-                #     # If item does not exist, insert new item
-                #     try:
-                #         categories = item.get("categories") or []
-                #         category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
-                #         category_name = categories[0].get("name") if categories else "NA"
-                #         images = item.get("images") or []
-                #         picture_url = images[0].get("src") if images else "NA"
-                #         item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name") or "NA", description=json.dumps(item.get("description")) or "NA", category_id=category_id, category=category_name, woo_category_name=category_name, sku=item.get("sku") or 0,  start_price=item.get("price") or 0, price=item.get("price") or 0, picture_detail=picture_url, thumbnailImage="Null", quantity=item.get("stock_quantity") or 0, return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", date_created=(item.get("date_created") or "NA").split("T")[0], active=True, vendor_name="Not Found", enable_charity=True, market_name="Woocommerce", map_status=False, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin,  market_item_url=item.get("permalink") or "NA"))
+                    if db_item:
+                        try:
+                            # Modify selling price before updating on ebay 
+                            cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
+                            if cost_computation == None:
+                                continue
+                            selling_price, total_product_cost = cost_computation
+                            # Check if the product exists in GeneralProduct table
+                            item_product = Generalproducttable.objects.filter(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku))
+                            if not item_product.exists():
+                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.product.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
+                            # insert mapped item into inventory
+                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
+                            # Update the VendorUpdate table to set listed_market to true
+                            db_item.active = True
+                            db_item.save()
+                            
+                            db_items = None
+                        except Exception as e:
+                            print(f" Woocommerce Product processing failed with error: {e}")
+                            continue
+                except Exception as e:
+                    print(f" Woocommerce Product processing in first try block failed with error: {e}")
+                    # If item does not exist, insert new item
+                    try:
+                        categories = item.get("categories") or []
+                        category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
+                        category_name = categories[0].get("name") if categories else "NA"
+                        images = item.get("images") or []
+                        picture_url = images[0].get("src") if images else "NA"
+                        item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name") or "NA", description=json.dumps(item.get("description")) or "NA", category_id=category_id, category=category_name, woo_category_name=category_name, sku=item.get("sku") or 0,  start_price=item.get("price") or 0, price=item.get("price") or 0, picture_detail=picture_url, thumbnailImage="Null", quantity=item.get("stock_quantity") or 0, return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", date_created=(item.get("date_created") or "NA").split("T")[0], active=True, vendor_name="Not Found", enable_charity=True, market_name="Woocommerce", map_status=False, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin,  market_item_url=item.get("permalink") or "NA"))
 
-                #     except Exception as e:
-                #         print(f"Woocommerce Product failed to insert into inventory {e}")
+                    except Exception as e:
+                        print(f"Woocommerce Product failed to insert into inventory {e}")
                 
 
 
