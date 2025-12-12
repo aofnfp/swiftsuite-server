@@ -362,8 +362,11 @@ class MarketInventory:
                 inventory_objects = paginator.page(1)
             except EmptyPage:
                 inventory_objects = paginator.page(paginator.num_pages)
-            
-            return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
+
+            enrollment = Enrollment.objects.filter(user_id=userid)
+            vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+
+            return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects), "vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
