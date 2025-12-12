@@ -437,6 +437,12 @@ class MarketInventory:
     @api_view(['GET'])
     def get_unmapped_product_details(request, userid, inventoryid):
         try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+                    
             unmapped_item = InventoryModel.objects.all().filter(id=inventoryid).values()
             enrollment = Enrollment.objects.filter(user_id=userid)
             vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
