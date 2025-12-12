@@ -32,6 +32,7 @@ import ast
 from django.db.models import Q
 from accounts.permissions import IsOwnerOrHasPermission
 from vendorEnrollment.utils import with_module
+from .tasks import complete_enrolment_price_update_task
 
 
 
@@ -471,7 +472,6 @@ class Ebay:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
     def complete_enrolment_or_update(request, userid, market_name):
-        eb = Ebay()
         try:
             
             # check if user is subaccount
@@ -485,10 +485,8 @@ class Ebay:
             if serializer.is_valid():
                 serializer.save()
                 valid_data = serializer.validated_data
-                inventory_data = InventoryModel.objects.filter(user_id=userid, market_name=market_name)
-                for item in inventory_data:
-                    selling_price = eb.calculated_selling_price(item.total_product_cost, item.product_id, item.user_id)
-                    item_updated = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"), start_price=selling_price)
+                InventoryModel.objects.filter(user_id=userid, market_name=market_name).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"))
+                complete_enrolment_price_update_task.delay(userid, market_name)
    
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -522,19 +520,19 @@ class Ebay:
         fulfillment_policies = eb.fetch_fulfillment_policies(access_token, marketplace_id)
         if type(fulfillment_policies) != dict:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
-        all_policy.update(fulfillment_policies=fulfillment_policies)
+        all_policy.update(fulfillment_policy=fulfillment_policies)
         
         # Fetch payment policies
         payment_policies = eb.fetch_payment_policies(access_token, marketplace_id)
         if type(payment_policies) != dict:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
-        all_policy.update(payment_policies=payment_policies)
+        all_policy.update(payment_policy=payment_policies)
         
         # Fetch return policies
         return_policies = eb.fetch_return_policies(access_token, marketplace_id)
         if type(return_policies) != dict:
            return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
-        all_policy.update(return_policies=return_policies)
+        all_policy.update(return_policy=return_policies)
         return all_policy
         
 
@@ -1096,9 +1094,7 @@ class WooCommerce:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
-    # @permission_classes([IsAuthenticated])
     def update_woocommerce_enrolment(request, userid, market_name):
-        eb = Ebay()
         try:            
             # check if user is subaccount
             user = request.user
@@ -1111,12 +1107,10 @@ class WooCommerce:
             if serializer.is_valid():
                 serializer.save()
                 valid_data = serializer.validated_data
-                inventory_data = InventoryModel.objects.filter(user_id=userid, market_name=market_name)
-                for item in inventory_data:
-                    selling_price = eb.calculated_selling_price(item.total_product_cost, item.product_id, item.user_id)
-                    item_updated = InventoryModel.objects.filter(id=item.id).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"), start_price=selling_price)
-   
+                InventoryModel.objects.filter(user_id=userid, market_name=market_name).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"))
+                complete_enrolment_price_update_task.delay(userid, market_name)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+            
         except Exception as e:
             return Response(f"Error: Update failed", status=status.HTTP_400_BAD_REQUEST)
 

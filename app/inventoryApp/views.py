@@ -1,4 +1,3 @@
-import base64
 import os, requests, json
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,8 +12,8 @@ from ebaysdk.exception import ConnectionError
 from marketplaceApp.models import MarketplaceEnronment
 from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
-from .serializer import InventoryModelUpdateSerializer
-from vendorEnrollment.models import Generalproducttable
+from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer
+from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
 from .tasks import check_ebay_item_ended_task, sync_ebay_inventory_task, update_ebay_price_quantity_inventory_task
@@ -23,9 +22,11 @@ from decouple import config
 from marketplaceApp.views import WooCommerce
 from xml.etree.ElementTree import Element, tostring, SubElement
 from xml.etree import ElementTree as ET
-from vendorEnrollment.models import Enrollment
 from vendorEnrollment.utils import with_module
 from accounts.permissions import IsOwnerOrHasPermission
+from django.db.models import Q
+from .utils import query_product_filter
+from django.apps import apps
 
 
 # Function to update product across marketplaces
@@ -366,6 +367,90 @@ class MarketInventory:
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
+
+    # Map an item to the right vendor and add to product table
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['PUT'])
+    def map_inventory_item_to_vendor(request, userid):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+            
+            serializer = MappingToVendorSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer_data = serializer.validated_data
+                vendor_name = serializer_data['vendor_name']
+                product_objects = serializer_data['product_objects']
+                unmapped_items = []
+                for prod in product_objects:
+                    try:
+                        model_name = vendor_name.capitalize() + "Update"
+                        # Get the actual model class from the string name
+                        model_class = apps.get_model('vendorEnrollment', model_name)
+                        conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
+                        db_items = model_class.objects.filter(conditions & Q(sku=prod.get("sku")))
+                        if not db_items.exists():
+                            prod["error"] = "No matching product found in vendor's inventory"
+                            unmapped_items.append(prod)
+                            continue
+                        
+                        db_item = db_items[0]                          
+                    except Exception as ea:
+                        prod["error"] = str(ea)
+                        unmapped_items.append(prod)
+                        continue
+                    
+                    if db_item:
+                        try:
+                            market_enrollment = MarketplaceEnronment.objects.get(user_id=userid)[0]
+                            # Modify selling price before updating on ebay 
+                            selling_price = float(db_item.total_price) + float(market_enrollment.fixed_markup) + ((float(market_enrollment.fixed_percentage_markup)/100) * float(db_item.total_price)) + ((float(market_enrollment.profit_margin)/100) * float(db_item.total_price))
+                            if db_item.map:
+                                if selling_price < float(db_item.map):
+                                    selling_price = float(db_item.map)
+                            # Create or update the product on GeneralProduct table
+                            conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
+                            item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": db_item.total_price, "map": db_item.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.price, "vendor_name": vendor_name})                           
+                            # Item exists, check if we need to update price or quantity
+                            inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "quantity": db_item.quantity, "vendor_name": db_item.vendor.name})
+                            # Update the VendorUpdate table to set listed_market to true
+                            db_item.active = True
+                            db_item.save()
+                            
+                        except Exception as e:
+                            prod["error"] = str(e)
+                            unmapped_items.append(prod)
+                            continue
+                
+                return JsonResponse({"Message": "Items mapped successfully", "Failed to map items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to map item.", status=status.HTTP_400_BAD_REQUEST)
+
+    
+    # Get umapped product details in the inventory for mapping to vendor
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_unmapped_product_details(request, userid, inventoryid):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+
+            unmapped_item = InventoryModel.objects.all().filter(id=inventoryid).values()
+            enrollment = Enrollment.objects.filter(user_id=userid)
+            vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+            return JsonResponse({"item_details":list(unmapped_item), "vendor_list": list(set(vendor_list))}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+
+
     # Get saved product in the inventory for listing to ebay
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -451,6 +536,11 @@ class MarketInventory:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         url = "https://api.ebay.com/ws/api.dll"
@@ -483,20 +573,8 @@ class MarketInventory:
             }, safe=False, status=status.HTTP_200_OK)
 
         xml = response.text
-        if "<ListingStatus>Completed</ListingStatus>" in xml:
-            # Check if it sold
-            if "<SellingStatus>" in xml and "<QuantitySold>0</QuantitySold>" not in xml:
-                return JsonResponse({
-                    "status": "sold",
-                    "description": "Listing is ended & item was sold",
-                    "raw": xml
-                }, safe=False, status=status.HTTP_200_OK)
-            else:
-                return JsonResponse({
-                    "status": "ended",
-                    "description": "Listing is ended (unsold, deleted, or manually ended)",
-                    "raw": xml
-                }, safe=False, status=status.HTTP_200_OK)
+        return Response(xml, status=status.HTTP_200_OK)
+    
 
 class WooCommerceInventory:
     # Function to update product on woocommerce store
