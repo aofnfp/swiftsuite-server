@@ -203,6 +203,10 @@ def sync_ebay_items_with_local():
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
+        # Get list of vendors registered by the user
+        enrollment = Enrollment.objects.filter(user_id=user.user_id)
+        vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+        # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             db_item = None
             # Fetch all item from eBay
@@ -221,11 +225,7 @@ def sync_ebay_items_with_local():
                 try:
                     # verify if item already existing on inventory
                     item_exists = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
-                   
-                   # Get list of vendors registered by the user
-                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
-                    vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
-
+                    # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
                             model_name = vendor_db + "Update"
@@ -297,10 +297,7 @@ def sync_ebay_items_with_local():
                 try:
                     # verify if item already existing on inventory
                     item_exists = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("id"))
-
-                    # Get list of vendors registered by the user
-                    enrollment = Enrollment.objects.filter(user_id=user.user_id)
-                    vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+                    # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
                             model_name = vendor_db + "Update"
