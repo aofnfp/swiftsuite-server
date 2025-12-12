@@ -10,7 +10,7 @@ class InventoryModel(models.Model):
     category_id = models.TextField(null=False, unique=False)
     sku = models.CharField(null=False, unique=False, max_length=25)
     upc = models.CharField(null=True, unique=False, max_length=25)
-    mpn = models.CharField(null=True, unique=False, max_length=25)
+    mpn = models.TextField(null=True, unique=False)
     start_price = models.TextField(null=False, unique=False)
     picture_detail = models.TextField(null=False, unique=False)
     postal_code = models.TextField(null=True, unique=False)

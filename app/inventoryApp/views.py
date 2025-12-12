@@ -442,11 +442,11 @@ class MarketInventory:
             if user:
                 if user.parent_id:
                     userid = user.parent_id
-                    
+
             unmapped_item = InventoryModel.objects.all().filter(id=inventoryid).values()
             enrollment = Enrollment.objects.filter(user_id=userid)
             vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
-            return JsonResponse({"item_details":list(unmapped_item), "vendor_list": vendor_list}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"item_details":list(unmapped_item), "vendor_list": list(set(vendor_list))}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
