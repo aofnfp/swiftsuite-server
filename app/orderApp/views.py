@@ -28,6 +28,12 @@ class OrderEbay:
     @api_view(['GET'])
     def get_product_ordered(request, userid, page_number, num_per_page):
         try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+
             order_items = OrdersOnEbayModel.objects.all().filter(user_id=userid).values().order_by('creationDate').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(order_items, int(num_per_page))
@@ -65,6 +71,12 @@ class OrderEbay:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_ordered_item_details(request, userid, market_name, ebayorderid):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+
         eb = OrderEbay()
         # Get access_token
         access_token = Ebay.refresh_access_token(request, userid, market_name)
@@ -96,6 +108,12 @@ class OrderEbay:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def cancel_order_from_ebay(request, userid, market_name, ebayorderid):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+                
         # Get access_token
         access_token = Ebay.refresh_access_token(request, userid, market_name)
         url = f'https://api.ebay.com/post-order/v2/cancellation/{ebayorderid}'
