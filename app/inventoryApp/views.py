@@ -426,7 +426,7 @@ class MarketInventory:
             enrollment = MarketplaceEnronment.objects.filter(user_id=userid)
             return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
     
     # Get all saved product yet to be listed on Ebay from the inventory
     @with_module('inventory')
