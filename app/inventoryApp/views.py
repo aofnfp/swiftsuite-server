@@ -423,10 +423,10 @@ class MarketInventory:
             except EmptyPage:
                 inventory_objects = paginator.page(paginator.num_pages)
             # Get enrollment details of the user too
-            enrollment = MarketplaceEnronment.objects.filter(user_id=userid)
+            enrollment = MarketplaceEnronment.objects.filter(user_id=userid).values()
             return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
     
     # Get all saved product yet to be listed on Ebay from the inventory
     @with_module('inventory')
@@ -451,7 +451,7 @@ class MarketInventory:
                 inventory_objects = paginator.page(paginator.num_pages)
 
              # Get enrollment details of the user too
-            enrollment = MarketplaceEnronment.objects.filter(user_id=userid)
+            enrollment = MarketplaceEnronment.objects.filter(user_id=userid).values()
             return JsonResponse({"Total_count":len(inventory_saved), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
