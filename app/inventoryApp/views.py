@@ -424,7 +424,7 @@ class MarketInventory:
                 inventory_objects = paginator.page(paginator.num_pages)
             # Get enrollment details of the user too
             enrollment = MarketplaceEnronment.objects.filter(user_id=userid)
-            return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":enrollment}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
     
@@ -452,7 +452,7 @@ class MarketInventory:
 
              # Get enrollment details of the user too
             enrollment = MarketplaceEnronment.objects.filter(user_id=userid)
-            return JsonResponse({"Total_count":len(inventory_saved), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects), "enrollment_detail":enrollment}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total_count":len(inventory_saved), "Total_pages":paginator.num_pages, "saved_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
             
