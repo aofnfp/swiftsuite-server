@@ -264,7 +264,6 @@ def sync_ebay_items_with_local():
                             continue
                         
                 except Exception as e:
-                    print(f"Ebay Product processing in first try block failed: {e}")
                     # If item does not exist, insert new item
                     try:
                         # Get product details from eBay
@@ -332,7 +331,6 @@ def sync_ebay_items_with_local():
                             print(f" Woocommerce Product processing failed with error: {e}")
                             continue
                 except Exception as e:
-                    print(f" Woocommerce Product processing in first try block failed: {e}")
                     # If item does not exist, insert new item
                     try:
                         categories = item.get("categories") or []
