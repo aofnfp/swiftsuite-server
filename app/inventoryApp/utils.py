@@ -85,8 +85,8 @@ def get_all_items_on_ebay(enroll_id):
                     ReturnProfileName = item.find("ebay:SellerProfiles/ebay:SellerReturnProfile/ebay:ReturnProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace) is not None else "N/A"
                     PaymentProfileID = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace) is not None else "N/A"
                     PaymentProfileName = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace) is not None else "N/A"
-                    market_item_url = item.find("ebay:ListingDetails/ebay:ViewItemURLForNaturalSearch", namespaces=namespace).text if item.find("ebay:ListingDetails/ebay:ViewItemURLForNaturalSearch", namespaces=namespace) is not None else "N/A"
-
+                    market_item_url = item.find("ebay:ListingDetails/ebay:ViewItemURL", namespaces=namespace).text if item.find("ebay:ListingDetails/ebay:ViewItemURL", namespaces=namespace) is not None else "N/A"
+                   
                     items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, market_item_url])
 
   
