@@ -246,6 +246,7 @@ def sync_ebay_items_with_local():
                             # Modify selling price before updating on ebay 
                             cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
                             if cost_computation == None:
+                                print(f"Cost computation failed for ebay item {item.get('ebay_item_id')} for user {user.user_id}")
                                 continue
                             selling_price, total_product_cost = cost_computation
                             # Check if the product exists in GeneralProduct table
