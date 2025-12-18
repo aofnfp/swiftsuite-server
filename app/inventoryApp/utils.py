@@ -15,16 +15,16 @@ from django.apps import apps
 
 # Get all products already listed on Ebay using sku
 def get_all_items_on_ebay(enroll_id):
+    eb = Ebay()
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
-        if e.get('errors')[0]['errorId'] == 1001:
-            return None
-        else:
-            return "Error"
+        print(f"Failed to fetch access token")
+        return None
+
     
     access_token =  user_data.access_token
     try:
@@ -101,12 +101,13 @@ def get_all_items_on_ebay(enroll_id):
             page_number += 1
 
     except requests.exceptions.ConnectTimeout as e:
-        return "Error"        
+        return None       
     except Exception as e:
         if e.get('errors')[0]['errorId'] == 1001:
-            return None
+            access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+            get_all_items_on_ebay(enroll_id)
         else:
-            return "Error"
+            return None
     
     return ebay_items
     
@@ -115,6 +116,7 @@ def get_all_items_on_ebay(enroll_id):
 @sleep_and_retry
 @limits(calls=5, period=1)
 def get_item_details(enroll_id, item_id):
+    eb = Ebay()
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
@@ -143,12 +145,14 @@ def get_item_details(enroll_id, item_id):
             return product_data
         else:
             print(f"Failed to retrieve details for inventory for Item ID {item_id}: {response.text}")
-            return "Error"
+            return None
     except Exception as e:
         if e.get('errors')[0]['errorId'] == 1001:
-            return None
+            access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+            get_item_details(access_token, item_id)
+
         else:
-            return "Error"
+            return None
                     
         
 # Calculate the selling price of product going to ebay
@@ -213,10 +217,6 @@ def sync_ebay_items_with_local():
             ebay_items = get_all_items_on_ebay(user._id)
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if ebay_items == None:
-                token = eb.refresh_access_token(user.user_id, "Ebay")
-                ebay_items = get_all_items_on_ebay(user._id)
-            elif ebay_items == "Error":
-                print(f"Failed to fetch all items from ebay for user {user.user_id}.")
                 continue
             
             for item in ebay_items:
@@ -270,15 +270,8 @@ def sync_ebay_items_with_local():
                         # Get product details from eBay
                         product_details = get_item_details(user._id, item.get("ebay_item_id"))
                         if product_details == None:
-                            # If fetching items failed due to invalid token, try refreshing token once and fetch again
-                            token = eb.refresh_access_token(user.user_id, "Ebay")
-                            product_details = get_item_details(user._id, item.get("ebay_item_id"))
-                        elif product_details == "Error":
-                            print(f"Failed to fetch item details from ebay for item {item.get('ebay_item_id')} for user {user.user_id}.")
                             continue
                         else:
-                            if product_details == None:
-                                continue
                             # Get the upc and mpn if the main mpn field does not exist
                             for specific in product_details.get("localizedAspects"):
                                 ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
