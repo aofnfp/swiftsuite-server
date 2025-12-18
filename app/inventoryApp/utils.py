@@ -277,6 +277,8 @@ def sync_ebay_items_with_local():
                             print(f"Failed to fetch item details from ebay for item {item.get('ebay_item_id')} for user {user.user_id}.")
                             continue
                         else:
+                            if product_details == None:
+                                continue
                             # Get the upc and mpn if the main mpn field does not exist
                             for specific in product_details.get("localizedAspects"):
                                 ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
