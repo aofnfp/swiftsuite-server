@@ -14,12 +14,12 @@ case "$1" in
     ;;
     celery-default)
         echo "Starting Celery default worker (light tasks)..."
-        exec celery -A swiftsuite worker -l info -Q default -c 500 --pool=gevent
+        exec celery -A swiftsuite worker -l info -Q default -c 8 --pool=prefork
     ;;
 
     celery-heavy)
         echo "Starting Celery heavy worker (long tasks)..."
-        exec celery -A swiftsuite worker -l info -Q heavy -c 200 --pool=threads
+        exec celery -A swiftsuite worker -l info -Q heavy -c 2 --pool=prefork
     ;;
 
     beat)
