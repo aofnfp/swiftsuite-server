@@ -22,7 +22,7 @@ def get_all_items_on_ebay(enroll_id):
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
-        print(f"Failed to fetch access token")
+        print(f"Failed to fetch access token {e}")
         return None
 
     
@@ -121,7 +121,7 @@ def get_item_details(enroll_id, item_id):
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
-        print(f"Failed to fetch access token")
+        print(f"Failed to fetch access token {e}")
         return None
     
     access_token =  user_data.access_token
