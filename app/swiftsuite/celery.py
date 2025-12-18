@@ -2,6 +2,8 @@ import os
 from celery import Celery
 from django.conf import settings
 import importlib
+from celery.signals import task_prerun
+from django import db
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "swiftsuite.settings")
 
@@ -19,3 +21,7 @@ for app_name in settings.INSTALLED_APPS:
             app.conf.beat_schedule.update(mod.APP_CELERY_BEAT_SCHEDULE)
     except ModuleNotFoundError:
         pass
+
+@task_prerun.connect
+def close_db_connections(**kwargs):
+    db.connections.close_all()
