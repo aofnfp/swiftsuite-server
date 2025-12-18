@@ -19,7 +19,7 @@ case "$1" in
 
     celery-heavy)
         echo "Starting Celery heavy worker (long tasks)..."
-        exec celery -A swiftsuite worker -l info -Q heavy -c 2 --pool=threads
+        exec celery -A swiftsuite worker -l info -Q heavy -c 200 --pool=threads
     ;;
 
     beat)
