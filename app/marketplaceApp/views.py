@@ -135,7 +135,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
     try:
         minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
         if type(minimum_offer_price) != float:
-            return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data: minimum offer price error. {minimum_offer_price}", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f"Failed to fetch data: Check your enrollments {e}", status=status.HTTP_400_BAD_REQUEST)
     
