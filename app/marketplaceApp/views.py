@@ -773,7 +773,7 @@ class Ebay:
     def calculated_minimum_offer_price(self, start_price, min_profit_mergin, profit_margin):
         eb = Ebay()
         try:
-            minimum_offer_price = start_price + float(profit_margin) + ((float(min_profit_mergin)/100) * start_price)
+            minimum_offer_price = float(start_price) + float(profit_margin) + ((float(min_profit_mergin)/100) * float(start_price))
         except Exception as e:
             return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(minimum_offer_price, 2)
