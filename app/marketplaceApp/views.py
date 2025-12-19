@@ -133,7 +133,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
         
     # Get the calculated price of the product to list
     try:
-        minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+        minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
         if type(minimum_offer_price) != float:
             return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -770,11 +770,10 @@ class Ebay:
         return round(selling_price, 2)
         
     # Calculate the minimum offer price of product going to ebay
-    def calculated_minimum_offer_price(self, prod_id, start_price, min_profit_mergin, profit_margin, userid):
+    def calculated_minimum_offer_price(self, start_price, min_profit_mergin, profit_margin):
         eb = Ebay()
         try:
-            selling_price = eb.calculated_selling_price(start_price, prod_id, userid)
-            minimum_offer_price = selling_price + float(profit_margin) + ((float(min_profit_mergin)/100) * selling_price)
+            minimum_offer_price = start_price + float(profit_margin) + ((float(min_profit_mergin)/100) * start_price)
         except Exception as e:
             return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
         return round(minimum_offer_price, 2)
