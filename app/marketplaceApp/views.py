@@ -931,7 +931,7 @@ class Ebay:
 
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post {e}", status=status.HTTP_400_BAD_REQUEST)
  
         
         
