@@ -76,9 +76,9 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         return Response(f"Error error occurred in the form.", status=status.HTTP_400_BAD_REQUEST)     
     # Get the calculated price of the product to list
     try:
-        minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+        minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
         if type(minimum_offer_price) != float:
-            return Response(f"Failed to fetch data: minimum offer price error. {minimum_offer_price}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch data: minimum offer price error.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f"Failed to fetch data check your enrollments.", status=status.HTTP_400_BAD_REQUEST)
     
@@ -928,9 +928,9 @@ class Ebay:
             # Update the GeneralProduct table to set listed_market to true
             Generalproducttable.objects.filter(id=validated_data['product'].id, user_id=userid).update(active=True)
 
-            return Response(f"Product saved was successful. {validated_data['product'].id}", status=status.HTTP_200_OK)
+            return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to post {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
  
         
         
