@@ -249,17 +249,17 @@ class General_operations:
                     Q(vendor_name__icontains=search_query) |
                     Q(market_name__icontains=search_query)).values().order_by('id').reverse()
             
-            page = request.GET.get('page', int(page_number))
-            paginator = Paginator(inventory_listing, int(num_per_page))
-            try:
-                inventory_objects = paginator.page(page)
-            except PageNotAnInteger:
-                inventory_objects = paginator.page(1)
-            except EmptyPage:
-                inventory_objects = paginator.page(paginator.num_pages)
-            # Get enrollment details of the user too
-            enrollment = MarketplaceEnronment.objects.filter(user_id=userid).values()
-            return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
+                page = request.GET.get('page', int(page_number))
+                paginator = Paginator(inventory_listing, int(num_per_page))
+                try:
+                    inventory_objects = paginator.page(page)
+                except PageNotAnInteger:
+                    inventory_objects = paginator.page(1)
+                except EmptyPage:
+                    inventory_objects = paginator.page(paginator.num_pages)
+                # Get enrollment details of the user too
+                enrollment = MarketplaceEnronment.objects.filter(user_id=userid).values()
+                return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
