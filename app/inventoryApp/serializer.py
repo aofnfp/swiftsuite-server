@@ -19,3 +19,7 @@ class MappingToVendorSerializer(serializers.Serializer):
         child=serializers.DictField(),
         required=True
     )
+
+
+class SearchQuerySerializer(serializers.Serializer):
+	search_query = serializers.CharField(required=True)

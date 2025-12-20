@@ -12,7 +12,7 @@ from ebaysdk.exception import ConnectionError
 from marketplaceApp.models import MarketplaceEnronment
 from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
-from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer
+from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer, SearchQuerySerializer
 from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
@@ -222,6 +222,48 @@ class General_operations:
             return JsonResponse({"log_items_details":list(log_item_details)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
+
+    
+    #  Use search query to filter inventory items
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def search_query_inventory_items(request, userid, page_number, num_per_page):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+
+            serializer = SearchQuerySerializer(data=request.data)
+            if serializer.is_valid():
+                serializer_data = serializer.validated_data
+                search_query = serializer_data['search_query']
+                
+            inventory_listing = InventoryModel.objects.all().filter(user_id=userid).filter(
+                Q(title__icontains=search_query) |
+                Q(sku__icontains=search_query) |
+                Q(upc__icontains=search_query) |
+                Q(market_item_id__icontains=search_query) |
+                Q(vendor_name__icontains=search_query) |
+                Q(market_name__icontains=search_query)
+            ).values().order_by('id').reverse()
+            
+            page = request.GET.get('page', int(page_number))
+            paginator = Paginator(inventory_listing, int(num_per_page))
+            try:
+                inventory_objects = paginator.page(page)
+            except PageNotAnInteger:
+                inventory_objects = paginator.page(1)
+            except EmptyPage:
+                inventory_objects = paginator.page(paginator.num_pages)
+            # Get enrollment details of the user too
+            enrollment = MarketplaceEnronment.objects.filter(user_id=userid).values()
+            return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
 
 # Create your views here.
