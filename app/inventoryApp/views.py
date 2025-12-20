@@ -236,13 +236,13 @@ class General_operations:
                 if user.parent_id:
                     userid = user.parent_id
 
-            serializer = SearchQuerySerializer(data=request.data)
+            search_data = request.data if request.data else request.GET
+            serializer = SearchQuerySerializer(data=search_data)
             if serializer.is_valid():
-                serializer_data = serializer.validated_data
-                search_query = serializer_data['search_query']
+                search_query = serializer.validated_data['search_query']
             else:
                 return Response(f"Search query not provided.", status=status.HTTP_400_BAD_REQUEST) 
-            inventory_listing = InventoryModel.objects.all().filter(user_id=userid).filter(
+            inventory_listing = InventoryModel.objects.filter(user_id=userid).filter(
                 Q(title__icontains=search_query) |
                 Q(sku__icontains=search_query) |
                 Q(upc__icontains=search_query) |
@@ -260,7 +260,7 @@ class General_operations:
                 inventory_objects = paginator.page(paginator.num_pages)
             # Get enrollment details of the user too
             enrollment = MarketplaceEnronment.objects.filter(user_id=userid).values()
-            return JsonResponse({"Total_count":len(inventory_listing), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total_count":inventory_listing.count(), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)

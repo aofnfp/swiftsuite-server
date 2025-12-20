@@ -22,4 +22,4 @@ class MappingToVendorSerializer(serializers.Serializer):
 
 
 class SearchQuerySerializer(serializers.Serializer):
-	search_query = serializers.CharField(required=True)
+	search_query = serializers.CharField(required=True, allow_blank=False)
