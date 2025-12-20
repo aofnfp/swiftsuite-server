@@ -236,12 +236,12 @@ class General_operations:
                 if user.parent_id:
                     userid = user.parent_id
 
-            search_data = request.data if request.data else request.GET
-            serializer = SearchQuerySerializer(data=search_data)
-            if serializer.is_valid():
-                search_query = serializer.validated_data['search_query']
-            else:
-                return Response(f"Search query not provided.", status=status.HTTP_400_BAD_REQUEST) 
+            search_query = request.GET.get('search_query', '').strip()
+            if not search_query:
+                return Response(
+                    {"detail": "search_query query parameter is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             inventory_listing = InventoryModel.objects.filter(user_id=userid).filter(
                 Q(title__icontains=search_query) |
                 Q(sku__icontains=search_query) |
