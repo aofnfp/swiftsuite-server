@@ -243,7 +243,6 @@ class General_operations:
                     status=status.HTTP_400_BAD_REQUEST
                 )
             inventory_listing = InventoryModel.objects.filter(user_id=userid).filter(
-                Q(title__icontains=search_query) |
                 Q(sku__icontains=search_query) |
                 Q(upc__icontains=search_query) |
                 Q(market_item_id__icontains=search_query) |
