@@ -241,14 +241,13 @@ class General_operations:
                 serializer_data = serializer.validated_data
                 search_query = serializer_data['search_query']
                 
-            inventory_listing = InventoryModel.objects.all().filter(user_id=userid).filter(
-                Q(title__icontains=search_query) |
-                Q(sku__icontains=search_query) |
-                Q(upc__icontains=search_query) |
-                Q(market_item_id__icontains=search_query) |
-                Q(vendor_name__icontains=search_query) |
-                Q(market_name__icontains=search_query)
-            ).values().order_by('id').reverse()
+                inventory_listing = InventoryModel.objects.all().filter(user_id=userid).filter(
+                    Q(title__icontains=search_query) |
+                    Q(sku__icontains=search_query) |
+                    Q(upc__icontains=search_query) |
+                    Q(market_item_id__icontains=search_query) |
+                    Q(vendor_name__icontains=search_query) |
+                    Q(market_name__icontains=search_query)).values().order_by('id').reverse()
             
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
