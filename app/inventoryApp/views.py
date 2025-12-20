@@ -241,7 +241,7 @@ class General_operations:
                 serializer_data = serializer.validated_data
                 search_query = serializer_data['search_query']
                 
-                inventory_listing = InventoryModel.objects.all().filter(user_id=userid).filter(
+                inventory_listing = InventoryModel.objects.all().filter(Q(user_id=userid) &
                     Q(title__icontains=search_query) |
                     Q(sku__icontains=search_query) |
                     Q(upc__icontains=search_query) |
