@@ -36,9 +36,8 @@ case "$1" in
 
     beat)
         echo "Starting Celery Beat..."
-        exec celery -A swiftsuite beat \
-            --loglevel=info \
-            --scheduler django_celery_beat.schedulers:DatabaseScheduler
+        exec celery -A swiftsuite beat --loglevel=info
+
     ;;
 
     *)
