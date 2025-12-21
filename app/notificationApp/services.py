@@ -12,7 +12,7 @@ class EmailNotificationSender(BaseNotificationSender):
         # TODO: Implement actual email sending logic
         context = {
             'user': self.notification.recipient_user.id,
-            'subject': self.notification.template.header,
+            'email_subject': self.notification.template.header,
             'body': self.notification.template.body,
         }
         send_email.delay(context, file='notification.html')
