@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "orderApp",
     "vendorActivities",
     "vendorEnrollment",
+    "notificationApp",
     "reportApp",
     "rest_framework",
     "corsheaders",
