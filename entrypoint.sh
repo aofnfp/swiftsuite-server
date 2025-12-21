@@ -16,11 +16,7 @@ case "$1" in
 
     celery-default)
         echo "Starting Celery default worker (short tasks)..."
-        exec celery -A swiftsuite worker \
-            --loglevel=info \
-            --queues=default \
-            --concurrency=8 \
-            --pool=prefork
+        exec celery -A swiftsuite worker -l info -Q default -c 500 --pool=gevent
     ;;
 
     celery-heavy)
