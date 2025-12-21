@@ -12,7 +12,7 @@ from inventoryApp.utils import calculated_selling_price
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-io')
 def update_vendor_data(enrollment_id):
     try:
         enrollment = Enrollment.objects.get(id = enrollment_id)
@@ -222,7 +222,7 @@ def process_cwr(file_path, enrollment):
     )
 
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-io')
 def update_all_enrollments():
     tasks = BackgroundTask.objects.all()
     for task in tasks:

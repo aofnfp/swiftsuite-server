@@ -7,7 +7,7 @@ from .utils import get_suppliers_for_vendor
 
 logger = logging.getLogger(__name__)
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-cpu')
 def process_vendor_data(supplier, task_id, vendor_id):
     try:
         vendor_info = Vendors.objects.get(id=vendor_id)
@@ -35,7 +35,7 @@ def process_vendor_data(supplier, task_id, vendor_id):
         pull.removeFile()
         cache.delete(f"upload_progress_{task_id}")
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-cpu')
 def reload_all_vendors():
     vendors = Vendors.objects.all()
     pull = VendorActivity()
