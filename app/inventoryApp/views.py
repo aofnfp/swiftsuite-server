@@ -602,7 +602,8 @@ class MarketInventory:
         
             product_data = response.json()
             if response.status_code == 200:
-                return product_data
+                return JsonResponse({"Listed_products":product_data}, safe=False, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(f"Failed to fetch data {e}", status=status.HTTP_400_BAD_REQUEST)   
     
