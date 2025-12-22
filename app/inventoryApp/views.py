@@ -101,7 +101,7 @@ class General_operations:
             enrollment = Enrollment.objects.filter(user_id=userid)
             vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
 
-            return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "inventory_items":list(inventory_objects), "vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
@@ -110,7 +110,7 @@ class General_operations:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
-    def map_inventory_item_to_vendor(request, userid):
+    def map_inventory_item_to_vendor(request, userid, market_name):
         try:
             # check if user is subaccount
             user = request.user
@@ -144,12 +144,15 @@ class General_operations:
                     
                     if db_item:
                         try:
-                            market_enrollment = MarketplaceEnronment.objects.get(user_id=userid)[0]
+                            market_enrollment = MarketplaceEnronment.objects.filter(user_id=userid, market_name=market_name).first()
                             # Modify selling price before updating on ebay 
                             selling_price = float(db_item.total_price) + float(market_enrollment.fixed_markup) + ((float(market_enrollment.fixed_percentage_markup)/100) * float(db_item.total_price)) + ((float(market_enrollment.profit_margin)/100) * float(db_item.total_price))
                             if db_item.map:
-                                if selling_price < float(db_item.map):
-                                    selling_price = float(db_item.map)
+                                try:
+                                    if selling_price < float(db_item.map):
+                                        selling_price = float(db_item.map)
+                                except:
+                                    return Response(f"Selling price calculation error.", status=status.HTTP_400_BAD_REQUEST)
                             # Create or update the product on GeneralProduct table
                             conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
                             item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": db_item.total_price, "map": db_item.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.price, "vendor_name": vendor_name})                           

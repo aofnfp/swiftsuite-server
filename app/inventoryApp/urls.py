@@ -13,7 +13,7 @@ urlpatterns = [
     path('test_api_function/<int:userid>/<int:item_id>/', MarketInventory.function_to_test_api, name='test_api_function'),
 
     path('get_all_unmapped_items/<int:userid>/<int:page_number>/<int:num_per_page>/', General_operations.get_unmapped_listing_items, name='get_all_unmapped_items'),
-    path('map_inventory_item_to_vendor/<int:userid>/', General_operations.map_inventory_item_to_vendor, name='map_inventory_item_to_vendor'),
+    path('map_inventory_item_to_vendor/<int:userid>/<str:market_name>/', General_operations.map_inventory_item_to_vendor, name='map_inventory_item_to_vendor'),
     path('get_unmapped_items_details/<int:userid>/<int:inventoryid>/', General_operations.get_unmapped_product_details, name='get_unmapped_items_details'),
     path('search_query_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', General_operations.search_query_inventory_items, name='search_query_inventory_items'),
 ]
