@@ -3,7 +3,7 @@ from .utils import sync_ebay_items_with_local
 from .update_market import check_and_update_ended_ebay_items, update_ebay_price_quantity
 
 
-@shared_task(queue='heavy-io')
+@shared_task(queue='heavy-cpu')
 def sync_ebay_inventory_task():
     """Background task to sync eBay items with local database"""
     sync_ebay_items_with_local()

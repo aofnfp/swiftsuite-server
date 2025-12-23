@@ -37,7 +37,7 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --loglevel=info \
             --queues=heavy-cpu \
-            --concurrency=2 \
+            --concurrency=3 \
             --pool=prefork
     ;;
 
