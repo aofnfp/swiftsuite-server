@@ -57,7 +57,7 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["GET"])
     def unread_count(self, request):
         count = Notification.objects.filter(
-            recipient_user=request.user, read=False
+            recipient_user=request.user, read=False, channel='in_app'
         ).count()
 
         return Response({"unread_count": count})

@@ -37,6 +37,14 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --loglevel=info \
             --queues=heavy-cpu \
+            --concurrency=3 \
+            --pool=prefork
+    ;;
+    celery-heavy-inv)
+        echo "Starting Celery heavy CPU worker (compute-intensive tasks)..."
+        exec celery -A swiftsuite worker \
+            --loglevel=info \
+            --queues=heavy-inv \
             --concurrency=2 \
             --pool=prefork
     ;;

@@ -11,6 +11,9 @@ from io import BytesIO
 
 
 def get_suppliers_for_vendor(vendor_name:str, ftp_host, ftp_user, ftp_password):
+    if vendor_name is None:
+        raise ValueError("Vendor name must be provided")
+    
     vendor_name = vendor_name.lower()
 
     if vendor_name == 'zanders':

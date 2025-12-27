@@ -87,7 +87,7 @@ def send_code_to_user(email):
     except Exception as e:
         logger.error(f"Error sending OTP email to {email}: {e}")
 
-@shared_task(queue='default')
+@shared_task(queue='default', rate_limit='2/s')
 def send_normal_email(data, file='reset_password.html'):
     try:
         if data.get('user'):
