@@ -45,8 +45,8 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --loglevel=info \
             --queues=heavy-inv \
-            --concurrency=2 \
-            --pool=prefork \
+            --concurrency=1 \
+            --pool=solo \
             --time-limit=3600 \
             --soft-time-limit=3500 \
             --heartbeat-interval=60 \
