@@ -116,7 +116,7 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
     # Place the order
     result = order_client.place_bulk_order(bulk_order)
    
-    if result.get("Success", False):
+    if result.get("Message", False) and result.get("BulkOrderId", False):
         return JsonResponse(
             {"message": "Order placed successfully.", "data": result, "order_info": bulk_order},
             status=status.HTTP_200_OK,
