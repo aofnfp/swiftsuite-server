@@ -16,10 +16,10 @@ class FrgxOrderApiClient:
         self.base_url = "https://apiordering.fragrancex.com/order"  
     
     def place_bulk_order(self, order_data):
+        access_token = getFragranceXAuth(self.api_id, self.api_key)
         headers = {
-            "Content-Type": "application/json",
-            "API-ID": self.api_id,
-            "API-KEY": self.api_key
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
         }
         response = requests.post(f"{self.base_url}/PlaceBulkOrder", json=order_data, headers=headers)
         return response.json()
