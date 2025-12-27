@@ -23,6 +23,11 @@ class FrgxOrderApiClient:
         }
         response = requests.post(f"{self.base_url}/PlaceBulkOrder", json=order_data, headers=headers)
         return response.json()
+    
+    def generate_reference(self, order_id):
+        import uuid
+        unique_suffix = str(uuid.uuid4())[:4]
+        return f"SW-FX-{order_id}-{unique_suffix}"
 
 
 @api_view(['POST'])
@@ -83,6 +88,11 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
             "Quantity": quantity[0]
         }
         items.append(detail)
+        
+    # Initialize client
+    order_client = FrgxOrderApiClient(apiAccessId , apiAccessKey)
+    
+    referenceId = order_client.generate_reference(ebayorderid)
     
     # Define bulk order payload
     bulk_order = {
@@ -100,7 +110,7 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
                     "Phone": primaryPhone,
                 },
                 "ShippingMethod": 0,
-                "ReferenceId": ebayorderid,
+                "ReferenceId": referenceId,
                 "IsDropship": False,
                 "IsGiftWrapped": False,
                 "OrderItems": items
@@ -110,9 +120,7 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
     }
     
     
-    # Initialize client
-    order_client = FrgxOrderApiClient(apiAccessId , apiAccessKey)
-    
+
     # Place the order
     result = order_client.place_bulk_order(bulk_order)
    
