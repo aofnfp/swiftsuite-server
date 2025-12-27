@@ -255,8 +255,13 @@ def sync_ebay_items_with_local():
                             # Check if an item has image url, if not call ebay to get the image url
                             if not item_exists.market_item_url:
                                 product_details = get_item_details(user._id, item.get("ebay_item_id"))
+                                market_item_url = product_details.get("itemWebUrl")
+                                if product_details == None:
+                                    continue
+                            else:
+                                market_item_url = item_exists.market_item_url
                             # Item exists, check if we need to update price or quantity
-                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": product_details.get("itemWebUrl")})
+                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": market_item_url})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()

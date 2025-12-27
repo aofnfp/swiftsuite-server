@@ -16,5 +16,6 @@ urlpatterns = [
     path('map_inventory_item_to_vendor/<int:userid>/<str:market_name>/', General_operations.map_inventory_item_to_vendor, name='map_inventory_item_to_vendor'),
     path('get_unmapped_items_details/<int:userid>/<int:inventoryid>/', General_operations.get_unmapped_product_details, name='get_unmapped_items_details'),
     path('search_query_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', General_operations.search_query_inventory_items, name='search_query_inventory_items'),
+    path('search_query_unmapped_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', General_operations.search_query_unmapped_inventory_items, name='search_query_unmapped_inventory_items'),
     path('get_all_marketplaces_enrolled/<int:userid>/', General_operations.get_all_marketplaces_enrolled, name='get_all_marketplaces_enrolled'),
 ]
