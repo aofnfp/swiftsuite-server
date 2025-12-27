@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from vendorActivities.apiSupplier import getFragranceXAuth
+from accounts.models import User
 
 
 
@@ -28,8 +29,13 @@ class FrgxOrderApiClient:
 @permission_classes([IsAuthenticated])
 def place_order_fragrancex(request, userid, market_name, ebayorderid):
     # Get vendor enrollment details
+    user = User.objects.filter(id=userid).first()
+    if user and user.parent_id:
+        userid = user.parent_id
+        user = User.objects.filter(id=userid).first()
+    
     enrolment_details = Enrollment.objects.filter(
-        user=request.user, vendor__name__iexact='Fragrancex'
+        user=user, vendor__name__iexact='Fragrancex'
     ).first()
 
     if not enrolment_details:
