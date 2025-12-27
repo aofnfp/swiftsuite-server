@@ -193,7 +193,7 @@ def query_product_filter(upc=None, mpn=None):
     if upc:
         conditions |= Q(upc=upc)
     if mpn:
-        conditions |= Q(sku=mpn)
+        conditions |= Q(mpn=mpn)
 
     return conditions
 
