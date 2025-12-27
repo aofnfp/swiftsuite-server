@@ -50,8 +50,8 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
  
     # Get order details
     ebay_orderDetails_url = f"https://service.swiftsuite.app/orderApp/get_ordered_item_details/{userid}/{market_name}/{ebayorderid}/"
-    response = requests.get(ebay_orderDetails_url)
-    
+    response = requests.get(ebay_orderDetails_url, headers={"Authorization": f"Bearer {request.auth}"})
+
     if response.status_code != 200:
         return JsonResponse(
             {"error": "Failed to fetch order details."},
