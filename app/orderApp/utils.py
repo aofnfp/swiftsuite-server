@@ -204,12 +204,42 @@ def sync_ebay_order_with_local():
                                                         listingMarketplaceId=lineItems.get("listingMarketplaceId"), purchaseMarketplaceId=lineItems.get("purchaseMarketplaceId"),
                                                         itemLocation=lineItems.get("itemLocation"), legacyItemId=lineItems.get('legacyItemId'), image=product_data.get("picture_detail"),
                                                         additionalImages=product_data.get("thumbnailImage"), description=product_data.get("description"), categoryId=product_data.get("category_id"),
-                                                        ebayItemId=product_data.get("market_item_id"), localizeAspects=product_data.get("item_specific_fields"), vendor_name=product_data.get('vendor_name'))
+                                                        marketItemId=product_data.get("market_item_id"), localizeAspects=product_data.get("item_specific_fields"), vendor_name=product_data.get('vendor_name'))
                             save_order.save()
                         except Exception as e:
                             print(f"Ordered item insert error {e} ")
+                            continue
+
         elif user.marketplace_name == "WooCommerce":
-            all_orders = get_all_woocommerce_orders(user.user_id)
+            woocommerce_orders = get_all_woocommerce_orders(user.user_id)
+            for order in woocommerce_orders:
+                try:
+                    wc_order_id = order.get("id")
+                    exist_order = OrdersOnEbayModel.objects.get(orderId=wc_order_id)
+                    product_data = InventoryModel.objects.all().filter(market_item_id=order.get("id"))
+                    if len(product_data) == 0:
+                        product_data = {"vendor_name":""}
+                    else:
+                        product_data = product_data.values()[0]
+                    OrdersOnEbayModel.objects.filter(orderId=wc_order_id).update(orderFulfillmentStatus=order.get("status"), orderPaymentStatus=order.get("payment_method_title"), vendor_name=product_data.get('vendor_name'))
+                except:
+                    try:
+                        product_data = InventoryModel.objects.all().filter(market_item_id=order.get("id"))
+                        if len(product_data) == 0:
+                            product_data = {"vendor_name":""}
+                        else:
+                            product_data = product_data.values()[0]
+                        save_order = OrdersOnEbayModel(user_id=user.user_id, orderId=order.get("id"),
+                                                    creationDate=order.get("date_created"),
+                                                    orderFulfillmentStatus=order.get("status"), orderPaymentStatus=order.get("payment_method_title"),
+                                                    sku=order.get("sku"), title=order.get("name"),
+                                                    quantity=order.get("quantity"),
+                                                    marketItemId=product_data.get("market_item_id"), image=product_data.get("picture_detail"),
+                                                    additionalImages=product_data.get("thumbnailImage"), description=product_data.get("description"), categoryId=product_data.get("category_id"),
+                                                    localizeAspects=product_data.get("item_specific_fields"), vendor_name=product_data.get('vendor_name'))
+                        save_order.save()
+                    except Exception as e:
+                        print(f"WooCommerce Ordered item insert error {e} ")
                 
 
 
