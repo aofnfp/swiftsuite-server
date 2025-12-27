@@ -33,8 +33,8 @@ class OrdersOnEbayModel(models.Model):
     categoryId = models.CharField(null=True, unique=False, max_length=155)
     vendor_name = models.CharField(null=True, unique=False, max_length=155)
     tracking_id = models.CharField(null=True, unique=False, max_length=155)
-    ebayItemId = models.CharField(null=True, unique=False, max_length=155)
-    itemEbayStatus = models.CharField(null=True, unique=False, max_length=155)
+    marketItemId = models.CharField(null=True, unique=False, max_length=155)
+    itemMarketStatus = models.CharField(null=True, unique=False, max_length=155)
     legacyItemId = models.TextField(null=True, unique=False)
     localizeAspects = models.TextField(null=True, unique=False)
     

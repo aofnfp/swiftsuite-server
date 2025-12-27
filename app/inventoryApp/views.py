@@ -267,6 +267,24 @@ class General_operations:
         except Exception as e:
             return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
 
+    
+    # function to filter get all enrolled marketplace
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_all_marketplaces_enrolled(request, userid):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+
+            market_enrolled = MarketplaceEnronment.objects.filter(user_id=userid).values_list('marketplace_name', flat=True)
+            return JsonResponse({"enrollment_detail":list(market_enrolled)}, safe=False, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
 
 # Create your views here.
 class MarketInventory:
