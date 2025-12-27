@@ -190,6 +190,16 @@ def getTracking_fragranceX(request, orderId):
                 },
                 status=response.status_code,
             )
+        else:
+            return JsonResponse(
+            {
+                "message": "Failed to fetch tracking information from FragranceX.",
+                "status_code": response.status_code,
+                "response": response.json(),
+            },
+            status=response.status_code,
+        )
+
 
 
     except requests.RequestException as e:
