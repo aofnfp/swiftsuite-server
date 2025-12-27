@@ -195,7 +195,7 @@ def getTracking_fragranceX(request, orderId):
             {
                 "message": "Failed to fetch tracking information from FragranceX.",
                 "status_code": response.status_code,
-                "response": response.json(),
+                "response": response.text,
             },
             status=response.status_code,
         )
