@@ -46,7 +46,7 @@ class OrderEbay:
             
             return JsonResponse({"Total_count":len(order_items), "Total_pages":paginator.num_pages, "order_items":list(order_items_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to get ordered items.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get ordered items.: {e}", status=status.HTTP_400_BAD_REQUEST)
         
 
     # Crease a function to get order item full details using item ID
