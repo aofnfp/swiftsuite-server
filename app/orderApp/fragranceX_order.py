@@ -134,8 +134,12 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
 def getTracking_fragranceX(request, orderId):
     try:
         # Get vendor enrollment details
+        user = request.user
+        if user and user.parent_id:
+            user = user.parent
+            
         enrolment_details = Enrollment.objects.filter(
-            user=request.user, vendor__name__iexact='Fragrancex' 
+            user=user, vendor__name__iexact='Fragrancex'
         ).first()
 
         if not enrolment_details:

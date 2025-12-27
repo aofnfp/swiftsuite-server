@@ -1,7 +1,7 @@
 from .views import OrderEbay as eb_view
 from django.urls import path
 from .utils import sync_ebay_order_with_local
-from .fragranceX_order import place_order_fragrancex
+from .fragranceX_order import place_order_fragrancex, getTracking_fragranceX
 
 urlpatterns = [
     
@@ -10,5 +10,5 @@ urlpatterns = [
     path('cancel_ordered_item/<int:userid>/<str:market_name>/<str:ebayorderid>/', eb_view.cancel_order_from_ebay, name='cancel_ordered_item'),
     path('sync_ordered_item/', sync_ebay_order_with_local, name='sync_ordered_item'),
     path('place_order_fragrancex/<int:userid>/<str:market_name>/<str:ebayorderid>/', place_order_fragrancex, name='place_order_fragrancex'),
-    
+    path('get_tracking_fragranceX/<str:orderId>/', getTracking_fragranceX, name='get_tracking_fragranceX'),
 ]
