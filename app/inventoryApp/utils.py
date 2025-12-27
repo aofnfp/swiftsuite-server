@@ -85,7 +85,6 @@ def get_all_items_on_ebay(enroll_id):
                     ReturnProfileName = item.find("ebay:SellerProfiles/ebay:SellerReturnProfile/ebay:ReturnProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace) is not None else "N/A"
                     PaymentProfileID = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace) is not None else "N/A"
                     PaymentProfileName = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace) is not None else "N/A"
-                    market_item_url = item.find("ebay:ListingDetails/ebay:ViewItemURL", namespaces=namespace).text if item.find("ebay:ListingDetails/ebay:ViewItemURL", namespaces=namespace) is not None else "N/A"
                    
                     items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, market_item_url])
 
@@ -253,8 +252,11 @@ def sync_ebay_items_with_local():
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
                                 item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
+                            # Check if an item has image url, if not call ebay to get the image url
+                            if not item_exists.market_item_url:
+                                product_details = get_item_details(user._id, item.get("ebay_item_id"))
                             # Item exists, check if we need to update price or quantity
-                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
+                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": product_details.get("itemWebUrl")})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
