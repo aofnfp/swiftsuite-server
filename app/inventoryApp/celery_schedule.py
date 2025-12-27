@@ -1,4 +1,6 @@
 from celery.schedules import crontab
+from celery.signals import task_prerun
+from django import db
 
 APP_CELERY_BEAT_SCHEDULE = {
     "sync-ebay-every-half-hour": {
@@ -14,3 +16,8 @@ APP_CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="*/30"),
     }
 }
+
+
+@task_prerun.connect
+def close_db_connections(**kwargs):
+    db.connections.close_all()

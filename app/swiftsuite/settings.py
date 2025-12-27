@@ -223,6 +223,13 @@ CACHES = {
     }
 }
 
+broker_heartbeat = 60
+broker_connection_timeout = 120
+worker_prefetch_multiplier = 1
+task_time_limit = 3600
+task_soft_time_limit = 3500
+
+
 O365_CLIENT_ID = config("O365_CLIENT_ID")
 O365_CLIENT_SECRET = config("O365_CLIENT_SECRET")
 O365_TENANT_ID = config("O365_TENANT_ID", default=None)

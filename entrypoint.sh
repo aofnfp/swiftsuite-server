@@ -46,7 +46,12 @@ case "$1" in
             --loglevel=info \
             --queues=heavy-inv \
             --concurrency=2 \
-            --pool=prefork
+            --pool=prefork \
+            --time-limit=3600 \
+            --soft-time-limit=3500 \
+            --heartbeat-interval=60 \
+            --prefetch-multiplier=1 \
+            --max-tasks-per-child=20
     ;;
 
     beat)
