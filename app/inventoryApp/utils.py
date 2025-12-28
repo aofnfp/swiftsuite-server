@@ -231,8 +231,7 @@ def sync_ebay_items_with_local():
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("ebay_sku")))
+                            db_items = model_class.objects.filter(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), user_id=user.user_id)
                             if not db_items.exists():
                                 continue
                             
@@ -296,8 +295,7 @@ def sync_ebay_items_with_local():
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
+                            db_items = model_class.objects.filter((Q(sku=item.get("sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("sku")) & Q(mpn=item_exists.mpn)))
                             if not db_items.exists():
                                 continue
                             
