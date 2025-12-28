@@ -143,7 +143,7 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 200:
             product_data = response.json()
             return product_data
-        
+        print(response.text)
         response.raise_for_status()  # Auto raises for non-200 responses
 
     except Exception as e:
