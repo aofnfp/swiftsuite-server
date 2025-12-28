@@ -138,20 +138,20 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 429:  # Rate limit hit
             retry_after = int(response.headers.get('Retry-After', 2))
             time.sleep(retry_after)
-            return get_item_details(access_token, item_id)
+            return get_item_details(enroll_id, item_id)
     
         product_data = response.json()
         if response.status_code == 200:
             return product_data
         else:
-            print(f"Failed to retrieve details for inventory for Item ID {item_id}: {response.text}")
-            return None
+            raise Exception(product_data)
     except Exception as e:
         if e.get('errors')[0]['errorId'] == 1001:
             access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-            get_item_details(access_token, item_id)
+            get_item_details(enroll_id, item_id)
 
         else:
+            print(f"Failed to retrieve details for inventory for Item ID {item_id}: {e}")
             return None
                     
         
@@ -243,19 +243,13 @@ def sync_ebay_items_with_local():
 
                     if db_item:
                         try:
-                            # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
-                            if cost_computation == None:
-                                print(f"Cost computation failed for ebay item {item.get('ebay_item_id')} for user {user.user_id}")
-                                continue
-                            selling_price, total_product_cost = cost_computation
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
-                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
+                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=db_item.total_price, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.price, vendor_name=db_item.vendor.name)
                             
                             # Item exists, check if we need to update price or quantity
-                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
+                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "price": db_item.price, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
@@ -314,17 +308,12 @@ def sync_ebay_items_with_local():
 
                     if db_item:
                         try:
-                            # Modify selling price before updating on ebay 
-                            cost_computation = calculated_selling_price(market_id=user._id, total_product_cost=db_item.total_price, userid=user.user_id, map=db_item.map)
-                            if cost_computation == None:
-                                continue
-                            selling_price, total_product_cost = cost_computation
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
-                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=total_product_cost, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.total_price, vendor_name=db_item.vendor.name)
+                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=db_item.total_price, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.price, vendor_name=db_item.vendor.name)
                             # insert mapped item into inventory
-                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
+                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "price": db_item.price, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()

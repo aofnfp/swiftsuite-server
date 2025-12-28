@@ -16,8 +16,7 @@ from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerialize
 from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from marketplaceApp.views import Ebay
-from .tasks import check_ebay_item_ended_task, sync_ebay_inventory_task, update_ebay_price_quantity_inventory_task
-from woocommerce import API
+from .tasks import update_inventory_price_quantity_task, sync_ebay_inventory_task, check_ended_status_update_quantity_price_task
 from decouple import config
 from marketplaceApp.views import WooCommerce
 from xml.etree.ElementTree import Element, tostring, SubElement
@@ -750,6 +749,6 @@ class WooCommerceInventory:
 
 
 # Inventory background task invocation
-# sync_ebay_inventory_task.delay()
-# update_ebay_price_quantity_inventory_task.delay()
-# check_ebay_item_ended_task.delay()
+sync_ebay_inventory_task.delay()
+check_ended_status_update_quantity_price_task.delay()
+update_inventory_price_quantity_task.delay()
