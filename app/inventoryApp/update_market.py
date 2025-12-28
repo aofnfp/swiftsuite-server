@@ -9,7 +9,7 @@ from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, Generalproductt
 from marketplaceApp.models import MarketplaceEnronment
 from django.db.models import Q
 from woocommerce import API
-from .utils import calculated_selling_price
+
 
 
 # Create a function to update items quantity and price at the background on Ebay
