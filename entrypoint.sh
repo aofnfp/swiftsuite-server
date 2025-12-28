@@ -45,8 +45,8 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --loglevel=info \
             --queues=heavy-inv \
-            --concurrency=50 \
-            --pool=gevent
+            --pool=solo \
+            --loglevel=info
     ;;
 
     beat)
