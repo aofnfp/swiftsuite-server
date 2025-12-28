@@ -660,12 +660,12 @@ class MarketInventory:
 
             root = ET.fromstring(xml_body)
 
-            # Try to find the natural-search URL first
-            url_elem = root.find(".//eb:ViewItemURLForNaturalSearch//eb:ViewItemURL", ns)
+            # # Try to find the natural-search URL first
+            # url_elem = root.find(".//eb:ViewItemURLForNaturalSearch///eb:ViewItemURL", ns)
 
             # if url_elem is None:
-            #     # Fallback: sometimes ViewItemURL is present instead
-            #     url_elem = root.find(".//eb:ViewItemURL", ns)
+            # Fallback: sometimes ViewItemURL is present instead
+            url_elem = root.find(".//eb:ViewItemURL", ns)
 
             item_url = url_elem.text if url_elem is not None else None
             return JsonResponse({"Listed_products": item_url}, safe=False, status=status.HTTP_200_OK)
