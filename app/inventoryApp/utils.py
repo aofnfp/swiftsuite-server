@@ -153,21 +153,6 @@ def get_item_details(enroll_id, item_id):
         else:
             print(f"Failed to retrieve details for inventory for Item ID {item_id}: {e}")
             return None
-                    
-        
-# Calculate the selling price of product going to ebay
-def calculated_selling_price(market_id, total_product_cost, userid, map=""):
-    try:
-        market_place = MarketplaceEnronment.objects.get(_id=market_id)
-        selling_price = float(total_product_cost) + float(market_place.fixed_markup) + ((float(market_place.fixed_percentage_markup)/100) * float(total_product_cost)) + ((float(market_place.profit_margin)/100) * float(total_product_cost))
-        if map:
-            if selling_price < float(map):
-                selling_price = float(map)
-    except Exception as e:
-        print(f"Failed to compute price due to missing data with user id {userid}, total_product_cost {total_product_cost}: {e}")
-        return None
-
-    return round(selling_price, 2), round(total_product_cost, 2)
 
 
 # Get all existing listed products on Woocommerce store for a specific user.
@@ -182,20 +167,6 @@ def get_woocommerce_existing_products(user_id):
     )
     products = wcapi.get("products").json()  
     return products
-
-
-# An helper function to filter product by upc or mpn and sku
-def query_product_filter(upc=None, mpn=None):
-    # Ensure at least one identifier is provided
-    if not upc and not mpn:
-        raise ValueError("Either UPC or SKU must be provided to activate a product.")
-    conditions = Q()
-    if upc:
-        conditions |= Q(upc=upc)
-    if mpn:
-        conditions |= Q(mpn=mpn)
-
-    return conditions
 
 
 # Map items on ebay with the one on local database for updates
@@ -231,8 +202,7 @@ def sync_ebay_items_with_local():
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("ebay_sku")))
+                            db_items = model_class.objects.filter(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), user_id=user.user_id)
                             if not db_items.exists():
                                 continue
                             
@@ -296,8 +266,7 @@ def sync_ebay_items_with_local():
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            conditions = query_product_filter(item_exists.upc, item_exists.mpn)
-                            db_items = model_class.objects.filter(conditions & Q(sku=item.get("sku")))
+                            db_items = model_class.objects.filter((Q(sku=item.get("sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("sku")) & Q(mpn=item_exists.mpn)))
                             if not db_items.exists():
                                 continue
                             
