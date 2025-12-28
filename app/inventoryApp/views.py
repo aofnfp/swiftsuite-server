@@ -750,6 +750,6 @@ class WooCommerceInventory:
 
 
 # Inventory background task invocation
-sync_ebay_inventory_task.delay()
-update_ebay_price_quantity_inventory_task.delay()
-check_ebay_item_ended_task.delay()
+# sync_ebay_inventory_task.delay()
+# update_ebay_price_quantity_inventory_task.delay()
+# check_ebay_item_ended_task.delay()
