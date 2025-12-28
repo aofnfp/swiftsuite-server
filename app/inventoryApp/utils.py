@@ -138,7 +138,7 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 429:  # Rate limit hit
             retry_after = int(response.headers.get('Retry-After', 2))
             time.sleep(retry_after)
-            return get_item_details(access_token, item_id)
+            return get_item_details(enroll_id, item_id)
     
         product_data = response.json()
         if response.status_code == 200:
