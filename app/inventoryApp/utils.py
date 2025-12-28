@@ -140,9 +140,11 @@ def get_item_details(enroll_id, item_id):
             time.sleep(retry_after)
             return get_item_details(enroll_id, item_id)
     
+        if response.status_code == 200:
+            product_data = response.json()
+            return product_data
+        
         response.raise_for_status()  # Auto raises for non-200 responses
-        product_data = response.json()
-        return product_data
 
     except Exception as e:
         if hasattr(e, 'response'):
@@ -203,7 +205,7 @@ def sync_ebay_items_with_local():
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            db_items = model_class.objects.filter(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), user_id=user.user_id)
+                            db_items = model_class.objects.filter((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn)))
                             if not db_items.exists():
                                 continue
                             
