@@ -140,21 +140,25 @@ def get_item_details(enroll_id, item_id):
             time.sleep(retry_after)
             return get_item_details(enroll_id, item_id)
     
+        product_data = response.json()
         if response.status_code == 200:
-            product_data = response.json()
             return product_data
-        print(response.text)
-        response.raise_for_status()  # Auto raises for non-200 responses
-
-    except Exception as e:
-        if hasattr(e, 'response'):
-            error_response = e.response.json()
-            if error_response.get('errors')[0]['errorId'] == 1001:
-                access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                get_item_details(enroll_id, item_id)
         else:
-            print(f"Failed to retrieve details for inventory for Item ID {item_id}: {e}")
+             raise ValueError(product_data)
+    except ValueError as e:
+        error_data = e.args[0]  # The dict you passed into the exception
+
+        if isinstance(error_data, dict) and error_data.get('errors'):
+            if error_data['errors'][0].get('errorId') == 1001:
+                access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+                return get_item_details(enroll_id, item_id)  # return recursion call
+            else:
+                print(f"Error ID: {error_data['errors'][0].get('errorId')}")
+                return None
+        else:
+            print("Unexpected error format:", error_data)
             return None
+
 
 
 # Get all existing listed products on Woocommerce store for a specific user.
