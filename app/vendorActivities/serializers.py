@@ -23,7 +23,7 @@ class VendorRequestSerializer(serializers.ModelSerializer):
             'id', 'name', 'address_street1', 'address_street2',
             'city', 'state', 'zip_code', 'country',
             'integration_type', 'request_type',
-            'api_details', 'host', 'ftp_username', 'ftp_password'
+            'api_details', 'host', 'ftp_username', 'ftp_password', 'logo'
         ]
         read_only_fields = ['integration_type']
         

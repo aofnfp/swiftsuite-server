@@ -4,7 +4,8 @@ from rest_framework.routers import DefaultRouter
 from vendorActivities.payment_utils import stripe_webhook
 
 router = DefaultRouter()
-router.register('vendor', views.VendorsViewSet, basename='vendor')
+router.register('vendor', views.VendorsViewSetUser, basename='vendor')
+router.register('vendor-admin', views.VendorsViewSetAdmin, basename='vendor-admin')
 
 urlpatterns = [
     path('', include(router.urls)),

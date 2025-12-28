@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets, filters
 from rest_framework.views import APIView
 from .models import Vendors
 from rest_framework import status
@@ -20,13 +20,22 @@ from accounts.models import Payment
 from rest_framework_extensions.cache.decorators import cache_response
 
 
-class VendorsViewSet(ModelViewSet):
-    queryset = Vendors.objects.all()
+
+class VendorsViewSetAdmin(viewsets.ModelViewSet):
     serializer_class = VendorsSerializer
     permission_classes = [IsSuperUser]
-    parser_classes = (MultiPartParser, FormParser) 
+    parser_classes = (MultiPartParser, FormParser)
+    queryset = Vendors.objects.all().order_by('-created_at')
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'integration_type', 'request_type']
+        
+
+class VendorsViewSetUser(viewsets.ReadOnlyModelViewSet):
+    queryset = Vendors.objects.all()
+    serializer_class = VendorsSerializer
+    permission_classes = [IsAuthenticated]
     
-    
+
     def get_queryset(self):
         queryset = Vendors.objects.all().order_by('-created_at')
         queryset = queryset.exclude(integration_type='requested', available=False)
@@ -76,6 +85,7 @@ class CheckTaskProgress(APIView):
 
 class VendorRequestView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser) 
     
     def post(self, request):
         serializer = VendorRequestSerializer(data=request.data , context={'request': request})
