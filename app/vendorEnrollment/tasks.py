@@ -7,7 +7,6 @@ from .utils import VendorDataMixin
 from celery import shared_task
 import logging
 from inventoryApp.models import InventoryModel
-from inventoryApp.utils import calculated_selling_price
 
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)

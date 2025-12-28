@@ -30,7 +30,7 @@ def process_vendor_orders():
         
 
 @shared_task(queue='default')
-def dispatch_order(vendor_order_log):
+def dispatch_order(vendor_order_log: VendorOrderLog):
     """Function to dispatch order to vendor"""
     try:
         vendor_name = vendor_order_log.vendor.lower()
@@ -45,6 +45,7 @@ def dispatch_order(vendor_order_log):
                 vendor_order_log.vendor_order_id = result.get("BulkOrderId")
                 vendor_order_log.raw_response = result
                 vendor_order_log.save()
+                
                 logger.info(f"Order {vendor_order_log.id} placed successfully with Fragrancex.")
             else:
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.FAILED
