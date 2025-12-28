@@ -7,35 +7,89 @@ from rest_framework.permissions import IsAuthenticated
 from vendorActivities.apiSupplier import getFragranceXAuth
 from accounts.models import User
 from .models import VendorOrderLog
+from .utils import get_ebay_order_details
 
 
 class FrgxOrderApiClient:
-    def __init__(self, api_id, api_key):
-        self.api_id = api_id
-        self.api_key = api_key
+    def __init__(self):
+        self.api_id = None
+        self.api_key = None
         self.base_url = "https://apiordering.fragrancex.com/order"  
         
-    def get_order_data(self, order: VendorOrderLog):
+    def get_order_details(self, VendorOrder: VendorOrderLog):
         # Get order details
-        user = order.enrollment.user
-        
-        ebay_orderDetails_url = f"https://service.swiftsuite.app/orderApp/get_ordered_item_details/{order.user.id}/{order.market_name}/{order.ebay_order_id}/"
-        response = requests.get(ebay_orderDetails_url, headers={"Authorization": f"Bearer {requests.request.auth}"})
+        self.user = VendorOrder.enrollment.user
+        self.market_name =  VendorOrder.order.market_name.capitalize()
+        self.order_id = VendorOrder.order.orderId
+        self.api_id = VendorOrder.enrollment.account.apiAccessId
+        self.api_key = VendorOrder.enrollment.account.apiAccessKey
 
-        if response.status_code != 200:
-            return JsonResponse(
-                {"error": "Failed to fetch order details."},
-                status=response.status_code,
-            )
+        order_details = get_ebay_order_details(self.user.id, self.market_name, self.order_id)
+        
+        return order_details
     
-    
-    def place_bulk_order(self, order_data):
+    def build_bulk_payload(self, order_details):
+        # Build bulk order payload
+
+        fulfillmentStartInstructions = order_details.get('fulfillmentStartInstructions', [])[0]
+        shipTo = fulfillmentStartInstructions.get("shippingStep", {}).get("shipTo", {})
+        fullname = shipTo.get("fullName", "Unknown").split(' ')
+        firstName = fullname[0]
+        lastName = fullname[1]
+        contactAddress = shipTo.get("contactAddress", {})
+        ShipAddress = contactAddress.get("addressLine1", "Unknown")
+        city = contactAddress.get("city", "Unknown")
+        state = contactAddress.get("stateOrProvince", "Unknown")
+        zipcode = contactAddress.get("postalCode", "Unknown")
+        country = contactAddress.get("countryCode", "Unknown")
+        primaryPhone = shipTo.get("primaryPhone", {}).get("phoneNumber", "Unknown")
+        
+        items = []
+        for item in order_details.get('lineItems'):
+            sku = item.get('sku', 'Unknown'),
+            quantity = item.get('quantity', 0),
+            
+            detail = {
+                "ItemId": sku[0], 
+                "Quantity": quantity[0]
+            }
+            items.append(detail)
+            
+        
+        # Define bulk order payload
+        bulk_order = {
+            "Orders": [
+                {
+                    "ShippingAddress": {
+                        "FirstName": firstName,
+                        "LastName": lastName,
+                        "Address1": ShipAddress,
+                        "Address2": "",
+                        "City": city,
+                        "State": state,
+                        "ZipCode": zipcode,
+                        "Country": country,
+                        "Phone": primaryPhone,
+                    },
+                    "ShippingMethod": 0,
+                    "ReferenceId": self.generate_reference(self.order_id),
+                    "IsDropship": False,
+                    "IsGiftWrapped": False,
+                    "OrderItems": items
+                }
+            ],
+            "BillingInfoSpecified": False
+        }
+            
+        return bulk_order
+         
+    def place_bulk_order(self, bulk_order):
         access_token = getFragranceXAuth(self.api_id, self.api_key)
         headers = {
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
         }
-        response = requests.post(f"{self.base_url}/PlaceBulkOrder", json=order_data, headers=headers)
+        response = requests.post(f"{self.base_url}/PlaceBulkOrder", json=bulk_order, headers=headers)
         return response.json()
     
     def generate_reference(self, order_id):
@@ -55,88 +109,28 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
         userid = user.parent_id
         user = User.objects.filter(id=userid).first()
     
-    enrolment_details = Enrollment.objects.filter(
-        user=user, vendor__name__iexact='Fragrancex'
+    
+    VendorOrder = VendorOrderLog.objects.filter(
+        order__orderId=ebayorderid,
+        order__market_name__iexact=market_name,
+        enrollment__user=user,
+        enrollment__vendor__name__iexact='Fragrancex'
     ).first()
-
-    if not enrolment_details:
+    
+    if not VendorOrder:
         return JsonResponse(
-            {"message": "Vendor enrollment details not found."},
+            {"message": "Vendor order log not found."},
             status=status.HTTP_404_NOT_FOUND,
         )
-
-    apiAccessId = enrolment_details.vendor.api_access_id
-    apiAccessKey = enrolment_details.vendor.api_access_key
     
- 
-    # Get order details
-    ebay_orderDetails_url = f"https://service.swiftsuite.app/orderApp/get_ordered_item_details/{userid}/{market_name}/{ebayorderid}/"
-    response = requests.get(ebay_orderDetails_url, headers={"Authorization": f"Bearer {request.auth}"})
-
-    if response.status_code != 200:
-        return JsonResponse(
-            {"error": "Failed to fetch order details."},
-            status=response.status_code,
-        )
-
-    Details = response.json()
-    ordered_details = Details.get('ordered_details', {})
-    fulfillmentStartInstructions = ordered_details.get('fulfillmentStartInstructions', [])[0]
-    shipTo = fulfillmentStartInstructions.get("shippingStep", {}).get("shipTo", {})
-    fullname = shipTo.get("fullName", "Unknown").split(' ')
-    firstName = fullname[0]
-    lastName = fullname[1]
-    contactAddress = shipTo.get("contactAddress", {})
-    ShipAddress = contactAddress.get("addressLine1", "Unknown")
-    city = contactAddress.get("city", "Unknown")
-    state = contactAddress.get("stateOrProvince", "Unknown")
-    zipcode = contactAddress.get("postalCode", "Unknown")
-    country = contactAddress.get("countryCode", "Unknown")
-    primaryPhone = shipTo.get("primaryPhone", {}).get("phoneNumber", "Unknown")
-    
-    items = []
-    for item in ordered_details.get('lineItems'):
-        sku = item.get('sku', 'Unknown'),
-        quantity = item.get('quantity', 0),
-        
-        detail = {
-            "ItemId": sku[0], 
-            "Quantity": quantity[0]
-        }
-        items.append(detail)
-        
     # Initialize client
-    order_client = FrgxOrderApiClient(apiAccessId , apiAccessKey)
+    order_client = FrgxOrderApiClient()
     
-    referenceId = order_client.generate_reference(ebayorderid)
+    ordered_details = order_client.get_order_details(VendorOrder)
     
     # Define bulk order payload
-    bulk_order = {
-        "Orders": [
-            {
-                "ShippingAddress": {
-                    "FirstName": firstName,
-                    "LastName": lastName,
-                    "Address1": ShipAddress,
-                    "Address2": "",
-                    "City": city,
-                    "State": state,
-                    "ZipCode": zipcode,
-                    "Country": country,
-                    "Phone": primaryPhone,
-                },
-                "ShippingMethod": 0,
-                "ReferenceId": referenceId,
-                "IsDropship": False,
-                "IsGiftWrapped": False,
-                "OrderItems": items
-            }
-        ],
-        "BillingInfoSpecified": False
-    }
+    bulk_order = order_client.build_bulk_payload(ordered_details)
     
-    
-
     # Place the order
     result = order_client.place_bulk_order(bulk_order)
    
@@ -150,7 +144,6 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
             {"message": "Failed to place order.", "data": result, "order_info": bulk_order},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
 
 
 @api_view(['GET'])

@@ -244,4 +244,24 @@ def sync_ebay_order_with_local():
                 
 
 
+def get_ebay_order_details(user_id, market_name, ebay_order_id):
+    enroll_id = MarketplaceEnronment.objects.filter(user_id=user_id, marketplace_name=market_name).first()._id
+    
+    access_token = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay").access_token
+    
+    url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}'
 
+    # Set up the headers with the access token
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        order_details = response.json()
+        
+        return order_details
+        
+    except Exception as e:
+        print(f"Error fetching ebay order details: {e}")
+        return None
