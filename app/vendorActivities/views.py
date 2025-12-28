@@ -18,12 +18,14 @@ from rest_framework.permissions import IsAuthenticated
 from vendorActivities.payment_utils import create_vendor_checkout_session
 from accounts.models import Payment
 from rest_framework_extensions.cache.decorators import cache_response
+from vendorEnrollment.pagination import CustomOffsetPagination
 
 
 
 class VendorsViewSetAdmin(viewsets.ModelViewSet):
     serializer_class = VendorsSerializer
     permission_classes = [IsSuperUser]
+    pagination_class = CustomOffsetPagination
     parser_classes = (MultiPartParser, FormParser)
     queryset = Vendors.objects.all().order_by('-created_at')
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
