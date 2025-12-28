@@ -1,12 +1,12 @@
 from rest_framework.decorators import api_view, permission_classes
-from vendorEnrollment.models import Enrollment
+from .utils import get_vendor_enrollment
 import requests
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from vendorActivities.apiSupplier import getFragranceXAuth
 from accounts.models import User
-from .models import VendorOrderLog
+from .models import VendorOrderLog, OrdersOnEbayModel
 from .utils import get_ebay_order_details
 
 
@@ -118,9 +118,23 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
     ).first()
     
     if not VendorOrder:
-        return JsonResponse(
-            {"message": "Vendor order log not found."},
-            status=status.HTTP_404_NOT_FOUND,
+        OrdersOnEbayModel_obj = OrdersOnEbayModel.objects.filter(
+            orderId=ebayorderid,
+            market_name__iexact=market_name,
+            user=user
+        ).first()
+        
+        if not OrdersOnEbayModel_obj:
+            return JsonResponse(
+                {"message": "Vendor order log not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        VendorOrder = VendorOrderLog.objects.create(
+            order=OrdersOnEbayModel_obj,
+            enrollment=get_vendor_enrollment(OrdersOnEbayModel_obj.marketItemId),
+            vendor='Fragrancex',
+            status=VendorOrderLog.VendorOrderStatus.CREATED
         )
     
     # Initialize client
@@ -135,6 +149,10 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
     result = order_client.place_bulk_order(bulk_order)
    
     if result.get("Message", False) and result.get("BulkOrderId", False):
+        VendorOrder.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+        VendorOrder.vendor_order_id = result.get("BulkOrderId")
+        VendorOrder.raw_response = result
+        VendorOrder.save()
         return JsonResponse(
             {"message": "Order placed successfully.", "data": result, "order_info": bulk_order},
             status=status.HTTP_200_OK,
@@ -151,6 +169,8 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
 def getTracking_fragranceX(request, orderId):
     try:
         # Get vendor enrollment details
+        from vendorEnrollment.models import Enrollment
+        
         user = request.user
         if user and user.parent_id:
             user = user.parent

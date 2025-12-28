@@ -1,7 +1,7 @@
 from celery import shared_task
 from .utils import sync_ebay_order_with_local
 from .models import OrdersOnEbayModel, VendorOrderLog
-from vendorEnrollment.models import Enrollment
+from .utils import create_vendor_order_log
 import logging
 logger = logging.getLogger(__name__)
 
@@ -12,37 +12,6 @@ def sync_ebay_order_task():
     sync_ebay_order_with_local()
     return "Order Sync completed successfully"
 
-
-def create_vendor_order_log(order: OrdersOnEbayModel):
-    from inventoryApp.models import InventoryModel
-    
-    if VendorOrderLog.objects.filter(
-        order=order,
-        vendor=order.vendor_name,
-    ).exclude(status=VendorOrderLog.VendorOrderStatus.FAILED).exists():
-        return
-
-    # get item on inventory using the marketItemId
-    product = InventoryModel.objects.filter(
-        market_item_id=order.marketItemId
-    ).first()
-    if not product:
-        logger.error(f"Product with marketItemId {order.marketItemId} not found in inventory.")
-        return
-    
-    enrollment = Enrollment.objects.get(id=product.product.enrollment.id)
-    if not enrollment:
-        logger.error(f"Enrollment not found for product with marketItemId {order.marketItemId}.")
-        return
-    
-    order_log = VendorOrderLog.objects.create(
-        order=order,
-        enrollment=enrollment,
-        vendor=order.vendor_name,
-        status=VendorOrderLog.VendorOrderStatus.CREATED,
-    )
-    
-    return order_log    
 
 
 @shared_task(queue='default')

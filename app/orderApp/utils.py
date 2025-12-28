@@ -6,6 +6,11 @@ from .models import OrdersOnEbayModel
 from inventoryApp.models import InventoryModel
 from datetime import datetime, timedelta
 from woocommerce import API
+import logging
+from vendorEnrollment.models import Enrollment
+from .models import VendorOrderLog
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -265,3 +270,41 @@ def get_ebay_order_details(user_id, market_name, ebay_order_id):
     except Exception as e:
         print(f"Error fetching ebay order details: {e}")
         return None
+    
+def create_vendor_order_log(order: OrdersOnEbayModel):
+    
+    if VendorOrderLog.objects.filter(
+        order=order,
+        vendor=order.vendor_name,
+    ).exclude(status=VendorOrderLog.VendorOrderStatus.FAILED).exists():
+        return
+
+    enrollment = get_vendor_enrollment(order.marketItemId)
+    if not enrollment:
+        logger.error(f"Enrollment not found for order with marketItemId {order.marketItemId}.")
+        return
+    
+    order_log = VendorOrderLog.objects.create(
+        order=order,
+        enrollment=enrollment,
+        vendor=order.vendor_name,
+        status=VendorOrderLog.VendorOrderStatus.CREATED,
+    )
+    
+    return order_log  
+
+
+def get_vendor_enrollment(marketItemId):
+    # get item on inventory using the marketItemId
+    product = InventoryModel.objects.filter(
+        market_item_id=marketItemId
+    ).first()
+    if not product:
+        logger.error(f"Product with marketItemId {marketItemId} not found in inventory.")
+        return
+    
+    enrollment = Enrollment.objects.get(id=product.product.enrollment.id)
+    if not enrollment:
+        return
+    
+    return enrollment
