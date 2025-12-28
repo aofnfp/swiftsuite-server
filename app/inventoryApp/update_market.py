@@ -186,8 +186,7 @@ def update_woocommerce_product_from_background(market_item_id, selling_price, qu
 
 
 # update items price and quantity on ebay and inventory with the from the vendor
-def update_ebay_price_quantity():
-    eb = Ebay()
+def update_inventory_price_quantity():
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
@@ -211,9 +210,7 @@ def update_ebay_price_quantity():
                     if db_item.map:
                         if selling_price < float(db_item.map):
                             selling_price = float(db_item.map)
-                    # Update the product on Ebay
-                    if item.market_item_id:
-                        response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, round(selling_price, 2), db_item.quantity, user._id)
+                    
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
@@ -244,9 +241,6 @@ def update_ebay_price_quantity():
                             if selling_price < float(db_item.map):
                                 selling_price = float(db_item.map)
                 
-                    # Update the product on Woocommerce
-                    if item.market_item_id:
-                        response = update_woocommerce_product_from_background(item.market_item_id, round(selling_price, 2), db_item.quantity, user.user_id)
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))                
@@ -256,7 +250,7 @@ def update_ebay_price_quantity():
 
 
 # function to check and update ended ebay items in the inventory
-def check_and_update_ended_ebay_items():
+def check_ended_status_update_quantity_price():
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
@@ -264,18 +258,18 @@ def check_and_update_ended_ebay_items():
             all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay")
                 
             for item in all_ebay_items:
-                # Modify selling price before updating on ebay 
-                if item.total_product_cost:
-                    selling_price = float(item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(user.profit_margin)/100) * float(item.total_product_cost))
-                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2)))
                 # Check if the item has a vendor mapped to it
-                if item.market_item_id == "":
+                if item.market_item_id == "" or item.vendor_name == "Not Found":
                     continue
                 try:
                     # Check if ebay item has ended
                     ends_status = check_if_ebay_item_has_ended(item.market_item_id, user.user_id)
                     if ends_status is None:
                         continue
+
+                    # Update the price and quantity of product on Ebay
+                    response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, item.start_price, item.quantity, user._id)
+
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(ends_status=ends_status))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item availability status changed to {ends_status}"))
                 except Exception as e:
@@ -286,10 +280,18 @@ def check_and_update_ended_ebay_items():
             all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
                 
             for item in all_ebay_items:
-                # Modify selling price before updating on ebay 
-                if item.total_product_cost:
-                    selling_price = float(item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(user.profit_margin)/100) * float(item.total_product_cost))
-                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2)))
-                # Check if the item has a vendor mapped to it
+                    
+                # Update the product on Woocommerce
+                try: 
+                    if item.market_item_id == "" or item.vendor_name == "Not Found":
+                        continue
+                    # Update the price and quantity of product on Woocommerce
+                    response = update_woocommerce_product_from_background(item.market_item_id,item.start_price, item.quantity, user.user_id)
+
+                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=item.start_price))
+                    # Check if the item has a vendor mapped to it
+                except Exception as e:
+                    print(f"Failed to update woocommerce items: {e}")
+                    continue
 
 
