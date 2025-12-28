@@ -661,7 +661,7 @@ class MarketInventory:
             root = ET.fromstring(xml_body)
 
             # Try to find the natural-search URL first
-            url_elem = root.find(".//eb:ViewItemURLForNaturalSearch///eb:ViewItemURL", ns)
+            url_elem = root.find(".//eb:ViewItemURLForNaturalSearch//eb:ViewItemURL", ns)
 
             # if url_elem is None:
             #     # Fallback: sometimes ViewItemURL is present instead
