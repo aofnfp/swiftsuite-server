@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from vendorActivities.apiSupplier import getFragranceXAuth
 from accounts.models import User
-
+from .models import VendorOrderLog
 
 
 class FrgxOrderApiClient:
@@ -14,6 +14,20 @@ class FrgxOrderApiClient:
         self.api_id = api_id
         self.api_key = api_key
         self.base_url = "https://apiordering.fragrancex.com/order"  
+        
+    def get_order_data(self, order: VendorOrderLog):
+        # Get order details
+        user = order.enrollment.user
+        
+        ebay_orderDetails_url = f"https://service.swiftsuite.app/orderApp/get_ordered_item_details/{order.user.id}/{order.market_name}/{order.ebay_order_id}/"
+        response = requests.get(ebay_orderDetails_url, headers={"Authorization": f"Bearer {requests.request.auth}"})
+
+        if response.status_code != 200:
+            return JsonResponse(
+                {"error": "Failed to fetch order details."},
+                status=response.status_code,
+            )
+    
     
     def place_bulk_order(self, order_data):
         access_token = getFragranceXAuth(self.api_id, self.api_key)
@@ -28,6 +42,8 @@ class FrgxOrderApiClient:
         import uuid
         unique_suffix = str(uuid.uuid4())[:4]
         return f"SW-FX-{order_id}-{unique_suffix}"
+    
+    
 
 
 @api_view(['POST'])
