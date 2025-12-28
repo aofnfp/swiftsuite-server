@@ -1,3 +1,4 @@
+import json
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -143,6 +144,47 @@ class OrderEbay:
             return Response(f"Connection error occurred.", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(f"An error occurred, contact support team.", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # Function to track order and update fulfilment status on Ebay
+    def track_order_on_ebay(self, userid, ebayorderid, tracking_number, carrier_code, line_item_id, shipped_date):
+                
+        # Get access_token
+        access_token = Ebay.refresh_access_token(userid, "Ebay")
+        url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebayorderid}/shipping_fulfillment'
+
+        # Set up the headers with the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json',
+        }
+        
+        # Define the tracking details payload
+        payload = {
+            "shippedDate": shipped_date,
+            "shippingCarrierCode": carrier_code,    # (UPS, USPS, FedEx, DHL, Royal Mail, Hermes, etc.)
+            "trackingNumber": tracking_number,
+            "lineItems": [
+                {
+                    "lineItemId": line_item_id
+                }
+            ]
+        }
+        
+        try:
+            response = requests.post(url, headers=headers, json=json.dumps(payload))
+            if response.status_code in [200, 201, 204]:
+                tracking_details = response.json()
+                return tracking_details
+            else:
+                print(f"Failed to update tracking on eBay. Status code: {response.status_code}, Response: {response.text}")
+                return None
+        except requests.exceptions.HTTPError as err:
+            print(f"Connection error occurred: {err}")
+            return None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
 
 
 # Order background task invocation
