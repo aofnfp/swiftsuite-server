@@ -144,14 +144,14 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 200:
             return product_data
         else:
-            print(f"Failed to retrieve details for inventory for Item ID {item_id}: {response.text}")
-            return None
+            raise Exception(product_data)
     except Exception as e:
         if e.get('errors')[0]['errorId'] == 1001:
             access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
             get_item_details(access_token, item_id)
 
         else:
+            print(f"Failed to retrieve details for inventory for Item ID {item_id}: {e}")
             return None
                     
         
