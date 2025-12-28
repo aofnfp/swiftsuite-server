@@ -24,7 +24,6 @@ from xml.etree import ElementTree as ET
 from vendorEnrollment.utils import with_module
 from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
-from .utils import query_product_filter
 from django.apps import apps
 from woocommerce import API
 
@@ -129,8 +128,7 @@ class General_operations:
                         model_name = vendor_name.capitalize() + "Update"
                         # Get the actual model class from the string name
                         model_class = apps.get_model('vendorEnrollment', model_name)
-                        conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
-                        db_items = model_class.objects.filter(conditions & Q(sku=prod.get("sku")))
+                        db_items = model_class.objects.filter((Q(sku=prod.get("ebay_sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn"))))
                         if not db_items.exists():
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
@@ -154,8 +152,7 @@ class General_operations:
                                 except:
                                     return Response(f"Selling price calculation error.", status=status.HTTP_400_BAD_REQUEST)
                             # Create or update the product on GeneralProduct table
-                            conditions = query_product_filter(prod.get("upc"), prod.get("mpn"))
-                            item_product, created = Generalproducttable.objects.update_or_create(conditions & Q(user_id=user.user_id) & Q(sku=db_item.sku), defaults={"active": True, "total_product_cost": db_item.total_price, "map": db_item.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.price, "vendor_name": vendor_name})                           
+                            item_product, created = Generalproducttable.objects.update_or_create(((Q(sku=prod.get("ebay_sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn")))), user_id=userid, defaults={"active": True, "total_product_cost": db_item.total_price, "map": db_item.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.price, "vendor_name": vendor_name})                           
                             # Item exists, check if we need to update price or quantity
                             inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "quantity": db_item.quantity, "vendor_name": db_item.vendor.name, "fixed_markup": market_enrollment.fixed_markup, "fixed_percentage_markup": market_enrollment.fixed_percentage_markup, "profit_margin": market_enrollment.profit_margin, "percentage_markup": market_enrollment.percentage_markup})
                             # Update the VendorUpdate table to set listed_market to true
