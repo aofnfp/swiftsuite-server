@@ -24,7 +24,6 @@ class FrgxOrderApiClient:
         self.api_key = self.VendorOrder.enrollment.account.apiAccessKey
         
     def get_order_details(self):
-        print(self.user.id, self.market_name, self.order_id, "inside get_order_details")
         order_details = get_ebay_order_details(self.user.id, self.market_name, self.order_id)
         
         return order_details
@@ -114,12 +113,11 @@ class FrgxOrderApiClient:
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def place_order_fragrancex(request, userid, market_name, orderid):
+def place_order_fragrancex(request, market_name, orderid):
     # Get vendor enrollment details
-    user = User.objects.filter(id=userid).first()
+    user = request.user
     if user and user.parent_id:
-        userid = user.parent_id
-        user = User.objects.filter(id=userid).first()
+        user = user.parent
     
     
     VendorOrder = VendorOrderLog.objects.filter(

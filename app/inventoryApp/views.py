@@ -516,7 +516,7 @@ class MarketInventory:
                 if user.parent_id:
                     userid = user.parent_id
             
-            inventory_listing = InventoryModel.objects.all().filter(user_id=userid, active=True).values().order_by('-date_created')
+            inventory_listing = InventoryModel.objects.all().filter(user_id=userid, active=True).values().order_by('id').reverse()
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
             try:
