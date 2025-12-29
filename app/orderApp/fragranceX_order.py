@@ -18,24 +18,33 @@ class FrgxOrderApiClient:
         
     def get_order_details(self, VendorOrder: VendorOrderLog):
         # Get order details
-        self.user = VendorOrder.enrollment.user
-        self.market_name =  VendorOrder.order.market_name.capitalize()
-        self.order_id = VendorOrder.order.orderId
+        user = VendorOrder.enrollment.user
+        market_name =  VendorOrder.order.market_name.capitalize()
+        order_id = VendorOrder.order.orderId
         self.api_id = VendorOrder.enrollment.account.apiAccessId
         self.api_key = VendorOrder.enrollment.account.apiAccessKey
 
-        order_details = get_ebay_order_details(self.user.id, self.market_name, self.order_id)
+        order_details = get_ebay_order_details(user.id, market_name, order_id)
         
         return order_details
     
-    def build_bulk_payload(self, order_details):
+    def build_bulk_payload(self, order_details, vendor_order_log: VendorOrderLog):
+
+        if not vendor_order_log.reference_id:
+            vendor_order_log.reference_id = self.generate_reference(
+                vendor_order_log.order.orderId
+            )
+            vendor_order_log.save(
+                update_fields=['reference_id']
+            )
+        
         # Build bulk order payload
 
-        fulfillmentStartInstructions = order_details.get('fulfillmentStartInstructions', [])[0]
+        fulfillmentStartInstructions = order_details.get('fulfillmentStartInstructions', [{}])[0]
         shipTo = fulfillmentStartInstructions.get("shippingStep", {}).get("shipTo", {})
         fullname = shipTo.get("fullName", "Unknown").split(' ')
         firstName = fullname[0]
-        lastName = fullname[1]
+        lastName = fullname[1] if len(fullname) > 1 else ''
         contactAddress = shipTo.get("contactAddress", {})
         ShipAddress = contactAddress.get("addressLine1", "Unknown")
         city = contactAddress.get("city", "Unknown")
@@ -45,16 +54,18 @@ class FrgxOrderApiClient:
         primaryPhone = shipTo.get("primaryPhone", {}).get("phoneNumber", "Unknown")
         
         items = []
-        for item in order_details.get('lineItems'):
-            sku = item.get('sku', 'Unknown'),
-            quantity = item.get('quantity', 0),
+        for item in order_details.get('lineItems', []):
+            sku = item.get('sku', 'Unknown')
+            quantity = item.get('quantity', 0)
             
             detail = {
-                "ItemId": sku[0], 
-                "Quantity": quantity[0]
+                "ItemId": sku,
+                "Quantity": quantity
             }
             items.append(detail)
-            
+        
+        if not items:
+            raise ValueError("No items found in order details to build the bulk order payload.")   
         
         # Define bulk order payload
         bulk_order = {
@@ -72,7 +83,7 @@ class FrgxOrderApiClient:
                         "Phone": primaryPhone,
                     },
                     "ShippingMethod": 0,
-                    "ReferenceId": self.generate_reference(self.order_id),
+                    "ReferenceId": vendor_order_log.reference_id,
                     "IsDropship": False,
                     "IsGiftWrapped": False,
                     "OrderItems": items
@@ -89,12 +100,12 @@ class FrgxOrderApiClient:
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
         }
-        response = requests.post(f"{self.base_url}/PlaceBulkOrder", json=bulk_order, headers=headers)
+        response = requests.post(f"{self.base_url}/PlaceBulkOrder", json=bulk_order, headers=headers, timeout=30)
         return response.json()
     
     def generate_reference(self, order_id):
         import uuid
-        unique_suffix = str(uuid.uuid4())[:4]
+        unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-FX-{order_id}-{unique_suffix}"
     
     
@@ -143,7 +154,7 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
     ordered_details = order_client.get_order_details(VendorOrder)
     
     # Define bulk order payload
-    bulk_order = order_client.build_bulk_payload(ordered_details)
+    bulk_order = order_client.build_bulk_payload(ordered_details, VendorOrder)
     
     # Place the order
     result = order_client.place_bulk_order(bulk_order)

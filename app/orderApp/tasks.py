@@ -17,28 +17,35 @@ def sync_ebay_order_task():
 @shared_task(queue='default')
 def process_vendor_orders():
     """Function to process vendor orders"""
-    all_orders = OrdersOnEbayModel.objects.filter(orderPaymentStatus='PAID', orderFulfillmentStatus='NOT_STARTED')
+    all_orders = OrdersOnEbayModel.objects.filter(orderPaymentStatus='PAID', orderFulfillmentStatus='NOT_STARTED').exclude(
+        vendororderlog__status__in=[
+            VendorOrderLog.VendorOrderStatus.CREATED,
+            VendorOrderLog.VendorOrderStatus.PROCESSING,
+            VendorOrderLog.VendorOrderStatus.SHIPPED
+        ]
+    )
     
     for order in all_orders:
         order_log = create_vendor_order_log(order)
         
         # dispatch order to vendor
         if order_log:
-            dispatch_order.delay(order_log)
+            dispatch_order.delay(order_log.id)
         
     logger.info("order log entries created for vendor orders and dispatched.")
         
 
 @shared_task(queue='default')
-def dispatch_order(vendor_order_log: VendorOrderLog):
+def dispatch_order(vendor_order_log_id: int):
     """Function to dispatch order to vendor"""
     try:
+        vendor_order_log = VendorOrderLog.objects.get(id=vendor_order_log_id)
         vendor_name = vendor_order_log.vendor.lower()
         if vendor_name == 'fragrancex':
             from .fragranceX_order import FrgxOrderApiClient
             client = FrgxOrderApiClient()
             order_details = client.get_order_details(vendor_order_log)
-            bulk_order = client.build_bulk_payload(order_details)
+            bulk_order = client.build_bulk_payload(order_details, vendor_order_log)
             result = client.place_bulk_order(bulk_order)
             if result.get("Message", False) and result.get("BulkOrderId", False):
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
