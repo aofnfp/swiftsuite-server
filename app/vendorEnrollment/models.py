@@ -60,6 +60,13 @@ class Enrollment(models.Model):
     third_party_marketplaces = models.BooleanField(default=False)
     returnable = models.BooleanField(default=False)
     
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['vendor', 'user', 'identifier'], name='unique_enrollment_per_user_vendor_identifier')
+        ]
+    
+    
     def __str__(self):
         return self.identifier
 
