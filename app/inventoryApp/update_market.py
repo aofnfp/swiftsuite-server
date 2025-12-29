@@ -206,11 +206,14 @@ def update_inventory_price_quantity():
                         continue
                     
                     # Modify selling price before updating on ebay 
-                    selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
-                    if db_item.map:
-                        if selling_price < float(db_item.map):
-                            selling_price = float(db_item.map)
-                    
+                    try:
+                        selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
+                        if db_item.map:
+                            if selling_price < float(db_item.map):
+                                selling_price = float(db_item.map)
+                    except:
+                        print("Price calculation error with MAP value") 
+                        continue
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
@@ -235,12 +238,15 @@ def update_inventory_price_quantity():
                         continue 
                     
                     # Modify selling price before updating on ebay 
-                    if item.total_product_cost:
+                    try:
                         selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
                         if db_item.map:
                             if selling_price < float(db_item.map):
                                 selling_price = float(db_item.map)
-                
+                    except:
+                        print("Price calculation error with MAP value") 
+                        continue
+                    
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
                     item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))                
