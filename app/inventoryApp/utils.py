@@ -191,7 +191,6 @@ def sync_ebay_items_with_local():
         vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
-            db_item = None
             # Fetch all item from eBay
             ebay_items = get_all_items_on_ebay(user._id)
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
@@ -217,7 +216,7 @@ def sync_ebay_items_with_local():
                         except Exception as ea:
                             continue
 
-                    if db_items.exists():
+                    if db_items:
                         try:
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
@@ -258,7 +257,6 @@ def sync_ebay_items_with_local():
                         print(f"Ebay Product failed to insert into inventory {e}")
 
         elif user.marketplace_name == "Woocommerce":
-            db_item = None
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             for item in all_woocommercer_items:
@@ -278,7 +276,7 @@ def sync_ebay_items_with_local():
                         except Exception as ea:
                             continue
 
-                    if db_items.exists():
+                    if db_items:
                         try:
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()

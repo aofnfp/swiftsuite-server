@@ -143,7 +143,7 @@ class General_operations:
                     
                     if db_items:
                         try:
-                            market_enrollment = MarketplaceEnronment.objects.filter(user_id=userid, market_name=market_name).first()
+                            market_enrollment = MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).first()
                             # Modify selling price before updating on ebay 
                             selling_price = float(db_items.total_price) + float(market_enrollment.fixed_markup) + ((float(market_enrollment.fixed_percentage_markup)/100) * float(db_items.total_price)) + ((float(market_enrollment.profit_margin)/100) * float(db_items.total_price))
                             if db_items.map:
@@ -155,7 +155,7 @@ class General_operations:
                             # Create or update the product on GeneralProduct table
                             item_product, created = Generalproducttable.objects.update_or_create(sku=prod.get("sku"), user_id=userid, defaults={"active": True, "total_product_cost": db_items.total_price, "map": db_items.map, "enrollment_id": db_items.enrollment_id, "product_id": db_items.product_id, "quantity": db_items.quantity, "price": db_items.price, "vendor_name": vendor_name})                           
                             # Item exists, check if we need to update price or quantity
-                            inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_items.total_price, "quantity": db_items.quantity, "vendor_name": db_items.vendor.name, "fixed_markup": market_enrollment.fixed_markup, "fixed_percentage_markup": market_enrollment.fixed_percentage_markup, "profit_margin": market_enrollment.profit_margin, "percentage_markup": market_enrollment.percentage_markup})
+                            inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_items.total_price, "quantity": db_items.quantity, "vendor_name": db_items.vendor.name, "fixed_markup": market_enrollment.fixed_markup, "fixed_percentage_markup": market_enrollment.fixed_percentage_markup, "profit_margin": market_enrollment.profit_margin, "percentage_markup": market_enrollment.percentage_markup, "vendor_identifier": vendor_name})
                             # Update the VendorUpdate table to set listed_market to true
                             db_items.active = True
                             db_items.save()
