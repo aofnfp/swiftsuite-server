@@ -92,9 +92,9 @@ class RsrOrderApiClient:
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def place_order_rsr(request, userid, market_name, orderid):
+def place_order_rsr(request, market_name, orderid):
     # Resolve parent account
-    user = User.objects.filter(id=userid).first()
+    user = request.user
     if user and user.parent_id:
         user = user.parent
 

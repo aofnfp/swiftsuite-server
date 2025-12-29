@@ -117,7 +117,7 @@ def place_order_fragrancex(request, market_name, orderid):
     # Get vendor enrollment details
     user = request.user
     if user and user.parent_id:
-        user = User.objects.filter(id=user.parent_id).first()
+        user = user.parent
     
     
     VendorOrder = VendorOrderLog.objects.filter(
