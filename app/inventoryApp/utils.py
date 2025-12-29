@@ -111,6 +111,7 @@ def get_all_items_on_ebay(enroll_id):
     
     return ebay_items
     
+     
 # Function to get details of specific item listing on ebay
 # Limit to 5 calls per second (eBay's typical limit)
 @sleep_and_retry
@@ -144,7 +145,8 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 200:
             return product_data
         else:
-             raise ValueError(product_data)
+            return None
+            #  raise ValueError(product_data)
     except ValueError as e:
         error_data = e.args[0]  # The dict you passed into the exception
 
