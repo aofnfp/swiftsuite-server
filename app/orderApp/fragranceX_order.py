@@ -11,30 +11,30 @@ from .utils import get_ebay_order_details
 
 
 class FrgxOrderApiClient:
-    def __init__(self):
-        self.api_id = None
-        self.api_key = None
-        self.base_url = "https://apiordering.fragrancex.com/order"  
-        
-    def get_order_details(self, VendorOrder: VendorOrderLog):
+    base_url = "https://apiordering.fragrancex.com/order"  
+    
+    def __init__(self, VendorOrder: VendorOrderLog):
+        self.VendorOrder = VendorOrder
         # Get order details
-        user = VendorOrder.enrollment.user
-        market_name =  VendorOrder.order.market_name.capitalize()
-        order_id = VendorOrder.order.orderId
-        self.api_id = VendorOrder.enrollment.account.apiAccessId
-        self.api_key = VendorOrder.enrollment.account.apiAccessKey
 
-        order_details = get_ebay_order_details(user.id, market_name, order_id)
+        self.user = self.VendorOrder.enrollment.user
+        self.market_name =  self.VendorOrder.order.market_name.capitalize()
+        self.order_id = self.VendorOrder.order.orderId
+        self.api_id = self.VendorOrder.enrollment.account.apiAccessId
+        self.api_key = self.VendorOrder.enrollment.account.apiAccessKey
+        
+    def get_order_details(self):
+        order_details = get_ebay_order_details(self.user.id, self.market_name, self.order_id)
         
         return order_details
     
-    def build_bulk_payload(self, order_details, vendor_order_log: VendorOrderLog):
+    def build_bulk_payload(self, order_details):
 
-        if not vendor_order_log.reference_id:
-            vendor_order_log.reference_id = self.generate_reference(
-                vendor_order_log.order.orderId
+        if not self.VendorOrder.reference_id:
+            self.VendorOrder.reference_id = self.generate_reference(
+                self.VendorOrder.order.orderId
             )
-            vendor_order_log.save(
+            self.VendorOrder.save(
                 update_fields=['reference_id']
             )
         
@@ -83,7 +83,7 @@ class FrgxOrderApiClient:
                         "Phone": primaryPhone,
                     },
                     "ShippingMethod": 0,
-                    "ReferenceId": vendor_order_log.reference_id,
+                    "ReferenceId": self.VendorOrder.reference_id,
                     "IsDropship": False,
                     "IsGiftWrapped": False,
                     "OrderItems": items
@@ -113,7 +113,7 @@ class FrgxOrderApiClient:
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def place_order_fragrancex(request, userid, market_name, ebayorderid):
+def place_order_fragrancex(request, userid, market_name, orderid):
     # Get vendor enrollment details
     user = User.objects.filter(id=userid).first()
     if user and user.parent_id:
@@ -122,39 +122,39 @@ def place_order_fragrancex(request, userid, market_name, ebayorderid):
     
     
     VendorOrder = VendorOrderLog.objects.filter(
-        order__orderId=ebayorderid,
+        order__orderId=orderid,
         order__market_name__iexact=market_name,
         enrollment__user=user,
         enrollment__vendor__name__iexact='Fragrancex'
     ).first()
     
     if not VendorOrder:
-        OrdersOnEbayModel_obj = OrdersOnEbayModel.objects.filter(
-            orderId=ebayorderid,
+        order = OrdersOnEbayModel.objects.filter(
+            orderId=orderid,
             market_name__iexact=market_name,
             user=user
         ).first()
         
-        if not OrdersOnEbayModel_obj:
+        if not order:
             return JsonResponse(
                 {"message": "Vendor order log not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
         
         VendorOrder = VendorOrderLog.objects.create(
-            order=OrdersOnEbayModel_obj,
-            enrollment=get_vendor_enrollment(OrdersOnEbayModel_obj.marketItemId),
+            order=order,
+            enrollment=get_vendor_enrollment(order.marketItemId),
             vendor='Fragrancex',
             status=VendorOrderLog.VendorOrderStatus.CREATED
         )
     
     # Initialize client
-    order_client = FrgxOrderApiClient()
+    order_client = FrgxOrderApiClient(VendorOrder)
     
-    ordered_details = order_client.get_order_details(VendorOrder)
+    ordered_details = order_client.get_order_details()
     
     # Define bulk order payload
-    bulk_order = order_client.build_bulk_payload(ordered_details, VendorOrder)
+    bulk_order = order_client.build_bulk_payload(ordered_details)
     
     # Place the order
     result = order_client.place_bulk_order(bulk_order)

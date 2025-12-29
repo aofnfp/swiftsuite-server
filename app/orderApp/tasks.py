@@ -43,9 +43,9 @@ def dispatch_order(vendor_order_log_id: int):
         vendor_name = vendor_order_log.vendor.lower()
         if vendor_name == 'fragrancex':
             from .fragranceX_order import FrgxOrderApiClient
-            client = FrgxOrderApiClient()
-            order_details = client.get_order_details(vendor_order_log)
-            bulk_order = client.build_bulk_payload(order_details, vendor_order_log)
+            client = FrgxOrderApiClient(vendor_order_log)
+            order_details = client.get_order_details()
+            bulk_order = client.build_bulk_payload(order_details)
             result = client.place_bulk_order(bulk_order)
             if result.get("Message", False) and result.get("BulkOrderId", False):
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
@@ -62,7 +62,25 @@ def dispatch_order(vendor_order_log_id: int):
                 logger.error(f"Failed to place order {vendor_order_log.id} with Fragrancex. Error: {result}")
 
         elif vendor_name == 'rsr':
-            pass
+            from .rsr_order import RsrOrderApiClient
+            client = RsrOrderApiClient(vendor_order_log)
+            order_details = client.get_order_details()
+            payload = client.build_payload(order_details)
+            result = client.place_order(payload)
+            if result.get("StatusCode") == 0:
+                vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+                vendor_order_log.vendor_order_id = result.get("OrderNum") or vendor_order_log.reference_id
+                vendor_order_log.raw_response = result
+                vendor_order_log.save()
+
+                logger.info(f"Order {vendor_order_log.id} placed successfully with RSR.")
+            else:
+                vendor_order_log.status = VendorOrderLog.VendorOrderStatus.FAILED
+                vendor_order_log.error_message = result.get("StatusMssg")
+                vendor_order_log.raw_response = result
+                vendor_order_log.save()
+
+                logger.error(f"Failed to place order {vendor_order_log.id} with RSR. Error: {result.get('StatusMssg')}")
 
 
         logger.info(f"Dispatching order {vendor_order_log.id} to vendor {vendor_order_log.vendor}.")
