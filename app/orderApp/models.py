@@ -86,7 +86,8 @@ class VendorOrderLog(models.Model):
     reference_id = models.CharField(
         max_length=100,
         unique=True,
-        db_index=True
+        null=True,
+        blank=True
     )
 
     # Shipping

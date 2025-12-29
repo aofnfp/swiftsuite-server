@@ -24,7 +24,6 @@ class FrgxOrderApiClient:
         self.api_key = self.VendorOrder.enrollment.account.apiAccessKey
         
     def get_order_details(self):
-        print(self.user.id, self.market_name, self.order_id, "inside get_order_details")
         order_details = get_ebay_order_details(self.user.id, self.market_name, self.order_id)
         
         return order_details

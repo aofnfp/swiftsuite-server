@@ -250,8 +250,17 @@ def sync_ebay_order_with_local():
 
 
 def get_ebay_order_details(user_id, market_name, ebay_order_id):
-    print(user_id, market_name, ebay_order_id, "inside get_ebay_order_details")
-    enroll_id = MarketplaceEnronment.objects.filter(user_id=user_id, marketplace_name=market_name).first()._id
+    env = MarketplaceEnronment.objects.filter(
+        user_id=user_id,
+        marketplace_name__iexact=market_name
+    ).first()
+
+    if not env:
+        raise ValueError(
+            f"Marketplace environment not found for {market_name}-{user_id}-{ebay_order_id}"
+        )
+
+    enroll_id = env._id
     
     access_token = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay").access_token
     
