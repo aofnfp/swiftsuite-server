@@ -306,15 +306,22 @@ def create_vendor_order_log(order: OrdersOnEbayModel):
 
 def get_vendor_enrollment(marketItemId):
     # get item on inventory using the marketItemId
-    product = InventoryModel.objects.filter(
+    inventory = InventoryModel.objects.filter(
         market_item_id=marketItemId
     ).first()
-    if not product:
-        logger.error(f"Product with marketItemId {marketItemId} not found in inventory.")
-        return
-    
-    enrollment = Enrollment.objects.get(id=product.product.enrollment.id)
-    if not enrollment:
-        return
-    
-    return enrollment
+    if not inventory:
+        logger.error(f"Inventory item with marketItemId {marketItemId} not found in inventory.")
+        
+    if not inventory.product:
+        logger.error(
+            f"Inventory {inventory.id} has no linked product"
+        )
+        return None
+
+    if not inventory.product.enrollment:
+        logger.error(
+            f"Product {inventory.product.id} has no enrollment"
+        )
+        return None
+
+    return inventory.product.enrollment

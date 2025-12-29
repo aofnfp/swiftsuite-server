@@ -121,6 +121,11 @@ def place_order_rsr(request, market_name, orderid):
 
         
         enrollment = get_vendor_enrollment(order.marketItemId)
+        if not enrollment:
+            return JsonResponse(
+                {"message": "Vendor enrollment for RSR not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         
         vendor_order = VendorOrderLog.objects.create(
             order=order,
