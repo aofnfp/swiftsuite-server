@@ -113,12 +113,11 @@ class FrgxOrderApiClient:
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def place_order_fragrancex(request, userid, market_name, orderid):
+def place_order_fragrancex(request, market_name, orderid):
     # Get vendor enrollment details
-    user = User.objects.filter(id=userid).first()
+    user = request.user
     if user and user.parent_id:
-        userid = user.parent_id
-        user = User.objects.filter(id=userid).first()
+        user = User.objects.filter(id=user.parent_id).first()
     
     
     VendorOrder = VendorOrderLog.objects.filter(
