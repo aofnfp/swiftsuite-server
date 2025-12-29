@@ -181,9 +181,8 @@ def get_woocommerce_existing_products(user_id):
 # Map items on ebay with the one on local database for updates
 # @api_view(['GET'])
 def sync_ebay_items_with_local():
-    eb = Ebay()
     all_ebay_items = []
-    db_items = None
+
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
@@ -208,13 +207,11 @@ def sync_ebay_items_with_local():
                     # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
-                            vendor_db, vendor_id = vendor_db
+                            vendor_db, enroll_id = vendor_db
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            db_items = model_class.objects.filter(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), enrollment_id=vendor_id)
-                            if not db_items.exists():
-                                continue
+                            db_items = model_class.objects.get(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), enrollment_id=enroll_id)
                         
                             break                    
                         except Exception as ea:
@@ -222,19 +219,17 @@ def sync_ebay_items_with_local():
 
                     if db_items.exists():
                         try:
-                            db_item = db_items[0]
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
-                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=db_item.total_price, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.price, vendor_name=db_item.vendor.name)
+                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                             
                             # Item exists, check if we need to update price or quantity
-                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "price": db_item.price, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
+                            inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("ebay_item_id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_items.total_price, "price": db_items.price, "vendor_name": db_items.vendor.name, "market_item_url": item.get("market_item_url")})
                             # Update the VendorUpdate table to set listed_market to true
-                            db_item.active = True
-                            db_item.save()
+                            db_items.active = True
+                            db_items.save()
                             
-                            db_items = None
                         except Exception as e:
                             print(f"Ebay Product processing failed with error: {e}")
                             continue
@@ -273,31 +268,28 @@ def sync_ebay_items_with_local():
                     # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
+                            vendor_db, enroll_id = vendor_db
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            db_items = model_class.objects.filter((Q(sku=item.get("sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("sku")) & Q(mpn=item_exists.mpn)))
-                            if not db_items.exists():
-                                continue
-                            
-                            db_item = db_items[0]                 
+                            db_items = model_class.objects.get(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), enrollment_id=enroll_id)
+                               
                             break                    
                         except Exception as ea:
                             continue
 
-                    if db_item.exists():
+                    if db_items.exists():
                         try:
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
-                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=db_item.total_price, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.price, vendor_name=db_item.vendor.name)
+                                item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                             # insert mapped item into inventory
-                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "price": db_item.price, "vendor_name": db_item.vendor.name, "market_item_url": item.get("permalink")})
+                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_items.total_price, "price": db_items.price, "vendor_name": db_items.vendor.name, "market_item_url": item.get("permalink")})
                             # Update the VendorUpdate table to set listed_market to true
-                            db_item.active = True
-                            db_item.save()
-                            
-                            db_items = None
+                            db_items.active = True
+                            db_items.save()
+           
                         except Exception as e:
                             print(f" Woocommerce Product processing failed with error: {e}")
                             continue

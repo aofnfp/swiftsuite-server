@@ -130,43 +130,42 @@ class General_operations:
                         model_name = enrollment.vendor.name.capitalize() + "Update"
                         # Get the actual model class from the string name
                         model_class = apps.get_model('vendorEnrollment', model_name)
-                        db_items = model_class.objects.filter(((Q(sku=prod.get("ebay_sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn")))), enrollment_id=enrollment.id)
+                        db_items = model_class.objects.get(((Q(sku=prod.get("sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn")))), enrollment_id=enrollment.id)
                         if not db_items.exists():
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
                             continue
-                        
-                        db_item = db_items[0]                          
+                                                 
                     except Exception as ea:
                         prod["error"] = str(ea)
                         unmapped_items.append(prod)
                         continue
                     
-                    if db_item:
+                    if db_items:
                         try:
                             market_enrollment = MarketplaceEnronment.objects.filter(user_id=userid, market_name=market_name).first()
                             # Modify selling price before updating on ebay 
-                            selling_price = float(db_item.total_price) + float(market_enrollment.fixed_markup) + ((float(market_enrollment.fixed_percentage_markup)/100) * float(db_item.total_price)) + ((float(market_enrollment.profit_margin)/100) * float(db_item.total_price))
-                            if db_item.map:
+                            selling_price = float(db_items.total_price) + float(market_enrollment.fixed_markup) + ((float(market_enrollment.fixed_percentage_markup)/100) * float(db_items.total_price)) + ((float(market_enrollment.profit_margin)/100) * float(db_items.total_price))
+                            if db_items.map:
                                 try:
-                                    if selling_price < float(db_item.map):
-                                        selling_price = float(db_item.map)
+                                    if selling_price < float(db_items.map):
+                                        selling_price = float(db_items.map)
                                 except:
                                     return Response(f"Selling price calculation error.", status=status.HTTP_400_BAD_REQUEST)
                             # Create or update the product on GeneralProduct table
-                            item_product, created = Generalproducttable.objects.update_or_create(sku=prod.get("sku"), user_id=userid, defaults={"active": True, "total_product_cost": db_item.total_price, "map": db_item.map, "enrollment_id": db_item.enrollment_id, "product_id": db_item.product_id, "quantity": db_item.quantity, "price": db_item.price, "vendor_name": vendor_name})                           
+                            item_product, created = Generalproducttable.objects.update_or_create(sku=prod.get("sku"), user_id=userid, defaults={"active": True, "total_product_cost": db_items.total_price, "map": db_items.map, "enrollment_id": db_items.enrollment_id, "product_id": db_items.product_id, "quantity": db_items.quantity, "price": db_items.price, "vendor_name": vendor_name})                           
                             # Item exists, check if we need to update price or quantity
-                            inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "quantity": db_item.quantity, "vendor_name": db_item.vendor.name, "fixed_markup": market_enrollment.fixed_markup, "fixed_percentage_markup": market_enrollment.fixed_percentage_markup, "profit_margin": market_enrollment.profit_margin, "percentage_markup": market_enrollment.percentage_markup})
+                            inentory, created = InventoryModel.objects.update_or_create(id=prod.get("id"), defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_items.total_price, "quantity": db_items.quantity, "vendor_name": db_items.vendor.name, "fixed_markup": market_enrollment.fixed_markup, "fixed_percentage_markup": market_enrollment.fixed_percentage_markup, "profit_margin": market_enrollment.profit_margin, "percentage_markup": market_enrollment.percentage_markup})
                             # Update the VendorUpdate table to set listed_market to true
-                            db_item.active = True
-                            db_item.save()
+                            db_items.active = True
+                            db_items.save()
                             
                         except Exception as e:
                             prod["error"] = str(e)
                             unmapped_items.append(prod)
                             continue
                 
-                return JsonResponse({"Message": "Items mapped successfully", "Failed to map items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
+                return JsonResponse({"Message": "Items mapped successfully", "Failed_to_map_items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to map item.", status=status.HTTP_400_BAD_REQUEST)
 
