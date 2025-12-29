@@ -195,7 +195,7 @@ def update_inventory_price_quantity():
                 
             for item in all_ebay_items:
                 # Check if the item has a vendor mapped to it
-                if item.vendor_name.lower() == "not found":
+                if item.vendor_name.lower() == "not found" or item.manual_map == True:
                     continue
                 try:
                     # Get updated price and quantity from the product table

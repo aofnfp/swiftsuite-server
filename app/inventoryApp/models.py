@@ -61,6 +61,7 @@ class InventoryModel(models.Model):
     ends_status = models.CharField(null=True, unique=False, max_length=20)
     market_item_url = models.TextField(null=True, unique=False)
     vendor_identifier = models.CharField(null=True, unique=False, max_length=50)
+    manual_map = models.BooleanField(default=False, unique=False)
     
 
     
