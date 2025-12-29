@@ -60,6 +60,7 @@ class InventoryModel(models.Model):
     last_updated = models.DateTimeField(auto_now=True, unique=False, null=False)
     ends_status = models.CharField(null=True, unique=False, max_length=20)
     market_item_url = models.TextField(null=True, unique=False)
+    vendor_identifier = models.CharField(null=True, unique=False, max_length=50)
     
 
     

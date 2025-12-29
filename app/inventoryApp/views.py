@@ -98,7 +98,7 @@ class General_operations:
                 inventory_objects = paginator.page(paginator.num_pages)
 
             enrollment = Enrollment.objects.filter(user_id=userid)
-            vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+            vendor_list = [vendor.identifier for vendor in enrollment]
 
             return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
@@ -123,12 +123,14 @@ class General_operations:
                 vendor_name = serializer_data['vendor_name']
                 product_objects = serializer_data['product_objects']
                 unmapped_items = []
+                # Get all enrollment details of the user
+                enrollment = Enrollment.objects.get(user_id=userid, identifier=vendor_name)
                 for prod in product_objects:
                     try:
-                        model_name = vendor_name.capitalize() + "Update"
+                        model_name = enrollment.vendor.name.capitalize() + "Update"
                         # Get the actual model class from the string name
                         model_class = apps.get_model('vendorEnrollment', model_name)
-                        db_items = model_class.objects.filter((Q(sku=prod.get("ebay_sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn"))))
+                        db_items = model_class.objects.filter(((Q(sku=prod.get("ebay_sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn")))), enrollment_id=enrollment.id)
                         if not db_items.exists():
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
