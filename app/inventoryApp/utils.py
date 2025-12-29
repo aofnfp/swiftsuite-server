@@ -189,7 +189,7 @@ def sync_ebay_items_with_local():
     for user in user_token:
         # Get list of vendors registered by the user
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
-        vendor_list = [vendor_name.vendor.name.capitalize() for vendor_name in enrollment]
+        vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             db_item = None
@@ -208,20 +208,21 @@ def sync_ebay_items_with_local():
                     # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
+                            vendor_db, vendor_id = vendor_db
                             model_name = vendor_db + "Update"
                             # Get the actual model class from the string name
                             model_class = apps.get_model('vendorEnrollment', model_name)
-                            db_items = model_class.objects.filter((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn)))
+                            db_items = model_class.objects.filter(((Q(sku=item.get("ebay_sku")) & Q(upc=item_exists.upc)) | (Q(sku=item.get("ebay_sku")) & Q(mpn=item_exists.mpn))), enrollment_id=vendor_id)
                             if not db_items.exists():
                                 continue
-                            
-                            db_item = db_items[0]        
+                        
                             break                    
                         except Exception as ea:
                             continue
 
-                    if db_item:
+                    if db_items.exists():
                         try:
+                            db_item = db_items[0]
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
@@ -284,14 +285,14 @@ def sync_ebay_items_with_local():
                         except Exception as ea:
                             continue
 
-                    if db_item:
+                    if db_item.exists():
                         try:
                             # Check if the product exists in GeneralProduct table
                             item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item_exists.product_id).first()
                             if not item_product:
                                 item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_item.sku, upc=db_item.upc, mpn=db_item.mpn, active=True, total_product_cost=db_item.total_price, map=db_item.map, enrollment_id=db_item.enrollment_id, product_id=db_item.product_id, quantity=db_item.quantity, price=db_item.price, vendor_name=db_item.vendor.name)
                             # insert mapped item into inventory
-                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "price": db_item.price, "vendor_name": db_item.vendor.name, "market_item_url": item.get("market_item_url")})
+                            inentory, created = InventoryModel.objects.update_or_create(market_item_id=item.get("id"), user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_item.total_price, "price": db_item.price, "vendor_name": db_item.vendor.name, "market_item_url": item.get("permalink")})
                             # Update the VendorUpdate table to set listed_market to true
                             db_item.active = True
                             db_item.save()
