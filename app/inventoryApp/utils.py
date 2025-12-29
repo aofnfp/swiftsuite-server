@@ -203,6 +203,8 @@ def sync_ebay_items_with_local():
                 try:
                     # verify if item already existing on inventory
                     item_exists = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
+                    if item_exists.manual_map == True:
+                        continue
                     # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
@@ -265,6 +267,8 @@ def sync_ebay_items_with_local():
                 try:
                     # verify if item already existing on inventory
                     item_exists = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("id"))
+                    if item_exists.manual_map == True:
+                        continue
                     # Find the product in vendor update tables
                     for vendor_db in vendor_list:
                         try:
