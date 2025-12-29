@@ -250,7 +250,7 @@ def sync_ebay_order_with_local():
 
 
 def get_ebay_order_details(user_id, market_name, ebay_order_id):
-    logger.info(f"Fetching eBay order details for User ID: {user_id}, Market: {market_name}, Order ID: {ebay_order_id}")
+    print(user_id, market_name, ebay_order_id, "inside get_ebay_order_details")
     enroll_id = MarketplaceEnronment.objects.filter(user_id=user_id, marketplace_name=market_name).first()._id
     
     access_token = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay").access_token
