@@ -131,7 +131,7 @@ class General_operations:
                         # Get the actual model class from the string name
                         model_class = apps.get_model('vendorEnrollment', model_name)
                         db_items = model_class.objects.get(((Q(sku=prod.get("sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn")))), enrollment_id=enrollment.id)
-                        if not db_items.exists():
+                        if not db_items:
                             prod["error"] = "No matching product found in vendor's inventory"
                             unmapped_items.append(prod)
                             continue
