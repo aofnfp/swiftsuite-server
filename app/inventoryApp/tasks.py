@@ -1,13 +1,13 @@
 from celery import shared_task
-from .utils import sync_ebay_items_with_local
+from .utils import download_marketplace_items_to_inventory, map_marketplace_items_to_vendor
 from .update_market import check_ended_status_update_quantity_price, update_inventory_price_quantity
 
 
 @shared_task(queue='heavy-inv')
-def sync_ebay_inventory_task():
+def download_marketplace_items_to_inventory_task():
     """Background task to sync eBay items with local database"""
-    sync_ebay_items_with_local()
-    return "Inventory Sync completed successfully"
+    download_marketplace_items_to_inventory()
+    return "Download marketplace items to inventory completed successfully"
 
 @shared_task(queue='default')
 def update_inventory_price_quantity_task():
@@ -20,3 +20,10 @@ def check_ended_status_update_quantity_price_task():
     """Background task to check if eBay items have ended"""
     check_ended_status_update_quantity_price()
     return "Check eBay item ended completed successfully"
+
+@shared_task(queue='default')
+def map_marketplace_items_to_vendor_task():
+    """Background task to map marketplace items to vendor update tables"""
+    map_marketplace_items_to_vendor()
+    return "Mapping marketplace items to vendor completed successfully"
+
