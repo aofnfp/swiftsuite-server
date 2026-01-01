@@ -40,14 +40,15 @@ case "$1" in
             --concurrency=3 \
             --pool=prefork
     ;;
+
     celery-heavy-inv)
-        echo "Starting Celery heavy CPU worker (compute-intensive tasks)..."
-        exec celery -A swiftsuite worker \
-            --loglevel=info \
-            --queues=heavy-inv \
-            --pool=solo \
-            --loglevel=info
+    echo "Starting Celery heavy CPU worker (compute-intensive tasks)..."
+    exec celery -A swiftsuite worker \
+        --loglevel=info \
+        --queues=heavy-inv \
+        --pool=solo
     ;;
+
 
     beat)
         echo "Starting Celery Beat..."
