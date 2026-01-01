@@ -95,7 +95,7 @@ def get_product_ordered_from_background(enroll_id):
     #         else:
     #             print(f"Failed to retrieve orders: {response.text}")
         
-    #     return orders  
+    #     return orders   
     # except Exception as e:
     #     print(f'Could not fetch ordered items from ebay Error: {e}')
     #     return None

@@ -1257,4 +1257,5 @@ class WooCommerce:
             return Response(f"Fail to save product.", status=status.HTTP_400_BAD_REQUEST)
         
 
-    
+class Shopify:
+    pass
