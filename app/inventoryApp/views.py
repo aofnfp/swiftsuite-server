@@ -163,7 +163,7 @@ class General_operations:
                 
                 return JsonResponse({"Message": "Items mapped successfully", "Failed_to_map_items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to map item.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to map item. {e}", status=status.HTTP_400_BAD_REQUEST)
 
     
     # Get umapped product details in the inventory for mapping to vendor
