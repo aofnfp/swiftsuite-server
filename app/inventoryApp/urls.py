@@ -1,9 +1,8 @@
 from .views import MarketInventory, update_product_on_marketplace, WooCommerceInventory, General_operations
-from .tasks import sync_ebay_items_with_local
+
 from django.urls import path
 
 urlpatterns = [
-    path('syc_ebay_product_map/', sync_ebay_items_with_local, name='syc_ebay_product_map'),
     path('get_all_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', MarketInventory.get_all_inventory_items, name='get_all_inventory_items'),
     path('get_all_saved_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', MarketInventory.get_all_saved_inventory_items, name='get_all_saved_inventory_items'),
     path('get_saved_product_for_listing/<int:inventoryid>/', MarketInventory.get_saved_product_for_listing, name='get_saved_product_for_listing'),
