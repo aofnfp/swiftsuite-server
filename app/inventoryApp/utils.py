@@ -191,6 +191,7 @@ def download_marketplace_items_to_inventory():
             ebay_items = get_all_items_on_ebay(user._id)
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if ebay_items == None:
+                print(f"Ebay inventory download failed with error: {ebay_items}")
                 continue
             # Construct a list of ebay items with relevant details
             for item in ebay_items:
@@ -205,6 +206,7 @@ def download_marketplace_items_to_inventory():
                     # Get product details from eBay
                     product_details = get_item_details(user._id, item.get("ebay_item_id"))
                     if product_details == None:
+                        print(f"Ebay get product details failed for item id {item.get('ebay_item_id')} with error: {product_details}")
                         continue
                     else:
                         # Get the upc and mpn if the main mpn field does not exist
@@ -225,9 +227,9 @@ def download_marketplace_items_to_inventory():
         elif user.marketplace_name == "Woocommerce":
             # Fetch all item from Woocommerce
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
-            for item in all_woocommercer_items:
-                # If item does not exist, insert new item
-                try:
+            try:
+                for item in all_woocommercer_items:
+                    # If item does not exist, insert new item
                     categories = item.get("categories") or []
                     category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
                     category_name = categories[0].get("name") if categories else "NA"
@@ -235,8 +237,8 @@ def download_marketplace_items_to_inventory():
                     picture_url = images[0].get("src") if images else "NA"
                     item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name") or "NA", description=json.dumps(item.get("description")) or "NA", category_id=category_id, category=category_name, woo_category_name=category_name, sku=item.get("sku") or 0,  start_price=item.get("price") or 0, price=item.get("price") or 0, picture_detail=picture_url, thumbnailImage="Null", quantity=item.get("stock_quantity") or 0, return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", date_created=(item.get("date_created") or "NA").split("T")[0], active=True, vendor_name="Not Found", enable_charity=True, market_name="Woocommerce", map_status=False, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin,  market_item_url=item.get("permalink") or "NA"))
 
-                except Exception as e:
-                    print(f"Woocommerce Product failed to insert into inventory {e}")
+            except Exception as e:
+                print(f"Woocommerce Product failed to insert into inventory {e}")
                 
 
 
