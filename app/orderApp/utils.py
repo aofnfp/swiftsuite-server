@@ -10,8 +10,6 @@ import logging
 from vendorEnrollment.models import Enrollment
 from .models import VendorOrderLog
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
@@ -176,8 +174,8 @@ def get_all_woocommerce_orders(userid):
 
 
 # Update orders on ebay to the one on local database at the background
-@api_view(["GET"])
-def sync_ebay_order_with_local(request):
+# @api_view(["GET"])
+def sync_ebay_order_with_local():
 
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
@@ -260,9 +258,7 @@ def sync_ebay_order_with_local(request):
                         save_order.save()
                     except Exception as e:
                         print(f"WooCommerce Ordered item insert error {e} ")
-
-    return Response("Ebay orders synced successfully", status=status.HTTP_200_OK)  
-          
+                
         # # Update all orders status to completed if the orderFulfillmentStatus is COMPLETED
         # all_ordered_item = OrdersOnEbayModel.objects.filter(user_id=user.user_id, orderFulfillmentStatus="NOT _STARTED")
         # for order in all_ordered_item:
