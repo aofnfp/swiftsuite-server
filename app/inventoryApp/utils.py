@@ -144,20 +144,18 @@ def get_item_details(enroll_id, item_id):
         product_data = response.json()
         if response.status_code == 200:
             return product_data
-        else:
-            return None
-            #  raise ValueError(product_data)
-    except ValueError as e:
-        error_data = e.args[0]  # The dict you passed into the exception
 
-        if isinstance(error_data, dict) and error_data.get('errors'):
-            if error_data['errors'][0].get('errorId') == 1001:
-                access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                return get_item_details(enroll_id, item_id)  # return recursion call
-            else:
-                print(f"Error ID: {error_data['errors'][0].get('errorId')}")
-                return None
-        else:
+        raise ValueError(product_data)
+    except ValueError as e:
+        try:
+            error_data = e.args[0]  # The dict you passed into the exception
+
+            if isinstance(error_data, dict) and error_data.get('errors'):
+                if error_data['errors'][0].get('errorId') == 1001:
+                    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+                    get_item_details(enroll_id, item_id)  # return recursion call
+                
+        except Exception as ex:
             print("Unexpected error format:", error_data)
             return None
 
