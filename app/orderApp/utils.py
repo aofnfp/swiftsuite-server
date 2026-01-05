@@ -1,5 +1,4 @@
 import requests, time
-from Swiftsuite.accounts.permissions import IsOwnerOrHasPermission
 from marketplaceApp.views import Ebay
 from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
@@ -10,7 +9,7 @@ from woocommerce import API
 import logging
 from vendorEnrollment.models import Enrollment
 from .models import VendorOrderLog
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
