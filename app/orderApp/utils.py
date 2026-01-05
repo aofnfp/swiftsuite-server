@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 # Function to retrieve all fulfilment orders from Ebay
-def get_product_ordered_from_background(enroll_id):
+def get_product_ordered_from_background(userid, enroll_id):
+    # refresh access token if expired
+    access_token = Ebay.refresh_access_token(userid, "Ebay")
     # Get access_token
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
@@ -177,7 +179,7 @@ def sync_ebay_order_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
-            ebay_orders = get_product_ordered_from_background(user._id)
+            ebay_orders = get_product_ordered_from_background(user.user_id, user._id)
             if ebay_orders == None:
                 # Refresh access token and retry fetching orders
                 print(f"Access token expired for user {user.user_id}, refreshing token.")
