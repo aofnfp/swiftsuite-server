@@ -49,7 +49,7 @@ class RsrOrderApiClient:
                 "WishQTY": item.get("quantity", 0),
             })
 
-        return {
+        payload = {
             "Username": self.username,
             "Password": self.password,
             "ShipAddress": address.get("addressLine1"),
@@ -64,6 +64,9 @@ class RsrOrderApiClient:
             "POS": self.pos,
             "FillOrKill": 1,
         }
+        
+        print("RSR Payload:", payload)
+        return payload
 
     def place_order(self, payload):
         response = requests.post(
