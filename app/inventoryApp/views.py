@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os, requests, json
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -647,23 +648,48 @@ class MarketInventory:
                 userid = user.parent_id
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
-        # Set up the headers with the access token
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json',
-        }
-        # get full product details of the item in inventory
+    
+        # Set eBay API endpoint and headers
         try:
-            item_url = f"https://api.ebay.com/buy/browse/v1/item/get_item_by_legacy_id?legacy_item_id={item_id}"
-            response = requests.get(item_url, headers=headers)
-        
-            product_data = response.json()
-            if response.status_code == 200:
-                return JsonResponse(product_data, safe=False, status=status.HTTP_200_OK)
+            HEADERS = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+                }   
+            all_orders = []
+            base_url = "https://api.ebay.com/sell/fulfillment/v1/order"
+            limit = 100
+            offset = 0
 
-            raise ValueError(product_data)
-        except ValueError as e:
-            return Response(f"Error fetching product details: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+            # Custom date range
+            start_time = (datetime.utcnow() - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+            params = {
+                "filter": f"creationdate:[{start_time}..]",
+                "limit": limit
+            }
+
+            while True:
+                params["offset"] = offset
+                response = requests.get(base_url, headers=HEADERS, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    if "orders" not in data:
+                        break
+                    orders = data["orders"]
+                    all_orders.extend(orders)
+                    if len(orders) < limit:
+                        break
+                    offset += limit
+                else:
+                    if response.json().get('errors')[0]['errorId'] == 1001:
+                        return None
+                    else:
+                        return "Error"
+            return JsonResponse({"ordered_items":all_orders}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+
+        
    
     
 
