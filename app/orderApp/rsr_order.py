@@ -20,9 +20,9 @@ class RsrOrderApiClient:
         self.enrollment = vendor_order_log.enrollment
         self.user = self.enrollment.user
 
-        self.username = self.enrollment.vendor.username
-        self.password = self.enrollment.vendor.password
-        self.pos = self.enrollment.vendor.pos
+        self.username = self.enrollment.account.Username
+        self.password = self.enrollment.account.Password
+        self.pos = self.enrollment.account.POS
 
     def get_order_details(self):
         order = self.vendor_order_log.order
