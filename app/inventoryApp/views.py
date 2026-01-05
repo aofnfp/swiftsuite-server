@@ -645,8 +645,25 @@ class MarketInventory:
         if user:
             if user.parent_id:
                 userid = user.parent_id
-        # eb = Ebay()
-        # access_token = eb.refresh_access_token(userid, "Ebay")
+        eb = Ebay()
+        access_token = eb.refresh_access_token(userid, "Ebay")
+        # Set up the headers with the access token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json',
+        }
+        # get full product details of the item in inventory
+        try:
+            item_url = f"https://api.ebay.com/buy/browse/v1/item/get_item_by_legacy_id?legacy_item_id={item_id}"
+            response = requests.get(item_url, headers=headers)
+        
+            product_data = response.json()
+            if response.status_code == 200:
+                return JsonResponse(product_data, safe=False, status=status.HTTP_200_OK)
+
+            raise ValueError(product_data)
+        except ValueError as e:
+            return Response(f"Error fetching product details: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
    
     
 
