@@ -1,4 +1,5 @@
 import requests, time
+from Swiftsuite.accounts.permissions import IsOwnerOrHasPermission
 from marketplaceApp.views import Ebay
 from marketplaceApp.models import MarketplaceEnronment
 from ratelimit import limits, sleep_and_retry
@@ -9,6 +10,7 @@ from woocommerce import API
 import logging
 from vendorEnrollment.models import Enrollment
 from .models import VendorOrderLog
+from rest_framework.decorators import api_view, permission_classes
 
 logger = logging.getLogger(__name__)
 
@@ -172,9 +174,9 @@ def get_all_woocommerce_orders(userid):
 
 
 # Update orders on ebay to the one on local database at the background
-# @api_view(["GET"])
-def sync_ebay_order_with_local():
-    eb = Ebay()
+@api_view(["GET"])
+def sync_ebay_order_with_local(request):
+
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token and user id
     for user in user_token:
         if user.marketplace_name == "Ebay":    

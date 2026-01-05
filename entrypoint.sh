@@ -123,7 +123,7 @@ case "$1" in
             --queues=heavy-inv \
             --loglevel=info \
             --pool=solo \
-            --concurrency=1 \
+            --concurrency=4 \
             --heartbeat-interval=30 \
             --time-limit=360
     ;;
