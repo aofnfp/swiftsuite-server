@@ -105,7 +105,15 @@ def get_product_ordered_from_background(enroll_id):
 # Limit to 5 calls per second (eBay's typical limit)
 @sleep_and_retry
 @limits(calls=5, period=1)
-def get_item_ordered_details(access_token, item_id):
+def get_item_ordered_details(enroll_id, item_id):
+    # Get access_token
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token =  user_data.access_token
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
     # Set up the headers with the access token
     headers = {
@@ -186,7 +194,7 @@ def sync_ebay_order_with_local():
                         exist_order = OrdersOnEbayModel.objects.get(orderId=ebay_order_id)
                         product_data = InventoryModel.objects.all().filter(market_item_id=lineItems.get("legacyItemId"))
                         if len(product_data) == 0:
-                            product_data = {"vendor_name":""}
+                            product_data = {"vendor_name":"Not Found"}
                         else:
                             product_data = product_data.values()[0]
                         OrdersOnEbayModel.objects.filter(orderId=ebay_order_id).update(orderFulfillmentStatus=order.get("orderFulfillmentStatus"), orderPaymentStatus=order.get("orderPaymentStatus"), vendor_name=product_data.get('vendor_name'))
@@ -215,7 +223,7 @@ def sync_ebay_order_with_local():
                         except Exception as e:
                             print(f"Ordered item insert error {e} ")
                             continue
-
+            
         elif user.marketplace_name == "WooCommerce":
             woocommerce_orders = get_all_woocommerce_orders(user.user_id)
             for order in woocommerce_orders:
@@ -247,6 +255,16 @@ def sync_ebay_order_with_local():
                     except Exception as e:
                         print(f"WooCommerce Ordered item insert error {e} ")
                 
+        # Update all orders status to completed if the orderFulfillmentStatus is COMPLETED
+        all_ordered_item = OrdersOnEbayModel.objects.filter(user_id=user.user_id, orderFulfillmentStatus="NOT _STARTED")
+        for order in all_ordered_item:
+            try:
+                if order.purchaseMarketplaceId == "EBAY_US":
+                    order_detail = get_item_ordered_details(user._id, order.legacyItemId)
+                    invetory_item = InventoryModel.objects.get(market_item_id=order.marketItemId)
+                    OrdersOnEbayModel.objects.filter(orderId=order.orderId).update(orderFulfillmentStatus=order_detail.get("orderFulfillmentStatus"), orderPaymentStatus=order_detail.get("orderPaymentStatus"), vendor_name=invetory_item.vendor_name)
+            except:
+                continue
 
 
 def get_ebay_order_details(user_id, market_name, ebay_order_id):
