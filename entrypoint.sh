@@ -20,10 +20,8 @@ case "$1" in
             --queues=default \
             --loglevel=info \
             --pool=gevent \
-            --concurrency=20 \
-            --heartbeat-interval=30 \
-            --soft-time-limit=240 \
-            --time-limit=300
+            --concurrency=50 \
+            
     ;;
 
     celery-heavy-io)
@@ -63,9 +61,7 @@ case "$1" in
 
     beat)
         echo "Starting Celery Beat..."
-        exec celery -A swiftsuite beat \
-            --loglevel=info \
-            --scheduler django_celery_beat.schedulers:DatabaseScheduler
+        exec celery -A swiftsuite beat --loglevel=info
     ;;
 
     *)
