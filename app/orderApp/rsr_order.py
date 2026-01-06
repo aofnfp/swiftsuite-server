@@ -64,7 +64,7 @@ class RsrOrderApiClient:
             "PONum": self.vendor_order_log.reference_id,
             "Email": self.user.email,
             "Items": items,
-            "POS": '1',
+            "POS": self.pos,
             "FillOrKill": 1,
         }
         
