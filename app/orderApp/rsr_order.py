@@ -164,6 +164,6 @@ def place_order_rsr(request, market_name, orderid):
     vendor_order.save()
 
     return JsonResponse(
-        {"message": "Failed to place RSR order", "data": result},
+        {"message": f"Failed to place RSR order: {payload}", "data": result},
         status=status.HTTP_400_BAD_REQUEST
     )
