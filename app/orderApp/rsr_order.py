@@ -10,6 +10,9 @@ from vendorEnrollment.models import Enrollment
 from accounts.models import User
 from .models import OrdersOnEbayModel
 from .utils import get_vendor_enrollment
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RsrOrderApiClient:
@@ -141,7 +144,7 @@ def place_order_rsr(request, market_name, orderid):
     rsr_client = RsrOrderApiClient(vendor_order)
     order_details = rsr_client.get_order_details()
     payload = rsr_client.build_payload(order_details)
-    print("RSR Payload:", payload)
+    logger.debug(f"RSR Order Payload: {payload}")
     result = rsr_client.place_order(payload)
     
     if result.get("StatusCode") == 0:
