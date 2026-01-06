@@ -146,7 +146,6 @@ def place_order_rsr(request, market_name, orderid):
     rsr_client = RsrOrderApiClient(vendor_order)
     order_details = rsr_client.get_order_details()
     payload = rsr_client.build_payload(order_details)
-    logger.debug(f"RSR Order Payload: {payload}")
     result = rsr_client.place_order(payload)
     
     if result.get("StatusCode") == 0:
@@ -166,6 +165,6 @@ def place_order_rsr(request, market_name, orderid):
     vendor_order.save()
 
     return JsonResponse(
-        {"message": f"Failed to place RSR order: {payload}", "data": result},
+        {"message": f"Failed to place RSR order", "data": result},
         status=status.HTTP_400_BAD_REQUEST
     )
