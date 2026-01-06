@@ -44,6 +44,7 @@ class RsrOrderApiClient:
 
         buyer = order_details.get("buyer", {}).get("buyerRegistrationAddress", {})
         address = buyer.get("contactAddress", {})
+        sellerId = order_details.get("sellerId", "Unknown")
 
         items = []
         for item in order_details.get("lineItems", []):
@@ -55,6 +56,7 @@ class RsrOrderApiClient:
         payload = {
             "Username": self.username,
             "Password": self.password,
+            "Storename": sellerId,
             "ShipAddress": address.get("addressLine1"),
             "ShipCity": address.get("city"),
             "ShipState": address.get("stateOrProvince"),
