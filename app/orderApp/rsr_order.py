@@ -61,11 +61,11 @@ class RsrOrderApiClient:
             "PONum": self.vendor_order_log.reference_id,
             "Email": self.user.email,
             "Items": items,
-            "POS": 'I',
+            "POS": self.pos,
             "FillOrKill": 1,
         }
         
-        print("RSR Payload:", payload)
+        
         return payload
 
     def place_order(self, payload):
@@ -141,6 +141,7 @@ def place_order_rsr(request, market_name, orderid):
     rsr_client = RsrOrderApiClient(vendor_order)
     order_details = rsr_client.get_order_details()
     payload = rsr_client.build_payload(order_details)
+    print("RSR Payload:", payload)
     result = rsr_client.place_order(payload)
     
     if result.get("StatusCode") == 0:
