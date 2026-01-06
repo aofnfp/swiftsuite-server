@@ -59,12 +59,12 @@ class RsrOrderApiClient:
             "ShipCity": address.get("city"),
             "ShipState": address.get("stateOrProvince"),
             "ShipZip": address.get("postalCode"),
-            "ShipAcccount": self.username,
+            "ShipAccount": self.username,
             "ContactNum": buyer.get("primaryPhone", {}).get("phoneNumber"),
             "PONum": self.vendor_order_log.reference_id,
             "Email": self.user.email,
             "Items": items,
-            "POS": 1,
+            "POS": '1',
             "FillOrKill": 1,
         }
         
@@ -75,7 +75,7 @@ class RsrOrderApiClient:
         response = requests.post(
             f"{self.BASE_URL}/place-order",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json=payload,
+            data=payload,
             timeout=30
         )
         return response.json()
@@ -84,7 +84,7 @@ class RsrOrderApiClient:
         response = requests.post(
             f"{self.BASE_URL}/check-order",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json=payload,
+            data=payload,
             timeout=30
         )
         return response.json()
