@@ -43,34 +43,27 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
             userid = user.parent_id
 
     try:
-        product_info = get_object_or_404(InventoryModel, id=inventory_id)
-        serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
-        if serializer.is_valid():
-            if market_name == "Ebay":
-                response = mk.update_item_on_ebay(request, userid, inventory_id)
-                # Check the response
-                if response == "Success":
-                    serializer.save()
-                    return Response(f"Product updated successfully", status=status.HTTP_200_OK)
-                else:
-                    return Response(f"Failed to update product on eBay. {response}", status=status.HTTP_400_BAD_REQUEST)
+        if market_name == "Ebay":
+            response = mk.update_item_on_ebay(request, userid, inventory_id)
+            if response == "Success":
+                return Response(f"Product updated successfully", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Error updating product on Ebay: {response}", status=status.HTTP_400_BAD_REQUEST)
 
-            elif market_name == "Woocommerce":
-                response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
-                if response == "Success":
-                    serializer.save()
-                    return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
-                else:
-                    return Response(f"Unexpected error: {response}", status=status.HTTP_400_BAD_REQUEST)
-            elif market_name == "Shopify":
-                pass
-            elif market_name == "Amazon":
-                pass
-            elif market_name == "all":
-                pass
+        elif market_name == "Woocommerce":
+            response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
+            if response == "Success":
+                return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Error updating product on Woocommerce: {response}", status=status.HTTP_400_BAD_REQUEST)
+
+        elif market_name == "Shopify":
+            pass
+        elif market_name == "Amazon":
+            pass
+        elif market_name == "all":
+            pass
             
-        else:
-            return Response(f"Form not filled correctly.", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
@@ -494,8 +487,10 @@ class MarketInventory:
         response = requests.post(url, headers=headers, data=body)
         # return response
         if response.status_code == 200:
+            serializer.save()
             return "Success"
-        raise Exception(f"Error updating: {response.text}")
+        return f"Error updating: {response.text}"
+
         # else:
         #     # return f"Error updating: {response.text}"
         #     return response
