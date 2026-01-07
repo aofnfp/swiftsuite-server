@@ -390,7 +390,7 @@ class MarketInventory:
         xml_item_specifics = minv.json_to_xml(product_info.item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
         try:
-            minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['product'].id, validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'], userid)
+            minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
             if type(minimum_offer_price) != float:
                 return Response(f"Failed to fetch data", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

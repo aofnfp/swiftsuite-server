@@ -771,7 +771,6 @@ class Ebay:
         
     # Calculate the minimum offer price of product going to ebay
     def calculated_minimum_offer_price(self, start_price, min_profit_mergin, profit_margin):
-        eb = Ebay()
         try:
             minimum_offer_price = float(start_price) + float(profit_margin) + ((float(min_profit_mergin)/100) * float(start_price))
         except Exception as e:
