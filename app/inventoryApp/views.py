@@ -375,7 +375,8 @@ class MarketInventory:
 
 
     # Create a function to update item information on Ebay
-    def update_item_on_ebay(self, request, userid, inventory_id):
+    api_view(['PUT'])
+    def update_item_on_ebay(request, userid, market_name, inventory_id):
         minv = MarketInventory()
         eb = Ebay()
         
@@ -419,83 +420,79 @@ class MarketInventory:
         except:
             return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
         
-        # try:
-        # XML Body for ReviseItem request
-        body = f"""
-        <?xml version="1.0" encoding="utf-8"?>
-        <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>{access_token}</eBayAuthToken>
-            </RequesterCredentials>
-            <Item>
-                <ItemID>{validated_data['market_item_id']}</ItemID>
-                <Title><![CDATA[{validated_data['title']}]]></Title>
-                <Description><![CDATA[
-                    {validated_data['description']}
-                ]]></Description>
-                <globalId>EBAY-US</globalId>
-                <PrimaryCategory>
-                    <CategoryID>{validated_data['category_id']}</CategoryID>
-                </PrimaryCategory>
-                <ConditionID>1000</ConditionID>
-                <SKU>{validated_data['sku']}</SKU>
-                {f'''<ProductListingDetails>
-                    <UPC>{validated_data['upc']}</UPC>
-                </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
-                <!-- ... more PictureURL values allowed here ... -->
-                {item_image_url}
-                
-                <!-- ... Item specifics are placed here ... -->
-                {xml_item_specifics}
-                
-                <autoPay>false</autoPay>
-                <PostalCode>{validated_data['postal_code']}</PostalCode>
-                <Location>{validated_data['location']}</Location>
-                <Country>US</Country>
-                <Currency>USD</Currency>
-                <ListingDuration>GTC</ListingDuration>
-                <SellerProfiles>
-                    <SellerPaymentProfile>
-                        <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
-                    </SellerPaymentProfile>
-                    <SellerReturnProfile>
-                        <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
-                    </SellerReturnProfile>
-                    <SellerShippingProfile>
-                        <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
-                    </SellerShippingProfile>
-                </SellerProfiles>
-                <StartPrice>{validated_data['start_price']}</StartPrice>
-                <Quantity>{validated_data['quantity']}</Quantity>
-                <ListingDetails>
-                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                </ListingDetails>
-                <listingInfo>
-                    <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
-                    <buyItNowAvailable>false</buyItNowAvailable>
-                    <listingType>{validated_data['listingType']}</listingType>
-                    <gift>{validated_data['gift']}</gift>
-                    <watchCount>6</watchCount>
-                </listingInfo>
-                <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
-                <IsMultiVariationListing>true</IsMultiVariationListing>
-                <TopRatedListing>false</TopRatedListing>
-            </Item>
-            </ReviseItemRequest>"""
-        # Make the POST request
-        response = requests.post(url, headers=headers, data=body)
-        # return response
-        if response.status_code == 200:
-            serializer.save()
-            return "Success"
-        return f"Error updating: {response.text}"
+        try:
+            # XML Body for ReviseItem request
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{validated_data['market_item_id']}</ItemID>
+                    <Title><![CDATA[{validated_data['title']}]]></Title>
+                    <Description><![CDATA[
+                        {validated_data['description']}
+                    ]]></Description>
+                    <globalId>EBAY-US</globalId>
+                    <PrimaryCategory>
+                        <CategoryID>{validated_data['category_id']}</CategoryID>
+                    </PrimaryCategory>
+                    <ConditionID>1000</ConditionID>
+                    <SKU>{validated_data['sku']}</SKU>
+                    {f'''<ProductListingDetails>
+                        <UPC>{validated_data['upc']}</UPC>
+                    </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
+                    <!-- ... more PictureURL values allowed here ... -->
+                    {item_image_url}
+                    
+                    <!-- ... Item specifics are placed here ... -->
+                    {xml_item_specifics}
+                    
+                    <autoPay>false</autoPay>
+                    <PostalCode>{validated_data['postal_code']}</PostalCode>
+                    <Location>{validated_data['location']}</Location>
+                    <Country>US</Country>
+                    <Currency>USD</Currency>
+                    <ListingDuration>GTC</ListingDuration>
+                    <SellerProfiles>
+                        <SellerPaymentProfile>
+                            <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
+                        </SellerPaymentProfile>
+                        <SellerReturnProfile>
+                            <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
+                        </SellerReturnProfile>
+                        <SellerShippingProfile>
+                            <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
+                        </SellerShippingProfile>
+                    </SellerProfiles>
+                    <StartPrice>{validated_data['start_price']}</StartPrice>
+                    <Quantity>{validated_data['quantity']}</Quantity>
+                    <ListingDetails>
+                        <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
+                        <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
+                    </ListingDetails>
+                    <listingInfo>
+                        <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
+                        <buyItNowAvailable>false</buyItNowAvailable>
+                        <listingType>{validated_data['listingType']}</listingType>
+                        <gift>{validated_data['gift']}</gift>
+                        <watchCount>6</watchCount>
+                    </listingInfo>
+                    <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
+                    <IsMultiVariationListing>true</IsMultiVariationListing>
+                    <TopRatedListing>false</TopRatedListing>
+                </Item>
+                </ReviseItemRequest>"""
+            # Make the POST request
+            response = requests.post(url, headers=headers, data=body)
+            # return response
+            if response.status_code == 200:
+                serializer.save()
+                return Response("Success", status=status.HTTP_200_OK)
 
-        # else:
-        #     # return f"Error updating: {response.text}"
-        #     return response
-        # except ConnectionError as e:
-        #     return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(f"Error in payload {e}", status=status.HTTP_400_BAD_REQUEST)
      
     
     # Get all product already listed on Ebay from the inventory
