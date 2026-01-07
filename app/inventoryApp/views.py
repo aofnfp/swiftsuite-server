@@ -53,7 +53,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                     serializer.save()
                     return Response(f"Product updated successfully", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Failed to update product on eBay. {response.text}", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Failed to update product on eBay. {response}", status=status.HTTP_400_BAD_REQUEST)
 
             elif market_name == "Woocommerce":
                 response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
@@ -495,9 +495,9 @@ class MarketInventory:
         # return response
         if response.status_code == 200:
             return "Success"
-        else:
-            # return f"Error updating: {response.text}"
-            return response
+        # else:
+        #     # return f"Error updating: {response.text}"
+        #     return response
         # except ConnectionError as e:
         #     return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
      
