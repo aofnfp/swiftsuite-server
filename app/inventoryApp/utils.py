@@ -252,7 +252,7 @@ def map_marketplace_items_to_vendor():
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
- 
+            db_items = None
             # Find the product in vendor update tables
             for vendor_db in vendor_list:
                 try:
