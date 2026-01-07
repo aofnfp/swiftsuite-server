@@ -375,8 +375,7 @@ class MarketInventory:
 
 
     # Create a function to update item information on Ebay
-    @api_view(['PUT'])
-    def update_item_on_ebay(request, userid, market_name, inventory_id):
+    def update_item_on_ebay(self, request, userid, inventory_id):
         minv = MarketInventory()
         eb = Ebay()
         
@@ -489,10 +488,12 @@ class MarketInventory:
             # return response
             if response.status_code == 200:
                 serializer.save()
-                return Response("Success", status=status.HTTP_200_OK)
+                return "Success"
+            else:
+                return "Error"
 
         except Exception as e:
-            return Response(f"Error in payload {e}", status=status.HTTP_400_BAD_REQUEST)
+            return "Error"
      
     
     # Get all product already listed on Ebay from the inventory
@@ -738,6 +739,7 @@ class WooCommerceInventory:
             # --- MAKE THE UPDATE REQUEST ---
             response = wcapi.put(f"products/{product_info.market_item_id}", update_data)
             if response.status_code == 200:
+                serializer.save()
                 return "Success"
             elif response.status_code == 404:
                 return "Product not found — check the product ID."
@@ -746,7 +748,7 @@ class WooCommerceInventory:
             else:
                 return "Unexpected error"
         except ConnectionError as e:
-            return Response(f"Error in the form", status=status.HTTP_400_BAD_REQUEST)
+            return "Error"
 
     # Get all existing listed product on woocommerce
     @with_module('inventory')
