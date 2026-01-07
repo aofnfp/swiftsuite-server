@@ -53,7 +53,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
                     serializer.save()
                     return Response(f"Product updated successfully", status=status.HTTP_200_OK)
                 else:
-                    return Response(f"Failed to update product on eBay.", status=status.HTTP_400_BAD_REQUEST)
+                    return Response(f"Failed to update product on eBay. {response}", status=status.HTTP_400_BAD_REQUEST)
 
             elif market_name == "Woocommerce":
                 response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
@@ -241,6 +241,7 @@ class General_operations:
                     status=status.HTTP_400_BAD_REQUEST
                 )
             inventory_listing = InventoryModel.objects.filter(user_id=userid).filter(
+                Q(title__icontains=search_query) |
                 Q(sku__icontains=search_query) |
                 Q(upc__icontains=search_query) |
                 Q(market_item_id__icontains=search_query) |
@@ -495,9 +496,9 @@ class MarketInventory:
             if response.status_code == 200:
                 return "Success"
             else:
-                return "Error updating"
+                return f"Error updating: {response.text}"
         except ConnectionError as e:
-            return Response(f"Error in payload", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
      
     
     # Get all product already listed on Ebay from the inventory
