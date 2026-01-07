@@ -495,6 +495,7 @@ class MarketInventory:
         # return response
         if response.status_code == 200:
             return "Success"
+        raise Exception(f"Error updating: {response.text}")
         # else:
         #     # return f"Error updating: {response.text}"
         #     return response

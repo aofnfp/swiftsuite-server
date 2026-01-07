@@ -256,11 +256,16 @@ def map_marketplace_items_to_vendor():
             # Find the product in vendor update tables
             for vendor_db in vendor_list:
                 try:
+                    # Get upc and mpn from the inventory item
+                    for specific in item.item_specific_fields:
+                        upc = specific.get("UPC") if specific.get("UPC") else item.upc
+                        mpn = specific.get("MPN") if specific.get("MPN") else item.mpn
+
                     vendor_db, enroll_id = vendor_db
                     model_name = vendor_db + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enroll_id)
+                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=upc)) | (Q(sku=item.sku) & Q(mpn=mpn))), enrollment_id=enroll_id)
                 
                     break                    
                 except Exception as ea:
@@ -286,4 +291,7 @@ def map_marketplace_items_to_vendor():
                 except Exception as e:
                             print(f"Mapping Product processing failed with error: {e}")
                             continue
+
+
+{'Type': 'Ring', 'Brand': 'Warne', 'Model': 'HyperLite Rings', 'MPN': '8521DE', 'Color': 'Flat Dark Earth', 'Finish': 'Matte', 'Size': '34mm Medium', 'Fit': 'Picatinny', 'UPC': '656813114535'}
 
