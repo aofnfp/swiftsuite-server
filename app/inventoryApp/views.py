@@ -497,7 +497,7 @@ class MarketInventory:
             return "Success"
         else:
             # return f"Error updating: {response.text}"
-            return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
+            return response
         # except ConnectionError as e:
         #     return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
      
