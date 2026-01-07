@@ -375,7 +375,7 @@ class MarketInventory:
 
 
     # Create a function to update item information on Ebay
-    api_view(['PUT'])
+    @api_view(['PUT'])
     def update_item_on_ebay(request, userid, market_name, inventory_id):
         minv = MarketInventory()
         eb = Ebay()
