@@ -498,7 +498,8 @@ class MarketInventory:
             else:
                 return f"Error updating: {response.text}"
         except ConnectionError as e:
-            return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
+            return f"Connection error occurred: {e}"
+            # return Response(f"Error in payload ", status=status.HTTP_400_BAD_REQUEST)
      
     
     # Get all product already listed on Ebay from the inventory

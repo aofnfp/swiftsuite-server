@@ -7,6 +7,7 @@ from xml.etree import ElementTree as ET
 from marketplaceApp.views import Ebay
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Generalproducttable, Enrollment
 from marketplaceApp.models import MarketplaceEnronment
+from orderApp.models import OrdersOnEbayModel
 from ratelimit import limits, sleep_and_retry
 from django.db.models import Q
 from woocommerce import API
@@ -279,6 +280,8 @@ def map_marketplace_items_to_vendor():
                     # Update the VendorUpdate table to set listed_market to true
                     db_items.active = True
                     db_items.save()
+                    # update the product in order table to reflect the mapping
+                    OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
                     
                 except Exception as e:
                             print(f"Mapping Product processing failed with error: {e}")
