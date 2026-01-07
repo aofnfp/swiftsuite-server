@@ -56,7 +56,7 @@ class RsrOrderApiClient:
         payload = {
             "Username": self.username,
             "Password": self.password,
-            "Storename": sellerId,
+            "Storename": "DOTFAK GROUP LLC",
             "ShipAddress": address.get("addressLine1"),
             "ShipCity": address.get("city"),
             "ShipState": address.get("stateOrProvince"),
