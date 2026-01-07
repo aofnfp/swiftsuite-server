@@ -44,7 +44,7 @@ class RsrOrderApiClient:
 
         buyer = order_details.get("buyer", {}).get("buyerRegistrationAddress", {})
         address = buyer.get("contactAddress", {})
-        sellerId = order_details.get("sellerId", "Unknown")
+        sellerId = buyer.get("fullName")
 
         items = []
         for item in order_details.get("lineItems", []):
@@ -56,7 +56,7 @@ class RsrOrderApiClient:
         payload = {
             "Username": self.username,
             "Password": self.password,
-            "Storename": "DOTFAK GROUP LLC",
+            "Storename": sellerId,
             "ShipAddress": address.get("addressLine1"),
             "ShipCity": address.get("city"),
             "ShipState": address.get("stateOrProvince"),
@@ -165,6 +165,6 @@ def place_order_rsr(request, market_name, orderid):
     vendor_order.save()
 
     return JsonResponse(
-        {"message": f"Failed to place RSR order", "data": result},
+        {"message": f"Failed to place RSR order: {payload}", "data": result},
         status=status.HTTP_400_BAD_REQUEST
     )
