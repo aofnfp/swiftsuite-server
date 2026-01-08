@@ -784,7 +784,7 @@ class WooCommerceInventory:
 
 
 # Inventory background task invocation
-map_marketplace_items_to_vendor_task.delay()
-download_marketplace_items_to_inventory_task.delay()
-check_ended_status_update_quantity_price_task.delay()
-update_inventory_price_quantity_task.delay()
+# map_marketplace_items_to_vendor_task.delay()
+# download_marketplace_items_to_inventory_task.delay()
+# check_ended_status_update_quantity_price_task.delay()
+# update_inventory_price_quantity_task.delay()
