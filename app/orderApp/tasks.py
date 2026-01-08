@@ -1,4 +1,4 @@
-from functools import cache
+from django.core.cache import cache
 from celery import shared_task
 from .utils import sync_ebay_order_with_local
 from .models import OrdersOnEbayModel, VendorOrderLog
