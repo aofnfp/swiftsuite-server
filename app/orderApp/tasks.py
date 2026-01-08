@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from celery import shared_task
+from celery.exceptions import Ignore
 from .utils import sync_ebay_order_with_local
 from .models import OrdersOnEbayModel, VendorOrderLog
 from .utils import create_vendor_order_log
@@ -7,16 +8,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@shared_task(queue='default', bind=True)
+LOCK_KEY = "sync_ebay_order_task_lock"
+LOCK_TIMEOUT = 7200  # 2 hours, adjust based on max runtime
+@shared_task(bind=True, queue='default')
 def sync_ebay_order_task(self):
-    if not cache.add("sync_ebay_order_task", "1", timeout=7200):
-        return "sync_ebay_order_task already running"
+    # Attempt to acquire lock; skip if already running
+    if not cache.add(LOCK_KEY, "1", timeout=LOCK_TIMEOUT):
+        logger.info("sync_ebay_order_task skipped: already running")
+        raise Ignore()  # Skipped task is ignored in Celery
+
+    logger.info("sync_ebay_order_task started")
     try:
-        """Background task to sync eBay items with local database"""
+        # Call your existing sync logic
         sync_ebay_order_with_local()
-        return "Order Sync completed successfully"  
+        logger.info("sync_ebay_order_task completed successfully")
     finally:
-        cache.delete("sync_ebay_order_task")
+        # Always release the lock
+        cache.delete(LOCK_KEY)
+
 
 @shared_task(queue='default')
 def process_vendor_orders():
