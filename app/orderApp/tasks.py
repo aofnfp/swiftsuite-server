@@ -1,3 +1,4 @@
+from functools import cache
 from celery import shared_task
 from .utils import sync_ebay_order_with_local
 from .models import OrdersOnEbayModel, VendorOrderLog
@@ -6,13 +7,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@shared_task(queue='default')
-def sync_ebay_order_task():
-    """Background task to sync eBay items with local database"""
-    sync_ebay_order_with_local()
-    return "Order Sync completed successfully"
-
-
+@shared_task(queue='default', bind=True)
+def sync_ebay_order_task(self):
+    if not cache.add("sync_ebay_order_task", "1", timeout=7200):
+        return "sync_ebay_order_task already running"
+    try:
+        """Background task to sync eBay items with local database"""
+        sync_ebay_order_with_local()
+        return "Order Sync completed successfully"  
+    finally:
+        cache.delete("sync_ebay_order_task")
 
 @shared_task(queue='default')
 def process_vendor_orders():
