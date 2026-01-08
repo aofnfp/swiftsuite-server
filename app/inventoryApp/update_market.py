@@ -105,6 +105,7 @@ def check_if_ebay_item_has_ended(item_id, userid):
     except Exception as e:
         print(f"Failed to fetch access token")
         return None
+    
     url = "https://api.ebay.com/ws/api.dll"
     headers = {
         "X-EBAY-API-CALL-NAME": "GetItem",
