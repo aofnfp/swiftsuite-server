@@ -201,7 +201,9 @@ def download_marketplace_items_to_inventory():
                     # If item already exists, skip to next item
                     check_existing_item = InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
                     if check_existing_item.exists():
+                        check_existing_item.update(market_item_url=item.get("market_item_url"))
                         continue
+
                     # Get product details from eBay
                     product_details = get_item_details(user._id, item.get("ebay_item_id"))
                     if product_details == None:
@@ -228,6 +230,12 @@ def download_marketplace_items_to_inventory():
             all_woocommercer_items = get_woocommerce_existing_products(user.user_id)
             try:
                 for item in all_woocommercer_items:
+                    # If item already exists, skip to next item
+                    check_existing_item = InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("id"))
+                    if check_existing_item.exists():
+                        check_existing_item.update(market_item_url=item.get("permalink"))
+                        continue
+                    
                     # If item does not exist, insert new item
                     categories = item.get("categories") or []
                     category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
@@ -291,7 +299,3 @@ def map_marketplace_items_to_vendor():
                 except Exception as e:
                             print(f"Mapping Product processing failed with error: {e}")
                             continue
-
-
-{'Type': 'Ring', 'Brand': 'Warne', 'Model': 'HyperLite Rings', 'MPN': '8521DE', 'Color': 'Flat Dark Earth', 'Finish': 'Matte', 'Size': '34mm Medium', 'Fit': 'Picatinny', 'UPC': '656813114535'}
-
