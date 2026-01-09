@@ -1,4 +1,6 @@
 import json, requests, time
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from ebaysdk.exception import ConnectionError
@@ -431,5 +433,5 @@ def map_marketplace_items_to_vendor(request, userid, item_id):
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
                     
                 except Exception as e:
-                    print(f"Mapping Product processing failed with error: {e}")
-                    continue
+                    return Response(f"Mapping Product processing failed with error: {e}", status=status.HTTP_400_BAD_REQUEST)
+    return Response("Mapping marketplace items to vendor completed successfully", status=status.HTTP_200_OK)
