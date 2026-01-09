@@ -95,7 +95,7 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --loglevel=info \
             --queues=default \
-            --concurrency=7 \
+            --concurrency=10 \
             --pool=gevent
     ;;
 
