@@ -399,8 +399,8 @@ def map_marketplace_items_to_vendor():
             for vendor_db in vendor_list:
                 try:
                     # Get upc and mpn from the inventory item specific fields if they exist
-                    upc = item.item_specific_fields.get("UPC") if item.item_specific_fields.get("UPC") else item.upc
-                    mpn = item.item_specific_fields.get("MPN") if item.item_specific_fields.get("MPN") else item.mpn
+                    upc = item.item_specific_fields.get("UPC") 
+                    mpn = item.item_specific_fields.get("MPN") 
 
                     vendor_db, enroll_id = vendor_db
                     model_name = vendor_db + "Update"
