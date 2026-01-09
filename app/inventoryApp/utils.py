@@ -409,7 +409,7 @@ def map_marketplace_items_to_vendor(request, userid, item_id):
                     model_name = vendor_db + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=upc)) | (Q(sku=item.sku) & Q(mpn=mpn))), enrollment_id=enroll_id)
+                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enroll_id)
                 
                     break                    
                 except Exception as ea:
