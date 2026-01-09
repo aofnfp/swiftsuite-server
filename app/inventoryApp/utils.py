@@ -391,21 +391,9 @@ def map_marketplace_items_to_vendor():
     user_token = MarketplaceEnronment.objects.all()
     for user in user_token:
         # Get list of vendors registered by the user
-        enrollment = (
-            Enrollment.objects
-            .filter(user_id=user.user_id)
-            .select_related("vendor__vendor")
-            .distinct("vendor__vendor__name")
-        )
-
-        vendor_list = [
-            (e.vendor.vendor.name.capitalize(), e.vendor.id)
-            for e in enrollment
-        ]
-
-        # enrollment = Enrollment.objects.filter(user_id=user.user_id)
-        # vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
-        print(f"vendors list: {vendor_list}")
+        enrollment = Enrollment.objects.filter(user_id=user.user_id)
+        vendor_list = [vendor.vendor.name.capitalize()for vendor in enrollment]
+        print(f"vendors list: {set(vendor_list)}")
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
