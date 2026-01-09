@@ -393,8 +393,11 @@ def map_marketplace_items_to_vendor():
         # Get list of vendors registered by the user
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
         vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
+        print(f"Vendor list for user {user.user_id}: {vendor_list}")
+        
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
+        print(f"Total marketplace items to map for user {user.user_id}: {all_marketplace_items.count()}")
         for item in all_marketplace_items:
             db_items = None
             # Find the product in vendor update tables
@@ -413,7 +416,7 @@ def map_marketplace_items_to_vendor():
                     break                    
                 except Exception as ea:
                     continue
-
+            print(item.sku, item.upc, item.mpn, f"Mapped to vendor product: {db_items}")
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
@@ -433,3 +436,5 @@ def map_marketplace_items_to_vendor():
                     
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
+            else:
+                print(f"No matching vendor product found for inventory item SKU: {item.sku}, UPC: {item.upc}, MPN: {item.mpn}")
