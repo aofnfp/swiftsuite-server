@@ -392,14 +392,13 @@ def map_marketplace_items_to_vendor():
     for user in user_token:
         # Get list of vendors registered by the user
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
-        vendor_list = [vendor.vendor.name.capitalize()for vendor in enrollment]
-        print(f"vendors list: {set(vendor_list)}")
+        vendor_list = [vendor.vendor.name.capitalize() for vendor in enrollment]
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
             db_items = None
             # Find the product in vendor update tables
-            for vendor_db in vendor_list:
+            for vendor_db in set(vendor_list):
                 try:
                     # Get upc and mpn from the inventory item specific fields if they exist
                     upc = item.item_specific_fields.get("UPC") 
@@ -409,7 +408,7 @@ def map_marketplace_items_to_vendor():
                     model_name = vendor_db + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enroll_id)
+                    db_items = model_class.objects.get((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn)))
                 
                     break                    
                 except Exception as ea:
