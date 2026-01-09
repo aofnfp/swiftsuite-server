@@ -14,6 +14,90 @@ from woocommerce import API
 from django.apps import apps
 
 
+
+# Create a function to update items quantity and price at the background on Ebay
+# Limit to 5 calls per second (eBay's typical limit)
+@sleep_and_retry
+@limits(calls=5, period=1)
+def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id):
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token =  user_data.access_token
+    
+    # eBay Trading API endpoint
+    url = 'https://api.ebay.com/ws/api.dll'
+
+    headers = {
+        'X-EBAY-API-CALL-NAME': 'ReviseItem',
+        'X-EBAY-API-SITEID': '0',  # Change this to your site ID, 0 is for US
+        'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',  # eBay API version
+        'Content-Type': 'text/xml',
+        'Authorization': f'Bearer {access_token}'
+    }
+    try:
+        # XML Body for ReviseItem request
+        if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>{price,}</StartPrice>
+                    <Quantity>{quantity}</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """
+        elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>{price}</StartPrice>
+                </Item>
+            </ReviseItemRequest>
+            """
+        elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <Quantity>{quantity}</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """
+        else:
+            return None
+        
+        # Make the POST request
+        response = requests.post(url, headers=headers, data=body)
+        if response.status_code == 429:  # Rate limit hit
+            retry_after = int(response.headers.get('Retry-After', 2))
+            time.sleep(retry_after)
+            return update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id)
+        # Check the response
+        if response.status_code == 200:
+            return f"Success: {response.text}"
+        else:
+            return f"Error:{response.text}"
+    except ConnectionError as e:
+        return f'Error: {e}'
+
+
 # Get all products already listed on Ebay using sku
 def get_all_items_on_ebay(enroll_id):
     eb = Ebay()
@@ -162,6 +246,43 @@ def get_item_details(enroll_id, item_id):
 
 
 
+# Function to update product on woocommerce store
+# Limit to 5 calls per second (eBay's typical limit)
+@sleep_and_retry
+@limits(calls=5, period=1)
+def update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid):
+    try:
+        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
+        # Set up the WooCommerce API client
+        wcapi = API(
+            url = enrollment.wc_consumer_url, 
+            consumer_key = enrollment.wc_consumer_key,  
+            consumer_secret = enrollment.wc_consumer_secret, 
+            version = "wc/v3"
+        )
+        # Product payload mapped to WooCommerce
+        update_data = {
+            "type": "simple",
+            "regular_price": str(selling_price),
+            "stock_quantity": str(quantity),
+            "manage_stock": True,
+        }
+
+        # --- MAKE THE UPDATE REQUEST ---
+        response = wcapi.put(f"products/{market_item_id}", update_data)
+        if response.status_code == 429:  # Rate limit hit
+            retry_after = int(response.headers.get('Retry-After', 2))
+            time.sleep(retry_after)
+            return update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid)
+        if response.status_code == 200:
+            return "Success"
+        else:
+            print(f"Error: Woocommerce update fails. Status code: {response.status_code}, Response: {response.text}")
+    except Exception as e:
+        print(f"Error: Error from the try block woocommerce update. {e}")
+        return None
+
+
 # Get all existing listed products on Woocommerce store for a specific user.
 def get_woocommerce_existing_products(user_id):
     enrollment = MarketplaceEnronment.objects.get(user_id=user_id, marketplace_name="Woocommerce")
@@ -178,7 +299,7 @@ def get_woocommerce_existing_products(user_id):
 
 
 # Download all items from all marketplace to local inventory
-def download_marketplace_items_to_inventory():
+def download_item_update_market_price_quantity():
     all_ebay_items = []
 
     # Get all user with ebay marketplace to sync their products
@@ -199,31 +320,37 @@ def download_marketplace_items_to_inventory():
             for item in all_ebay_items:                         
                 try:
                     # If item already exists, skip to next item
-                    check_existing_item = InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
-                    if check_existing_item.exists():
-                        check_existing_item.update(market_item_url=item.get("market_item_url"))
+                    existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
+                    # Update the market url on inventory
+                    InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
+                    if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
                         continue
+                    # Update the price and quantity of product on Ebay
+                    if existing_item.start_price != item.get("ebay_price") or existing_item.quantity != item.get("ebay_quantity"):
+                        response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, existing_item.quantity, user._id)
+                except:
+                    try:
+                        # Get product details from eBay
+                        product_details = get_item_details(user._id, item.get("ebay_item_id"))
+                        if product_details == None:
+                            print(f"Ebay get product details failed for item id {item.get('ebay_item_id')} with error: {product_details}")
+                            continue
+                        else:
+                            # Get the upc and mpn if the main mpn field does not exist
+                            for specific in product_details.get("localizedAspects"):
+                                ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
+                                ebay_mpn = specific.get("value") if specific.get("name") == "MPN" else product_details.get("mpn") 
 
-                    # Get product details from eBay
-                    product_details = get_item_details(user._id, item.get("ebay_item_id"))
-                    if product_details == None:
-                        print(f"Ebay get product details failed for item id {item.get('ebay_item_id')} with error: {product_details}")
-                        continue
-                    else:
-                        # Get the upc and mpn if the main mpn field does not exist
-                        for specific in product_details.get("localizedAspects"):
-                            ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
-                            ebay_mpn = specific.get("value") if specific.get("name") == "MPN" else product_details.get("mpn") 
-
-                        # Put all the custom fields in the dictionary
-                        custom_fields = {}
-                        for object in product_details.get("localizedAspects"):
-                            custom_fields[object.get("name")] = object.get("value")
-                            
-                        inentory, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults={"title": item.get("Title"),"description": json.dumps(product_details.get("shortDescription")), "location": product_details.get("itemLocation")["country"], "category_id": product_details.get("categoryId"), "category": product_details.get("categoryPath"), "sku": item.get("ebay_sku"), "upc": ebay_upc, "mpn": ebay_mpn, "start_price": product_details.get("price")["value"], "price": product_details.get("price")["value"], "cost": product_details.get("price")["value"], "picture_detail": product_details.get("image")["imageUrl"], "thumbnailImage": product_details.get("additionalImages"), "postal_code": product_details.get("itemLocation")["postalCode"], "city": product_details.get("itemLocation")["city"], "country": product_details.get("itemLocation")["country"], "quantity": item.get("ebay_quantity"), "return_profileID": item.get("ReturnProfileID"), "return_profileName": item.get("ReturnProfileName"), "payment_profileID": item.get("PaymentProfileID"), "payment_profileName": item.get("PaymentProfileName"), "shipping_profileID": item.get("ShippingProfileID"), "shipping_profileName": item.get("ShippingProfileName"), "bestOfferEnabled": True, "listingType": item.get("ListingType"), "item_specific_fields": custom_fields, "market_logos": product_details.get("listingMarketplaceId"), "date_created": product_details.get("itemCreationDate").split("T")[0], "active": True, "vendor_name": "Not Found", "map_status": False, "market_name": "Ebay", "fixed_percentage_markup": user.fixed_percentage_markup, "fixed_markup": user.fixed_markup, "profit_margin": user.profit_margin, "min_profit_mergin": user.min_profit_mergin, "charity_id": user.charity_id, "enable_charity": user.enable_charity, "market_item_url": item.get("market_item_url")})
-                
-                except Exception as e:
+                            # Put all the custom fields in the dictionary
+                            custom_fields = {}
+                            for object in product_details.get("localizedAspects"):
+                                custom_fields[object.get("name")] = object.get("value")
+                                
+                            inentory, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults={"title": item.get("Title"),"description": json.dumps(product_details.get("shortDescription")), "location": product_details.get("itemLocation")["country"], "category_id": product_details.get("categoryId"), "category": product_details.get("categoryPath"), "sku": item.get("ebay_sku"), "upc": ebay_upc, "mpn": ebay_mpn, "start_price": product_details.get("price")["value"], "price": product_details.get("price")["value"], "cost": product_details.get("price")["value"], "picture_detail": product_details.get("image")["imageUrl"], "thumbnailImage": product_details.get("additionalImages"), "postal_code": product_details.get("itemLocation")["postalCode"], "city": product_details.get("itemLocation")["city"], "country": product_details.get("itemLocation")["country"], "quantity": item.get("ebay_quantity"), "return_profileID": item.get("ReturnProfileID"), "return_profileName": item.get("ReturnProfileName"), "payment_profileID": item.get("PaymentProfileID"), "payment_profileName": item.get("PaymentProfileName"), "shipping_profileID": item.get("ShippingProfileID"), "shipping_profileName": item.get("ShippingProfileName"), "bestOfferEnabled": True, "listingType": item.get("ListingType"), "item_specific_fields": custom_fields, "market_logos": product_details.get("listingMarketplaceId"), "date_created": product_details.get("itemCreationDate").split("T")[0], "active": True, "vendor_name": "Not Found", "map_status": False, "market_name": "Ebay", "fixed_percentage_markup": user.fixed_percentage_markup, "fixed_markup": user.fixed_markup, "profit_margin": user.profit_margin, "min_profit_mergin": user.min_profit_mergin, "charity_id": user.charity_id, "enable_charity": user.enable_charity, "market_item_url": item.get("market_item_url")})
+                    
+                    except Exception as e:
                         print(f"Ebay Product failed to insert into inventory {e}")
+                        continue
 
         elif user.marketplace_name == "Woocommerce":
             # Fetch all item from Woocommerce
@@ -231,11 +358,17 @@ def download_marketplace_items_to_inventory():
             try:
                 for item in all_woocommercer_items:
                     # If item already exists, skip to next item
-                    check_existing_item = InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("id"))
-                    if check_existing_item.exists():
-                        check_existing_item.update(market_item_url=item.get("permalink"))
+                    existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("id"))
+                    # Update the market url on inventory
+                    InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("id")).update(market_item_url=item.get("permalink"))
+                    if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
                         continue
-                    
+                    # Update the price and quantity of product on Woocommerce
+                    if existing_item.start_price != item.item.get("price") or existing_item.quantity != item.get("stock_quantity"):
+                        response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, user.user_id)
+
+            except:
+                try:
                     # If item does not exist, insert new item
                     categories = item.get("categories") or []
                     category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
@@ -244,8 +377,9 @@ def download_marketplace_items_to_inventory():
                     picture_url = images[0].get("src") if images else "NA"
                     item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name") or "NA", description=json.dumps(item.get("description")) or "NA", category_id=category_id, category=category_name, woo_category_name=category_name, sku=item.get("sku") or 0,  start_price=item.get("price") or 0, price=item.get("price") or 0, picture_detail=picture_url, thumbnailImage="Null", quantity=item.get("stock_quantity") or 0, return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", date_created=(item.get("date_created") or "NA").split("T")[0], active=True, vendor_name="Not Found", enable_charity=True, market_name="Woocommerce", map_status=False, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin,  market_item_url=item.get("permalink") or "NA"))
 
-            except Exception as e:
-                print(f"Woocommerce Product failed to insert into inventory {e}")
+                except Exception as e:
+                    print(f"Woocommerce Product failed to insert into inventory {e}")
+                    continue
                 
 
 
@@ -297,5 +431,5 @@ def map_marketplace_items_to_vendor():
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
                     
                 except Exception as e:
-                            print(f"Mapping Product processing failed with error: {e}")
-                            continue
+                    print(f"Mapping Product processing failed with error: {e}")
+                    continue
