@@ -399,7 +399,7 @@ def map_marketplace_items_to_vendor():
         )
 
         vendor_list = [
-            (e.vendor.name.capitalize(), e.id)
+            (e.vendor.vendor.name.capitalize(), e.vendor.id)
             for e in enrollment
         ]
 
