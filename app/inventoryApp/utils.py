@@ -404,7 +404,7 @@ def map_marketplace_items_to_vendor():
                     upc = item.item_specific_fields.get("UPC") 
                     mpn = item.item_specific_fields.get("MPN") 
 
-                    vendor_db, enroll_id = vendor_db
+                    # vendor_db= vendor_db
                     model_name = vendor_db + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
