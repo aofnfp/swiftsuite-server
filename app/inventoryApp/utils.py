@@ -414,7 +414,6 @@ def map_marketplace_items_to_vendor():
                     break                    
                 except Exception as ea:
                     continue
-            print(item.sku, item.upc, item.mpn, f"Mapped to vendor product: {db_items}")
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
