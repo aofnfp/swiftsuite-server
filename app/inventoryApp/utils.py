@@ -386,8 +386,7 @@ def download_item_update_market_price_quantity():
 
 
 # Map items in inventory to products vendor update tables
-@api_view(['GET'])
-def map_marketplace_items_to_vendor(request, userid, item_id):
+def map_marketplace_items_to_vendor():
     # Get all user in with marketplace enrollment to map their products
     user_token = MarketplaceEnronment.objects.all()
     for user in user_token:
@@ -433,5 +432,4 @@ def map_marketplace_items_to_vendor(request, userid, item_id):
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
                     
                 except Exception as e:
-                    return Response(f"Mapping Product processing failed with error: {e}", status=status.HTTP_400_BAD_REQUEST)
-                return Response("Mapping marketplace items to vendor completed successfully", status=status.HTTP_200_OK)
+                    print(f"Mapping Product processing failed with error: {e}")
