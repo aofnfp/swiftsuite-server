@@ -26,6 +26,7 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
+from .tasks import map_marketplace_items_to_vendor_task
 
 
 # Function to update product across marketplaces
@@ -779,4 +780,4 @@ class WooCommerceInventory:
         return JsonResponse({"Listed_products":products}, safe=False, status=status.HTTP_200_OK)
     
 
-
+map_marketplace_items_to_vendor_task.delay()
