@@ -412,6 +412,7 @@ def map_marketplace_items_to_vendor():
                 
                     break                    
                 except Exception as ea:
+                    print(f"Mapping Product not found in {vendor_db} for sku {item.sku} with error: {ea}")
                     continue
             if db_items:
                 try:
