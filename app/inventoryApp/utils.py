@@ -401,14 +401,15 @@ def map_marketplace_items_to_vendor():
             for vendor_db in set(vendor_list):
                 try:
                     # Get upc and mpn from the inventory item specific fields if they exist
-                    # upc = item.item_specific_fields.get("UPC") 
-                    # mpn = item.item_specific_fields.get("MPN") 
+                    specific_fields = json.loads(item.item_specific_fields)
+                    upc = item.upc if item.upc else specific_fields.get("UPC")
+                    mpn = item.mpn if item.mpn else specific_fields.get("MPN")
 
                     vendor_db_name, enrolled_id = vendor_db
-                    model_name = vendor_db_name + "pdate"
+                    model_name = vendor_db_name + "update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enrolled_id)
+                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=upc)) | (Q(sku=item.sku) & Q(mpn=mpn))), enrollment_id=enrolled_id)
                 
                     break                    
                 except Exception as ea:
