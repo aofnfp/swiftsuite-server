@@ -392,7 +392,7 @@ def map_marketplace_items_to_vendor():
     for user in user_token:
         # Get list of vendors registered by the user
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
-        vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
+        vendor_list = [(vendor.vendor.name, vendor.id) for vendor in enrollment]
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
@@ -405,7 +405,7 @@ def map_marketplace_items_to_vendor():
                     # mpn = item.item_specific_fields.get("MPN") 
 
                     vendor_db_name, enrolled_id = vendor_db
-                    model_name = vendor_db_name + "Update"
+                    model_name = vendor_db_name + "pdate"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enrolled_id)
