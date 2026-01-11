@@ -49,8 +49,9 @@ class RsrOrderApiClient:
         items = []
         for item in order_details.get("lineItems", []):
             items.append({
-                "UPCcode": "792695370802",
-                "PartNum": item.get("sku"),
+                "RSRStockNumber": "DSG206KA3TZ0",
+                "UPC": "792695370802",
+                "MfgPartNum": item.get("sku"),
                 "WishQTY": item.get("quantity", 0),
             })
 
