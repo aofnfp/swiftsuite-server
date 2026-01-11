@@ -50,9 +50,7 @@ class RsrOrderApiClient:
         for item in order_details.get("lineItems", []):
             items.append({
                 "RSRStockNumber": "DSG206KA3TZ0",
-                "UPC": "792695370802",
-                "MfgPartNum": item.get("sku"),
-                "WishQTY": item.get("quantity", 0),
+                "WishQTY": 1
             })
 
         payload = {
@@ -97,6 +95,20 @@ class RsrOrderApiClient:
         import uuid
         unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-RSR-{order_id}-{unique_suffix}"
+    
+    def validate_item(self, sku):
+        response = requests.get(
+            f"{self.BASE_URL}/get-items",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            params={
+                "Username": self.username,
+                "Password": self.password,
+                "MfgPartNum": sku,
+                "POS": self.pos
+            },
+            timeout=30
+        )
+        return response.json()
 
 
 
