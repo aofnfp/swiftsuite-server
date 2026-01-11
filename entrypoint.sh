@@ -95,7 +95,7 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --loglevel=info \
             --queues=default \
-            --concurrency=50 \
+            --concurrency=10 \
             --pool=gevent
     ;;
 
@@ -123,7 +123,7 @@ case "$1" in
             --queues=heavy-inv \
             --loglevel=info \
             --pool=solo \
-            --concurrency=4 \
+            --concurrency=1 \
             --heartbeat-interval=30 \
             --time-limit=360
     ;;

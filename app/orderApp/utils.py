@@ -258,17 +258,8 @@ def sync_ebay_order_with_local():
                         save_order.save()
                     except Exception as e:
                         print(f"WooCommerce Ordered item insert error {e} ")
+                        continue
                 
-        # # Update all orders status to completed if the orderFulfillmentStatus is COMPLETED
-        # all_ordered_item = OrdersOnEbayModel.objects.filter(user_id=user.user_id, orderFulfillmentStatus="NOT _STARTED")
-        # for order in all_ordered_item:
-        #     try:
-        #         if order.purchaseMarketplaceId == "EBAY_US":
-        #             order_detail = get_item_ordered_details(user._id, order.legacyItemId)
-        #             invetory_item = InventoryModel.objects.get(market_item_id=order.marketItemId)
-        #             OrdersOnEbayModel.objects.filter(orderId=order.orderId).update(orderFulfillmentStatus=order_detail.get("orderFulfillmentStatus"), orderPaymentStatus=order_detail.get("orderPaymentStatus"), vendor_name=invetory_item.vendor_name)
-        #     except:
-        #         continue
 
 
 def get_ebay_order_details(user_id, market_name, ebay_order_id):

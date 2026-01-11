@@ -25,3 +25,9 @@ for app_name in settings.INSTALLED_APPS:
 @task_prerun.connect
 def close_db_connections(**kwargs):
     db.connections.close_all()
+
+worker_max_tasks_per_child = 50
+worker_prefetch_multiplier = 1
+task_acks_late = True
+broker_heartbeat = 60
+broker_connection_timeout = 120

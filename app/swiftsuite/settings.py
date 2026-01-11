@@ -135,8 +135,10 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         "HOST": config("DB_HOST", default="127.0.0.1"),
         "PORT": config("DB_PORT", cast=int, default=3306),
+        'CONN_MAX_AGE': 60,
         'OPTIONS': {
             'autocommit': True,
+            'charset': 'utf8mb4',
         },
     }
 }
