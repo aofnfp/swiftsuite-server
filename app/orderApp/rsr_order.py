@@ -49,7 +49,7 @@ class RsrOrderApiClient:
         items = []
         for item in order_details.get("lineItems", []):
             items.append({
-                "UPCcode": "792695370802"
+                "UPCcode": "792695370802",
                 "PartNum": item.get("sku"),
                 "WishQTY": item.get("quantity", 0),
             })
