@@ -407,8 +407,8 @@ def map_marketplace_items_to_vendor(request, userid, item_id):
             #         print("JSON decode error in item_specific_fields :", e)
 
             try:
-                upc = item.upc or specific_fields.get("UPC")
-                mpn = item.mpn or specific_fields.get("MPN")
+                upc = item.upc or item.item_specific_fields.get("UPC")
+                mpn = item.mpn or item.item_specific_fields.get("MPN")
 
                 for vendor_name, enrolled_id in vendor_list:
                     model_name = vendor_name + "update"
@@ -420,7 +420,7 @@ def map_marketplace_items_to_vendor(request, userid, item_id):
             except Exception as e:
                 print(f"Error mapping SKU {item.sku}, upc {upc}, mpn {mpn} in vendor {vendor_name}: {e}")
                 continue
-            print(f"Mapping item {item.market_item_id} for user {user.user_id} with vendor product {db_items}")
+        
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
