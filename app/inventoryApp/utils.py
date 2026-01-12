@@ -406,7 +406,7 @@ def map_marketplace_items_to_vendor():
                     mpn = item.mpn if item.mpn else specific_fields.get("MPN")
 
                     vendor_db_name, enrolled_id = vendor_db
-                    model_name = vendor_db_name + "update"
+                    model_name = vendor_db_name + 'update'
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=upc)) | (Q(sku=item.sku) & Q(mpn=mpn))), enrollment_id=enrolled_id)
