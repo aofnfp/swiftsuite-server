@@ -410,15 +410,14 @@ def map_marketplace_items_to_vendor():
                 mpn = item.mpn or specific_fields.get("MPN")
 
                 for vendor_name, enrolled_id in vendor_list:
-                    model_name = f"{vendor_name}update"
+                    model_name = vendor_name + "update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=upc)) | (Q(sku=item.sku) & Q(mpn=mpn))), enrollment_id=enrolled_id)
                 
                     break                    
-            except model_class.DoesNotExist:
-                continue
             except Exception as e:
+                print(f"Error mapping SKU {item.sku} in vendor {vendor_name}: {e}")
                 continue
             print(f"Mapping item {item.market_item_id} for user {user.user_id} with vendor product {db_items}")
             if db_items:
