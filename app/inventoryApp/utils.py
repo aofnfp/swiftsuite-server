@@ -398,23 +398,29 @@ def map_marketplace_items_to_vendor():
         for item in all_marketplace_items:
             db_items = None
             # Find the product in vendor update tables
-            for vendor_db in set(vendor_list):
+            if item.item_specific_fields:
                 try:
-                    # Get upc and mpn from the inventory item specific fields if they exist
                     specific_fields = json.loads(item.item_specific_fields)
-                    upc = item.upc if item.upc else specific_fields.get("UPC")
-                    mpn = item.mpn if item.mpn else specific_fields.get("MPN")
+                except json.JSONDecodeError:
+                    pass
 
-                    vendor_db_name, enrolled_id = vendor_db
-                    model_name = vendor_db_name + 'update'
+            try:
+                upc = item.upc or specific_fields.get("UPC")
+                mpn = item.mpn or specific_fields.get("MPN")
+
+                for vendor_name, enrolled_id in vendor_list:
+                    model_name = f"{vendor_name}update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=upc)) | (Q(sku=item.sku) & Q(mpn=mpn))), enrollment_id=enrolled_id)
                 
                     break                    
-                except Exception as ea:
-                    print(f"Mapping Product not found in {vendor_db} for sku {item.sku} with error: {ea}")
-                    continue
+            except model_class.DoesNotExist:
+                continue
+            except Exception as e:
+                print(f"Error mapping SKU {item.sku} in vendor {vendor_name}: {e}")
+                continue
+
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
@@ -434,4 +440,5 @@ def map_marketplace_items_to_vendor():
                     
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
+                    continue
            
