@@ -397,6 +397,7 @@ def map_marketplace_items_to_vendor():
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
             db_items = None
+            specific_fields = {}
             # Find the product in vendor update tables
             if item.item_specific_fields:
                 try:
