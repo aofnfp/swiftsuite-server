@@ -400,11 +400,11 @@ def map_marketplace_items_to_vendor(request, userid, item_id):
             db_items = None
             specific_fields = {}
             # Find the product in vendor update tables
-            if item.item_specific_fields:
-                try:
-                    specific_fields = json.loads(item.item_specific_fields)
-                except json.JSONDecodeError as e:
-                    print("JSON decode error in item_specific_fields :", e)
+            # if item.item_specific_fields:
+            #     try:
+            #         specific_fields = json.loads(item.item_specific_fields)
+            #     except json.JSONDecodeError as e:
+            #         print("JSON decode error in item_specific_fields :", e)
 
             try:
                 upc = item.upc or specific_fields.get("UPC")
