@@ -417,12 +417,10 @@ def map_marketplace_items_to_vendor():
                 
                     break                    
             except model_class.DoesNotExist:
-                print(f"SKU {item.sku} not found in vendor {vendor_name} update table.")
                 continue
             except Exception as e:
-                print(f"Error mapping SKU {item.sku} in vendor {vendor_name}: {e}")
                 continue
-
+            print(f"Mapping item {item.market_item_id} for user {user.user_id} with vendor product {db_items}")
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
