@@ -418,7 +418,7 @@ def map_marketplace_items_to_vendor():
                 
                     break                    
             except Exception as e:
-                print(f"Error mapping SKU {item.sku}, upc {item.upc}, mpn {item.mpn} in vendor {vendor_name}: {e}")
+                # print(f"Error mapping SKU {item.sku}, upc {item.upc}, mpn {item.mpn} in vendor {vendor_name}: {e}")
                 continue
         
             if db_items:
