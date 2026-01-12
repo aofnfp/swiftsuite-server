@@ -402,8 +402,8 @@ def map_marketplace_items_to_vendor():
             if item.item_specific_fields:
                 try:
                     specific_fields = json.loads(item.item_specific_fields)
-                except json.JSONDecodeError:
-                    pass
+                except json.JSONDecodeError as e:
+                    print("JSON decode error in item_specific_fields :", e)
 
             try:
                 upc = item.upc or specific_fields.get("UPC")
@@ -417,6 +417,7 @@ def map_marketplace_items_to_vendor():
                 
                     break                    
             except model_class.DoesNotExist:
+                print(f"SKU {item.sku} not found in vendor {vendor_name} update table.")
                 continue
             except Exception as e:
                 print(f"Error mapping SKU {item.sku} in vendor {vendor_name}: {e}")
@@ -426,13 +427,12 @@ def map_marketplace_items_to_vendor():
                 try:
                     # Check if the product exists in GeneralProduct table
                     try:
-                        item_product = Generalproducttable.objects.filter(user_id=user.user_id, id=item.product_id)
-                        item_product = item_product[0]
+                        item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
                     except:
                         item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                     
                     # Item exists, check if we need to update price or quantity
-                    inventory, created = InventoryModel.objects.update_or_create(market_item_id=item.market_item_id, user_id=user.user_id, defaults={"map_status": True, "product_id": item_product.id, "total_product_cost": db_items.total_price, "price": db_items.price, "vendor_name": db_items.vendor.name, "vendor_identifier": db_items.enrollment.identifier})
+                    inventory, created = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier)
                     # Update the VendorUpdate table to set listed_market to true
                     db_items.active = True
                     db_items.save()

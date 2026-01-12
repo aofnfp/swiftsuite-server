@@ -2577,17 +2577,3 @@
 }
 
 
-property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('rsr', 145) for sku GFRO-1911CNR-0101121 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 121) for sku GFRO-1911CNR-0101121 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 115) for sku GFRO-1911CNR-0101121 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('rsr', 145) for sku SFXR1-A with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 121) for sku SFXR1-A with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 115) for sku SFXR1-A with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('rsr', 145) for sku GCGPC-K01-129L41 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 121) for sku GCGPC-K01-129L41 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 115) for sku GCGPC-K01-129L41 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('rsr', 145) for sku TIP182978R with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 121) for sku TIP182978R with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('fragrancex', 115) for sku TIP182978R with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-today at 09:06:01 [2026-01-12 08:06:01,734: WARNING/MainProcess] Mapping Product not found in ('rsr', 145) for sku BC47706 with error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
