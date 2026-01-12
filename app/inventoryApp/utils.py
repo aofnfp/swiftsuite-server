@@ -386,7 +386,8 @@ def download_item_update_market_price_quantity():
 
 
 # Map items in inventory to products vendor update tables
-def map_marketplace_items_to_vendor():
+@api_view(['GET'])
+def map_marketplace_items_to_vendor(userid, item_id):
     # Get all user in with marketplace enrollment to map their products
     user_token = MarketplaceEnronment.objects.all()
     for user in user_token:
