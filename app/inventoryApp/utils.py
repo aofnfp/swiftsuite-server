@@ -398,16 +398,16 @@ def map_marketplace_items_to_vendor():
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
             db_items = None
-            try:
-                for vendor_name, enrolled_id in vendor_list:
+            for vendor_name, enrolled_id in vendor_list:
+                try:
                     model_name = vendor_name + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))) & Q(enrollment_id=enrolled_id))
                 
                     break                    
-            except Exception as e:
-                continue
+                except Exception as e:
+                    continue
 
             if db_items:
                 try:
@@ -415,11 +415,7 @@ def map_marketplace_items_to_vendor():
                     try:
                         item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
                     except:
-                        try:
-                            item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
-                        except Exception as e:
-                            print(f"General Product creation failed with error: {e}")
-                            continue
+                        item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                     
                     # Item exists, check if we need to update price or quantity
                     inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier)
