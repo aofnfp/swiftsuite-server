@@ -398,27 +398,16 @@ def map_marketplace_items_to_vendor():
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
         for item in all_marketplace_items:
             db_items = None
-            specific_fields = {}
-            # Find the product in vendor update tables
-            # if item.item_specific_fields:
-            #     try:
-            #         specific_fields = json.loads(item.item_specific_fields)
-            #     except json.JSONDecodeError as e:
-            #         print("JSON decode error in item_specific_fields :", e)
-
             try:
-                # upc = item.upc or item.item_specific_fields.get("UPC")
-                # mpn = item.mpn or item.item_specific_fields.get("MPN")
-
                 for vendor_name, enrolled_id in vendor_list:
                     model_name = vendor_name + "update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enrolled_id)
+                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))) & Q(enrollment_id=enrolled_id))
                 
                     break                    
             except Exception as e:
-                # print(f"Error mapping SKU {item.sku}, upc {item.upc}, mpn {item.mpn} in vendor {vendor_name}: {e}")
+                print(f"Error mapping SKU {item.sku}, upc {item.upc}, mpn {item.mpn} in vendor {vendor_name}: {e}")
                 continue
         
             if db_items:
