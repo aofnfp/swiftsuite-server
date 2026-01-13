@@ -416,7 +416,6 @@ def map_marketplace_items_to_vendor():
                     try:
                         item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
                     except:
-                        print(f"General Product not found for SKU {db_items.sku}, creating new entry.")
                         try:
                             item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                         except Exception as e:
@@ -433,6 +432,5 @@ def map_marketplace_items_to_vendor():
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
                     continue
-            else:
-                print(f"No mapping found for item SKU {item.sku} and UPC {item.upc}")        
+     
            
