@@ -26,7 +26,7 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
-from .utils import map_marketplace_items_to_vendor()
+from .utils import map_marketplace_items_to_vendor
 
 
 # Function to update product across marketplaces
