@@ -393,7 +393,7 @@ def map_marketplace_items_to_vendor():
     for user in user_token:
         # Get list of vendors registered by the user
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
-        vendor_list = [(vendor.vendor.name, vendor.id) for vendor in enrollment]
+        vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
         print(f"Mapping products for user {user.user_id} with vendors: {vendor_list}")
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False)
@@ -401,7 +401,7 @@ def map_marketplace_items_to_vendor():
             db_items = None
             try:
                 for vendor_name, enrolled_id in vendor_list:
-                    model_name = vendor_name + "update"
+                    model_name = vendor_name + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))) & Q(enrollment_id=enrolled_id))
@@ -409,7 +409,7 @@ def map_marketplace_items_to_vendor():
                     break                    
             except Exception as e:
                 continue
-            print(f"Mapping found for vendor {vendor_name} and item SKU {item.sku}")
+            
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
@@ -425,8 +425,9 @@ def map_marketplace_items_to_vendor():
                     db_items.save()
                     # update the product in order table to reflect the mapping
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
-                    
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
                     continue
+            else:
+                print(f"No mapping found for item SKU {item.sku} and UPC {item.upc}")        
            
