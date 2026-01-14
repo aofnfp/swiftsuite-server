@@ -83,7 +83,7 @@ def update_inventory_price_quantity():
                     try:
                         db_item = Generalproducttable.objects.get(id=item.product_id)
                     except Exception as e:
-                        print(f"item not found on product table: {e}")
+                        print(f"item not found on product table: {e} with sku {item.sku}")
                         continue
                     
                     # Modify selling price before updating on ebay 

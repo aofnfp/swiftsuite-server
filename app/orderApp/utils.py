@@ -12,7 +12,7 @@ from .models import VendorOrderLog
 from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
-
+from vendorEnrollment.models import Generalproducttable
 
 
 # Function to retrieve all fulfilment orders from Ebay
@@ -259,6 +259,13 @@ def sync_ebay_order_with_local():
                     except Exception as e:
                         print(f"WooCommerce Ordered item insert error {e} ")
                         continue
+    
+    product_item = Generalproducttable.objects.all()
+    for item in product_item:
+        vendor_enrollment = get_vendor_enrollment(item.market_item_id)
+        if not vendor_enrollment:
+            continue
+        
                 
 
 
