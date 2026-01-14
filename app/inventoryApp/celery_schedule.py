@@ -17,7 +17,7 @@ APP_CELERY_BEAT_SCHEDULE = {
     },
     "map-marketplace-items-to-vendor-4hr": {
         "task": "inventoryApp.tasks.map_marketplace_items_to_vendor_task",
-        "schedule": crontab(minute="*/30"),
+        "schedule": crontab(hour="*/4"),
     },
 }
 
