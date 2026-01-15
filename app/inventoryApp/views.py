@@ -26,10 +26,6 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
-from .tasks import map_marketplace_items_to_vendor_task
-
-
-map_marketplace_items_to_vendor_task.delay()
 
 
 # Function to update product across marketplaces
