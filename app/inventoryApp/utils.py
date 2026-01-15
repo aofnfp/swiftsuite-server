@@ -405,8 +405,8 @@ def map_marketplace_items_to_vendor():
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.filter((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn)), enrollment_id=enrolled_id)
-                    logger.info(f"Mapping Product found for {db_items}, item sku: {item.sku}, vendor: {model_name}")
                     db_items = db_items[0]
+                    logger.info(f"Mapping Product found for {db_items}, item sku: {item.sku}, vendor: {model_name}")
                     break                    
                 except Exception as e:
                     continue
