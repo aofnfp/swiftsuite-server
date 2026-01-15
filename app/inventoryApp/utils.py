@@ -404,15 +404,14 @@ def map_marketplace_items_to_vendor():
                     model_name = vendor_name + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))) & Q(enrollment_id=enrolled_id))
+                    db_items = model_class.objects.get(((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn))), enrollment_id=enrolled_id)
                 
                     break                    
                 except Exception as e:
                     continue
-            logger.info(f"Mapping Product found for {db_items}")
+            logger.info(f"Mapping Product found for {db_items}, item sku: {item.sku}, vendor: {vendor_name}")
             if db_items:
                 try:
-                    logger.info(f"Mapping Product started for item {item.sku} for user {model_name}")
                     # Check if the product exists in GeneralProduct table
                     try:
                         item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
@@ -426,7 +425,6 @@ def map_marketplace_items_to_vendor():
                     db_items.save()
                     # update the product in order table to reflect the mapping
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
-                    logger.info(f"Item {item.sku} mapped successfully for user {user.user_id} to vendor {db_items.vendor.name}")
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
                     continue
