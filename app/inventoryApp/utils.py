@@ -398,7 +398,6 @@ def map_marketplace_items_to_vendor():
         # fetch all items from inventory for the user
         all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False, map_status=False)
         for item in all_marketplace_items:
-            logger.info(f"Mapping item {item.sku} for user {user.user_id}")
             db_items = None
             for vendor_name, enrolled_id in vendor_list:
                 try:
@@ -410,22 +409,23 @@ def map_marketplace_items_to_vendor():
                     break                    
                 except Exception as e:
                     continue
-            logger.info(f"Mapping item {item.sku} for user {user.user_id}, vendor found: {model_name}")
+
             if db_items:
                 try:
+                    logger.info(f"Mapping Product started for item {item.sku} for user {model_name}")
                     # Check if the product exists in GeneralProduct table
                     try:
                         item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
                     except:
                         item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
-                    
+
                     # Item exists, check if we need to update price or quantity
                     inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier)
                     # Update the VendorUpdate table to set listed_market to true
                     db_items.active = True
                     db_items.save()
                     # update the product in order table to reflect the mapping
-                    OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
+                    # OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
                     logger.info(f"Item {item.sku} mapped successfully for user {user.user_id} to vendor {db_items.vendor.name}")
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
