@@ -1,4 +1,5 @@
 import json, requests, time
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -326,12 +327,14 @@ def download_item_update_market_price_quantity():
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
                     # Update the market url on inventory
-                    InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
+                    InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
                     if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
                         continue
                     # Update the price and quantity of product on Ebay
                     if existing_item.start_price != item.get("ebay_price") or existing_item.quantity != item.get("ebay_quantity"):
                         response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, existing_item.quantity, user._id)
+                        item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
+
                 except:
                     try:
                         # Get product details from eBay
@@ -351,7 +354,7 @@ def download_item_update_market_price_quantity():
                                 custom_fields[object.get("name")] = object.get("value")
                                 
                             inentory, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("ebay_item_id"), defaults={"title": item.get("Title"),"description": json.dumps(product_details.get("shortDescription")), "location": product_details.get("itemLocation")["country"], "category_id": product_details.get("categoryId"), "category": product_details.get("categoryPath"), "sku": item.get("ebay_sku"), "upc": ebay_upc, "mpn": ebay_mpn, "start_price": product_details.get("price")["value"], "price": product_details.get("price")["value"], "cost": product_details.get("price")["value"], "picture_detail": product_details.get("image")["imageUrl"], "thumbnailImage": product_details.get("additionalImages"), "postal_code": product_details.get("itemLocation")["postalCode"], "city": product_details.get("itemLocation")["city"], "country": product_details.get("itemLocation")["country"], "quantity": item.get("ebay_quantity"), "return_profileID": item.get("ReturnProfileID"), "return_profileName": item.get("ReturnProfileName"), "payment_profileID": item.get("PaymentProfileID"), "payment_profileName": item.get("PaymentProfileName"), "shipping_profileID": item.get("ShippingProfileID"), "shipping_profileName": item.get("ShippingProfileName"), "bestOfferEnabled": True, "listingType": item.get("ListingType"), "item_specific_fields": custom_fields, "market_logos": product_details.get("listingMarketplaceId"), "date_created": product_details.get("itemCreationDate").split("T")[0], "active": True, "vendor_name": "Not Found", "map_status": False, "market_name": "Ebay", "fixed_percentage_markup": user.fixed_percentage_markup, "fixed_markup": user.fixed_markup, "profit_margin": user.profit_margin, "min_profit_mergin": user.min_profit_mergin, "charity_id": user.charity_id, "enable_charity": user.enable_charity, "market_item_url": item.get("market_item_url")})
-                    
+                            item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
                     except Exception as e:
                         print(f"Ebay Product failed to insert into inventory {e}")
                         continue
@@ -370,6 +373,7 @@ def download_item_update_market_price_quantity():
                     # Update the price and quantity of product on Woocommerce
                     if existing_item.start_price != item.item.get("price") or existing_item.quantity != item.get("stock_quantity"):
                         response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, user.user_id)
+                        item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
 
             except:
                 try:

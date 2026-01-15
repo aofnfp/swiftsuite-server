@@ -97,8 +97,7 @@ def update_inventory_price_quantity():
                         continue
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-
+                 
                 except Exception as e:
                     print(f"Product fails to update price and quantity on ebay: {e}")
                     continue
@@ -130,7 +129,6 @@ def update_inventory_price_quantity():
                     
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))                
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
                     continue
@@ -155,7 +153,7 @@ def check_product_ended_status():
                         continue
 
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(ends_status=ends_status))
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item availability status changed to {ends_status}"))
+                    # item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item availability status changed to {ends_status}"))
                 except Exception as e:
                     print(f"Failed to check and update ended ebay items: {e}")
                     continue
