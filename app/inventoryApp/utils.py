@@ -14,6 +14,8 @@ from ratelimit import limits, sleep_and_retry
 from django.db.models import Q
 from woocommerce import API
 from django.apps import apps
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -407,7 +409,7 @@ def map_marketplace_items_to_vendor():
                     break                    
                 except Exception as e:
                     continue
-
+            logger.info(f"Mapping item {item.sku} for user {user.user_id}, vendor found: {model_name}")
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
@@ -423,6 +425,7 @@ def map_marketplace_items_to_vendor():
                     db_items.save()
                     # update the product in order table to reflect the mapping
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
+                    logger.info(f"Item {item.sku} mapped successfully for user {user.user_id} to vendor {db_items.vendor.name}")
                 except Exception as e:
                     print(f"Mapping Product processing failed with error: {e}")
                     continue
