@@ -404,13 +404,14 @@ def map_marketplace_items_to_vendor():
                     model_name = vendor_name + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.get((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn)), enrollment_id=enrolled_id)
+                    db_items = model_class.objects.filter((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn)), enrollment_id=enrolled_id)
                     logger.info(f"Mapping Product found for {db_items}, item sku: {item.sku}, vendor: {model_name}")
                 
                     break                    
                 except Exception as e:
                     continue
-                
+                finally:
+                    db_items = db_items.first() if db_items else None
             if db_items:
                 try:
                     # Check if the product exists in GeneralProduct table
