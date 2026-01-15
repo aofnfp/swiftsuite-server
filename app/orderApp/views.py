@@ -187,8 +187,6 @@ class OrderEbay:
             return None
 
 
-# Order background task invocation
-# sync_ebay_order_task.delay()
     
     
 class Woocommerce(APIView):
