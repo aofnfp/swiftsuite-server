@@ -408,7 +408,7 @@ def map_marketplace_items_to_vendor():
                     model_name = vendor_name + "Update"
                     # Get the actual model class from the string name
                     model_class = apps.get_model('vendorEnrollment', model_name)
-                    db_items = model_class.objects.filter((Q(sku=item.sku) & Q(upc=item.upc)) | (Q(sku=item.sku) & Q(mpn=item.mpn)), enrollment_id=enrolled_id)
+                    db_items = model_class.objects.filter(Q(enrollment_id=enrolled_id) & Q(sku=item.sku) & (Q(upc=item.upc) | Q(mpn=item.mpn) | (Q(upc__in=[None, ""]) & Q(mpn__in=[None, ""]))))
                     db_items = db_items[0]
                     logger.info(f"Mapping Product found for {db_items}, item sku: {item.sku}, vendor: {model_name}")
                     break                    
