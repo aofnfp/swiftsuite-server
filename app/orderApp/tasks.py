@@ -4,6 +4,7 @@ from celery.exceptions import Ignore
 from .utils import sync_ebay_order_with_local
 from .models import OrdersOnEbayModel, VendorOrderLog
 from .utils import create_vendor_order_log
+from django.db.models import Exists, OuterRef
 import logging
 logger = logging.getLogger(__name__)
 
@@ -30,15 +31,28 @@ def sync_ebay_order_task(self):
 @shared_task(queue='default')
 def process_vendor_orders():
     """Function to process vendor orders"""
-    all_orders = OrdersOnEbayModel.objects.filter(orderPaymentStatus='PAID', orderFulfillmentStatus='NOT_STARTED').exclude(
-        vendororderlog__status__in=[
-            VendorOrderLog.VendorOrderStatus.CREATED,
-            VendorOrderLog.VendorOrderStatus.PROCESSING,
-            VendorOrderLog.VendorOrderStatus.SHIPPED
-        ]
+    ACTIVE_STATUSES = [
+        VendorOrderLog.VendorOrderStatus.CREATED,
+        VendorOrderLog.VendorOrderStatus.PROCESSING,
+        VendorOrderLog.VendorOrderStatus.SHIPPED,
+    ]
+
+    active_vendor_orders = VendorOrderLog.objects.filter(
+        order=OuterRef("pk"),
+        status__in=ACTIVE_STATUSES,
+    )
+
+    orders = (
+        OrdersOnEbayModel.objects
+        .filter(
+            orderPaymentStatus="PAID",
+            orderFulfillmentStatus="NOT_STARTED",
+        )
+        .annotate(has_active_vendor_order=Exists(active_vendor_orders))
+        .filter(has_active_vendor_order=False)
     )
     
-    for order in all_orders:
+    for order in orders:
         order_log = create_vendor_order_log(order)
         
         # dispatch order to vendor

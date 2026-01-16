@@ -8,6 +8,7 @@ from vendorActivities.apiSupplier import getFragranceXAuth
 from accounts.models import User
 from .models import VendorOrderLog, OrdersOnEbayModel
 from .utils import get_ebay_order_details
+from django.db.models import Q
 
 
 class FrgxOrderApiClient:
@@ -185,18 +186,33 @@ def getTracking_fragranceX(request, orderId):
         if user and user.parent_id:
             user = user.parent
             
-        enrolment_details = Enrollment.objects.filter(
-            user=user, vendor__name__iexact='Fragrancex'
-        ).first()
+        # enrolment_details = Enrollment.objects.filter(
+        #     user=user, vendor__name__iexact='Fragrancex'
+        # ).first()
 
-        if not enrolment_details:
+        # if not enrolment_details:
+        #     return JsonResponse(
+        #         {"message": "Vendor enrollment details not found."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+
+        # apiAccessId = enrolment_details.vendor.api_access_id
+        # apiAccessKey = enrolment_details.vendor.api_access_key
+        
+        # Lets get the enrollment from VendorOrderLog instead
+        vendor_order = VendorOrderLog.objects.filter(
+            Q(order__orderId=orderId) | Q(reference_id=orderId),
+            enrollment__user=user,
+            enrollment__vendor__name__iexact='Fragrancex'
+        ).first()
+        
+        if not vendor_order:
             return JsonResponse(
-                {"message": "Vendor enrollment details not found."},
+                {"message": "Vendor order details not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
-        apiAccessId = enrolment_details.vendor.api_access_id
-        apiAccessKey = enrolment_details.vendor.api_access_key
+        apiAccessId = vendor_order.enrollment.account.apiAccessId
+        apiAccessKey = vendor_order.enrollment.account.apiAccessKey
 
         # Get FragranceX token
         token = getFragranceXAuth(apiAccessId, apiAccessKey)
