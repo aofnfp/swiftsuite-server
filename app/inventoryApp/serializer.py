@@ -6,7 +6,7 @@ class InventoryModelUpdateSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = InventoryModel
-		exclude = ('id', 'user')
+		exclude = ('id', 'user', 'last_updated')
 
 	def update(self, instance, validated_data):
 		validated_data.pop('user_id', None)

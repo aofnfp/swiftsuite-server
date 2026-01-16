@@ -57,7 +57,7 @@ class InventoryModel(models.Model):
     vendor_name = models.TextField(null=True, unique=False)
     woo_category_name = models.CharField(null=True, unique=False, max_length=100)
     market_name = models.TextField(null=True, unique=False)
-    last_updated = models.DateTimeField(unique=False, null=False)
+    last_updated = models.DateTimeField(unique=False, null=True)
     ends_status = models.CharField(null=True, unique=False, max_length=20)
     market_item_url = models.TextField(null=True, unique=False)
     vendor_identifier = models.CharField(null=True, unique=False, max_length=50)
