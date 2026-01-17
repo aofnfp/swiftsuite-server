@@ -2576,3 +2576,355 @@
     }
 }
 
+
+// All order items on Ebay
+
+"order_items": [
+    {
+        "_id": 315,
+        "user_id": 12,
+        "orderId": "02-14114-48029",
+        "legacyOrderId": "02-14114-48029",
+        "creationDate": "2026-01-15T08:16:20Z",
+        "orderFulfillmentStatus": "NOT_STARTED",
+        "orderPaymentStatus": "PAID",
+        "sellerId": "sozodealz",
+        "buyer": "{'username': 'jagad-40', 'taxAddress': {'city': 'Coeur D Alene', 'stateOrProvince': 'ID', 'postalCode': '83814-9639', 'countryCode': 'US'}, 'buyerRegistrationAddress': {'fullName': 'jack gadmer', 'contactAddress': {'addressLine1': '1652 S Agate Rd', 'city': 'Coeur D Alene', 'stateOrProvince': 'ID', 'postalCode': '83814', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '2819101157'}, 'email': '44016b6a44d5af2e5379@members.ebay.com'}}",
+        "cancelStatus": "{'cancelState': 'NONE_REQUESTED', 'cancelRequests': []}",
+        "pricingSummary": "{'priceSubtotal': {'value': '25.79', 'currency': 'USD'}, 'deliveryCost': {'value': '0.0', 'currency': 'USD'}, 'total': {'value': '25.79', 'currency': 'USD'}}",
+        "paymentSummary": "{'totalDueSeller': {'value': '24.82', 'currency': 'USD'}, 'refunds': [], 'payments': [{'paymentMethod': 'EBAY', 'paymentReferenceId': '420004_S', 'paymentDate': '2026-01-15T08:16:20.125Z', 'amount': {'value': '24.82', 'currency': 'USD'}, 'paymentStatus': 'PAID'}]}",
+        "fulfillmentStartInstructions": "[{'fulfillmentInstructionsType': 'SHIP_TO', 'minEstimatedDeliveryDate': '2026-01-17T08:00:00.000Z', 'maxEstimatedDeliveryDate': '2026-01-21T08:00:00.000Z', 'ebaySupportedFulfillment': False, 'shippingStep': {'shipTo': {'fullName': 'jack gadmer', 'contactAddress': {'addressLine1': '1652 S Agate Rd', 'city': 'Coeur D Alene', 'stateOrProvince': 'ID', 'postalCode': '83814-9639', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '2819101157'}, 'email': '44016b6a44d5af2e5379@members.ebay.com'}, 'shippingServiceCode': 'ShippingMethodExpress'}}]",
+        "sku": "RUG90434",
+        "title": "​Ruger Stock Adapter High Comb/Compact Pull Fits American Rimfire & 10/22 Black",
+        "lineItemCost": "{'value': '25.79', 'currency': 'USD'}",
+        "quantity": "1",
+        "listingMarketplaceId": "EBAY_US",
+        "purchaseMarketplaceId": "EBAY_US",
+        "itemLocation": "{'location': 'Fort Worth, Texas', 'countryCode': 'US', 'postalCode': '76155'}",
+        "image": "https://i.ebayimg.com/images/g/Xw0AAOSw2Rtl1HEI/s-l1600.jpg",
+        "additionalImages": "[{'imageUrl': 'https://i.ebayimg.com/images/g/EOoAAOSwtpNl1HEK/s-l1600.jpg', 'width': 1600, 'height': 1600}, {'imageUrl': 'https://i.ebayimg.com/images/g/R~sAAOSwqoRl1HEM/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+        "mpn": null,
+        "description": "\"Ruger rifle owners looking to enhance comfort and ergonomics during shooting sessions. Those prioritizing genuine Ruger accessories for optimal fit and performance. Provides 1.84\\\" comb height and 12.5\\\" length of pull.\"",
+        "categoryId": "73949",
+        "vendor_name": "Not Found",
+        "tracking_id": null,
+        "marketItemId": "305405699685",
+        "itemMarketStatus": null,
+        "market_name": "Ebay",
+        "legacyItemId": "305405699685",
+        "localizeAspects": "{'Brand': 'Ruger', 'Type': 'Stock Adapter', 'For Gun Type': 'Rifle', 'Model': '90434', 'Fit': 'Fits any Ruger Rifle with the Modular Stock System', 'UPC': '736676904341'}",
+        "last_updated": "2026-01-15T08:20:01.464Z"
+    },
+    {
+        "_id": 313,
+        "user_id": 12,
+        "orderId": "15-14094-92974",
+        "legacyOrderId": "15-14094-92974",
+        "creationDate": "2026-01-15T01:37:40Z",
+        "orderFulfillmentStatus": "NOT_STARTED",
+        "orderPaymentStatus": "PAID",
+        "sellerId": "sozodealz",
+        "buyer": "{'username': 'jodyc110', 'taxAddress': {'city': 'houma', 'stateOrProvince': 'LA', 'postalCode': '70360-7305', 'countryCode': 'US'}, 'buyerRegistrationAddress': {'fullName': 'jody cenac', 'contactAddress': {'addressLine1': '9dallasdr', 'city': 'houma', 'stateOrProvince': 'LA', 'postalCode': '70360', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '9852170024'}, 'email': '43fff4a35501cfa8cf92@members.ebay.com'}}",
+        "cancelStatus": "{'cancelState': 'NONE_REQUESTED', 'cancelRequests': []}",
+        "pricingSummary": "{'priceSubtotal': {'value': '89.34', 'currency': 'USD'}, 'deliveryCost': {'value': '0.0', 'currency': 'USD'}, 'total': {'value': '89.34', 'currency': 'USD'}}",
+        "paymentSummary": "{'totalDueSeller': {'value': '86.91', 'currency': 'USD'}, 'refunds': [], 'payments': [{'paymentMethod': 'EBAY', 'paymentReferenceId': '420008_S', 'paymentDate': '2026-01-15T01:37:40.561Z', 'amount': {'value': '86.91', 'currency': 'USD'}, 'paymentStatus': 'PAID'}]}",
+        "fulfillmentStartInstructions": "[{'fulfillmentInstructionsType': 'SHIP_TO', 'minEstimatedDeliveryDate': '2026-01-16T08:00:00.000Z', 'maxEstimatedDeliveryDate': '2026-01-20T08:00:00.000Z', 'ebaySupportedFulfillment': False, 'shippingStep': {'shipTo': {'fullName': 'jody cenac', 'contactAddress': {'addressLine1': '9 dallas dr', 'city': 'houma', 'stateOrProvince': 'LA', 'postalCode': '70360-7305', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '9852170024'}, 'email': '43fff4a35501cfa8cf92@members.ebay.com'}, 'shippingServiceCode': 'ShippingMethodExpress'}}]",
+        "sku": "BSA22-412X40AOWRTB",
+        "title": "​BSA Optics Sweet 22 Rimfire Scope 4-12X40mm 30/30 Duplex Reticle - Black",
+        "lineItemCost": "{'value': '89.34', 'currency': 'USD'}",
+        "quantity": "1",
+        "listingMarketplaceId": "EBAY_US",
+        "purchaseMarketplaceId": "EBAY_US",
+        "itemLocation": "{'location': 'Fort Worth, Texas', 'countryCode': 'US', 'postalCode': '76155'}",
+        "image": "https://i.ebayimg.com/images/g/-58AAOSw5nJl4yNW/s-l1600.jpg",
+        "additionalImages": "[{'imageUrl': 'https://i.ebayimg.com/images/g/aBAAAOSwSFll4yNY/s-l1600.jpg', 'width': 1600, 'height': 1600}, {'imageUrl': 'https://i.ebayimg.com/images/g/pMcAAOSwuQhl4yNZ/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+        "mpn": null,
+        "description": "\"Designed with specific features tailored to the. 22LR caliber, this scope ensures optimal performance and accuracy with every shot. Specifically designed for. 22LR rifles, ideal for rimfire shooting.\"",
+        "categoryId": "31714",
+        "vendor_name": "Not Found",
+        "tracking_id": null,
+        "marketItemId": "305428586122",
+        "itemMarketStatus": null,
+        "market_name": "Ebay",
+        "legacyItemId": "305428586122",
+        "localizeAspects": "{'Features': 'Fogproof, Shock Proof, Waterproof, SHOCKPROOF', 'Size': '1\"', 'Power': '4-12X', 'Objective': '40mm', 'UPC': '793676089881', 'Brand': 'BSA', 'Mounting': 'Picatinny, Dovetail', 'Reticle Type': 'Duplex', 'Type': 'Hunting Scope', 'Lens Coating': 'Fully Coated', 'Color': 'Black', 'Objective Lens Diameter': '40 mm', 'Model': '22412X40AO', 'MPN': '22412X40AO', 'For Gun Type': 'Rifle', 'Range': '12x', 'Tube Diameter': '1 in'}",
+        "last_updated": "2026-01-15T07:59:56.809Z"
+    },
+    {
+        "_id": 314,
+        "user_id": 12,
+        "orderId": "18-14090-71697",
+        "legacyOrderId": "18-14090-71697",
+        "creationDate": "2026-01-15T01:07:46Z",
+        "orderFulfillmentStatus": "NOT_STARTED",
+        "orderPaymentStatus": "PAID",
+        "sellerId": "sozodealz",
+        "buyer": "{'username': 'rorha.us.5621ln7', 'taxAddress': {'city': 'Carlisle', 'stateOrProvince': 'IA', 'postalCode': '50047-3196', 'countryCode': 'US'}, 'buyerRegistrationAddress': {'fullName': 'Robert Hartz', 'contactAddress': {'addressLine1': '1208 east lacona ave', 'city': 'Des Moines', 'stateOrProvince': 'IA', 'postalCode': '50315', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '15153261468'}, 'email': '43ffd8a850c73fa56095@members.ebay.com'}}",
+        "cancelStatus": "{'cancelState': 'NONE_REQUESTED', 'cancelRequests': []}",
+        "pricingSummary": "{'priceSubtotal': {'value': '42.56', 'currency': 'USD'}, 'deliveryCost': {'value': '0.0', 'currency': 'USD'}, 'total': {'value': '42.56', 'currency': 'USD'}}",
+        "paymentSummary": "{'totalDueSeller': {'value': '41.22', 'currency': 'USD'}, 'refunds': [], 'payments': [{'paymentMethod': 'EBAY', 'paymentReferenceId': '420004_S', 'paymentDate': '2026-01-15T01:07:47.113Z', 'amount': {'value': '41.22', 'currency': 'USD'}, 'paymentStatus': 'PAID'}]}",
+        "fulfillmentStartInstructions": "[{'fulfillmentInstructionsType': 'SHIP_TO', 'minEstimatedDeliveryDate': '2026-01-16T08:00:00.000Z', 'maxEstimatedDeliveryDate': '2026-01-20T08:00:00.000Z', 'ebaySupportedFulfillment': False, 'shippingStep': {'shipTo': {'fullName': 'Robert Hartz', 'contactAddress': {'addressLine1': '2160 152nd Ln', 'city': 'Carlisle', 'stateOrProvince': 'IA', 'postalCode': '50047-3196', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '5153261468'}, 'email': '43ffd8a850c73fa56095@members.ebay.com'}, 'shippingServiceCode': 'ShippingMethodExpress'}}]",
+        "sku": "GOGPS-T800-75T",
+        "title": "GPS Suppressor Cover 7.5\" Heat Resistant for Suppressor Secure Tether Nylon Tan",
+        "lineItemCost": "{'value': '42.56', 'currency': 'USD'}",
+        "quantity": "1",
+        "listingMarketplaceId": "EBAY_US",
+        "purchaseMarketplaceId": "EBAY_US",
+        "itemLocation": "{'location': 'Fort Worth, Texas', 'countryCode': 'US', 'postalCode': '76155'}",
+        "image": "https://i.ebayimg.com/images/g/PEgAAOSwlFBnI9aY/s-l1600.jpg",
+        "additionalImages": "[{'imageUrl': 'https://i.ebayimg.com/images/g/F88AAOSwralnI9aZ/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+        "mpn": null,
+        "description": "\"The inner lining features heat-resistant fiberglass and silicone, ensuring that your suppressor remains protected even during prolonged shooting sessions. Reduces visual mirage caused by heat from suppressor during shooting.\"",
+        "categoryId": "73949",
+        "vendor_name": "rsr",
+        "tracking_id": null,
+        "marketItemId": "305874809295",
+        "itemMarketStatus": null,
+        "market_name": "Ebay",
+        "legacyItemId": "305874809295",
+        "localizeAspects": "{'Brand': 'GPS', 'Type': 'Cover', 'For Gun Type': 'Rifle', 'Color': 'Tan', 'Model': 'Suppressor Cover', 'Barrel Length': '7.5\"', 'UPC': '888151059968'}",
+        "last_updated": "2026-01-15T07:59:56.826Z"
+    },
+
+]
+
+// Ebay order item details response
+
+{
+    "ordered_details": {
+        "orderId": "25-12529-08476",
+        "legacyOrderId": "25-12529-08476",
+        "creationDate": "2025-01-06T15:35:35.000Z",
+        "lastModifiedDate": "2025-02-05T08:12:47.000Z",
+        "orderFulfillmentStatus": "FULFILLED",
+        "orderPaymentStatus": "PARTIALLY_REFUNDED",
+        "sellerId": "sozodealz",
+        "buyer": {
+            "username": "3gn-vegas",
+            "taxAddress": {
+                "city": "Las Vegas",
+                "stateOrProvince": "NV",
+                "postalCode": "89179-1438",
+                "countryCode": "US"
+            },
+            "buyerRegistrationAddress": {
+                "contactAddress": {
+                    "city": "Las Vegas",
+                    "stateOrProvince": "NV",
+                    "postalCode": "89179",
+                    "countryCode": "US"
+                }
+            }
+        },
+        "pricingSummary": {
+            "priceSubtotal": {
+                "value": "50.18",
+                "currency": "USD"
+            },
+            "deliveryCost": {
+                "value": "0.0",
+                "currency": "USD"
+            },
+            "total": {
+                "value": "50.18",
+                "currency": "USD"
+            }
+        },
+        "cancelStatus": {
+            "cancelState": "NONE_REQUESTED",
+            "cancelRequests": []
+        },
+        "paymentSummary": {
+            "totalDueSeller": {
+                "value": "13.56",
+                "currency": "USD"
+            },
+            "refunds": [
+                {
+                    "refundDate": "2025-01-20T19:37:36.393Z",
+                    "amount": {
+                        "value": "35.13",
+                        "currency": "USD"
+                    },
+                    "refundStatus": "REFUNDED",
+                    "refundReferenceId": "5282652702"
+                }
+            ],
+            "payments": [
+                {
+                    "paymentMethod": "EBAY",
+                    "paymentReferenceId": "420004_S",
+                    "paymentDate": "2025-01-06T15:35:37.958Z",
+                    "amount": {
+                        "value": "48.69",
+                        "currency": "USD"
+                    },
+                    "paymentStatus": "PAID"
+                }
+            ]
+        },
+        "fulfillmentStartInstructions": [
+            {
+                "fulfillmentInstructionsType": "SHIP_TO",
+                "minEstimatedDeliveryDate": "2025-01-08T08:00:00.000Z",
+                "maxEstimatedDeliveryDate": "2025-01-13T08:00:00.000Z",
+                "ebaySupportedFulfillment": false,
+                "shippingStep": {
+                    "shipTo": {
+                        "contactAddress": {
+                            "city": "Las Vegas",
+                            "stateOrProvince": "NV",
+                            "postalCode": "89179-1438",
+                            "countryCode": "US"
+                        }
+                    },
+                    "shippingServiceCode": "ShippingMethodExpress"
+                }
+            }
+        ],
+        "fulfillmentHrefs": [
+            "https://api.ebay.com/sell/fulfillment/v1/order/25-12529-08476/shipping_fulfillment/436292108447"
+        ],
+        "lineItems": [
+            {
+                "lineItemId": "10068730007925",
+                "legacyItemId": "305786180551",
+                "sku": "REP100-085",
+                "title": "Reptilia Riser Black Fits for Trijicon RMR Anodized Mount ROF 10MM  100-085",
+                "lineItemCost": {
+                    "value": "50.18",
+                    "currency": "USD"
+                },
+                "quantity": 1,
+                "soldFormat": "FIXED_PRICE",
+                "listingMarketplaceId": "EBAY_US",
+                "purchaseMarketplaceId": "EBAY_US",
+                "lineItemFulfillmentStatus": "FULFILLED",
+                "total": {
+                    "value": "50.18",
+                    "currency": "USD"
+                },
+                "deliveryCost": {
+                    "shippingCost": {
+                        "value": "0.0",
+                        "currency": "USD"
+                    }
+                },
+                "appliedPromotions": [],
+                "taxes": [],
+                "ebayCollectAndRemitTaxes": [
+                    {
+                        "taxType": "STATE_SALES_TAX",
+                        "amount": {
+                            "value": "4.2",
+                            "currency": "USD"
+                        },
+                        "collectionMethod": "NET"
+                    }
+                ],
+                "properties": {
+                    "buyerProtection": true
+                },
+                "refunds": [
+                    {
+                        "refundDate": "2025-01-20T19:37:36.393Z",
+                        "amount": {
+                            "value": "35.13",
+                            "currency": "USD"
+                        }
+                    }
+                ],
+                "lineItemFulfillmentInstructions": {
+                    "minEstimatedDeliveryDate": "2025-01-08T08:00:00.000Z",
+                    "maxEstimatedDeliveryDate": "2025-01-13T08:00:00.000Z",
+                    "shipByDate": "2025-01-09T07:59:59.000Z",
+                    "guaranteedDelivery": false
+                },
+                "itemLocation": {
+                    "location": "Fort Worth, Texas",
+                    "countryCode": "US",
+                    "postalCode": "76155"
+                }
+            }
+        ],
+        "ebayCollectAndRemitTax": true,
+        "salesRecordReference": "23151",
+        "totalFeeBasisAmount": {
+            "value": "54.38",
+            "currency": "USD"
+        },
+        "totalMarketplaceFee": {
+            "value": "1.49",
+            "currency": "USD"
+        }
+    },
+    "product_data": [
+        {
+            "id": 6228,
+            "title": "Reptilia Riser Black Fits for Trijicon RMR Anodized Mount ROF 10MM  100-085",
+            "description": "\"Made from high-quality anodized aluminum, this riser provides both strength and lightweight properties. Compatibility: Designed to fit Trijicon RMR optics. Color: Black anodized finish for durability and a sleek appearance.\"",
+            "location": "US",
+            "category_id": "52510",
+            "sku": "REP100-085",
+            "upc": "850002688818",
+            "mpn": "100-085",
+            "start_price": "1095.0",
+            "picture_detail": "https://i.ebayimg.com/images/g/e8kAAOSwDexm5-MF/s-l1600.jpg",
+            "postal_code": "761**",
+            "quantity": "98",
+            "return_profileID": "148084438019",
+            "return_profileName": "Default",
+            "payment_profileID": "148084374019",
+            "payment_profileName": "Default",
+            "shipping_profileID": "192943792019",
+            "shipping_profileName": "Default",
+            "bestOfferEnabled": true,
+            "listingType": "FixedPriceItem",
+            "gift": null,
+            "categoryMappingAllowed": null,
+            "item_specific_fields": "{'Type': 'Riser', 'Brand': 'Reptilia', 'Model': 'ROF', 'MPN': '100-085', 'Fit': 'Trijicon RMR', 'UPC': '850002688818'}",
+            "market_logos": "EBAY_US",
+            "market_item_id": "305786180551",
+            "user_id": 12,
+            "product_id": 37313,
+            "map_status": false,
+            "date_created": "2026-01-06",
+            "active": true,
+            "enable_charity": true,
+            "category": "Sporting Goods|Hunting|Scopes, Optics & Lasers|Scope Mounts & Accessories",
+            "city": "Fort Worth",
+            "cost": "51.08",
+            "country": "US",
+            "model": null,
+            "msrp": null,
+            "price": "838.89",
+            "percentage_markup": null,
+            "fixed_percentage_markup": null,
+            "fixed_markup": null,
+            "shipping_cost": null,
+            "shipping_height": null,
+            "shipping_width": null,
+            "thumbnailImage": "[{'imageUrl': 'https://i.ebayimg.com/images/g/qpwAAOSw2Wlm5-MG/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+            "total_product_cost": "848.89",
+            "us_size": null,
+            "min_profit_mergin": null,
+            "profit_margin": null,
+            "charity_id": 188477,
+            "donation_percentage": null,
+            "vendor_name": "Not Found",
+            "woo_category_name": null,
+            "market_name": "Ebay",
+            "last_updated": "2026-01-17T14:05:51.446Z",
+            "ends_status": "active",
+            "market_item_url": "https://www.ebay.com/itm/Reptilia-Riser-Black-Fits-for-Trijicon-RMR-Anodized-Mount-ROF-10MM-100-085-/305786180551",
+            "vendor_identifier": "",
+            "manual_map": false
+        }
+    ]
+}
+
+Ebay get product details failed for item id 305854624273 with error: None
+Ebay get product details failed for item id 305854624273 with error: None
+Ebay get product details failed for item id 305854624273 with error: None
+Ebay get product details failed for item id 305854624273 with error: None
+Ebay get product details failed for item id 305854624273 with error: None
