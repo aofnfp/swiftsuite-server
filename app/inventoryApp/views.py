@@ -28,7 +28,7 @@ from django.apps import apps
 from woocommerce import API
 from .tasks import download_update_marketplace_items_task
 
-download_update_marketplace_items_task()
+download_update_marketplace_items_task.delay()
 
 # Function to update product across marketplaces
 @with_module('inventory')
