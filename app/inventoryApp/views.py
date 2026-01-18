@@ -26,7 +26,9 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
+from .tasks import download_update_marketplace_items_task
 
+download_update_marketplace_items_task()
 
 # Function to update product across marketplaces
 @with_module('inventory')

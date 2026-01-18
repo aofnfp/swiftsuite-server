@@ -235,7 +235,6 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 200:
             return product_data
 
-        raise ValueError(product_data)
     except ValueError as e:
         try:
             error_data = e.args[0]  # The dict you passed into the exception
