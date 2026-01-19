@@ -399,7 +399,7 @@ def map_marketplace_items_to_vendor():
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
         vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
         # fetch all items from inventory for the user
-        all_marketplace_items = InventoryModel.objects.filter(user_id=user.user_id, manual_map=False, map_status=False)
+        all_marketplace_items = InventoryModel.objects.filter(Q(user_id=user.user_id) & Q(manual_map=False) & Q(map_status=False))
         for item in all_marketplace_items:
             db_items = None
             for vendor_name, enrolled_id in vendor_list:
@@ -428,6 +428,7 @@ def map_marketplace_items_to_vendor():
                     # Update the VendorUpdate table to set listed_market to true
                     db_items.active = True
                     db_items.save()
+                    Generalproducttable.objects.filter(user_id=user.user_id, id=item.product_id).update(active=True)
                     # update the product in order table to reflect the mapping
                     OrdersOnEbayModel.objects.filter(marketItemId=item.market_item_id, user_id=user.user_id).update(vendor_name=db_items.vendor.name)
                 except Exception as e:

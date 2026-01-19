@@ -72,12 +72,9 @@ def update_inventory_price_quantity():
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         if user.marketplace_name == "Ebay":
-            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay")
+            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay").exclude(vendor_name="Not Found")
                 
             for item in all_ebay_items:
-                # Check if the item has a vendor mapped to it
-                if item.vendor_name.lower() == "not found":
-                    continue
                 try:
                     # Get updated price and quantity from the product table
                     try:
@@ -104,11 +101,8 @@ def update_inventory_price_quantity():
 
         elif user.marketplace_name == "Woocommerce":
             # Fetch all item from Woocommerce
-            all_woocommercer_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
+            all_woocommercer_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce").exclude(vendor_name="Not Found")
             for item in all_woocommercer_items:
-                # Check if the item has a vendor mapped to it
-                if item.vendor_name.lower() == "not found":
-                    continue
                 try:
                     # Get updated price and quantity from the product table
                     try:
@@ -140,12 +134,9 @@ def check_product_ended_status():
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
         if user.marketplace_name == "Ebay":
-            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay")
+            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay").exclude(market_item_id="")
                 
             for item in all_ebay_items:
-                # Check if the item has a vendor mapped to it
-                if item.market_item_id == "":
-                    continue
                 try:
                     # Check if ebay item has ended
                     ends_status = check_if_ebay_item_has_ended(item.market_item_id, user.user_id)
@@ -159,12 +150,9 @@ def check_product_ended_status():
                     continue
         
         elif user.marketplace_name == "Woocommerce":
-            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce")
+            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce").exclude(market_item_id="")
                 
             for item in all_ebay_items:    
-                # Update the product on Woocommerce
-                if item.market_item_id == "":
-                    continue
                 try: 
                     # Check if ebay item has ended
                     pass
