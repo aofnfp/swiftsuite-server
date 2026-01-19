@@ -58,7 +58,9 @@ def process_vendor_orders():
         # dispatch order to vendor
         if order_log:
             dispatch_order.delay(order_log.id)
-        
+        else:
+            logger.error(f"Failed to create VendorOrderLog for order {order.id}.")
+            
     logger.info("order log entries created for vendor orders and dispatched.")
         
 

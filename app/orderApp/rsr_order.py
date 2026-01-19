@@ -37,9 +37,7 @@ class RsrOrderApiClient:
 
     def build_payload(self, order_details):
         if not self.vendor_order_log.reference_id:
-            self.vendor_order_log.reference_id = self.generate_reference(
-                self.vendor_order_log.order.orderId
-            )
+            self.vendor_order_log.reference_id = self.vendor_order_log.order.orderId
             self.vendor_order_log.save(update_fields=["reference_id"])
 
         buyer = order_details.get("buyer", {}).get("buyerRegistrationAddress", {})
