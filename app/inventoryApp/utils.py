@@ -235,6 +235,7 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 200:
             return product_data
 
+
     except ValueError as e:
         try:
             error_data = e.args[0]  # The dict you passed into the exception
@@ -408,13 +409,14 @@ def map_marketplace_items_to_vendor():
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.filter(Q(enrollment_id=enrolled_id) & Q(sku=item.sku) & (Q(upc=item.upc) | Q(mpn=item.mpn) | (Q(upc__in=[None, ""]) & Q(mpn__in=[None, ""]))))
                     db_items = db_items[0]
-                    logger.info(f"Mapping Product found for {db_items}, item sku: {item.sku}, vendor: {model_name}")
+                    
                     break                    
                 except Exception as e:
                     continue
                 
             if db_items:
                 try:
+                    logger.info(f"Trying to map product {db_items}, item sku: {item.sku}, vendor: {model_name}")
                     # Check if the product exists in GeneralProduct table
                     try:
                         item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
