@@ -409,7 +409,7 @@ def map_marketplace_items_to_vendor():
                     model_class = apps.get_model('vendorEnrollment', model_name)
                     db_items = model_class.objects.filter(Q(enrollment_id=enrolled_id) & Q(sku=item.sku) & (Q(upc=item.upc) | Q(mpn=item.mpn) | (Q(upc__in=[None, ""]) & Q(mpn__in=[None, ""]))))
                     db_items = db_items[0]
-                    
+                    logger.info(f"Found matching product in {db_items} for item sku: {item.sku}, vendor: {model_name}")
                     break                    
                 except Exception as e:
                     continue
@@ -422,7 +422,7 @@ def map_marketplace_items_to_vendor():
                         item_product = Generalproducttable.objects.get(user_id=user.user_id, id=item.product_id)
                     except:
                         item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
-
+                    logger.info(f"Product found or created in Generalproducttable: {item_product}, for item sku: {item.sku}")
                     # Item exists, check if we need to update price or quantity
                     inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier)
                     # Update the VendorUpdate table to set listed_market to true
