@@ -178,7 +178,12 @@ def get_all_items_on_ebay(enroll_id):
                     item_market_url = item.find(".//ebay:ViewItemURL", namespaces=namespace).text if item.find(".//ebay:ViewItemURL", namespaces=namespace) is not None else "N/A"
 
                     items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, item_market_url])
-
+            else:
+                if response.json().get('errors')[0]['errorId'] == 1001:
+                    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+                    get_all_items_on_ebay(enroll_id)
+                else:
+                    return None
   
             # If no more items, break out of the loop
             if not items:
@@ -193,11 +198,7 @@ def get_all_items_on_ebay(enroll_id):
     except requests.exceptions.ConnectTimeout as e:
         return None       
     except Exception as e:
-        if e.get('errors')[0]['errorId'] == 1001:
-            access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-            get_all_items_on_ebay(enroll_id)
-        else:
-            return None
+        return None
     
     return ebay_items
     
@@ -235,19 +236,15 @@ def get_item_details(enroll_id, item_id):
         if response.status_code == 200:
             return product_data
 
-        raise Exception(product_data)
+        else:
+            if response.json().get('errors')[0]['errorId'] == 1001:
+                access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+                get_item_details(enroll_id, item_id)  # return recursion call
+            else:
+                return None
+            
     except Exception as e:
-        try:
-            error_data = e.args[0]  # The dict you passed into the exception
-
-            if isinstance(error_data, dict) and error_data.get('errors'):
-                if error_data['errors'][0].get('errorId') == 1001:
-                    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                    get_item_details(enroll_id, item_id)  # return recursion call
-                
-        except Exception as ex:
-            print("Unexpected error format:", error_data)
-            return None
+        return None
 
 
 

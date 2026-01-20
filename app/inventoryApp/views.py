@@ -705,9 +705,7 @@ class MarketInventory:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
         
-   
-    
-
+        
 class WooCommerceInventory:
     # Function to update product on woocommerce store
     def update_woocommerce_product(self, request, userid, market_name, inventory_id):
