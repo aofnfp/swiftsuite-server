@@ -123,7 +123,8 @@ class General_operations:
                         model_name = enrollment.vendor.name.capitalize() + "Update"
                         # Get the actual model class from the string name
                         model_class = apps.get_model('vendorEnrollment', model_name)
-                        db_items = model_class.objects.get(((Q(sku=prod.get("sku")) & Q(upc=prod.get("upc"))) | (Q(sku=prod.get("sku")) & Q(mpn=prod.get("mpn")))), enrollment_id=enrollment.id)
+                        db_items = model_class.objects.filter(Q(enrollment_id=enrollment.id) & Q(sku=prod.get("sku")) & (Q(upc=prod.get("upc")) | Q(mpn=prod.get("mpn")) | (Q(upc__in=[None, ""]) & Q(mpn__in=[None, ""]))))
+                        db_items = db_items[0]
                                                  
                     except Exception as ea:
                         prod["error"] = str(ea)
