@@ -37,6 +37,7 @@ class OrdersOnEbayModel(models.Model):
     itemMarketStatus = models.CharField(null=True, unique=False, max_length=155)
     market_name = models.CharField(null=True, unique=False, max_length=155)
     legacyItemId = models.TextField(null=True, unique=False)
+    lineItemId = models.CharField(null=True, unique=False, max_length=155)
     localizeAspects = models.TextField(null=True, unique=False)
     last_updated = models.DateTimeField(auto_now=True)
     

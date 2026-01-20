@@ -294,6 +294,8 @@ def get_ebay_order_details(user_id, market_name, ebay_order_id):
         print(f"Error fetching ebay order details: {e}")
         return None
     
+    
+    
 def create_vendor_order_log(order: OrdersOnEbayModel):
     
     if VendorOrderLog.objects.filter(
