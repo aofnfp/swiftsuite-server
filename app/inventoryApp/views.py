@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 import os, requests, json
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -27,7 +27,7 @@ from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
 from .tasks import download_item_update_market_price_quantity_task
-
+import pandas as pd
 
 # download_item_update_market_price_quantity_task.delay()
 
@@ -656,6 +656,90 @@ class MarketInventory:
             return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
     
 
+
+
+
+
+
+
+
+
+
+
+    
+    
+    CSV_FILENAME = 'inventory_report.csv'
+
+    def create_inventory_report_task(self, access_token):
+
+        BASE_URL = 'https://api.ebay.com/sell/feed/v1'
+        HEADERS = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        url = f'{BASE_URL}/task'
+        payload = {
+            "feedType": "LMS_ACTIVE_INVENTORY_REPORT",
+            "format": "CSV",
+            "schemaVersion": "1.0"
+        }
+        response = requests.post(self, url, headers=HEADERS, json=payload)
+        if response.status_code != 201:
+            print("Error creating task:", response.text)
+            return None
+        return response.json().get('taskId')
+
+    def wait_for_task_completion(self, access_token, task_id, poll_interval=10):
+        BASE_URL = 'https://api.ebay.com/sell/feed/v1'
+        HEADERS = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        url = f"{BASE_URL}/task/{task_id}"
+        while True:
+            response = requests.get(url, headers=HEADERS)
+            if response.status_code != 200:
+                print("Error checking task status:", response.text)
+                return None
+            data = response.json()
+            status = data.get('status')
+            print(f"Task status: {status}")
+            if status == 'COMPLETED':
+                return data
+            elif status in ['FAILED', 'ABORTED']:
+                print("Task failed.")
+                return None
+            time.sleep(poll_interval)
+
+    def download_csv(self, access_token, file_reference_id, file_id, filename=CSV_FILENAME):
+        BASE_URL = 'https://api.ebay.com/sell/feed/v1'
+        HEADERS = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        url = f"{BASE_URL}/file/{file_id}?file_reference_id={file_reference_id}"
+        response = requests.get(url, headers=HEADERS, stream=True)
+        if response.status_code == 200:
+            with open(filename, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            print(f"Downloaded report to {filename}")
+            return filename
+        else:
+            print("Failed to download file:", response.text)
+            return None
+
+    def load_csv_to_dataframe(self, filename):
+        try:
+            df = pd.read_csv(filename)
+            return df.head(10)
+        except Exception as e:
+            print("Failed to load CSV to DataFrame:", e)
+
+
     # Function to test any api from ebay before implementation
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -667,45 +751,24 @@ class MarketInventory:
             if user.parent_id:
                 userid = user.parent_id
         eb = Ebay()
+        mark_inv =MarketInventory()
         access_token = eb.refresh_access_token(userid, "Ebay")
     
         # Set eBay API endpoint and headers
-
-        url = "https://api.ebay.com/ws/api.dll"
-        headers = {
-            "X-EBAY-API-CALL-NAME": "GetSellerList",
-            "X-EBAY-API-SITEID": "0",
-            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-            "Content-Type": "text/xml"
-        }
-
         try:
-            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            task_id = mark_inv.create_inventory_report_task(access_token)
+            if task_id:
+                task_info = mark_inv.wait_for_task_completion(access_token, task_id)
+                if task_info and 'fileReferenceId' in task_info:
+                    file_ref_id = task_info['fileReferenceId']
+                    file_id = task_info['fileId']
+                    file_path = mark_inv.download_csv(access_token, file_ref_id, file_id)
+                    if file_path:
+                        df_data = mark_inv.load_csv_to_dataframe(file_path)
 
-            xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>{access_token}</eBayAuthToken>
-            </RequesterCredentials>
 
-            <StartTimeFrom>{start_time_from}</StartTimeFrom>
-            <StartTimeTo>{start_time_to}</StartTimeTo>
 
-            <Pagination>
-                <EntriesPerPage>10</EntriesPerPage>
-                <PageNumber>1</PageNumber>
-            </Pagination>
-
-            <DetailLevel>ReturnAll</DetailLevel>
-            </GetSellerListRequest>
-            """
-            response = requests.post(url, headers=headers, data=xml_body)
-            root = ET.fromstring(response.text)
-            ns = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
-            item_ids = [item.find('ns:ItemID', ns).text for item in root.findall('.//ns:Item', ns)]
-
-            return JsonResponse({"Total_items": item_ids}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Preview_items": df_data}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as e:
