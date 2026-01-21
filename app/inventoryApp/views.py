@@ -671,54 +671,38 @@ class MarketInventory:
     
         # Set eBay API endpoint and headers
 
-        # Base URL for eBay Sell Inventory API (Production environment)
-        BASE_URL = 'https://api.ebay.com/sell/inventory/v1/inventory_item'
-
-        # Headers with OAuth2 token
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+        EBAY_API_ENDPOINT = "https://api.ebay.com/ws/api.dll"
+        HEADERS = {
+            "Content-Type": "text/xml",
+            "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
+            "X-EBAY-API-SITEID": "0",
+            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+            "Authorization": f"Bearer {access_token}"
         }
 
-        all_items = []
-        limit = 100  # Max per request
-        offset = 0
-
         try:
-            while True:
-                url = f"{BASE_URL}?limit={limit}&offset={offset}"
-                response = requests.get(url, headers=headers)
+            body = """<?xml version="1.0" encoding="utf-8"?>
+            <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <ActiveList>
+                    <Include>true</Include>
+                    <Pagination>
+                        <EntriesPerPage>100</EntriesPerPage>
+                        <PageNumber>1</PageNumber>
+                    </Pagination>
+                </ActiveList>
+            </GetMyeBaySellingRequest>"""
 
-                if response.status_code != 200:
-                    print(f"Failed to retrieve inventory: {response.status_code} - {response.text}")
-                    break
+            response = requests.post(EBAY_API_ENDPOINT, headers=HEADERS, data=body)
 
-                data = response.json()
-                inventory_items = data.get('inventoryItems', [])
+            if response.status_code != 200:
+                print("Error getting active listings:", response.text)
+                return []
 
-                for item in inventory_items:
-                    item_details = {
-                        'sku': item.get('sku'),
-                        'title': item.get('product', {}).get('title'),
-                        'brand': item.get('product', {}).get('brand'),
-                        'upc': ', '.join(item.get('product', {}).get('upc', [])),
-                        'mpn': item.get('product', {}).get('mpn'),
-                        'description': item.get('product', {}).get('description'),
-                        'condition': item.get('condition'),
-                        'availability': item.get('availability', {}),
-                        'product': item.get('product', {})
-                    }
-                    all_items.append(item_details)
+            root = ET.fromstring(response.text)
+            ns = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
+            item_ids = [item.find('ns:ItemID', ns).text for item in root.findall('.//ns:Item', ns)]
 
-                print(f"Fetched {len(inventory_items)} items. Total so far: {len(all_items)}")
-                
-                # Break if no more items
-                if len(inventory_items) < limit:
-                    break
-                offset += limit
-
-            return JsonResponse({"Total_items":all_items}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total_items": len(item_ids)}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as e:
