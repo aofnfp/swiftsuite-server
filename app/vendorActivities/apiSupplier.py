@@ -66,7 +66,8 @@ def getRSR(username, password, pos='I'):
     payload = {
         "Username":Username,
         "Password":Password,
-        "POS":POS
+        "POS":POS,
+        "WithAttributes": True
     }
     
 

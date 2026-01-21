@@ -660,28 +660,28 @@ class VendorActivity():
     
     def is_valid_image(self, url, min_width=100, min_height=100):
         try:
-            resp = requests.get(url, timeout=5)
+            resp = requests.get(url, stream=True, timeout=5)
             resp.raise_for_status()
 
-            img = Image.open(BytesIO(resp.content))
-            img.verify()  # Basic integrity check
+            img = Image.open(resp.raw)
+            img.load()  # ensure image is fully read
 
-            # Re-open to get dimensions
-            img = Image.open(BytesIO(resp.content))
             width, height = img.size
-
             return width >= min_width and height >= min_height
+
         except Exception:
             return False
+
 
     
     def process_rsr(self):
         try:
-            for row in self.data.iterrows():
-                row = row[1]
+            self.insert_data = []
+            
+            for _, row in self.data.iterrows():
 
                 # Convert naive datetime to aware datetime using Django's timezone utility
-                last_modified = pd.to_datetime(row["LastModified"])
+                last_modified = pd.to_datetime(row["LastModified"]).to_pydatetime()
                 if timezone.is_naive(last_modified):
                     last_modified = timezone.make_aware(last_modified, timezone.get_current_timezone())
                 
@@ -694,6 +694,7 @@ class VendorActivity():
                             images.append(url)
                 else:
                     images = []
+                    
                 try: 
                     rsr_product = Rsr( 
                         sku=row["SKU"],
@@ -740,22 +741,33 @@ class VendorActivity():
                         blemished=row["Blemished"],
                         dealer_price=row["DealerPrice"],
                         dealer_case_price=row["DealerCasePrice"],
-                        features = getRsrItemAttribute(row["UPC"]),
-                        images = images
+                        features = json.dumps(row["Attributes"]),
+                        images = json.dumps(images)
                     )
                     
+                    self.insert_data.append(rsr_product)
+                    
                 except Exception as e:
-                    print(f"An error occurred: {e}")
-                    return False
+                    print(f"RSR SKU {row.get('SKU')} failed: {e}")
+                    continue
 
-                # Save the product to the database
-                rsr_product.save()
+            if self.insert_data:
+                Rsr.objects.bulk_create(
+                    self.insert_data,
+                    batch_size=500,
+                    update_conflicts=True,
+                    unique_fields=["sku"],
+                    update_fields=[
+                        "last_modified",
+                        "inventory_on_hand",
+                        "allocated",
+                        "dealer_price",
+                        "dealer_case_price",
+                    ],
+                )
 
-                # Introduce a small delay between each save (e.g., 0.5 seconds)
-                time.sleep(0.5)
-
-            print('RSR products uploaded successfully')
+            print("RSR products uploaded successfully")
             return True
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return e
+            print(f"RSR processing failed: {e}")
+            return False
