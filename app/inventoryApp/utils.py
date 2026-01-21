@@ -301,7 +301,7 @@ def get_woocommerce_existing_products(user_id):
 
 
 # Download all items from all marketplace to local inventory
-@api_view("GET")
+@api_view(["GET"])
 def download_item_update_market_price_quantity(request, userid, item_id):
     all_ebay_items = []
 
