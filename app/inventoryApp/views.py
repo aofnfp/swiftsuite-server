@@ -671,7 +671,7 @@ class MarketInventory:
     
         # Set eBay API endpoint and headers
 
-        EBAY_API_ENDPOINT = "https://api.ebay.com/ws/api.dll"
+        url = "https://api.ebay.com/ws/api.dll"
         headers = {
             "X-EBAY-API-CALL-NAME": "GetSellerList",
             "X-EBAY-API-SITEID": "0",
@@ -680,25 +680,27 @@ class MarketInventory:
         }
 
         try:
-            body = f"""<?xml version="1.0" encoding="utf-8"?>
+            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+            xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
             <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
             <RequesterCredentials>
                 <eBayAuthToken>{access_token}</eBayAuthToken>
             </RequesterCredentials>
+
+            <StartTimeFrom>{start_time_from}</StartTimeFrom>
+            <StartTimeTo>{start_time_to}</StartTimeTo>
+
             <Pagination>
                 <EntriesPerPage>10</EntriesPerPage>
                 <PageNumber>1</PageNumber>
             </Pagination>
+
             <DetailLevel>ReturnAll</DetailLevel>
             </GetSellerListRequest>
             """
-
-            response = requests.post(EBAY_API_ENDPOINT, headers=headers, data=body)
-
-            if response.status_code != 200:
-                print("Error getting active listings:", response.text)
-                return []
-
+            response = requests.post(url, headers=headers, data=xml_body)
             root = ET.fromstring(response.text)
             ns = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
             item_ids = [item.find('ns:ItemID', ns).text for item in root.findall('.//ns:Item', ns)]
