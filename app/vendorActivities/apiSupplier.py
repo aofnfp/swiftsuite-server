@@ -76,7 +76,7 @@ def fetch_rsr_chunk(username, password, pos, offset, limit=25):
     return data.get("Items", [])
 
 
-def getRSR(username, password, pos="I"):
+def getRSRWithAttr(username, password, pos="I"):
     offset = 0
     limit = 500
     all_items = []
@@ -110,41 +110,28 @@ def getRSR(username, password, pos="I"):
 
 
 
-# def getRSR(username, password, pos='I'):
-#     global Username, Password, POS  # Access the global variables
-
-#     # Set the global variables so they can be used in other functions
-#     Username = username
-#     Password = password
-#     POS = pos
-
-#     # API endpoint
-#     url = "https://www.rsrgroup.com/api/rsrbridge/1.0/pos/get-items"
-
-#     payload = {
-#         "Username":Username,
-#         "Password":Password,
-#         "POS":POS,
-#         "WithAttributes": True
-#     }
+def getRSR(username, password, pos='I'):
     
+    payload = {
+        "Username":username,
+        "Password":password,
+        "POS":pos,
+    }
+    
+    try:
+        response = requests.post(URL, data=payload)
+        # Raise an error if the request was unsuccessful
+        response.raise_for_status()
+        data = response.json()
+        Items = data.get("Items")
+        return Items
 
-#     headers = {
-#         'Content-Type': 'application/x-www-form-urlencoded'
-#     }
 
-#     try:
-#         response = requests.post(url, data=payload, headers=headers)
-#         # Raise an error if the request was unsuccessful
-#         response.raise_for_status()
-#         data = response.json()
-#         Items = data.get("Items")
-#         return Items
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return None
 
 
-#     except requests.exceptions.RequestException as e:
-#         print(f"An error occurred: {e}")
-#         return None
 
 # def getRsrItemAttribute(upcCode):
 #     # API endpoint

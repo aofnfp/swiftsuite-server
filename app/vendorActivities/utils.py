@@ -1,7 +1,7 @@
 import pandas as pd # type: ignore
 from .models import Fragrancex, Lipsey, Cwr, Zanders, Rsr
 import re, json, os, csv, time
-from .apiSupplier import getFragranceXData, getRSR
+from .apiSupplier import getFragranceXData, getRSR, getRSRWithAttr
 from ftplib import FTP
 from django.utils import timezone
 from PIL import Image
@@ -117,7 +117,12 @@ class VendorActivity():
 
         elif supplier[0] == 'rsr':
             supplier_name, Username, Password, POS = supplier
-            data = getRSR(Username, Password, POS)
+            
+            if self.justTest:
+                data = getRSR(Username, Password, POS)
+            else:
+                data = getRSRWithAttr(Username, Password, POS)
+            
             print(len(data), "final length")
             file_name = "rsr.csv"
             file_path = os.path.join(local_dir, file_name)
