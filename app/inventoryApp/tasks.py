@@ -7,23 +7,13 @@ logger = logging.getLogger(__name__)
 from celery.exceptions import Ignore
 
 
-LOCK_KEY = "download_update_marketplace_items_task_lock"
-@shared_task(queue='heavy-inv', bind=True)
-def download_update_marketplace_items_task(self):
-    if not cache.add(LOCK_KEY, "1", timeout=7200):
-        logger.info("download_update_marketplace_items_task skipped: already running")
-        raise Ignore()
-    logger.info("download_update_marketplace_items_task started")
-    try:
-        """Background task to sync eBay items with local database and update price and quantity"""
-        download_item_update_market_price_quantity()
-        logger.info("download_update_marketplace_items_task completed successfully")
-    except Exception as e:
-        logger.error("download_update_marketplace_items_task failed: %s", str(e))
-        raise Ignore()
-    finally:
-        cache.delete(LOCK_KEY)
-
+# LOCK_KEY = "download_update_marketplace_items_task_lock"
+@shared_task(queue='heavy-inv')
+def download_item_update_market_price_quantity_task():
+    """Background task to sync eBay items with local database and update price and quantity"""
+    download_item_update_market_price_quantity()
+    logger.info("download_item_update_market_price_quantity_task completed successfully")
+    
 
 @shared_task(queue='default')
 def update_inventory_price_quantity_task():
