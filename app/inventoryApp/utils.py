@@ -318,7 +318,8 @@ def download_item_update_market_price_quantity():
             # Construct a list of ebay items with relevant details
             for item in ebay_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13], 'market_item_url':item[14]})
-            
+            logger.info(f"Ebay inventory download fetched {len(all_ebay_items)} items for user {user.user_id}")
+            # Loop through each item and update or insert into InventoryModel
             for item in all_ebay_items:                         
                 try:
                     # If item already exists, skip to next item
@@ -340,6 +341,7 @@ def download_item_update_market_price_quantity():
                             logger.info(f"Ebay get product details failed for item id {item.get('ebay_item_id')} with error: {product_details}")
                             continue
                         else:
+                            logger.info(f"Ebay get product details succeeded for item id {item.get('ebay_item_id')}")
                             # Get the upc and mpn if the main mpn field does not exist
                             for specific in product_details.get("localizedAspects"):
                                 ebay_upc = specific.get("value") if specific.get("name") == "UPC" else ""
@@ -385,7 +387,6 @@ def download_item_update_market_price_quantity():
                     logger.info(f"Woocommerce Product failed to insert into inventory {e}")
                     continue
                 
-download_item_update_market_price_quantity()
 
 # Map items in inventory to products vendor update tables
 def map_marketplace_items_to_vendor():

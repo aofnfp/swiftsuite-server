@@ -26,6 +26,10 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
+from .utils import download_item_update_market_price_quantity
+
+
+download_item_update_market_price_quantity()
 
 
 # Function to update product across marketplaces
