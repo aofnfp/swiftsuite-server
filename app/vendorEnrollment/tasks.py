@@ -2,7 +2,7 @@ from vendorActivities.models import Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
 from .models import FragrancexUpdate, LipseyUpdate, CwrUpdate, RsrUpdate, ZandersUpdate, Enrollment, BackgroundTask
 import os, csv, time
 from ftplib import FTP
-from vendorActivities.apiSupplier import getFragranceXData, getRSR
+from vendorActivities.apiSupplier import getFragranceXData, getRSRWithAttr
 from .utils import VendorDataMixin
 from celery import shared_task
 import logging
@@ -56,7 +56,7 @@ def update_vendor_data(enrollment_id):
             password=enrollment.account.Password
             pos=enrollment.account.POS
             try:
-                data = getRSR(username, password, pos)
+                data = getRSRWithAttr(username, password, pos)
                 if not data or not isinstance(data, list):
                     raise ValueError("RSR data is empty or invalid")
             except Exception as e:
