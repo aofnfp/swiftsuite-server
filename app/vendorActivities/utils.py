@@ -699,8 +699,7 @@ class VendorActivity():
 
                 # Build image URLs (no validation here)
                 images = [
-                    f"https://img.rsrgroup.com/highres-pimages/{row.SKU}_{i}_HR.jpg"
-                    for i in range(int(row.ImageCount or 0))
+                    f"https://img.rsrgroup.com/highres-pimages/{row.SKU}_1_HR.jpg"
                 ]
 
                 try:
