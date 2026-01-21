@@ -301,8 +301,7 @@ def get_woocommerce_existing_products(user_id):
 
 
 # Download all items from all marketplace to local inventory
-@api_view(["GET"])
-def download_item_update_market_price_quantity(request, userid, item_id):
+def download_item_update_market_price_quantity():
     all_ebay_items = []
 
     # Get all user with ebay marketplace to sync their products
@@ -386,7 +385,7 @@ def download_item_update_market_price_quantity(request, userid, item_id):
                     logger.info(f"Woocommerce Product failed to insert into inventory {e}")
                     continue
                 
-
+download_item_update_market_price_quantity()
 
 # Map items in inventory to products vendor update tables
 def map_marketplace_items_to_vendor():
