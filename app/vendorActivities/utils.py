@@ -1,7 +1,7 @@
 import pandas as pd # type: ignore
 from .models import Fragrancex, Lipsey, Cwr, Zanders, Rsr
 import re, json, os, csv, time
-from .apiSupplier import getFragranceXData, getRSR, getRsrItemAttribute
+from .apiSupplier import getFragranceXData, getRSR
 from ftplib import FTP
 from django.utils import timezone
 from PIL import Image
