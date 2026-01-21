@@ -8,11 +8,11 @@ from celery.exceptions import Ignore
 
 
 # LOCK_KEY = "download_update_marketplace_items_task_lock"
-@shared_task(queue='heavy-inv')
-def download_update_marketplace_items_task():
-    """Background task to sync eBay items with local database and update price and quantity"""
-    download_item_update_market_price_quantity()
-    logger.info("download_update_marketplace_items_task completed successfully")
+# @shared_task(queue='heavy-inv')
+# def download_update_marketplace_items_task():
+#     """Background task to sync eBay items with local database and update price and quantity"""
+#     download_item_update_market_price_quantity()
+#     logger.info("download_update_marketplace_items_task completed successfully")
 
 
 

@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 
 def getFragranceXAuth(apiAccessId, apiAccessKey):
     # API endpoint
@@ -48,70 +49,127 @@ def getFragranceXData(apiAccessId, apiAccessKey):
     except:
         return None
 
-Username = None
-Password = None
-POS = 'I'
 
-def getRSR(username, password, pos='I'):
-    global Username, Password, POS  # Access the global variables
 
-    # Set the global variables so they can be used in other functions
-    Username = username
-    Password = password
-    POS = pos
 
-    # API endpoint
-    url = "https://www.rsrgroup.com/api/rsrbridge/1.0/pos/get-items"
+URL = "https://www.rsrgroup.com/api/rsrbridge/1.0/pos/get-items"
 
+def fetch_rsr_chunk(username, password, pos, offset, limit=25):
+    
     payload = {
-        "Username":Username,
-        "Password":Password,
-        "POS":POS
+        "Username": username,
+        "Password": password,
+        "POS": pos,
+        "WithAttributes": True,
+        "Limit": limit,
+        "Offset": offset
     }
+
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(URL, json=payload, timeout=30)
+    if response.status_code == 500:
+        raise Exception("RSR internal server error")
+    
+    response.raise_for_status()
+    data = response.json()
+    return data.get("Items", [])
+
+
+def getRSR(username, password, pos="I"):
+    offset = 0
+    limit = 500
+    all_items = []
+    MAX_RETRIES = 5
+
+    while True:
+        retries = 0
+        
+        while retries < MAX_RETRIES:
+            try:
+                items = fetch_rsr_chunk(username, password, pos, offset, limit)
+                break
+            except Exception as e:
+                retries += 1
+                print(f"Retry {retries} for offset {offset}: {e}")
+                time.sleep(2 ** retries)
+
+        if retries == MAX_RETRIES:
+            raise RuntimeError(f"Failed permanently at offset {offset}")
+
+        if not items:
+            break
+
+        all_items.extend(items)
+        offset += limit
+
+        
+        time.sleep(0.2)
+    return all_items
+
+
+
+# def getRSR(username, password, pos='I'):
+#     global Username, Password, POS  # Access the global variables
+
+#     # Set the global variables so they can be used in other functions
+#     Username = username
+#     Password = password
+#     POS = pos
+
+#     # API endpoint
+#     url = "https://www.rsrgroup.com/api/rsrbridge/1.0/pos/get-items"
+
+#     payload = {
+#         "Username":Username,
+#         "Password":Password,
+#         "POS":POS,
+#         "WithAttributes": True
+#     }
     
 
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
+#     headers = {
+#         'Content-Type': 'application/x-www-form-urlencoded'
+#     }
 
-    try:
-        response = requests.post(url, data=payload, headers=headers)
-        # Raise an error if the request was unsuccessful
-        response.raise_for_status()
-        data = response.json()
-        Items = data.get("Items")
-        return Items
+#     try:
+#         response = requests.post(url, data=payload, headers=headers)
+#         # Raise an error if the request was unsuccessful
+#         response.raise_for_status()
+#         data = response.json()
+#         Items = data.get("Items")
+#         return Items
 
 
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        return None
+#     except requests.exceptions.RequestException as e:
+#         print(f"An error occurred: {e}")
+#         return None
 
-def getRsrItemAttribute(upcCode):
-    # API endpoint
-    url = "https://www.rsrgroup.com/api/rsrbridge/1.0/pos/get-item-attributes"
-    payload = {
-        "Username":Username,
-        "Password":Password,
-        "POS":POS,
-        "LookupBy": 'U',
-        "UPCcode": upcCode
-    }
+# def getRsrItemAttribute(upcCode):
+#     # API endpoint
+#     url = "https://www.rsrgroup.com/api/rsrbridge/1.0/pos/get-item-attributes"
+#     payload = {
+#         "Username":Username,
+#         "Password":Password,
+#         "POS":POS,
+#         "LookupBy": 'U',
+#         "UPCcode": upcCode
+#     }
 
     
 
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
+#     headers = {
+#         'Content-Type': 'application/x-www-form-urlencoded'
+#     }
 
-    try:
-        response = requests.post(url, data=payload, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        attribute = data.get("Attributes")
-        data_string = json.dumps(attribute)
-        print(upcCode)
-        return data_string
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        return None
+#     try:
+#         response = requests.post(url, data=payload, headers=headers)
+#         response.raise_for_status()
+#         data = response.json()
+#         attribute = data.get("Attributes")
+#         data_string = json.dumps(attribute)
+#         print(upcCode)
+#         return data_string
+#     except requests.exceptions.RequestException as e:
+#         print(f"An error occurred: {e}")
+#         return None
