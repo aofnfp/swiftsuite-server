@@ -78,7 +78,7 @@ def fetch_rsr_chunk(username, password, pos, offset, limit=25):
 
 def getRSR(username, password, pos="I"):
     offset = 0
-    limit = 25
+    limit = 500
     all_items = []
     MAX_RETRIES = 5
 
