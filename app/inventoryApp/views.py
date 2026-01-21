@@ -703,7 +703,7 @@ class MarketInventory:
             ns = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
             item_ids = [item.find('ns:ItemID', ns).text for item in root.findall('.//ns:Item', ns)]
 
-            return JsonResponse({"Total_items": len(item_ids)}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total_items": item_ids}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as e:
