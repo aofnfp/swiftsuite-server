@@ -118,6 +118,7 @@ class VendorActivity():
         elif supplier[0] == 'rsr':
             supplier_name, Username, Password, POS = supplier
             data = getRSR(Username, Password, POS)
+            print(len(data), "final length")
             file_name = "rsr.csv"
             file_path = os.path.join(local_dir, file_name)
             with open(file_path, mode='w', newline='', encoding = 'utf-8') as file:
@@ -677,97 +678,125 @@ class VendorActivity():
     def process_rsr(self):
         try:
             self.insert_data = []
-            
-            for _, row in self.data.iterrows():
 
-                # Convert naive datetime to aware datetime using Django's timezone utility
-                last_modified = pd.to_datetime(row["LastModified"]).to_pydatetime()
-                if timezone.is_naive(last_modified):
-                    last_modified = timezone.make_aware(last_modified, timezone.get_current_timezone())
-                
+            for row in self.data.itertuples(index=False):
+                # Safe datetime parsing
+                last_modified = pd.to_datetime(
+                    row.LastModified, errors="coerce"
+                )
+                if last_modified is not None:
+                    last_modified = last_modified.to_pydatetime()
+                    if timezone.is_naive(last_modified):
+                        last_modified = timezone.make_aware(
+                            last_modified,
+                            timezone.get_current_timezone()
+                        )
 
-                images = []
-                if int(row['ImageCount']) > 0:
-                    for count in range(int(row['ImageCount'])):
-                        url = f"https://img.rsrgroup.com/highres-pimages/{row['SKU']}_{count}_HR.jpg"
-                        if self.is_valid_image(url):
-                            images.append(url)
-                else:
-                    images = []
-                    
-                try: 
-                    rsr_product = Rsr( 
-                        sku=row["SKU"],
+                # Build image URLs (no validation here)
+                images = [
+                    f"https://img.rsrgroup.com/highres-pimages/{row.SKU}_{i}_HR.jpg"
+                    for i in range(int(row.ImageCount or 0))
+                ]
+
+                try:
+                    rsr_product = Rsr(
+                        sku=row.SKU,
                         last_modified=last_modified,
-                        upc=row["UPC"],
-                        title=row["Title"],
-                        description=row["Description"],
-                        manufacturer_code=row["ManufacturerCode"],
-                        manufacturer_name=row["ManufacturerName"],
-                        manufacturer_part_number=row["ManufacturerPartNumber"],
-                        department_id=row["DepartmentId"],
-                        department_name=row["DepartmentName"],
-                        category_id=row["CategoryId"],
-                        category_name=row["CategoryName"],
-                        subcategory_name=row["SubcategoryName"],
-                        exclusive=row["Exclusive"],
-                        talo_exclusive=row["TaloExclusive"],
-                        coming_soon=row["ComingSoon"],
-                        new_item=row["NewItem"],
-                        le_resale_only=row["LEResaleOnly"],
-                        unit_of_measure=row["UnitOfMeasure"],
-                        items_per_case=row["ItemsPerCase"],
-                        items_per_unit=row["ItemsPerUnit"],
-                        units_per_case=row["UnitsPerCase"],
-                        nfa=row["NFA"],
-                        hazard_warning=row["HazardWarning"],
-                        image_count=row["ImageCount"],
-                        msrp=row["MSRP"],
-                        map=row["RetailMAP"],
-                        inventory_on_hand=row["InventoryOnHand"],
-                        ground_only=row["GroundOnly"],
-                        drop_ship_block=row["DropShipBlock"],
-                        closeout=row["Closeout"],
-                        allocated=row["Allocated"],
-                        drop_shippable=row["DropShippable"],
-                        unit_weight=row["UnitWeight"],
-                        unit_length=row["UnitLength"],
-                        unit_width=row["UnitWidth"],
-                        unit_height=row["UnitHeight"],
-                        case_weight=row["CaseWeight"],
-                        case_length=row["CaseLength"],
-                        case_width=row["CaseWidth"],
-                        case_height=row["CaseHeight"],
-                        blemished=row["Blemished"],
-                        dealer_price=row["DealerPrice"],
-                        dealer_case_price=row["DealerCasePrice"],
-                        features = json.dumps(row["Attributes"]),
-                        images = json.dumps(images)
+                        upc=row.UPC,
+                        title=row.Title,
+                        description=row.Description,
+                        manufacturer_code=row.ManufacturerCode,
+                        manufacturer_name=row.ManufacturerName,
+                        manufacturer_part_number=row.ManufacturerPartNumber,
+                        department_id=row.DepartmentId,
+                        department_name=row.DepartmentName,
+                        category_id=row.CategoryId,
+                        category_name=row.CategoryName,
+                        subcategory_name=row.SubcategoryName,
+                        exclusive=row.Exclusive,
+                        talo_exclusive=row.TaloExclusive,
+                        coming_soon=row.ComingSoon,
+                        new_item=row.NewItem,
+                        le_resale_only=row.LEResaleOnly,
+                        unit_of_measure=row.UnitOfMeasure,
+                        items_per_case=row.ItemsPerCase,
+                        items_per_unit=row.ItemsPerUnit,
+                        units_per_case=row.UnitsPerCase,
+                        nfa=row.NFA,
+                        hazard_warning=row.HazardWarning,
+                        image_count=row.ImageCount,
+                        msrp=row.MSRP,
+                        map=row.RetailMAP,
+                        inventory_on_hand=row.InventoryOnHand,
+                        ground_only=row.GroundOnly,
+                        drop_ship_block=row.DropShipBlock,
+                        closeout=row.Closeout,
+                        allocated=row.Allocated,
+                        drop_shippable=row.DropShippable,
+                        unit_weight=row.UnitWeight,
+                        unit_length=row.UnitLength,
+                        unit_width=row.UnitWidth,
+                        unit_height=row.UnitHeight,
+                        case_weight=row.CaseWeight,
+                        case_length=row.CaseLength,
+                        case_width=row.CaseWidth,
+                        case_height=row.CaseHeight,
+                        blemished=row.Blemished,
+                        dealer_price=row.DealerPrice,
+                        dealer_case_price=row.DealerCasePrice,
+                        features=json.dumps(row.Attributes),
+                        images=json.dumps(images),
                     )
-                    
+
                     self.insert_data.append(rsr_product)
-                    
+
                 except Exception as e:
-                    print(f"RSR SKU {row.get('SKU')} failed: {e}")
+                    print(f"RSR SKU {row.SKU} failed: {e}")
                     continue
 
             if self.insert_data:
+                # Insert new rows
                 Rsr.objects.bulk_create(
                     self.insert_data,
                     batch_size=500,
-                    update_conflicts=True,
-                    unique_fields=["sku"],
-                    update_fields=[
-                        "last_modified",
-                        "inventory_on_hand",
-                        "allocated",
-                        "dealer_price",
-                        "dealer_case_price",
-                    ],
+                    ignore_conflicts=True
                 )
+
+                # Fetch existing rows for update
+                skus = [obj.sku for obj in self.insert_data]
+                existing = {
+                    obj.sku: obj
+                    for obj in Rsr.objects.filter(sku__in=skus)
+                }
+
+                to_update = []
+
+                for obj in self.insert_data:
+                    if obj.sku in existing:
+                        db_obj = existing[obj.sku]
+                        db_obj.last_modified = obj.last_modified
+                        db_obj.inventory_on_hand = obj.inventory_on_hand
+                        db_obj.allocated = obj.allocated
+                        db_obj.dealer_price = obj.dealer_price
+                        db_obj.dealer_case_price = obj.dealer_case_price
+                        to_update.append(db_obj)
+
+                if to_update:
+                    Rsr.objects.bulk_update(
+                        to_update,
+                        fields=[
+                            "last_modified",
+                            "inventory_on_hand",
+                            "allocated",
+                            "dealer_price",
+                            "dealer_case_price",
+                        ],
+                        batch_size=500
+                    )
 
             print("RSR products uploaded successfully")
             return True
+
         except Exception as e:
             print(f"RSR processing failed: {e}")
             return False

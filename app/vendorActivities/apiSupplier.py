@@ -105,6 +105,7 @@ def getRSR(username, password, pos="I"):
 
         
         time.sleep(0.2)
+        print(len(all_items), "- total item")
     return all_items
 
 
