@@ -684,7 +684,7 @@ class MarketInventory:
             "format": "CSV",
             "schemaVersion": "1.0"
         }
-        response = requests.post(self, url, headers=HEADERS, json=payload)
+        response = requests.post(url, headers=HEADERS, json=payload)
         if response.status_code != 201:
             print("Error creating task:", response.text)
             return None
