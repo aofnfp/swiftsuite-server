@@ -670,82 +670,55 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
     
         # Set eBay API endpoint and headers
-        ebay_items = []
-        page_number = 1
-        total_pages = 1  # Initialize to 1 to enter the loop
+
+        # Base URL for eBay Sell Inventory API (Production environment)
+        BASE_URL = 'https://api.ebay.com/sell/inventory/v1/inventory_item'
+
+        # Headers with OAuth2 token
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+        all_items = []
+        limit = 100  # Max per request
+        offset = 0
+
         try:
-            url = "https://api.ebay.com/ws/api.dll"
-            headers = {
-                "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
-                "X-EBAY-API-SITEID": "0",
-                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-IAF-TOKEN": access_token,
-                "Content-Type": "text/xml"
-            }
-            namespace = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
+            while True:
+                url = f"{BASE_URL}?limit={limit}&offset={offset}"
+                response = requests.get(url, headers=headers)
 
-            while page_number <= total_pages:
-                items = []
-                # XML request body for the GetMyeBaySelling API with current page number
-                body = f"""<?xml version="1.0" encoding="utf-8"?>
-                        <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                            <RequesterCredentials>
-                                <eBayAuthToken>{access_token}</eBayAuthToken>
-                            </RequesterCredentials>
-                            <ActiveList>
-                                <Pagination>
-                                    <EntriesPerPage>100</EntriesPerPage>
-                                    <PageNumber>{page_number}</PageNumber>
-                                </Pagination>
-                            </ActiveList>
-                        </GetMyeBaySellingRequest>"""
-                            
-                # Sending the request
-                response = requests.post(url, headers=headers, data=body)               
-                if response.status_code == 200:
-                    # Decode response content if it's in byte format
-                    xml_content = response.content.decode('utf-8')
-                    
-                    # Parsing the XML response
-                    root = ET.fromstring(xml_content)
-
-                    # Get the total number of pages from the response
-                    total_pages_element = root.find(".//ebay:PaginationResult/ebay:TotalNumberOfPages", namespaces=namespace)
-                    if total_pages_element is not None:
-                        total_pages = int(total_pages_element.text)                   
-
-                    # Loop through each item in the current page
-                    for item in root.findall(".//ebay:ItemArray/ebay:Item", namespaces=namespace):
-                        item_id = item.find("ebay:ItemID", namespaces=namespace).text if item.find("ebay:ItemID", namespaces=namespace) is not None else "Not Found"
-                        sku = item.find("ebay:SKU", namespaces=namespace).text if item.find("ebay:SKU", namespaces=namespace) is not None else "N/A"
-                        title = item.find("ebay:Title", namespaces=namespace).text if item.find("ebay:Title", namespaces=namespace) is not None else "No Title"
-                        price = item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace) is not None else "No Price"
-                        quantity = item.find("ebay:Quantity", namespaces=namespace).text if item.find("ebay:Quantity", namespaces=namespace) is not None else "0"
-                        quantity_sold = item.find("ebay:SellingStatus/ebay:QuantitySold", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:QuantitySold", namespaces=namespace) is not None else "0"
-                        ListingDuration = item.find("ebay:ListingDuration", namespaces=namespace).text if item.find("ebay:ListingDuration", namespaces=namespace) is not None else "N/A"
-                        Listingtype = item.find("ebay:ListingType", namespaces=namespace).text if item.find("ebay:ListingType", namespaces=namespace) is not None else "N/A"
-                        PictureDetails = item.find("ebay:PictureDetails/ebay:GalleryURL", namespaces=namespace).text if item.find("ebay:PictureDetails/ebay:GalleryURL", namespaces=namespace) is not None else "N/A"
-                        ShippingProfileID = item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileID", namespaces=namespace) is not None else "N/A"
-                        ShippingProfileName = item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace) is not None else "N/A"
-                        ReturnProfileID = item.find("ebay:SellerProfiles/ebay:SellerReturnProfile/ebay:ReturnProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileID", namespaces=namespace) is not None else "N/A"
-                        ReturnProfileName = item.find("ebay:SellerProfiles/ebay:SellerReturnProfile/ebay:ReturnProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace) is not None else "N/A"
-                        PaymentProfileID = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace) is not None else "N/A"
-                        PaymentProfileName = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace) is not None else "N/A"
-                        item_market_url = item.find(".//ebay:ViewItemURL", namespaces=namespace).text if item.find(".//ebay:ViewItemURL", namespaces=namespace) is not None else "N/A"
-
-                        items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, item_market_url])
-    
-                # If no more items, break out of the loop
-                if not items:
+                if response.status_code != 200:
+                    print(f"Failed to retrieve inventory: {response.status_code} - {response.text}")
                     break
 
-                # Add retrieved items to the list
-                ebay_items.extend(items)
-            
-                # Increment the page number for the next iteration
-                page_number += 1
+                data = response.json()
+                inventory_items = data.get('inventoryItems', [])
 
-            return JsonResponse({"Total_items":len(ebay_items)}, safe=False, status=status.HTTP_200_OK)
+                for item in inventory_items:
+                    item_details = {
+                        'sku': item.get('sku'),
+                        'title': item.get('product', {}).get('title'),
+                        'brand': item.get('product', {}).get('brand'),
+                        'upc': ', '.join(item.get('product', {}).get('upc', [])),
+                        'mpn': item.get('product', {}).get('mpn'),
+                        'description': item.get('product', {}).get('description'),
+                        'condition': item.get('condition'),
+                        'availability': item.get('availability', {}),
+                        'product': item.get('product', {})
+                    }
+                    all_items.append(item_details)
+
+                print(f"Fetched {len(inventory_items)} items. Total so far: {len(all_items)}")
+                
+                # Break if no more items
+                if len(inventory_items) < limit:
+                    break
+                offset += limit
+
+            return JsonResponse({"Total_items":len(all_items)}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as e:
