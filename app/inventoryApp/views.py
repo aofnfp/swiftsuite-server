@@ -680,10 +680,10 @@ class MarketInventory:
         }
 
         try:
-            body = """<?xml version="1.0" encoding="utf-8"?>
+            body = f"""<?xml version="1.0" encoding="utf-8"?>
             <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
             <RequesterCredentials>
-                <eBayAuthToken>YOUR_LEGACY_AUTH_TOKEN</eBayAuthToken>
+                <eBayAuthToken>{access_token}</eBayAuthToken>
             </RequesterCredentials>
             <Pagination>
                 <EntriesPerPage>10</EntriesPerPage>
