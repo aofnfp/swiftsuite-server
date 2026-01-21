@@ -672,27 +672,28 @@ class MarketInventory:
         # Set eBay API endpoint and headers
 
         EBAY_API_ENDPOINT = "https://api.ebay.com/ws/api.dll"
-        HEADERS = {
-            "Content-Type": "text/xml",
-            "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
+        headers = {
+            "X-EBAY-API-CALL-NAME": "GetSellerList",
             "X-EBAY-API-SITEID": "0",
             "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-            "Authorization": f"Bearer {access_token}"
+            "Content-Type": "text/xml"
         }
 
         try:
             body = """<?xml version="1.0" encoding="utf-8"?>
-            <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <ActiveList>
-                    <Include>true</Include>
-                    <Pagination>
-                        <EntriesPerPage>100</EntriesPerPage>
-                        <PageNumber>1</PageNumber>
-                    </Pagination>
-                </ActiveList>
-            </GetMyeBaySellingRequest>"""
+            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            <RequesterCredentials>
+                <eBayAuthToken>YOUR_LEGACY_AUTH_TOKEN</eBayAuthToken>
+            </RequesterCredentials>
+            <Pagination>
+                <EntriesPerPage>10</EntriesPerPage>
+                <PageNumber>1</PageNumber>
+            </Pagination>
+            <DetailLevel>ReturnAll</DetailLevel>
+            </GetSellerListRequest>
+            """
 
-            response = requests.post(EBAY_API_ENDPOINT, headers=HEADERS, data=body)
+            response = requests.post(EBAY_API_ENDPOINT, headers=headers, data=body)
 
             if response.status_code != 200:
                 print("Error getting active listings:", response.text)
