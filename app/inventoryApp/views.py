@@ -709,12 +709,12 @@ class MarketInventory:
                 status_response.raise_for_status()
                 status_data = status_response.json()
 
-                status = status_data.get("reportStatus")
+                status_ad = status_data.get("reportStatus")
 
-                if status == "COMPLETED":
+                if status_ad == "COMPLETED":
                     file_id = status_data["fileReferenceId"]
                     break
-                elif status == "FAILED":
+                elif status_ad == "FAILED":
                     raise RuntimeError("Inventory report generation failed")
 
                 logger.info("[…] Waiting for report to complete...")
