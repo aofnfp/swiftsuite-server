@@ -685,7 +685,7 @@ class MarketInventory:
         # -------------------------------------------------
         # STEP 1: Request inventory report
         # -------------------------------------------------
-        create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/report"
+        create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/task"
 
         payload = {
             "reportType": "ACTIVE_LISTINGS_REPORT",
@@ -701,7 +701,7 @@ class MarketInventory:
             # -------------------------------------------------
             # STEP 2: Poll report status
             # -------------------------------------------------
-            status_url = f"{EBAY_API_BASE}/sell/feed/v1/report/{report_id}"
+            status_url = f"{EBAY_API_BASE}/sell/feed/v1/task/{report_id}"
 
             file_id = None
             while True:
