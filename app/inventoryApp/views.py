@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-import time
+from datetime import datetime, time, timedelta
 import os, requests, json
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -672,49 +671,66 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
- 
-            url = "https://api.ebay.com/sell/inventory/v1/inventory_item"
-
+            url = "https://api.ebay.com/ws/api.dll"
             headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                "X-EBAY-API-CALL-NAME": "GetSellerList",
+                "X-EBAY-API-SITEID": "0",
+                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+                "X-EBAY-API-IAF-TOKEN": access_token,
+                "Content-Type": "text/xml"
             }
 
-            limit = 100
-            offset = 0
-            all_items = []
+            all_items = {}
+            end_time = datetime.utcnow()
+            start_time = end_time - timedelta(days=30)
 
             while True:
-                params = {
-                    "limit": limit,
-                    "offset": offset
-                }
+                page_number = 1
+                total_pages = 1
+                found_any = False
 
-                response = requests.get(
-                    url,
-                    headers=headers,
-                    params=params,
-                    timeout=30
-                )
+                while page_number <= total_pages:
+                    body = f"""<?xml version="1.0" encoding="utf-8"?>
+                    <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <StartTimeFrom>{start_time.isoformat()}Z</StartTimeFrom>
+                    <StartTimeTo>{end_time.isoformat()}Z</StartTimeTo>
+                    <Pagination>
+                        <EntriesPerPage>100</EntriesPerPage>
+                        <PageNumber>{page_number}</PageNumber>
+                    </Pagination>
+                    <DetailLevel>ReturnAll</DetailLevel>
+                    </GetSellerListRequest>
+                    """
 
-                response.raise_for_status()
-                data = response.json()
+                    res = requests.post(url, headers=headers, data=body, timeout=60)
+                    res.raise_for_status()
 
-                items = data.get("inventoryItems", [])
-                all_items.extend(items)
+                    root = ET.fromstring(res.text)
+                    ns = {'e': 'urn:ebay:apis:eBLBaseComponents'}
 
-                # Pagination control
-                total = data.get("total", 0)
-                offset += limit
+                    items = root.findall(".//e:Item", ns)
+                    if not items:
+                        break
 
-                if offset >= total:
+                    found_any = True
+
+                    for item in items:
+                        item_id = item.findtext("e:ItemID", namespaces=ns)
+                        all_items[item_id] = item
+
+                    total_pages = int(root.findtext(".//e:TotalNumberOfPages", namespaces=ns))
+                    page_number += 1
+
+                if not found_any:
                     break
 
-                time.sleep(0.2)  # throttle
+                end_time = start_time
+                start_time -= timedelta(days=30)
 
-
-            return JsonResponse({"Total": len(all_items), "Item": all_items}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Item": len(all_items), "Items": list(all_items.values())[10]}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
