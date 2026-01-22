@@ -682,6 +682,8 @@ class MarketInventory:
                 "Content-Type": "text/xml"
             }
 
+            namespace = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
+
             ebay_items = []
             page_number = 1
             total_pages = 1
@@ -689,37 +691,58 @@ class MarketInventory:
             while page_number <= total_pages:
                 body = f"""<?xml version="1.0" encoding="utf-8"?>
                     <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <ActiveList>
-                        <Include>true</Include>
-                        <Pagination>
-                        <EntriesPerPage>50</EntriesPerPage>
-                        <PageNumber>{page_number}</PageNumber>
-                        </Pagination>
-                    </ActiveList>
-                    <DetailLevel>ItemReturnAttributes</DetailLevel>
-                    </GetMyeBaySellingRequest>"""
+                        <RequesterCredentials>
+                            <eBayAuthToken>{access_token}</eBayAuthToken>
+                        </RequesterCredentials>
+                        <ActiveList>
+                            <Include>true</Include>
+                            <Pagination>
+                                <EntriesPerPage>50</EntriesPerPage>
+                                <PageNumber>{page_number}</PageNumber>
+                            </Pagination>
+                        </ActiveList>
+                        <DetailLevel>ReturnAll</DetailLevel>
+                    </GetMyeBaySellingRequest>
+                    """
 
-                response = requests.post(url, headers=headers, data=body, timeout=30)
+                try:
+                    response = requests.post(
+                        url,
+                        headers=headers,
+                        data=body,
+                        timeout=30  # CRITICAL
+                    )
 
-                if response.status_code != 200:
-                    raise Exception(response.text)
+                    response.raise_for_status()
 
-                root = ET.fromstring(response.text)
-                ns = {"e": "urn:ebay:apis:eBLBaseComponents"}
+                except requests.exceptions.Timeout:
+                    time.sleep(5)
+                    continue
+
+                except requests.exceptions.RequestException as e:
+                    raise Exception(f"eBay API error: {e}")
+
+                root = ET.fromstring(response.content)
 
                 # Extract pagination info
-                total_pages_node = root.find(".//e:PaginationResult/e:TotalNumberOfPages", ns)
-                if total_pages_node is not None:
-                    total_pages = int(total_pages_node.text)
+                pagination = root.find('.//ebay:PaginationResult', namespace)
+                if pagination is not None:
+                    total_pages = int(
+                        pagination.find('ebay:TotalNumberOfPages', namespace).text
+                    )
 
-                # Extract item IDs
-                for item in root.findall(".//e:Item", ns):
-                    item_id = item.find("e:ItemID", ns)
-                    if item_id is not None:
-                        ebay_items.append(item_id.text)
+                # Extract items
+                items = root.findall('.//ebay:Item', namespace)
+                for item in items:
+                    ebay_items.append({
+                        "item_id": item.findtext('ebay:ItemID', default='', namespaces=namespace),
+                        "sku": item.findtext('ebay:SKU', default='', namespaces=namespace),
+                        "title": item.findtext('ebay:Title', default='', namespaces=namespace),
+                        "price": item.findtext('.//ebay:CurrentPrice', default='', namespaces=namespace)
+                    })
 
                 page_number += 1
-                time.sleep(1)  # throttle to avoid gateway timeout
+                time.sleep(1)  # IMPORTANT: throttle
 
             return JsonResponse({"Total": len(ebay_items), "Item": ebay_items}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
