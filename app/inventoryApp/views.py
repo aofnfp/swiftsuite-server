@@ -1,4 +1,5 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
+import time
 import os, requests, json
 from rest_framework.views import APIView
 from rest_framework.response import Response
