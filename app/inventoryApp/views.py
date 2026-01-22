@@ -672,79 +672,49 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
-            url = "https://api.ebay.com/ws/api.dll"
+ 
+            url = "https://api.ebay.com/sell/inventory/v1/inventory_item"
 
             headers = {
-                "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
-                "X-EBAY-API-SITEID": "0",
-                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-IAF-TOKEN": access_token,
-                "Content-Type": "text/xml"
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             }
 
-            namespace = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
+            limit = 100
+            offset = 0
+            all_items = []
 
-            ebay_items = []
-            page_number = 1
-            total_pages = 1
+            while True:
+                params = {
+                    "limit": limit,
+                    "offset": offset
+                }
 
-            while page_number <= total_pages:
-                body = f"""<?xml version="1.0" encoding="utf-8"?>
-                    <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                        <RequesterCredentials>
-                            <eBayAuthToken>{access_token}</eBayAuthToken>
-                        </RequesterCredentials>
-                        <ActiveList>
-                            <Include>true</Include>
-                            <Pagination>
-                                <EntriesPerPage>50</EntriesPerPage>
-                                <PageNumber>{page_number}</PageNumber>
-                            </Pagination>
-                        </ActiveList>
-                        <DetailLevel>ReturnAll</DetailLevel>
-                    </GetMyeBaySellingRequest>
-                    """
+                response = requests.get(
+                    url,
+                    headers=headers,
+                    params=params,
+                    timeout=30
+                )
 
-                try:
-                    response = requests.post(
-                        url,
-                        headers=headers,
-                        data=body,
-                        timeout=30  # CRITICAL
-                    )
+                response.raise_for_status()
+                data = response.json()
 
-                    response.raise_for_status()
+                items = data.get("inventoryItems", [])
+                all_items.extend(items)
 
-                except requests.exceptions.Timeout:
-                    time.sleep(5)
-                    continue
+                # Pagination control
+                total = data.get("total", 0)
+                offset += limit
 
-                except requests.exceptions.RequestException as e:
-                    raise Exception(f"eBay API error: {e}")
+                if offset >= total:
+                    break
 
-                root = ET.fromstring(response.content)
+                time.sleep(0.2)  # throttle
 
-                # Extract pagination info
-                pagination = root.find('.//ebay:PaginationResult', namespace)
-                if pagination is not None:
-                    total_pages = int(
-                        pagination.find('ebay:TotalNumberOfPages', namespace).text
-                    )
 
-                # Extract items
-                items = root.findall('.//ebay:Item', namespace)
-                for item in items:
-                    ebay_items.append({
-                        "item_id": item.findtext('ebay:ItemID', default='', namespaces=namespace),
-                        "sku": item.findtext('ebay:SKU', default='', namespaces=namespace),
-                        "title": item.findtext('ebay:Title', default='', namespaces=namespace),
-                        "price": item.findtext('.//ebay:CurrentPrice', default='', namespaces=namespace)
-                    })
-
-                page_number += 1
-                time.sleep(1)  # IMPORTANT: throttle
-
-            return JsonResponse({"Total": len(ebay_items), "Item": ebay_items}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total": len(all_items), "Item": all_items}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
