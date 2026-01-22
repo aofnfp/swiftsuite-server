@@ -30,7 +30,8 @@ from .tasks import download_item_update_market_price_quantity_task
 import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
-
+import urllib.parse
+from bs4 import BeautifulSoup
 # download_item_update_market_price_quantity_task.delay()
 
 
@@ -672,68 +673,72 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
     
         # Set eBay API endpoint and headers
+        results = []
+        current_url = "https://www.ebay.com/sch/i.html?_nkw=saint+patricks+tshirt"
 
-        EBAY_API_BASE = "https://api.ebay.com"
-        RETRY_INTERVAL = 60  # seconds
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
+        while current_url:
+            encoded_url = urllib.parse.quote_plus(current_url)
+            api_url = f"https://api.scrape.do/?token={access_token}&url={encoded_url}&geocode=us&super=true&render=true"
 
-        # -------------------------------------------------
-        # STEP 1: Request inventory report
-        # -------------------------------------------------
-        create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/task"
+            response = requests.get(api_url)
+            soup = BeautifulSoup(response.text, "html.parser")
 
-        payload = {
-            "feedType": "ACTIVE_LISTINGS_REPORT",
-            "format": "CSV"
-        }
+            # Detect which layout is being used
+            if soup.select("li.s-card"):
+                items = soup.select("li.s-card")
+                layout = "s-card"
+            elif soup.select("li.s-item"):
+                items = soup.select("li.s-item")
+                layout = "s-item"
+            else:
+                break
+
+            for item in items:
+                try:
+                    title = item.select_one(".s-card__title" if layout == "s-card" else ".s-item__title").get_text(strip=True)
+                except:
+                    title = None
+
+                try:
+                    price_spans = item.select(".s-card__price" if layout == "s-card" else ".s-item__price")
+                    if len(price_spans) > 1:
+                        price = " ".join([span.get_text(strip=True) for span in price_spans])
+                    elif price_spans:
+                        price = price_spans[0].get_text(strip=True)
+                    else:
+                        price = None
+                except:
+                    price = None
+
+                try:
+                    image_url = item.select_one(".s-card__image" if layout == "s-card" else ".s-item__image-img")["src"]
+                except:
+                    image_url = None
+
+                try:
+                    link = item.select_one("a.su-link" if layout == "s-card" else "a.s-item__link")["href"]
+                except:
+                    link = None
+
+                results.append({
+                    "title": title,
+                    "price": price,
+                    "image_url": image_url,
+                    "link": link
+                })
+
+            try:
+                next_link = soup.select_one("a.pagination__next")["href"]
+                current_url = next_link
+            except:
+                current_url = None
+
+        # Export to CSV
         try:
-            response = requests.post(create_report_url, headers=headers, json=payload)
-            response.raise_for_status()
-
-            report_id = response.json()["reportId"]
-            logger.info(f"[✓] Report requested: {report_id}")
-
-            # -------------------------------------------------
-            # STEP 2: Poll report status
-            # -------------------------------------------------
-            status_url = f"{EBAY_API_BASE}/sell/feed/v1/task/{report_id}"
-
-            file_id = None
-            while True:
-                status_response = requests.get(status_url, headers=headers)
-                status_response.raise_for_status()
-                status_data = status_response.json()
-
-                status_ad = status_data.get("reportStatus")
-
-                if status_ad == "COMPLETED":
-                    file_id = status_data["fileReferenceId"]
-                    break
-                elif status_ad == "FAILED":
-                    raise RuntimeError("Inventory report generation failed")
-
-                logger.info("[…] Waiting for report to complete...")
-                time.sleep(RETRY_INTERVAL)
-
-            logger.info(f"[✓] Report ready. File ID: {file_id}")
-
-            # -------------------------------------------------
-            # STEP 3: Download CSV file
-            # -------------------------------------------------
-            download_url = f"{EBAY_API_BASE}/sell/feed/v1/file/{file_id}"
-
-            file_response = requests.get(download_url, headers=headers)
-            file_response.raise_for_status()
-
-            filename = "ebay_inventory.csv"
-            with open(filename, "wb") as f:
-                f.write(file_response.content)
-
-            return Response(f"Item downloaded successfully {filename}", safe=False, status=status.HTTP_200_OK)
+            with open("ebay_search_results.csv", mode="w", newline="", encoding="utf-8") as f:
+                writer = pd.DataFrame(results)
+                writer.to_csv(f, index=False)
+            return Response(f"Item downloaded successfully.", safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
