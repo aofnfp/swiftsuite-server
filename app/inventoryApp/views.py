@@ -669,7 +669,6 @@ class MarketInventory:
             if user.parent_id:
                 userid = user.parent_id
         eb = Ebay()
-        mark_inv =MarketInventory()
         access_token = eb.refresh_access_token(userid, "Ebay")
     
         # Set eBay API endpoint and headers
@@ -688,7 +687,7 @@ class MarketInventory:
         create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/task"
 
         payload = {
-            "reportType": "ACTIVE_LISTINGS_REPORT",
+            "feedType": "ACTIVE_LISTINGS_REPORT",
             "format": "CSV"
         }
         try:
