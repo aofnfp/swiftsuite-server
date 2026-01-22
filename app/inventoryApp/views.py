@@ -672,68 +672,49 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
     
         # Set eBay API endpoint and headers
-
-        EBAY_API_BASE = "https://api.ebay.com"
-        RETRY_INTERVAL = 60  # seconds
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-
-        # -------------------------------------------------
-        # STEP 1: Request inventory report
-        # -------------------------------------------------
-        create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/task"
-
-        payload = {
-            "feedType": "ACTIVE_LISTINGS_REPORT",
-            "format": "CSV"
-        }
+        ebay_items = []
+        page_number = 1
+        total_pages = 1  # Initialize to 1 to enter the loop
         try:
-            response = requests.post(create_report_url, headers=headers, json=payload)
-            response.raise_for_status()
+            url = "https://api.ebay.com/ws/api.dll"
+            headers = {
+                "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
+                "X-EBAY-API-SITEID": "0",
+                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+                "X-EBAY-API-IAF-TOKEN": access_token,
+                "Content-Type": "text/xml"
+            }
+            namespace = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
 
-            report_id = response.json()["reportId"]
-            logger.info(f"[✓] Report requested: {report_id}")
+            while page_number <= total_pages:
+                items = []
+                # XML request body for the GetMyeBaySelling API with current page number
+                body = f"""<?xml version="1.0" encoding="utf-8"?>
+                        <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                            <RequesterCredentials>
+                                <eBayAuthToken>{access_token}</eBayAuthToken>
+                            </RequesterCredentials>
+                            <ActiveList>
+                                <Pagination>
+                                    <EntriesPerPage>100</EntriesPerPage>
+                                    <PageNumber>{page_number}</PageNumber>
+                                </Pagination>
+                            </ActiveList>
+                        </GetMyeBaySellingRequest>"""
+                            
+                # Sending the request
+                response = requests.post(url, headers=headers, data=body)               
+                if response.status_code == 200:
+                    # Decode response content if it's in byte format
+                    xml_content = response.content.decode('utf-8')
+                    
+                    # Parsing the XML response
+                    root = ET.fromstring(xml_content)
 
-            # -------------------------------------------------
-            # STEP 2: Poll report status
-            # -------------------------------------------------
-            # status_url = f"{EBAY_API_BASE}/sell/feed/v1/task/{report_id}"
+                    # Get the total number of pages from the response
+                    total_pages_element = root.find(".//ebay:PaginationResult/ebay:TotalNumberOfPages", namespaces=namespace)
 
-            # file_id = None
-            # while True:
-            #     status_response = requests.get(status_url, headers=headers)
-            #     status_response.raise_for_status()
-            #     status_data = status_response.json()
-
-            #     status_ad = status_data.get("reportStatus")
-
-            #     if status_ad == "COMPLETED":
-            #         file_id = status_data["fileReferenceId"]
-            #         break
-            #     elif status_ad == "FAILED":
-            #         raise RuntimeError("Inventory report generation failed")
-
-            #     logger.info("[…] Waiting for report to complete...")
-            #     time.sleep(RETRY_INTERVAL)
-
-            # logger.info(f"[✓] Report ready. File ID: {file_id}")
-
-            # -------------------------------------------------
-            # STEP 3: Download CSV file
-            # -------------------------------------------------
-            # download_url = f"{EBAY_API_BASE}/sell/feed/v1/file/{file_id}"
-
-            # file_response = requests.get(download_url, headers=headers)
-            # file_response.raise_for_status()
-
-            # filename = "ebay_inventory.csv"
-            # with open(filename, "wb") as f:
-            #     f.write(file_response.content)
-
-            return Response(f"Item downloaded successfully {filename}", safe=False, status=status.HTTP_200_OK)
+            return Response(f"Item downloaded successfully {total_pages_element}", safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
