@@ -674,61 +674,53 @@ class MarketInventory:
             url = "https://api.ebay.com/ws/api.dll"
 
             headers = {
-                "X-EBAY-API-CALL-NAME": "GetSellerList",
+                "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
                 "X-EBAY-API-SITEID": "0",
                 "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
                 "X-EBAY-API-IAF-TOKEN": access_token,
                 "Content-Type": "text/xml"
             }
 
+            ebay_items = []
             page_number = 1
             total_pages = 1
-            items = []
-
-            # REQUIRED: limit date range (prevents timeout)
-            start_time = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            end_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
             while page_number <= total_pages:
                 body = f"""<?xml version="1.0" encoding="utf-8"?>
-                        <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                        <RequesterCredentials>
-                            <eBayAuthToken>{access_token}</eBayAuthToken>
-                        </RequesterCredentials>
-                        <StartTimeFrom>{start_time}</StartTimeFrom>
-                        <StartTimeTo>{end_time}</StartTimeTo>
+                    <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <ActiveList>
+                        <Include>true</Include>
                         <Pagination>
-                            <EntriesPerPage>50</EntriesPerPage>
-                            <PageNumber>{page_number}</PageNumber>
+                        <EntriesPerPage>50</EntriesPerPage>
+                        <PageNumber>{page_number}</PageNumber>
                         </Pagination>
-                        <DetailLevel>ReturnSummary</DetailLevel>
-                        </GetSellerListRequest>
-                        """
+                    </ActiveList>
+                    <DetailLevel>ItemReturnAttributes</DetailLevel>
+                    </GetMyeBaySellingRequest>"""
 
-                response = requests.post(url, headers=headers, data=body, timeout=60)
-                response.raise_for_status()
+                response = requests.post(url, headers=headers, data=body, timeout=30)
+
+                if response.status_code != 200:
+                    raise Exception(response.text)
 
                 root = ET.fromstring(response.text)
                 ns = {"e": "urn:ebay:apis:eBLBaseComponents"}
 
-                # Read pagination info ONCE
-                if page_number == 1:
-                    total_pages = int(
-                        root.find(".//e:PaginationResult/e:TotalNumberOfPages", ns).text
-                    )
+                # Extract pagination info
+                total_pages_node = root.find(".//e:PaginationResult/e:TotalNumberOfPages", ns)
+                if total_pages_node is not None:
+                    total_pages = int(total_pages_node.text)
 
+                # Extract item IDs
                 for item in root.findall(".//e:Item", ns):
-                    items.append({
-                        "item_id": item.findtext("e:ItemID", default="", namespaces=ns),
-                        "title": item.findtext("e:Title", default="", namespaces=ns),
-                        "sku": item.findtext("e:SKU", default="", namespaces=ns),
-                        "price": item.findtext(".//e:CurrentPrice", default="", namespaces=ns),
-                        "quantity": item.findtext("e:Quantity", default="", namespaces=ns),
-                    })
+                    item_id = item.find("e:ItemID", ns)
+                    if item_id is not None:
+                        ebay_items.append(item_id.text)
 
                 page_number += 1
+                time.sleep(1)  # throttle to avoid gateway timeout
 
-            return JsonResponse({"Item": items}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Total": len(ebay_items), "Item": ebay_items}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
