@@ -734,11 +734,11 @@ class MarketInventory:
             with open(filename, "wb") as f:
                 f.write(file_response.content)
 
-            return Response(f"Item downloaded successfully {filename}", status=status.HTTP_200_OK)
+            return Response(f"Item downloaded successfully {filename}", safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
-        except Exception as e:
-            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ea:
+            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
 
         
         
