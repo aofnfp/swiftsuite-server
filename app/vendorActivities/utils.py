@@ -323,53 +323,115 @@ class VendorActivity():
         return {}
      
      
-    def process_fragranceX(self):             
+    def process_fragranceX(self):
         try:
-            for _, row in self.data.iterrows():
-            
-                description = self.clean_text(row.get("Description", ""))
-                productName = row.get("ProductName", "")
-                sku = row.get("ItemId", "")
-                brandName = self.clean_text(row.get("BrandName", ""))
-                gender = row.get("Gender", "")
-                size =  row.get("Size", "")
-                metric_size = row.get("MetricSize", "")
-                retailPriceUSD = row.get("RetailPriceUSD", 0)
-                wholesalePriceUSD =  row.get("WholesalePriceUSD", 0)
-                wholesalePriceEUR = row.get("WholesalePriceEUR", 0)
-                wholesalePriceGBP = row.get("WholesalePriceGBP", 0)
-                wholesalePriceCAD = row.get("WholesalePriceCAD", 0)
-                wholesalePriceAUD =  row.get("WholesalePriceAUD", 0)
-                smallImageUrl = row.get("SmallImageUrl", "")
-                largeImageUrl = row.get("LargeImageUrl", "")
-                productType = row.get("Type", "")
-                quantityAvailable = row.get("QuantityAvailable", 0)
-                upc = row.get("Upc", "")
-                instock = row.get("Instock", False)
-                parentCode = row.get("ParentCode", "")
+            self.insert_data = []
+
+            for row in self.data.itertuples(index=False):
                 
-                productName = f'{productName} by {brandName} {productType} {size} for {gender}'
-                
+                description = self.clean_text(getattr(row, "Description", ""))
+                brand_name = self.clean_text(getattr(row, "BrandName", ""))
+                product_type = getattr(row, "Type", "")
+                gender = getattr(row, "Gender", "")
+                size = getattr(row, "Size", "")
+                metric_size = getattr(row, "MetricSize", "")
+
+                product_name = (
+                    f"{row.ProductName} by {brand_name} "
+                    f"{product_type} {size} for {gender}"
+                ).strip()
+
                 features = [
-                    {"name": "Brand", "value": brandName},
+                    {"name": "Brand", "value": brand_name},
                     {"name": "Gender", "value": gender},
                     {"name": "Size", "value": size},
                     {"name": "Metric Size", "value": metric_size},
-                    {"name": "Product Type", "value": productType},                             
+                    {"name": "Product Type", "value": product_type},
                 ]
 
-                # Append processed data to insert list
-                self.insert_data.append(Fragrancex(productName=productName, sku=sku, description=description, brandName=brandName, gender=gender, size=size, metric_size=metric_size, retailPriceUSD=retailPriceUSD, wholesalePriceUSD=wholesalePriceUSD, wholesalePriceEUR=wholesalePriceEUR,wholesalePriceGBP=wholesalePriceGBP, wholesalePriceCAD=wholesalePriceCAD, wholesalePriceAUD=wholesalePriceAUD, smallImageUrl=smallImageUrl,largeImageUrl=largeImageUrl, type=productType, quantityAvailable=quantityAvailable,upc=upc, instock=instock, parentCode=parentCode, features = json.dumps(features)))
-                
-            
-            # Insert data into database
-            Fragrancex.objects.bulk_create(self.insert_data, batch_size=500, update_conflicts=True, update_fields=["size", "retailPriceUSD", "wholesalePriceUSD", "wholesalePriceEUR", "wholesalePriceGBP", "wholesalePriceCAD", "wholesalePriceAUD", "quantityAvailable",  "features"])
-            print('FrangranceX upload successfully')
-            
+                fx_product = Fragrancex(
+                    sku=row.ItemId,
+                    productName=product_name,
+                    description=description,
+                    brandName=brand_name,
+                    gender=gender,
+                    size=size,
+                    metric_size=metric_size,
+                    retailPriceUSD=getattr(row, "RetailPriceUSD", 0),
+                    wholesalePriceUSD=getattr(row, "WholesalePriceUSD", 0),
+                    wholesalePriceEUR=getattr(row, "WholesalePriceEUR", 0),
+                    wholesalePriceGBP=getattr(row, "WholesalePriceGBP", 0),
+                    wholesalePriceCAD=getattr(row, "WholesalePriceCAD", 0),
+                    wholesalePriceAUD=getattr(row, "WholesalePriceAUD", 0),
+                    smallImageUrl=getattr(row, "SmallImageUrl", ""),
+                    largeImageUrl=getattr(row, "LargeImageUrl", ""),
+                    type=product_type,
+                    quantityAvailable=getattr(row, "QuantityAvailable", 0),
+                    upc=getattr(row, "Upc", ""),
+                    instock=getattr(row, "Instock", False),
+                    parentCode=getattr(row, "ParentCode", ""),
+                    features=json.dumps(features),
+                )
+
+                self.insert_data.append(fx_product)
+
+            if not self.insert_data:
+                return True
+
+            # Insert new products only
+            Fragrancex.objects.bulk_create(
+                self.insert_data,
+                batch_size=500,
+                ignore_conflicts=True
+            )
+
+            # Fetch existing rows for update
+            skus = [obj.sku for obj in self.insert_data]
+            existing = {
+                obj.sku: obj
+                for obj in Fragrancex.objects.filter(sku__in=skus)
+            }
+
+            to_update = []
+
+            for obj in self.insert_data:
+                if obj.sku in existing:
+                    db_obj = existing[obj.sku]
+                    db_obj.size = obj.size
+                    db_obj.retailPriceUSD = obj.retailPriceUSD
+                    db_obj.wholesalePriceUSD = obj.wholesalePriceUSD
+                    db_obj.wholesalePriceEUR = obj.wholesalePriceEUR
+                    db_obj.wholesalePriceGBP = obj.wholesalePriceGBP
+                    db_obj.wholesalePriceCAD = obj.wholesalePriceCAD
+                    db_obj.wholesalePriceAUD = obj.wholesalePriceAUD
+                    db_obj.quantityAvailable = obj.quantityAvailable
+                    db_obj.features = obj.features
+                    to_update.append(db_obj)
+
+            if to_update:
+                Fragrancex.objects.bulk_update(
+                    to_update,
+                    fields=[
+                        "size",
+                        "retailPriceUSD",
+                        "wholesalePriceUSD",
+                        "wholesalePriceEUR",
+                        "wholesalePriceGBP",
+                        "wholesalePriceCAD",
+                        "wholesalePriceAUD",
+                        "quantityAvailable",
+                        "features",
+                    ],
+                    batch_size=500
+                )
+
+            print("FragranceX products uploaded successfully")
             return True
 
         except Exception as e:
-            return e
+            print(f"FragranceX processing failed: {e}")
+            return False
+
         
     def process_lipsey(self):
         try:
@@ -663,23 +725,7 @@ class VendorActivity():
         except Exception as e:
             print(f"An error occurred: {e}")
             return e
-    
-    def is_valid_image(self, url, min_width=100, min_height=100):
-        try:
-            resp = requests.get(url, stream=True, timeout=5)
-            resp.raise_for_status()
-
-            img = Image.open(resp.raw)
-            img.load()  # ensure image is fully read
-
-            width, height = img.size
-            return width >= min_width and height >= min_height
-
-        except Exception:
-            return False
-
-
-    
+        
     def process_rsr(self):
         try:
             self.insert_data = []
