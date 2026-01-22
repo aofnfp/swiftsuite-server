@@ -670,51 +670,65 @@ class MarketInventory:
                 userid = user.parent_id
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
-    
-        # Set eBay API endpoint and headers
-        ebay_items = []
-        page_number = 1
-        total_pages = 1  # Initialize to 1 to enter the loop
         try:
             url = "https://api.ebay.com/ws/api.dll"
+
             headers = {
-                "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
+                "X-EBAY-API-CALL-NAME": "GetSellerList",
                 "X-EBAY-API-SITEID": "0",
                 "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
                 "X-EBAY-API-IAF-TOKEN": access_token,
                 "Content-Type": "text/xml"
             }
-            namespace = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
+
+            page_number = 1
+            total_pages = 1
+            items = []
+
+            # REQUIRED: limit date range (prevents timeout)
+            start_time = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            end_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
             while page_number <= total_pages:
-                items = []
-                # XML request body for the GetMyeBaySelling API with current page number
                 body = f"""<?xml version="1.0" encoding="utf-8"?>
-                        <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                            <RequesterCredentials>
-                                <eBayAuthToken>{access_token}</eBayAuthToken>
-                            </RequesterCredentials>
-                            <ActiveList>
-                                <Pagination>
-                                    <EntriesPerPage>100</EntriesPerPage>
-                                    <PageNumber>{page_number}</PageNumber>
-                                </Pagination>
-                            </ActiveList>
-                        </GetMyeBaySellingRequest>"""
-                            
-                # Sending the request
-                response = requests.post(url, headers=headers, data=body)               
-                if response.status_code == 200:
-                    # Decode response content if it's in byte format
-                    xml_content = response.content.decode('utf-8')
-                    
-                    # Parsing the XML response
-                    root = ET.fromstring(xml_content)
+                        <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                        <RequesterCredentials>
+                            <eBayAuthToken>{access_token}</eBayAuthToken>
+                        </RequesterCredentials>
+                        <StartTimeFrom>{start_time}</StartTimeFrom>
+                        <StartTimeTo>{end_time}</StartTimeTo>
+                        <Pagination>
+                            <EntriesPerPage>50</EntriesPerPage>
+                            <PageNumber>{page_number}</PageNumber>
+                        </Pagination>
+                        <DetailLevel>ReturnSummary</DetailLevel>
+                        </GetSellerListRequest>
+                        """
 
-                    # Get the total number of pages from the response
-                    total_pages_element = root.find(".//ebay:PaginationResult/ebay:TotalNumberOfPages", namespaces=namespace)
+                response = requests.post(url, headers=headers, data=body, timeout=60)
+                response.raise_for_status()
 
-            return Response(f"Item downloaded successfully {total_pages_element}", safe=False, status=status.HTTP_200_OK)
+                root = ET.fromstring(response.text)
+                ns = {"e": "urn:ebay:apis:eBLBaseComponents"}
+
+                # Read pagination info ONCE
+                if page_number == 1:
+                    total_pages = int(
+                        root.find(".//e:PaginationResult/e:TotalNumberOfPages", ns).text
+                    )
+
+                for item in root.findall(".//e:Item", ns):
+                    items.append({
+                        "item_id": item.findtext("e:ItemID", default="", namespaces=ns),
+                        "title": item.findtext("e:Title", default="", namespaces=ns),
+                        "sku": item.findtext("e:SKU", default="", namespaces=ns),
+                        "price": item.findtext(".//e:CurrentPrice", default="", namespaces=ns),
+                        "quantity": item.findtext("e:Quantity", default="", namespaces=ns),
+                    })
+
+                page_number += 1
+
+            return Response(f"Item downloaded successfully {len(items)}", safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
