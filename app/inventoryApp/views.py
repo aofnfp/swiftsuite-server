@@ -28,6 +28,8 @@ from django.apps import apps
 from woocommerce import API
 from .tasks import download_item_update_market_price_quantity_task
 import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
 
 # download_item_update_market_price_quantity_task.delay()
 
@@ -654,90 +656,6 @@ class MarketInventory:
             
         except Exception as e:
             return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
-    
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-    CSV_FILENAME = 'inventory_report.csv'
-
-    def create_inventory_report_task(self, access_token):
-
-        BASE_URL = 'https://api.ebay.com/sell/feed/v1'
-        HEADERS = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        url = f'{BASE_URL}/task'
-        payload = {
-            "feedType": "LMS_ACTIVE_INVENTORY_REPORT",
-            "format": "CSV",
-            "schemaVersion": "1.0"
-        }
-        response = requests.post(url, headers=HEADERS, json=payload)
-        if response.status_code != 201:
-            print("Error creating task:", response.text)
-            return None
-        return response.json().get('taskId')
-
-    def wait_for_task_completion(self, access_token, task_id, poll_interval=10):
-        BASE_URL = 'https://api.ebay.com/sell/feed/v1'
-        HEADERS = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        url = f"{BASE_URL}/task/{task_id}"
-        while True:
-            response = requests.get(url, headers=HEADERS)
-            if response.status_code != 200:
-                print("Error checking task status:", response.text)
-                return None
-            data = response.json()
-            status = data.get('status')
-            print(f"Task status: {status}")
-            if status == 'COMPLETED':
-                return data
-            elif status in ['FAILED', 'ABORTED']:
-                print("Task failed.")
-                return None
-            time.sleep(poll_interval)
-
-    def download_csv(self, access_token, file_reference_id, file_id, filename=CSV_FILENAME):
-        BASE_URL = 'https://api.ebay.com/sell/feed/v1'
-        HEADERS = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        url = f"{BASE_URL}/file/{file_id}?file_reference_id={file_reference_id}"
-        response = requests.get(url, headers=HEADERS, stream=True)
-        if response.status_code == 200:
-            with open(filename, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=1024):
-                    f.write(chunk)
-            print(f"Downloaded report to {filename}")
-            return filename
-        else:
-            print("Failed to download file:", response.text)
-            return None
-
-    def load_csv_to_dataframe(self, filename):
-        try:
-            df = pd.read_csv(filename)
-            return df.head(10)
-        except Exception as e:
-            print("Failed to load CSV to DataFrame:", e)
 
 
     # Function to test any api from ebay before implementation
@@ -755,20 +673,68 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
     
         # Set eBay API endpoint and headers
+
+        EBAY_API_BASE = "https://api.ebay.com"
+        RETRY_INTERVAL = 60  # seconds
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+
+        # -------------------------------------------------
+        # STEP 1: Request inventory report
+        # -------------------------------------------------
+        create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/report"
+
+        payload = {
+            "reportType": "ACTIVE_LISTINGS_REPORT",
+            "format": "CSV"
+        }
         try:
-            task_id = mark_inv.create_inventory_report_task(access_token)
-            if task_id:
-                task_info = mark_inv.wait_for_task_completion(access_token, task_id)
-                if task_info and 'fileReferenceId' in task_info:
-                    file_ref_id = task_info['fileReferenceId']
-                    file_id = task_info['fileId']
-                    file_path = mark_inv.download_csv(access_token, file_ref_id, file_id)
-                    if file_path:
-                        df_data = mark_inv.load_csv_to_dataframe(file_path)
+            response = requests.post(create_report_url, headers=headers, json=payload)
+            response.raise_for_status()
 
+            report_id = response.json()["reportId"]
+            logger.info(f"[✓] Report requested: {report_id}")
 
+            # -------------------------------------------------
+            # STEP 2: Poll report status
+            # -------------------------------------------------
+            status_url = f"{EBAY_API_BASE}/sell/feed/v1/report/{report_id}"
 
-            return JsonResponse({"Preview_items": df_data}, safe=False, status=status.HTTP_200_OK)
+            file_id = None
+            while True:
+                status_response = requests.get(status_url, headers=headers)
+                status_response.raise_for_status()
+                status_data = status_response.json()
+
+                status = status_data.get("reportStatus")
+
+                if status == "COMPLETED":
+                    file_id = status_data["fileReferenceId"]
+                    break
+                elif status == "FAILED":
+                    raise RuntimeError("Inventory report generation failed")
+
+                logger.info("[…] Waiting for report to complete...")
+                time.sleep(RETRY_INTERVAL)
+
+            logger.info(f"[✓] Report ready. File ID: {file_id}")
+
+            # -------------------------------------------------
+            # STEP 3: Download CSV file
+            # -------------------------------------------------
+            download_url = f"{EBAY_API_BASE}/sell/feed/v1/file/{file_id}"
+
+            file_response = requests.get(download_url, headers=headers)
+            file_response.raise_for_status()
+
+            filename = "ebay_inventory.csv"
+            with open(filename, "wb") as f:
+                f.write(file_response.content)
+
+            return Response(f"Item downloaded successfully {filename}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as e:

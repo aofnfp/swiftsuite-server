@@ -13,7 +13,7 @@ def download_item_update_market_price_quantity_task():
     """Background task to sync eBay items with local database and update price and quantity"""
     download_item_update_market_price_quantity()
     logger.info("download_item_update_market_price_quantity_task completed successfully")
-    
+
 
 @shared_task(queue='default')
 def update_inventory_price_quantity_task():
@@ -43,3 +43,5 @@ def map_marketplace_items_to_vendor_task():
     """Background task to map marketplace items to vendor update tables"""
     map_marketplace_items_to_vendor()
     logger.info("map_marketplace_items_to_vendor_task completed successfully")
+
+
