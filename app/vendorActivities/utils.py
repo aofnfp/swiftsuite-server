@@ -435,131 +435,140 @@ class VendorActivity():
         
     def process_lipsey(self):
         try:
-            for row in self.data.iterrows():
-                row = row[1]
+            self.insert_data = []
 
+            for row in self.data.itertuples(index=False):
                 features = [
-                    {"Name": "Model", "Value": row["Model"]},
-                    {"Name": "CaliberGauge", "Value": row["CaliberGauge"]},
-                    {"Name": "Manufacturer", "Value": row["Manufacturer"]},
-                    {"Name": "Type", "Value": row["Type"]},
-                    {"Name": "Action", "Value": row["Action"]},
-                    {"Name": "BarrelLength", "Value": row["BarrelLength"]},
-                    {"Name": "Capacity", "Value": row["Capacity"]},
-                    {"Name": "Finish", "Value": row["Finish"]},
-                    {"Name": "OverallLength", "Value": row["OverallLength"]},
-                    {"Name": "Receiver", "Value": row["Receiver"]},
-                    {"Name": "Safety", "Value": row["Safety"]},
-                    {"Name": "Sights", "Value": row["Sights"]},
-                    {"Name": "StockFrameGrips", "Value": row["StockFrameGrips"]},
-                    {"Name": "Magazine", "Value": row["Magazine"]},
-                    {"Name": "Weight", "Value": row["Weight"]},
-                    {"Name": "Chamber", "Value": row["Chamber"]},
-                    {"Name": "DrilledAndTapped", "Value": row["DrilledAndTapped"]},
-                    {"Name": "RateOfTwist", "Value": row["RateOfTwist"]},
-                    {"Name": "ItemType", "Value": row["ItemType"]},
-                    {"Name": "AdditionalFeature1", "Value": row["AdditionalFeature1"]},
-                    {"Name": "AdditionalFeature2", "Value": row["AdditionalFeature2"]},
-                    {"Name": "AdditionalFeature3", "Value": row["AdditionalFeature3"]},
-                    {"Name": "ShippingWeight", "Value": row["ShippingWeight"]},
-                    {"Name": "NfaThreadPattern", "Value": row["NfaThreadPattern"]},
-                    {"Name": "NfaAttachmentMethod", "Value": row["NfaAttachmentMethod"]},
-                    {"Name": "NfaBaffleType", "Value": row["NfaBaffleType"]},
-                    {"Name": "SilencerCanBeDisassembled", "Value": row["SilencerCanBeDisassembled"]},
-                    {"Name": "SilencerConstructionMaterial", "Value": row["SilencerConstructionMaterial"]},
-                    {"Name": "NfaDbReduction", "Value": row["NfaDbReduction"]},
-                    {"Name": "SilencerOutsideDiameter", "Value": row["SilencerOutsideDiameter"]},
-                    {"Name": "NfaForm3Caliber", "Value": row["NfaForm3Caliber"]},
-                    {"Name": "OpticMagnification", "Value": row["OpticMagnification"]},
-                    {"Name": "MaintubeSize", "Value": row["MaintubeSize"]},
-                    {"Name": "AdjustableObjective", "Value": row["AdjustableObjective"]},
-                    {"Name": "ObjectiveSize", "Value": row["ObjectiveSize"]},
-                    {"Name": "OpticAdjustments", "Value": row["OpticAdjustments"]},
-                    {"Name": "IlluminatedReticle", "Value": row["IlluminatedReticle"]},
-                    {"Name": "Reticle", "Value": row["Reticle"]},
-                    {"Name": "SightsType", "Value": row["SightsType"]},
-                    {"Name": "Choke", "Value": row["Choke"]},
-                    {"Name": "DbReduction", "Value": row["DbReduction"]},
-                    {"Name": "FinishType", "Value": row["FinishType"]},
-                    {"Name": "Frame", "Value": row["Frame"]},
-                    {"Name": "GripType", "Value": row["GripType"]},
-                    {"Name": "HandgunSlideMaterial", "Value": row["HandgunSlideMaterial"]},
-                    {"Name": "CountryOfOrigin", "Value": row["CountryOfOrigin"]},
-                    {"Name": "ItemLength", "Value": row["ItemLength"]},
-                    {"Name": "ItemWidth", "Value": row["ItemWidth"]},
-                    {"Name": "ItemHeight", "Value": row["ItemHeight"]},
+                    {"name": "Model", "value": row.Model},
+                    {"name": "CaliberGauge", "value": row.CaliberGauge},
+                    {"name": "Manufacturer", "value": row.Manufacturer},
+                    {"name": "Type", "value": row.Type},
+                    {"name": "Action", "value": row.Action},
+                    {"name": "BarrelLength", "value": row.BarrelLength},
+                    {"name": "Capacity", "value": row.Capacity},
+                    {"name": "Finish", "value": row.Finish},
+                    {"name": "OverallLength", "value": row.OverallLength},
+                    {"name": "Receiver", "value": row.Receiver},
+                    {"name": "Safety", "value": row.Safety},
+                    {"name": "Sights", "value": row.Sights},
+                    {"name": "StockFrameGrips", "value": row.StockFrameGrips},
+                    {"name": "Magazine", "value": row.Magazine},
+                    {"name": "Weight", "value": row.Weight},
+                    {"name": "Chamber", "value": row.Chamber},
+                    {"name": "RateOfTwist", "value": row.RateOfTwist},
+                    {"name": "ItemType", "value": row.ItemType},
+                    {"name": "CountryOfOrigin", "value": row.CountryOfOrigin},
                 ]
-                
 
-                self.insert_data.append(
-                    Lipsey(
-                        sku=row["ItemNo"],
-                        description1=row["Description1"],
-                        description2=row["Description2"],
-                        upc=row["Upc"],
-                        manufacturermodelno=row["ManufacturerModelNo"],
-                        msrp=row["Msrp"],
-                        model=row["Model"],
-                        calibergauge=row["CaliberGauge"],
-                        manufacturer=row["Manufacturer"],
-                        type=row["Type"],
-                        action=row["Action"],
-                        barrellength=row["BarrelLength"],
-                        capacity=row["Capacity"],
-                        finish=row["Finish"],
-                        overalllength=row["OverallLength"],
-                        receiver=row["Receiver"],
-                        safety=row["Safety"],
-                        sights=row["Sights"],
-                        stockframegrips=row["StockFrameGrips"],
-                        magazine=row["Magazine"],
-                        weight=row["Weight"],
-                        imagename=f'https://www.lipseyscloud.com//images//{row["ImageName"]}',
-                        chamber=row["Chamber"],
-                        drilledandtapped=row["DrilledAndTapped"],
-                        rateoftwist=row["RateOfTwist"],
-                        itemtype=row["ItemType"],
-                        additionalfeature1=row["AdditionalFeature1"],
-                        additionalfeature2=row["AdditionalFeature2"],
-                        additionalfeature3=row["AdditionalFeature3"],
-                        shippingweight=row["ShippingWeight"],
-                        boundbookmanufacturer=row["BoundBookManufacturer"],
-                        boundbookmodel=row["BoundBookModel"],
-                        boundbooktype=row["BoundBookType"],
-                        exclusive=row["Exclusive"],
-                        quantity=row["Quantity"],
-                        allocated=row["Allocated"],
-                        onsale=row["OnSale"],
-                        price=row["Price"],
-                        currentprice=row["CurrentPrice"],
-                        map=row["RetailMap"],
-                        fflrequired=row["FflRequired"],
-                        sotrequired=row["SotRequired"],
-                        exclusivetype=row["ExclusiveType"],
-                        scopecoverincluded=row["ScopeCoverIncluded"],
-                        special=row["Special"],
-                        sightstype=row["SightsType"],  
-                        case=row["Case"],
-                        family=row["Family"],
-                        packagelength=row["PackageLength"],
-                        packagewidth=row["PackageWidth"],
-                        packageheight=row["PackageHeight"],
-                        itemgroup=row["ItemGroup"],
-                        features=json.dumps(features),
-                    )
+                product = Lipsey(
+                    sku=row.ItemNo,
+                    description1=row.Description1,
+                    description2=row.Description2,
+                    upc=row.Upc,
+                    manufacturermodelno=row.ManufacturerModelNo,
+                    msrp=row.Msrp,
+                    model=row.Model,
+                    calibergauge=row.CaliberGauge,
+                    manufacturer=row.Manufacturer,
+                    type=row.Type,
+                    action=row.Action,
+                    barrellength=row.BarrelLength,
+                    capacity=row.Capacity,
+                    finish=row.Finish,
+                    overalllength=row.OverallLength,
+                    receiver=row.Receiver,
+                    safety=row.Safety,
+                    sights=row.Sights,
+                    stockframegrips=row.StockFrameGrips,
+                    magazine=row.Magazine,
+                    weight=row.Weight,
+                    imagename=f"https://www.lipseyscloud.com/images/{row.ImageName}",
+                    chamber=row.Chamber,
+                    drilledandtapped=row.DrilledAndTapped,
+                    rateoftwist=row.RateOfTwist,
+                    itemtype=row.ItemType,
+                    additionalfeature1=row.AdditionalFeature1,
+                    additionalfeature2=row.AdditionalFeature2,
+                    additionalfeature3=row.AdditionalFeature3,
+                    shippingweight=row.ShippingWeight,
+                    boundbookmanufacturer=row.BoundBookManufacturer,
+                    boundbookmodel=row.BoundBookModel,
+                    boundbooktype=row.BoundBookType,
+                    exclusive=row.Exclusive,
+                    quantity=row.Quantity,
+                    allocated=row.Allocated,
+                    onsale=row.OnSale,
+                    price=row.Price,
+                    currentprice=row.CurrentPrice,
+                    map=row.RetailMap,
+                    fflrequired=row.FflRequired,
+                    sotrequired=row.SotRequired,
+                    exclusivetype=row.ExclusiveType,
+                    scopecoverincluded=row.ScopeCoverIncluded,
+                    special=row.Special,
+                    sightstype=row.SightsType,
+                    case=row.Case,
+                    family=row.Family,
+                    packagelength=row.PackageLength,
+                    packagewidth=row.PackageWidth,
+                    packageheight=row.PackageHeight,
+                    itemgroup=row.ItemGroup,
+                    features=json.dumps(features),
                 )
 
-            
+                self.insert_data.append(product)
+
+            if not self.insert_data:
+                return True
+
+            # Insert new SKUs
             Lipsey.objects.bulk_create(
                 self.insert_data,
-                batch_size=500
+                batch_size=500,
+                ignore_conflicts=True
             )
-            print("Lipsey upload completed successfully.")
+
+            # Fetch existing rows for update
+            skus = [obj.sku for obj in self.insert_data]
+            existing = {
+                obj.sku: obj
+                for obj in Lipsey.objects.filter(sku__in=skus)
+            }
+
+            to_update = []
+
+            for obj in self.insert_data:
+                if obj.sku in existing:
+                    db_obj = existing[obj.sku]
+                    db_obj.quantity = obj.quantity
+                    db_obj.allocated = obj.allocated
+                    db_obj.price = obj.price
+                    db_obj.currentprice = obj.currentprice
+                    db_obj.map = obj.map
+                    db_obj.features = obj.features
+                    to_update.append(db_obj)
+
+            if to_update:
+                Lipsey.objects.bulk_update(
+                    to_update,
+                    fields=[
+                        "quantity",
+                        "allocated",
+                        "price",
+                        "currentprice",
+                        "map",
+                        "features",
+                    ],
+                    batch_size=500
+                )
+
+            print("Lipsey upload completed successfully")
             return True
 
         except Exception as e:
-            print(f"Error processing Lipsey data: {e}")
-            return e
+            print(f"Lipsey processing failed: {e}")
+            return False
+
 
     def process_cwr(self):
         try:
