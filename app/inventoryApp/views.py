@@ -728,7 +728,7 @@ class MarketInventory:
 
                 page_number += 1
 
-            return Response(f"Item downloaded successfully {len(items)}", safe=False, status=status.HTTP_200_OK)
+            return Response(f"Item downloaded successfully {len(items)}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
