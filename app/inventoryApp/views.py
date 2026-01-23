@@ -32,6 +32,7 @@ import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
 
+from .tasks import fetch_all_ebay_items_task
 # download_item_update_market_price_quantity_task.delay()
 
 
@@ -672,56 +673,25 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
 
-        EBAY_BASE_URL = "https://api.ebay.com"
-        HEADERS = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
-        }
-        try:
-            ebay_items = []
-            limit = 200
-            offset = 0
+        task = fetch_all_ebay_items_task.delay(access_token)
 
-            while True:
-                url = f"{EBAY_BASE_URL}/sell/inventory/v1/inventory_item"
-                params = {
-                    "limit": limit,
-                    "offset": offset
-                }
 
-                response = requests.get(url, headers=HEADERS, params=params)
-                response.raise_for_status()
-                data = response.json()
-
-                inventory_items = data.get("inventoryItems", [])
-                if not inventory_items:
-                    break
-
-                for item in inventory_items:
-                    product = item.get("product", {})
-                    identifiers = product.get("productIdentifiers", {})
-
-                    ebay_items.append({
-                        "sku": item.get("sku"),
-                        "quantity": item.get("availability", {}).get("shipToLocationAvailability", {}).get("quantity"),
-                        "upc": identifiers.get("upc", [None])[0],
-                        "mpn": identifiers.get("mpn"),
-                        "brand": product.get("brand"),
-                        "title": product.get("title")
-                    })
-
-                offset += limit
-
-        except requests.exceptions.ConnectTimeout as e:
-            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
-        except Exception as ea:
-            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({
+            "task_id": task.id,
+            "status": "started"
+        })
+        # except requests.exceptions.ConnectTimeout as e:
+        #     return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
+        # except Exception as ea:
+        #     return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
         
-        return JsonResponse({"Total eBay items": len(ebay_items), "Items": ebay_items[10]}, safe=False, status=status.HTTP_200_OK)
+        # return JsonResponse({"Total eBay items": len(ebay_items), "Items": ebay_items[10]}, safe=False, status=status.HTTP_200_OK)
 
     
 
-    
+
+
+
 
 
 
