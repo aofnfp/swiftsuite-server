@@ -686,22 +686,22 @@ class MarketInventory:
             start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
             xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>REAL_LEGACY_AUTH_TOKEN_HERE</eBayAuthToken>
-            </RequesterCredentials>
+                    <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
 
-            <StartTimeFrom>{start_time_from}</StartTimeFrom>
-            <StartTimeTo>{start_time_to}</StartTimeTo>
+                    <StartTimeFrom>{start_time_from}</StartTimeFrom>
+                    <StartTimeTo>{start_time_to}</StartTimeTo>
 
-            <Pagination>
-                <EntriesPerPage>10</EntriesPerPage>
-                <PageNumber>1</PageNumber>
-            </Pagination>
+                    <Pagination>
+                        <EntriesPerPage>10</EntriesPerPage>
+                        <PageNumber>1</PageNumber>
+                    </Pagination>
 
-            <DetailLevel>ReturnAll</DetailLevel>
-            </GetSellerListRequest>
-            """
+                    <DetailLevel>ReturnAll</DetailLevel>
+                    </GetSellerListRequest>
+                    """
 
             response = requests.post(url, headers=headers, data=xml_body)
             # Parse the XML response
