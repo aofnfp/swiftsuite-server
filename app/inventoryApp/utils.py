@@ -150,7 +150,7 @@ def get_all_items_on_ebay(access_token, start_time_from, start_time_to):
             </GetSellerListRequest>
             """
 
-        response = requests.post(url, headers=headers, data=body, timeout=120)
+        response = requests.post(url, headers=headers, data=body, timeout=300)
         response.raise_for_status()
 
         root = ET.fromstring(response.text)
