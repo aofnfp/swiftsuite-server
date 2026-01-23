@@ -72,3 +72,4 @@ WooCommerce==3.0.0
 zipp==3.23.0
 zope.event==5.1
 zope.interface==8.0
+bs4

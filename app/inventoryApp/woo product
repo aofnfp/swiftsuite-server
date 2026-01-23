@@ -2928,3 +2928,64 @@ Ebay get product details failed for item id 305854624273 with error: None
 Ebay get product details failed for item id 305854624273 with error: None
 Ebay get product details failed for item id 305854624273 with error: None
 Ebay get product details failed for item id 305854624273 with error: None
+
+// Code to fetch all inventory items from Ebay using GetSellerList API
+try:
+    url = "https://api.ebay.com/ws/api.dll"
+    headers = {
+        "X-EBAY-API-CALL-NAME": "GetSellerList",
+        "X-EBAY-API-SITEID": "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        "X-EBAY-API-IAF-TOKEN": access_token,
+        "Content-Type": "text/xml"
+    }
+
+    all_items = {}
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(days=30)
+
+    while True:
+        page_number = 1
+        total_pages = 1
+        found_any = False
+
+        while page_number <= total_pages:
+            body = f"""<?xml version="1.0" encoding="utf-8"?>
+            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            <RequesterCredentials>
+                <eBayAuthToken>{access_token}</eBayAuthToken>
+            </RequesterCredentials>
+            <StartTimeFrom>{start_time.isoformat()}Z</StartTimeFrom>
+            <StartTimeTo>{end_time.isoformat()}Z</StartTimeTo>
+            <Pagination>
+                <EntriesPerPage>100</EntriesPerPage>
+                <PageNumber>{page_number}</PageNumber>
+            </Pagination>
+            <DetailLevel>ReturnAll</DetailLevel>
+            </GetSellerListRequest>
+            """
+
+            res = requests.post(url, headers=headers, data=body, timeout=60)
+            res.raise_for_status()
+
+            root = ET.fromstring(res.text)
+            ns = {'e': 'urn:ebay:apis:eBLBaseComponents'}
+
+            items = root.findall(".//e:Item", ns)
+            if not items:
+                break
+
+            found_any = True
+
+            for item in items:
+                item_id = item.findtext("e:ItemID", namespaces=ns)
+                all_items[item_id] = item
+
+            total_pages = int(root.findtext(".//e:TotalNumberOfPages", namespaces=ns))
+            page_number += 1
+
+        if not found_any:
+            break
+
+        end_time = start_time
+        start_time -= timedelta(days=30)
