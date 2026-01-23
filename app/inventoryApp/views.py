@@ -689,7 +689,7 @@ class MarketInventory:
                     "offset": offset
                 }
 
-                response = requests.get(url, headers=HEADERS, params=params, timeout=30)
+                response = requests.get(url, headers=HEADERS, params=params)
                 response.raise_for_status()
                 data = response.json()
 
