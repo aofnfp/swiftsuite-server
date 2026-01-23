@@ -105,15 +105,15 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
 
 
 # Get all products already listed on Ebay using sku
-def get_all_items_on_ebay(enroll_id, start_time_from, start_time_to):
-    eb = Ebay()
-    try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
-    except Exception as e:
-        print(f"Failed to fetch access token {e}")
-        return None, False
+def get_all_items_on_ebay(access_token, start_time_from, start_time_to):
+    # eb = Ebay()
+    # try:
+    #     user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+    # except Exception as e:
+    #     print(f"Failed to fetch access token {e}")
+    #     return None, False
 
-    access_token =  user_data.access_token
+    # access_token =  user_data.access_token
     try:
         url = "https://api.ebay.com/ws/api.dll"
 
@@ -326,7 +326,7 @@ def download_item_update_market_price_quantity():
             except Exception as e:
                 logger.info(f"Ebay inventory download failed with error: {e}")
                 continue
-            
+
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if all_ebay_items == None:
                 logger.info(f"Ebay inventory download failed with error: {all_ebay_items}")

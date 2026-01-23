@@ -26,12 +26,13 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
-from .tasks import download_item_update_market_price_quantity_task
+# from .tasks import download_item_update_market_price_quantity_task
+from .utils import get_all_items_on_ebay
 import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
 
-download_item_update_market_price_quantity_task.delay()
+# download_item_update_market_price_quantity_task.delay()
 
 
 
@@ -670,45 +671,24 @@ class MarketInventory:
                 userid = user.parent_id
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
+        # Fetch all eBay items by walking backward in 30-day windows
         try:
+            all_ebay_items = []
+            end_time = datetime.utcnow()
+            start_time = end_time - timedelta(days=30)
 
-            url = "https://api.ebay.com/ws/api.dll"
+            while True:
+                items, has_items = get_all_items_on_ebay(access_token, start_time_from=start_time, start_time_to=end_time)
 
-            headers = {
-                "X-EBAY-API-CALL-NAME": "GetSellerList",
-                "X-EBAY-API-SITEID": "0",
-                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-REQUEST-ENCODING": "XML",
-                "Content-Type": "text/xml"
-            }
+                all_ebay_items.extend(items)
 
-            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+                if not has_items:
+                    break
 
-            xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-                    <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
+                end_time = start_time
+                start_time -= timedelta(days=30)
 
-                    <StartTimeFrom>{start_time_from}</StartTimeFrom>
-                    <StartTimeTo>{start_time_to}</StartTimeTo>
-
-                    <Pagination>
-                        <EntriesPerPage>10</EntriesPerPage>
-                        <PageNumber>1</PageNumber>
-                    </Pagination>
-
-                    <DetailLevel>ReturnAll</DetailLevel>
-                    </GetSellerListRequest>
-                    """
-
-            response = requests.post(url, headers=headers, data=xml_body)
-            # Parse the XML response
-            root = ET.fromstring(response.text) 
-
-
-            return Response(f"Item: {response.text}", status=status.HTTP_200_OK)
+            return Response(f"Total Item: {len(all_ebay_items)}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
