@@ -672,25 +672,96 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         # Fetch all eBay items by walking backward in 30-day windows
+        try:
+            EBAY_API_BASE = "https://api.ebay.com"
+            RETRY_INTERVAL = 60  # seconds
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
 
-        all_ebay_items = []
-        end_time = datetime.utcnow()
-        start_time = end_time - timedelta(days=30)
-        itrate_time = 0
-        while True:
-            items, has_items = get_all_items_on_ebay(access_token, start_time_from=start_time, start_time_to=end_time)
+            # -------------------------------------------------
+            # STEP 1: Request inventory report
+            # -------------------------------------------------
+            create_report_url = f"{EBAY_API_BASE}/sell/feed/v1/inventory_task"
 
-            all_ebay_items.extend(items)
+            payload = {
+                "reportType": "ACTIVE_LISTINGS_REPORT",
+                "format": "CSV"
+            }
 
-            if not has_items:
-                break
-            itrate_time += 1
-            end_time = start_time
-            start_time -= timedelta(days=30)
+            response = requests.post(create_report_url, headers=headers, json=payload)
+            response.raise_for_status()
 
-        return Response(f"Total Item: {len(all_ebay_items)}", status=status.HTTP_200_OK)
+            task_id = response.json()["reportId"]
+            print(f"[✓] Report requested: {task_id}")
 
-        
+            # -------------------------------------------------
+            # STEP 2: Poll report status
+            # -------------------------------------------------
+            status_url = f"{EBAY_API_BASE}/sell/feed/v1/task/{task_id}"
+
+            file_id = None
+            while True:
+                status_response = requests.get(status_url, headers=headers)
+                status_response.raise_for_status()
+                status_data = status_response.json()
+
+                status = status_data.get("reportStatus")
+
+                if status == "COMPLETED":
+                    file_id = status_data["fileReferenceId"]
+                    break
+                elif status == "FAILED":
+                    raise RuntimeError("Inventory report generation failed")
+
+                print("[…] Waiting for report to complete...")
+                time.sleep(RETRY_INTERVAL)
+
+            print(f"[✓] Report ready. File ID: {file_id}")
+
+            # -------------------------------------------------
+            # STEP 3: Download CSV file
+            # -------------------------------------------------
+            download_url = f"{EBAY_API_BASE}/sell/feed/v1/file/{file_id}"
+
+            file_response = requests.get(download_url, headers=headers)
+            file_response.raise_for_status()
+
+            filename = "ebay_inventory.csv"
+            with open(filename, "wb") as f:
+                f.write(file_response.content)
+
+            # all_ebay_items = []
+            # end_time = datetime.utcnow()
+            # start_time = end_time - timedelta(days=30)
+
+            # while True:
+            #     items, has_items = get_all_items_on_ebay(enroll_id=user._id, start_time_from=start_time, start_time_to=end_time)
+
+            #     all_ebay_items.extend(items)
+
+            #     if not has_items:
+            #         break
+
+            #     end_time = start_time
+            #     start_time -= timedelta(days=30)
+
+            return Response(f"[✓] Inventory CSV downloaded: {filename}", status=status.HTTP_200_OK)
+        except requests.exceptions.ConnectTimeout as e:
+            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
+        except Exception as ea:
+            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+
+    
+
+    
+
+
+
+
+
         
 class WooCommerceInventory:
     # Function to update product on woocommerce store
