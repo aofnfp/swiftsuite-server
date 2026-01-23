@@ -682,8 +682,7 @@ class MarketInventory:
             }
 
             payload = {
-                "feedType": "INVENTORY_REPORT",
-                "format": "CSV"
+                "feedType": "LMS_ACTIVE_INVENTORY_REPORT"
             }
 
             res = requests.post(url, headers=headers, json=payload)
