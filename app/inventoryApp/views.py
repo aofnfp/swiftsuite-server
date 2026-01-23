@@ -696,7 +696,7 @@ class MarketInventory:
                             </RequesterCredentials>
                             <ActiveList>
                                 <Pagination>
-                                    <EntriesPerPage>100</EntriesPerPage>
+                                    <EntriesPerPage>200</EntriesPerPage>
                                     <PageNumber>{page_number}</PageNumber>
                                 </Pagination>
                             </ActiveList>
@@ -746,8 +746,8 @@ class MarketInventory:
             
                 # Increment the page number for the next iteration
                 page_number += 1
-    
-                return Response(f"Total eBay items fetched: {len(ebay_items)}", status=status.HTTP_200_OK)
+
+                return JsonResponse({"Total eBay items": len(ebay_items), "Items": ebay_items[10]}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
