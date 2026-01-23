@@ -672,43 +672,45 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
 
-            url = "https://api.ebay.com/ws/api.dll"
-
+            base_url = "https://api.ebay.com/sell/inventory/v1/inventory_item"
             headers = {
-                "X-EBAY-API-CALL-NAME": "GetSellerList",
-                "X-EBAY-API-SITEID": "0",
-                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-REQUEST-ENCODING": "XML",
-                "Content-Type": "text/xml"
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             }
 
-            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            all_items = []
+            limit = 100  # number of items per request (max eBay allows)
+            offset = 0
 
-            xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-                    <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
+            while True:
+                # build URL with pagination
+                url = f"{base_url}?limit={limit}&offset={offset}"
 
-                    <StartTimeFrom>{start_time_from}</StartTimeFrom>
-                    <StartTimeTo>{start_time_to}</StartTimeTo>
+                response = requests.get(url, headers=headers)
+                if response.status_code != 200:
+                    print(f"Error fetching inventory: {response.status_code} - {response.text}")
+                    break
 
-                    <Pagination>
-                        <EntriesPerPage>10</EntriesPerPage>
-                        <PageNumber>1</PageNumber>
-                    </Pagination>
+                data = response.json()
+                items = data.get("inventoryItems", [])
+                
+                # if no items returned, we’re done
+                if not items:
+                    break
 
-                    <DetailLevel>ReturnAll</DetailLevel>
-                    </GetSellerListRequest>
-                    """
+                # append results
+                all_items.extend(items)
+                
+                # if fewer than 'limit' returned, we’re at the end
+                if len(items) < limit:
+                    break
 
-            response = requests.post(url, headers=headers, data=xml_body)
-            # Parse the XML response
-            root = ET.fromstring(response.text) 
+                # otherwise, bump the offset and loop again
+                offset += limit
 
 
-            return Response(f"Item: {response.text}", status=status.HTTP_200_OK)
+            return Response(f"Total_item: {len(all_items)}, Item: {all_items}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
