@@ -131,62 +131,62 @@ def get_all_items_on_ebay(access_token, start_time_from, start_time_to):
         page_number = 1
         total_pages = 1
 
-        while page_number <= total_pages:
-            body = f"""<?xml version="1.0" encoding="utf-8"?>
-                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
+        # while page_number <= total_pages:
+        body = f"""<?xml version="1.0" encoding="utf-8"?>
+            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
 
-                    <StartTimeFrom>{start_time_from.isoformat()}Z</StartTimeFrom>
-                    <StartTimeTo>{start_time_to.isoformat()}Z</StartTimeTo>
+                <StartTimeFrom>{start_time_from.isoformat()}Z</StartTimeFrom>
+                <StartTimeTo>{start_time_to.isoformat()}Z</StartTimeTo>
 
-                    <Pagination>
-                        <EntriesPerPage>100</EntriesPerPage>
-                        <PageNumber>{page_number}</PageNumber>
-                    </Pagination>
+                <Pagination>
+                    <EntriesPerPage>100</EntriesPerPage>
+                    <PageNumber>{page_number}</PageNumber>
+                </Pagination>
 
-                    <DetailLevel>ReturnAll</DetailLevel>
-                </GetSellerListRequest>
-                """
+                <DetailLevel>ReturnAll</DetailLevel>
+            </GetSellerListRequest>
+            """
 
-            response = requests.post(url, headers=headers, data=body, timeout=60)
-            response.raise_for_status()
+        response = requests.post(url, headers=headers, data=body, timeout=60)
+        response.raise_for_status()
 
-            root = ET.fromstring(response.text)
+        root = ET.fromstring(response.text)
 
-            # pagination
-            total_pages = int(
-                root.findtext(".//e:TotalNumberOfPages", namespaces=namespace, default="1")
-            )
+        # pagination
+        total_pages = int(
+            root.findtext(".//e:TotalNumberOfPages", namespaces=namespace, default="1")
+        )
 
-            item_nodes = root.findall(".//e:Item", namespaces=namespace)
+        item_nodes = root.findall(".//e:Item", namespaces=namespace)
 
-            for item in item_nodes:
-                def get_text(path, default="N/A"):
-                    el = item.find(path, namespaces=namespace)
-                    return el.text if el is not None else default
+        for item in item_nodes:
+            def get_text(path, default="N/A"):
+                el = item.find(path, namespaces=namespace)
+                return el.text if el is not None else default
 
-                items.append({
-                    "item_id": get_text("e:ItemID"),
-                    "sku": get_text("e:SKU"),
-                    "title": get_text("e:Title"),
-                    "price": get_text("e:SellingStatus/e:CurrentPrice"),
-                    "quantity": get_text("e:Quantity", "0"),
-                    "quantity_sold": get_text("e:SellingStatus/e:QuantitySold", "0"),
-                    "listing_duration": get_text("e:ListingDuration"),
-                    "listing_type": get_text("e:ListingType"),
-                    "image": get_text("e:PictureDetails/e:GalleryURL"),
-                    "shipping_profile_id": get_text("e:SellerProfiles/e:SellerShippingProfile/e:ShippingProfileID"),
-                    "shipping_profile_name": get_text("e:SellerProfiles/e:SellerShippingProfile/e:ShippingProfileName"),
-                    "return_profile_id": get_text("e:SellerProfiles/e:SellerReturnProfile/e:ReturnProfileID"),
-                    "return_profile_name": get_text("e:SellerProfiles/e:SellerReturnProfile/e:ReturnProfileName"),
-                    "payment_profile_id": get_text("e:SellerProfiles/e:SellerPaymentProfile/e:PaymentProfileID"),
-                    "payment_profile_name": get_text("e:SellerProfiles/e:SellerPaymentProfile/e:PaymentProfileName"),
-                    "view_item_url": get_text("e:ListingDetails/e:ViewItemURL"),
-                })
+            items.append({
+                "item_id": get_text("e:ItemID"),
+                "sku": get_text("e:SKU"),
+                "title": get_text("e:Title"),
+                "price": get_text("e:SellingStatus/e:CurrentPrice"),
+                "quantity": get_text("e:Quantity", "0"),
+                "quantity_sold": get_text("e:SellingStatus/e:QuantitySold", "0"),
+                "listing_duration": get_text("e:ListingDuration"),
+                "listing_type": get_text("e:ListingType"),
+                "image": get_text("e:PictureDetails/e:GalleryURL"),
+                "shipping_profile_id": get_text("e:SellerProfiles/e:SellerShippingProfile/e:ShippingProfileID"),
+                "shipping_profile_name": get_text("e:SellerProfiles/e:SellerShippingProfile/e:ShippingProfileName"),
+                "return_profile_id": get_text("e:SellerProfiles/e:SellerReturnProfile/e:ReturnProfileID"),
+                "return_profile_name": get_text("e:SellerProfiles/e:SellerReturnProfile/e:ReturnProfileName"),
+                "payment_profile_id": get_text("e:SellerProfiles/e:SellerPaymentProfile/e:PaymentProfileID"),
+                "payment_profile_name": get_text("e:SellerProfiles/e:SellerPaymentProfile/e:PaymentProfileName"),
+                "view_item_url": get_text("e:ListingDetails/e:ViewItemURL"),
+            })
 
-            page_number += 1
+        page_number += 1
 
             # if response.json().get('errors')[0]['errorId'] == 1001:
             #     access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
