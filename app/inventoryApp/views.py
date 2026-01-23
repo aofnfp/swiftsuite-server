@@ -706,23 +706,9 @@ class MarketInventory:
             response = requests.post(url, headers=headers, data=xml_body)
             # Parse the XML response
             root = ET.fromstring(response.text) 
-            all_items = {}
-            namespace = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
-            for item in root.findall('.//ns:Item', namespace):
-                item_id = item.find('ns:ItemID', namespace).text
-                title = item.find('ns:Title', namespace).text
-                sku = item.find('ns:SKU', namespace).text if item.find('ns:SKU', namespace) is not None else None
-                start_price = item.find('ns:StartPrice', namespace).text
-                quantity = item.find('ns:Quantity', namespace).text
-                all_items[item_id] = {
-                    'title': title,
-                    'sku': sku,
-                    'start_price': start_price,
-                    'quantity': quantity
-                }
 
-
-            return JsonResponse({"Item": len(all_items), "Items": all_items}, safe=False, status=status.HTTP_200_OK)
+            
+            return JsonResponse({"Item": root}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
