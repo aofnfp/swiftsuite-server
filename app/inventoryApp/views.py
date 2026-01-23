@@ -722,7 +722,7 @@ class MarketInventory:
                 }
 
 
-            return JsonResponse({"Item": len(all_items), "Items": list(all_items.values())[10]}, safe=False, status=status.HTTP_200_OK)
+            return JsonResponse({"Item": len(all_items), "Items": all_items}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
