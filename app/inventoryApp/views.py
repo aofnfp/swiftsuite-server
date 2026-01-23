@@ -673,37 +673,25 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
         # Fetch all eBay items by walking backward in 30-day windows
         try:
-            url = "https://api.ebay.com/sell/feed/v1/inventory_task"
-
+            url = "https://api.ebay.com/ws/api.dll"
             headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                "X-EBAY-API-CALL-NAME": "GeteBayOfficialTime",  # Example call
+                "X-EBAY-API-SITEID": "0",
+                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+                "X-EBAY-API-DEV-NAME": f"{config("EB_DEV_ID")}",
+                "X-EBAY-API-APP-NAME": f"{config("EB_APP_ID")}",
+                "X-EBAY-API-CERT-NAME": f"{config("EB_CERT_ID")}",
+                "Content-Type": "text/xml"
             }
+            xml_payload = f"""<?xml version="1.0" encoding="utf-8"?>
+            <GeteBayOfficialTimeRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            <RequesterCredentials>
+                <eBayAuthToken>{access_token}</eBayAuthToken>
+            </RequesterCredentials>
+            </GeteBayOfficialTimeRequest>
+            """
 
-            payload = {
-                "feedType": "LMS_ACTIVE_INVENTORY_REPORT"
-            }
-
-            res = requests.post(url, headers=headers, json=payload)
-            res.raise_for_status()
-
-            task_id = res.json()["taskId"]
-        except requests.exceptions.HTTPError as e:
-            # Print error details for debugging
-            print(f"HTTP Error: {e}")
-            if e.response is not None:
-                print(f"Status Code: {e.response.status_code}")
-                print(f"Response: {e.response.text}")
-            raise
-        except KeyError as e:
-            print(f"Response missing expected field: {e}")
-            print(f"Full response: {res.json()}")
-            raise
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-            raise
-
+            response = requests.post(url, headers=headers, data=xml_payload)
 
             # all_ebay_items = []
             # end_time = datetime.utcnow()
@@ -720,11 +708,11 @@ class MarketInventory:
             #     end_time = start_time
             #     start_time -= timedelta(days=30)
 
-        #     return Response(f"task id: {task_id}", status=status.HTTP_200_OK)
-        # except requests.exceptions.ConnectTimeout as e:
-        #     return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
-        # except Exception as ea:
-        #     return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Status code: {response.status_code}, Text: {response.text}", status=status.HTTP_200_OK)
+        except requests.exceptions.ConnectTimeout as e:
+            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
+        except Exception as ea:
+            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
 
     
 
