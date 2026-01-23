@@ -696,14 +696,14 @@ class MarketInventory:
                             </RequesterCredentials>
                             <ActiveList>
                                 <Pagination>
-                                    <EntriesPerPage>200</EntriesPerPage>
+                                    <EntriesPerPage>100</EntriesPerPage>
                                     <PageNumber>{page_number}</PageNumber>
                                 </Pagination>
                             </ActiveList>
                         </GetMyeBaySellingRequest>"""
                             
                 # Sending the request
-                response = requests.post(url, headers=headers, data=body)               
+                response = requests.post(url, headers=headers, data=body, timeout=60)               
                 if response.status_code == 200:
                     # Decode response content if it's in byte format
                     xml_content = response.content.decode('utf-8')
