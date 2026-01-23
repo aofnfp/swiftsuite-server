@@ -671,64 +671,56 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
+
             url = "https://api.ebay.com/ws/api.dll"
+
             headers = {
                 "X-EBAY-API-CALL-NAME": "GetSellerList",
                 "X-EBAY-API-SITEID": "0",
                 "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-IAF-TOKEN": access_token,
+                "X-EBAY-API-REQUEST-ENCODING": "XML",
                 "Content-Type": "text/xml"
             }
 
+            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+            xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            <RequesterCredentials>
+                <eBayAuthToken>REAL_LEGACY_AUTH_TOKEN_HERE</eBayAuthToken>
+            </RequesterCredentials>
+
+            <StartTimeFrom>{start_time_from}</StartTimeFrom>
+            <StartTimeTo>{start_time_to}</StartTimeTo>
+
+            <Pagination>
+                <EntriesPerPage>10</EntriesPerPage>
+                <PageNumber>1</PageNumber>
+            </Pagination>
+
+            <DetailLevel>ReturnAll</DetailLevel>
+            </GetSellerListRequest>
+            """
+
+            response = requests.post(url, headers=headers, data=xml_body)
+            # Parse the XML response
+            root = ET.fromstring(response.text) 
             all_items = {}
-            end_time = datetime.utcnow()
-            start_time = end_time - timedelta(days=30)
+            namespace = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
+            for item in root.findall('.//ns:Item', namespace):
+                item_id = item.find('ns:ItemID', namespace).text
+                title = item.find('ns:Title', namespace).text
+                sku = item.find('ns:SKU', namespace).text if item.find('ns:SKU', namespace) is not None else None
+                start_price = item.find('ns:StartPrice', namespace).text
+                quantity = item.find('ns:Quantity', namespace).text
+                all_items[item_id] = {
+                    'title': title,
+                    'sku': sku,
+                    'start_price': start_price,
+                    'quantity': quantity
+                }
 
-            while True:
-                page_number = 1
-                total_pages = 1
-                found_any = False
-
-                while page_number <= total_pages:
-                    body = f"""<?xml version="1.0" encoding="utf-8"?>
-                    <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
-                    <StartTimeFrom>{start_time.isoformat()}Z</StartTimeFrom>
-                    <StartTimeTo>{end_time.isoformat()}Z</StartTimeTo>
-                    <Pagination>
-                        <EntriesPerPage>100</EntriesPerPage>
-                        <PageNumber>{page_number}</PageNumber>
-                    </Pagination>
-                    <DetailLevel>ReturnAll</DetailLevel>
-                    </GetSellerListRequest>
-                    """
-
-                    res = requests.post(url, headers=headers, data=body, timeout=60)
-                    res.raise_for_status()
-
-                    root = ET.fromstring(res.text)
-                    ns = {'e': 'urn:ebay:apis:eBLBaseComponents'}
-
-                    items = root.findall(".//e:Item", ns)
-                    if not items:
-                        break
-
-                    found_any = True
-
-                    for item in items:
-                        item_id = item.findtext("e:ItemID", namespaces=ns)
-                        all_items[item_id] = item
-
-                    total_pages = int(root.findtext(".//e:TotalNumberOfPages", namespaces=ns))
-                    page_number += 1
-
-                if not found_any:
-                    break
-
-                end_time = start_time
-                start_time -= timedelta(days=30)
 
             return JsonResponse({"Item": len(all_items), "Items": list(all_items.values())[10]}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
