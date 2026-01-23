@@ -676,7 +676,7 @@ class MarketInventory:
         all_ebay_items = []
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(days=30)
-
+        itrate_time = 0
         while True:
             items, has_items = get_all_items_on_ebay(access_token, start_time_from=start_time, start_time_to=end_time)
 
@@ -684,7 +684,7 @@ class MarketInventory:
 
             if not has_items:
                 break
-
+            itrate_time += 1
             end_time = start_time
             start_time -= timedelta(days=30)
 
