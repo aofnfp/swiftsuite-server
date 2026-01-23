@@ -707,8 +707,8 @@ class MarketInventory:
             # Parse the XML response
             root = ET.fromstring(response.text) 
 
-            
-            return Response(f"Item: {root}", status=status.HTTP_200_OK)
+
+            return Response(f"Item: {response.text}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
