@@ -689,7 +689,20 @@ class MarketInventory:
             res.raise_for_status()
 
             task_id = res.json()["taskId"]
-
+        except requests.exceptions.HTTPError as e:
+            # Print error details for debugging
+            print(f"HTTP Error: {e}")
+            if e.response is not None:
+                print(f"Status Code: {e.response.status_code}")
+                print(f"Response: {e.response.text}")
+            raise
+        except KeyError as e:
+            print(f"Response missing expected field: {e}")
+            print(f"Full response: {res.json()}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise
 
 
             # all_ebay_items = []
@@ -707,11 +720,11 @@ class MarketInventory:
             #     end_time = start_time
             #     start_time -= timedelta(days=30)
 
-            return Response(f"task id: {task_id}", status=status.HTTP_200_OK)
-        except requests.exceptions.ConnectTimeout as e:
-            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
-        except Exception as ea:
-            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+        #     return Response(f"task id: {task_id}", status=status.HTTP_200_OK)
+        # except requests.exceptions.ConnectTimeout as e:
+        #     return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
+        # except Exception as ea:
+        #     return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
 
     
 
