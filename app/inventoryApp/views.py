@@ -672,27 +672,23 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         # Fetch all eBay items by walking backward in 30-day windows
-        try:
-            all_ebay_items = []
-            end_time = datetime.utcnow()
-            start_time = end_time - timedelta(days=30)
 
-            while True:
-                items, has_items = get_all_items_on_ebay(access_token, start_time_from=start_time, start_time_to=end_time)
+        all_ebay_items = []
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(days=30)
 
-                all_ebay_items.extend(items)
+        while True:
+            items, has_items = get_all_items_on_ebay(access_token, start_time_from=start_time, start_time_to=end_time)
 
-                if not has_items:
-                    break
+            all_ebay_items.extend(items)
 
-                end_time = start_time
-                start_time -= timedelta(days=30)
+            if not has_items:
+                break
 
-            return Response(f"Total Item: {len(all_ebay_items)}", status=status.HTTP_200_OK)
-        except requests.exceptions.ConnectTimeout as e:
-            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
-        except Exception as ea:
-            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+            end_time = start_time
+            start_time -= timedelta(days=30)
+
+        return Response(f"Total Item: {len(all_ebay_items)}", status=status.HTTP_200_OK)
 
         
         
