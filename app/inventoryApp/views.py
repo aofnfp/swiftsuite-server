@@ -678,9 +678,9 @@ class MarketInventory:
                 "X-EBAY-API-CALL-NAME": "GeteBayOfficialTime",  # Example call
                 "X-EBAY-API-SITEID": "0",
                 "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-DEV-NAME": {config("EB_DEV_ID")},
-                "X-EBAY-API-APP-NAME": {config("EB_APP_ID")},
-                "X-EBAY-API-CERT-NAME": {config("EB_CERT_ID")},
+                "X-EBAY-API-DEV-NAME": config("EB_DEV_ID"),
+                "X-EBAY-API-APP-NAME": config("EB_APP_ID"),
+                "X-EBAY-API-CERT-NAME": config("EB_CERT_ID"),
                 "Content-Type": "text/xml"
             }
             xml_payload = f"""<?xml version="1.0" encoding="utf-8"?>
