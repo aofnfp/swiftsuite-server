@@ -541,7 +541,7 @@ class ViewAllProducts(ListAPIView):
         if user.is_subaccount:
             user = user.parent
             
-        queryset = Generalproducttable.objects.filter(user=user, active=False).order_by('-date_created')
+        queryset = Generalproducttable.objects.filter(user=user, active=False).order_by('-id')
         params = self.request.query_params
         filters = Q()
         search = params.get('search')
