@@ -747,11 +747,12 @@ class MarketInventory:
                 # Increment the page number for the next iteration
                 page_number += 1
 
-                return JsonResponse({"Total eBay items": len(ebay_items), "Items": ebay_items[10]}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
             return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({"Total eBay items": len(ebay_items), "Items": ebay_items[10]}, safe=False, status=status.HTTP_200_OK)
 
     
 
