@@ -673,42 +673,42 @@ class MarketInventory:
         access_token = eb.refresh_access_token(userid, "Ebay")
         # Fetch all eBay items by walking backward in 30-day windows
         try:
-            url = "https://api.ebay.com/ws/api.dll"
-            headers = {
-                "X-EBAY-API-CALL-NAME": "GeteBayOfficialTime",  # Example call
-                "X-EBAY-API-SITEID": "0",
-                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-DEV-NAME": config("EB_DEV_ID"),
-                "X-EBAY-API-APP-NAME": config("EB_APP_ID"),
-                "X-EBAY-API-CERT-NAME": config("EB_CERT_ID"),
-                "Content-Type": "text/xml"
-            }
-            xml_payload = f"""<?xml version="1.0" encoding="utf-8"?>
-            <GeteBayOfficialTimeRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>{access_token}</eBayAuthToken>
-            </RequesterCredentials>
-            </GeteBayOfficialTimeRequest>
-            """
+        #     url = "https://api.ebay.com/ws/api.dll"
+        #     headers = {
+        #         "X-EBAY-API-CALL-NAME": "GeteBayOfficialTime",  # Example call
+        #         "X-EBAY-API-SITEID": "0",
+        #         "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        #         "X-EBAY-API-DEV-NAME": config("EB_DEV_ID"),
+        #         "X-EBAY-API-APP-NAME": config("EB_APP_ID"),
+        #         "X-EBAY-API-CERT-NAME": config("EB_CERT_ID"),
+        #         "Content-Type": "text/xml"
+        #     }
+        #     xml_payload = f"""<?xml version="1.0" encoding="utf-8"?>
+        #     <GeteBayOfficialTimeRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+        #     <RequesterCredentials>
+        #         <eBayAuthToken>{access_token}</eBayAuthToken>
+        #     </RequesterCredentials>
+        #     </GeteBayOfficialTimeRequest>
+        #     """
 
-            response = requests.post(url, headers=headers, data=xml_payload)
+        #     response = requests.post(url, headers=headers, data=xml_payload)
 
-            # all_ebay_items = []
-            # end_time = datetime.utcnow()
-            # start_time = end_time - timedelta(days=30)
+            all_ebay_items = []
+            end_time = datetime.utcnow()
+            start_time = end_time - timedelta(days=30)
 
-            # while True:
-            #     items, has_items = get_all_items_on_ebay(enroll_id=user._id, start_time_from=start_time, start_time_to=end_time)
+            while True:
+                items, has_items = get_all_items_on_ebay(access_token=access_token, start_time_from=start_time, start_time_to=end_time)
 
-            #     all_ebay_items.extend(items)
+                all_ebay_items.extend(items)
 
-            #     if not has_items:
-            #         break
+                if not has_items:
+                    break
 
-            #     end_time = start_time
-            #     start_time -= timedelta(days=30)
+                end_time = start_time
+                start_time -= timedelta(days=30)
 
-            return Response(f"Status code: {response.status_code}, Text: {response.text}", status=status.HTTP_200_OK)
+            return Response(f"Total eBay items fetched: {len(all_ebay_items)}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:

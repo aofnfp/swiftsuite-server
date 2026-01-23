@@ -106,7 +106,7 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
 
 # Get all products already listed on Ebay using sku
 def get_all_items_on_ebay(access_token, start_time_from, start_time_to):
-    # eb = Ebay()
+    eb = Ebay()
     # try:
     #     user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     # except Exception as e:
@@ -188,11 +188,11 @@ def get_all_items_on_ebay(access_token, start_time_from, start_time_to):
 
             page_number += 1
 
-            if response.json().get('errors')[0]['errorId'] == 1001:
-                access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                get_all_items_on_ebay(enroll_id)
-            else:
-                return None, False
+            # if response.json().get('errors')[0]['errorId'] == 1001:
+            #     access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+            #     get_all_items_on_ebay(enroll_id)
+            # else:
+            #     return None, False
     except requests.exceptions.ConnectTimeout as e:
         return None, False
     except Exception as e:
