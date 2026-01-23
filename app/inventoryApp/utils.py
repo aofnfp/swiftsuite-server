@@ -111,7 +111,7 @@ def get_all_items_on_ebay(enroll_id, start_time_from, start_time_to):
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
     except Exception as e:
         print(f"Failed to fetch access token {e}")
-        return None
+        return None, False
 
     access_token =  user_data.access_token
     try:
@@ -192,12 +192,12 @@ def get_all_items_on_ebay(enroll_id, start_time_from, start_time_to):
                 access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
                 get_all_items_on_ebay(enroll_id)
             else:
-                return None
+                return None, False
     except requests.exceptions.ConnectTimeout as e:
-        return None       
+        return None, False
     except Exception as e:
-        return None
-    
+        return None, False
+
     return items, bool(items)
   
      
@@ -308,22 +308,25 @@ def download_item_update_market_price_quantity():
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            all_ebay_items = []
+            try:
+                all_ebay_items = []
+                end_time = datetime.utcnow()
+                start_time = end_time - timedelta(days=30)
 
-            end_time = datetime.utcnow()
-            start_time = end_time - timedelta(days=30)
+                while True:
+                    items, has_items = get_all_items_on_ebay(enroll_id=user._id, start_time_from=start_time, start_time_to=end_time)
 
-            while True:
-                items, has_items = get_all_items_on_ebay(enroll_id=user._id, start_time_from=start_time, start_time_to=end_time)
+                    all_ebay_items.extend(items)
 
-                all_ebay_items.extend(items)
+                    if not has_items:
+                        break
 
-                if not has_items:
-                    break
-
-                end_time = start_time
-                start_time -= timedelta(days=30)
-
+                    end_time = start_time
+                    start_time -= timedelta(days=30)
+            except Exception as e:
+                logger.info(f"Ebay inventory download failed with error: {e}")
+                continue
+            
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if all_ebay_items == None:
                 logger.info(f"Ebay inventory download failed with error: {all_ebay_items}")
