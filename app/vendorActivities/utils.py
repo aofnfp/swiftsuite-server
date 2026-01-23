@@ -431,7 +431,6 @@ class VendorActivity():
         except Exception as e:
             print(f"FragranceX processing failed: {e}")
             return False
-
         
     def process_lipsey(self):
         try:
@@ -569,120 +568,120 @@ class VendorActivity():
             print(f"Lipsey processing failed: {e}")
             return False
 
-
     def process_cwr(self):
         try:
-            for row in self.data.iterrows():
-                items = row[1].values
-                items = list(items)
+            self.insert_data = []
+
+            for _, row in self.data.iterrows():
 
                 features = [
-                    {"Name": "Quick Specs", "Value": items[25]},
-                    {"Name": "Shipping Weight", "Value": items[19]},
-                    {"Name": "Box Height", "Value": items[20]},
-                    {"Name": "Box Length", "Value": items[21]},
-                    {"Name": "Box Width", "Value": items[22]},
-                    {"Name": "Remanufactured", "Value": items[35]},
-                    {"Name": "Harmonization Code", "Value": items[37]},
-                    {"Name": "Country Of Origin", "Value": items[38]},
-                    {"Name": "Google Merchant Category", "Value": items[48]},
-                    {"Name": "Prop 65", "Value": items[53]},
+                    {"Name": "Quick Specs", "Value": row["Quick Specs"]},
+                    {"Name": "Shipping Weight", "Value": row["Shipping Weight"]},
+                    {"Name": "Box Height", "Value": row["Box Height"]},
+                    {"Name": "Box Length", "Value": row["Box Length"]},
+                    {"Name": "Box Width", "Value": row["Box Width"]},
+                    {"Name": "Remanufactured", "Value": row["Remanufactured"]},
+                    {"Name": "Harmonization Code", "Value": row["Harmonization Code"]},
+                    {"Name": "Country Of Origin", "Value": row["Country Of Origin"]},
+                    {"Name": "Google Merchant Category", "Value": row["Google Merchant Category"]},
+                    {"Name": "Prop 65", "Value": row["Prop 65"]},
                 ]
 
                 self.insert_data.append(
                     Cwr(
-                        cwr_part_number=items[0],
-                        manufacturer_part_number=items[1],
-                        upc=items[2],
-                        quantity_available_to_ship_combined=items[3],
-                        quantity_available_to_ship_nj=items[4],
-                        quantity_available_to_ship_fl=items[5],
-                        next_shipment_date_combined=items[6],
-                        next_shipment_date_nj=items[7],
-                        next_shipment_date_fl=items[8],
-                        your_cost=items[9],
-                        list_price=items[10],
-                        m_a_p_price=items[11],
-                        m_r_p_price=items[12],
-                        uppercase_title=items[13],
-                        title=self.clean_text(items[14]),
-                        full_description=items[15],
-                        category_id=items[16],
-                        category_name=items[17],
-                        manufacturer_name=items[18],
-                        shipping_weight=items[19],
-                        box_height=items[20],
-                        box_length=items[21],
-                        box_width=items[22],
-                        list_of_accessories_by_sku=items[23],
-                        list_of_accessories_by_mfg=items[24],
-                        quick_specs=self.clean_text(items[25]),
-                        image_300x300_url=items[26],
-                        image_1000x1000_url=items[27],
-                        non_stock=items[28],
-                        drop_ships_direct_from_vendor=items[29],
-                        hazardous_materials=items[30],
-                        truck_freight=items[31] in ["true", "True", True, "1", 1],
-                        exportable=items[32],
-                        first_class_mail=items[33],
-                        oversized=items[34] in ["true", "True", True, "1", 1],
-                        remanufactured=items[35],
-                        closeout=items[36],
-                        harmonization_code=items[37],
-                        country_of_origin=items[38],
-                        sale=items[39],
-                        original_price_if_on_sale_closeout=items[40],
-                        sale_start_date=items[41],
-                        sale_end_date=items[42],
-                        rebate=items[43],
-                        rebate_description=items[44],
-                        rebate_start_date=items[46],
-                        rebate_end_date=items[47],
-                        google_merchant_category=items[48],
-                        quick_guide_literature_pdf_url=items[49],
-                        owners_manual_pdf_url=items[50],
-                        brochure_literature_pdf_url=items[51],
-                        installation_guide_pdf_url=items[52],
-                        video_urls=items[53],
-                        prop_65=items[54],
-                        prop_65_description=items[55],
-                        free_shipping=items[56],
-                        free_shipping_end_date=items[57],
-                        returnable=items[58] in ["true", "True", True, "1", 1],
-                        image_additional_1000x1000_urls=items[59],
-                        case_qty_nj=items[60],
-                        case_qty_fl=items[61],
-                        number_3rd_party_marketplaces=items[62] in ["true", "True", True, "1", 1],
-                        fcc_id=items[63],
-                        sku=items[64],
-                        mfgn=items[65],
-                        qty=items[66],
-                        qtynj=items[67],
-                        qtyfl=items[68],
-                        price=items[69],
-                        map=items[70],
-                        mrp=items[71],
+                        cwr_part_number=row["CWR Part Number"],
+                        manufacturer_part_number=row["Manufacturer Part Number"],
+                        upc=row["UPC Code"],
+                        quantity_available_to_ship_combined=row["Quantity Available to Ship (Combined)"],
+                        quantity_available_to_ship_nj=row["Quantity Available to Ship (NJ)"],
+                        quantity_available_to_ship_fl=row["Quantity Available to Ship (FL)"],
+                        your_cost=row["Your Cost"] if "Your Cost" in row else None,
+                        list_price=row["List Price"] if "List Price" in row else None,
+                        m_a_p_price=row["MAP Price"] if "MAP Price" in row else None,
+                        m_r_p_price=row["MRP Price"] if "MRP Price" in row else None,
+                        title=self.clean_text(row["Title"]),
+                        manufacturer_name=row["Manufacturer Name"],
+                        shipping_weight=row["Shipping Weight"],
+                        box_height=row["Box Height"],
+                        box_length=row["Box Length"],
+                        box_width=row["Box Width"],
+                        quick_specs=self.clean_text(row["Quick Specs"]),
+                        image_300x300_url=row["Image (300x300) Url"],
+                        image_1000x1000_url=row["Image (1000x1000) Url"],
+                        exportable=row["Exportable"],
+                        oversized=row["Oversized"],
+                        remanufactured=row["Remanufactured"],
+                        closeout=row["Closeout"],
+                        harmonization_code=row["Harmonization Code"],
+                        country_of_origin=row["Country Of Origin"],
+                        sale=row["Sale"],
+                        rebate=row["Rebate"],
+                        google_merchant_category=row["Google Merchant Category"],
+                        prop_65=row["Prop 65"],
+                        returnable=row["Returnable"],
+                        sku=row["sku"],
+                        mfgn=row["mfgn"],
+                        qty=row["qty"],
+                        qtynj=row["qtynj"],
+                        qtyfl=row["qtyfl"],
+                        price=row["price"],
+                        map=row["map"],
+                        mrp=row["mrp"],
                         features=json.dumps(features),
                     )
                 )
-            Cwr.objects.bulk_create(
-                self.insert_data,
-                batch_size=300,
-                update_conflicts=True,
-                update_fields=["qty", "qtynj", "qtyfl", "price", "map", "mrp"],
-            )
+
+            if self.insert_data:
+                # Insert new records
+                Cwr.objects.bulk_create(
+                    self.insert_data,
+                    batch_size=300,
+                    ignore_conflicts=True
+                )
+
+                # Update existing ones
+                skus = [obj.sku for obj in self.insert_data]
+
+                existing = {
+                    obj.sku: obj
+                    for obj in Cwr.objects.filter(sku__in=skus)
+                }
+
+                to_update = []
+
+                for obj in self.insert_data:
+                    if obj.sku in existing:
+                        db_obj = existing[obj.sku]
+                        db_obj.qty = obj.qty
+                        db_obj.qtynj = obj.qtynj
+                        db_obj.qtyfl = obj.qtyfl
+                        db_obj.price = obj.price
+                        db_obj.map = obj.map
+                        db_obj.mrp = obj.mrp
+                        to_update.append(db_obj)
+
+                if to_update:
+                    Cwr.objects.bulk_update(
+                        to_update,
+                        fields=["qty", "qtynj", "qtyfl", "price", "map", "mrp"],
+                        batch_size=300
+                    )
+
             print("CWR upload completed successfully.")
             return True
 
         except Exception as e:
             print(f"Error processing CWR data: {e}")
-            return e
+            return False
+
+
         
     def process_zanders(self):
         try:
-            for row in self.data.iterrows():
-                items = row[1]
-
+            self.insert_data = []
+            
+            for _ , items in self.data.iterrows():
+        
                 features = [
                     {"name": "Weight", "value": items['weight']},
                 ]
@@ -713,20 +712,50 @@ class VendorActivity():
 
                 # Add to the batch for bulk processing
                 self.insert_data.append(zanders_product)
-                
-            Zanders.objects.bulk_create(
+            
+            if self.insert_data:
+                Zanders.objects.bulk_create(
                     self.insert_data,
                     batch_size=500,
-                    update_conflicts=True,
-                    update_fields=[
-                        "price1",
-                        "price2",
-                        "price3",
-                        "qty1",
-                        "qty2",
-                        "qty3",
-                    ],
+                    ignore_conflicts=True
                 )
+                
+                 # Update existing ones
+                skus = [obj.sku for obj in self.insert_data]
+
+                existing = {
+                    obj.sku: obj
+                    for obj in Zanders.objects.filter(sku__in=skus)
+                }
+
+                to_update = []
+                
+                for obj in self.insert_data:
+                    if obj.sku in existing:
+                        db_obj = existing[obj.sku]
+                        db_obj.price1 = obj.price1
+                        db_obj.price2 = obj.price2
+                        db_obj.price3 = obj.price3
+                        db_obj.qty1 = obj.qty1
+                        db_obj.qty2 = obj.qty2
+                        db_obj.qty3= obj.qty3
+                        db_obj.map = obj.map
+                        to_update.append(db_obj)
+
+                if to_update:
+                    Zanders.objects.bulk_update(
+                            to_update,
+                            batch_size=500,
+                            fields=[
+                                "price1",
+                                "price2",
+                                "price3",
+                                "qty1",
+                                "qty2",
+                                "qty3",
+                                "map"
+                            ],
+                        )
             print("Zanders upload completed successfully.")
 
             return True
