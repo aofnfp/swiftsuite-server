@@ -710,7 +710,7 @@ class MarketInventory:
                 offset += limit
 
 
-            return Response(f"Total_item: {len(all_items)}, Item: {all_items}", status=status.HTTP_200_OK)
+            return JsonResponse({"Total_item": len(all_items), "Item": all_items}, safe=False, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
