@@ -16,6 +16,7 @@ from .models import InventoryModel, UpdateLogModel
 from marketplaceApp.models import MarketplaceEnronment
 from .utils import get_item_details, update_items_quantity_or_price_on_ebay
 from django.utils import timezone
+from marketplaceApp.views import Ebay
 
 
 # LOCK_KEY = "download_update_marketplace_items_task_lock"
@@ -286,11 +287,12 @@ def download_item_update_market_price_quantity(self, months_back=12):
         months_back (int): Number of months to look back (default: 12)
     """
     user_tokens = MarketplaceEnronment.objects.all()
-    
+    eb = Ebay()
     for user in user_tokens:
         if user.marketplace_name != "Ebay":
             continue
-            
+
+        access_token = eb.refresh_access_token(user.user_id, "Ebay")
         try:
             end = datetime.utcnow()
             total_processed = 0
@@ -304,7 +306,7 @@ def download_item_update_market_price_quantity(self, months_back=12):
                 logger.info(f"Processing window {window_num + 1}: {start.isoformat()} to {end.isoformat()}")
                 
                 window_items = _fetch_window(
-                    user.access_token, 
+                    access_token, 
                     start.isoformat(), 
                     end.isoformat()
                 )
