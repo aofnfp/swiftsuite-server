@@ -26,14 +26,12 @@ from accounts.permissions import IsOwnerOrHasPermission
 from django.db.models import Q
 from django.apps import apps
 from woocommerce import API
-# from .tasks import download_item_update_market_price_quantity_task
-from .utils import get_all_items_on_ebay
 import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
+from .tasks import download_item_update_market_price_quantity
 
-# from .tasks import fetch_all_ebay_items_task
-# download_item_update_market_price_quantity_task.delay()
+download_item_update_market_price_quantity.delay()
 
 
 
@@ -673,13 +671,8 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
 
-        task = fetch_all_ebay_items_task.delay(access_token)
-
-
-        return JsonResponse({
-            "task_id": task.id,
-            "status": "started"
-        })
+        # try:
+            # pass
         # except requests.exceptions.ConnectTimeout as e:
         #     return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         # except Exception as ea:
