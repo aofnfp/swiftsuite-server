@@ -31,7 +31,7 @@ import logging
 logger = logging.getLogger(__name__)
 from .tasks import download_item_update_market_price_quantity
 
-download_item_update_market_price_quantity.delay()
+# download_item_update_market_price_quantity.delay()
 
 
 
