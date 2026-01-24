@@ -63,8 +63,9 @@ def _fetch_window(access_token, start_time, end_time):
     EBAY_URL = "https://api.ebay.com/ws/api.dll"
 
     NAMESPACE = {
-        "ebay": "urn:ebay:apis:eBLBaseComponents"
+        "e": "urn:ebay:apis:eBLBaseComponents"
     }
+
 
     HEADERS = {
         "X-EBAY-API-CALL-NAME": "GetSellerList",
