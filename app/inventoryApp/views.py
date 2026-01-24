@@ -32,7 +32,7 @@ import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
 
-from .tasks import fetch_all_ebay_items_task
+# from .tasks import fetch_all_ebay_items_task
 # download_item_update_market_price_quantity_task.delay()
 
 
