@@ -138,8 +138,10 @@ def _fetch_window(access_token, start_time, end_time):
 )
 def download_item_update_market_price_quantity(self, months_back=12):
 
-    user_token = MarketplaceEnronment.objects.all(marketplace_name="Ebay")
+    user_token = MarketplaceEnronment.objects.all()
     for user in user_token:
+        if user.marketplace_name != "Ebay":
+            continue
         try:
             end = datetime.utcnow()
             total_processed = 0
