@@ -671,14 +671,49 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
 
-        # try:
-            # pass
-        # except requests.exceptions.ConnectTimeout as e:
-        #     return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
-        # except Exception as ea:
-        #     return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            url = "https://api.ebay.com/ws/api.dll"
+            headers = {
+                "X-EBAY-API-CALL-NAME": "GetSellerList",
+                "X-EBAY-API-SITEID": "0",
+                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+                "X-EBAY-API-IAF-TOKEN": access_token,
+                "Content-Type": "text/xml"
+            }
+            body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{{access_token}}</eBayAuthToken>
+                    </RequesterCredentials>
+
+                    <!-- Seller username (recommended, not strictly required if token is valid) -->
+                    <UserID>{{SELLER_USERNAME}}</UserID>
+
+                    <!-- REQUIRED: time window (max ~120 days per call) -->
+                    <StartTimeFrom>2025-10-01T00:00:00.000Z</StartTimeFrom>
+                    <StartTimeTo>2026-01-26T23:59:59.000Z</StartTimeTo>
+
+                    <!-- Pagination -->
+                    <Pagination>
+                        <EntriesPerPage>200</EntriesPerPage>
+                        <PageNumber>1</PageNumber>
+                    </Pagination>
+
+                    <!-- Get full item data -->
+                    <DetailLevel>ReturnAll</DetailLevel>
+
+                    <!-- Include active + ended listings -->
+                    <IncludeVariations>true</IncludeVariations>
+                </GetSellerListRequest>"""
+            response = requests.post(url, headers=headers, data=body)
+            
+        except requests.exceptions.ConnectTimeout as e:
+            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
+        except Exception as ea:
+            return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
         
-        # return JsonResponse({"Total eBay items": len(ebay_items), "Items": ebay_items[10]}, safe=False, status=status.HTTP_200_OK)
+        return JsonResponse({"eBay items": response.text}, safe=False, status=status.HTTP_200_OK)
 
     
 
