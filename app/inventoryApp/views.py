@@ -658,7 +658,7 @@ class MarketInventory:
 
 
 
-
+    # Function to fetch all seller items from ebay
     def fetch_all_seller_items(self, access_token, resume_from=None):
         import requests
         import time
@@ -801,10 +801,11 @@ class MarketInventory:
             if user.parent_id:
                 userid = user.parent_id
         eb = Ebay()
+        ma = MarketInventory()
         access_token = eb.refresh_access_token(userid, "Ebay")
         all_items = []
         try:
-            result = eb.fetch_all_seller_items(access_token)
+            result = ma.fetch_all_seller_items(access_token, resume_from=None)
 
             while not result["done"]:
                 all_items.extend(result["items"])
