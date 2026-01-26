@@ -322,7 +322,11 @@ class Ebay:
     @api_view(['GET'])
     def refresh_access_token_using_api_call(request, userid, market_name):
         eb = Ebay()
-        
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         try:
             connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
         except Exception as e:
