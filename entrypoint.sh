@@ -124,8 +124,6 @@ case "$1" in
             --loglevel=info \
             --pool=solo \
             --concurrency=1 \
-            --heartbeat-interval=30 \
-            --time-limit=360
     ;;
 
 
