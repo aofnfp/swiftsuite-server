@@ -327,39 +327,12 @@ class Ebay:
         if user:
             if user.parent_id:
                 userid = user.parent_id
-        try:
-            connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
-        except Exception as e:
-            return Response(f"Failed to fetch access token", status=status.HTTP_400_BAD_REQUEST)
-        
-        access_token = connection.access_token
-        refresh_token = connection.refresh_token
 
-        credentials = f"{eb.client_id}:{eb.client_secret}"
-        credentials_base64 = base64.b64encode(credentials.encode()).decode()
-        
-        headers = {
-            "Authorization": f"Basic {credentials_base64}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        body = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-        }
-
-        response = requests.post(eb.token_url, headers=headers, data=body)
-        if response.status_code != 200:
-            return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
-
-        result = response.json()
-        access_token = result.get('access_token')
-        
+        access_token = eb.refresh_access_token(userid, market_name)
         if not access_token:
-            return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
-
-        MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-        return access_token
+            return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({"access_token":access_token}, safe=False, status=status.HTTP_200_OK)
 
 
     # Function to fetch fulfillment policies using the access token
