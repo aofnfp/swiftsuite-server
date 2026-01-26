@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 import json
 from .models import InventoryModel, UpdateLogModel
 from marketplaceApp.models import MarketplaceEnronment
-from .utils import get_item_details, update_items_quantity_or_price_on_ebay
 from django.utils import timezone
 from marketplaceApp.views import Ebay
 

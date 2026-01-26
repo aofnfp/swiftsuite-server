@@ -4,7 +4,7 @@ from django import db
 
 APP_CELERY_BEAT_SCHEDULE = {
     "download_update_marketplace_items_30_minutes": {
-        "task": "inventoryApp.tasks.download_update_marketplace_items_task",
+        "task": "inventoryApp.tasks.download_item_update_market_price_quantity_task",
         "schedule": crontab(minute="*/30"),
     },
     "update_inventory_price_quantity_8_hours": {
