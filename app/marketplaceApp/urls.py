@@ -15,6 +15,7 @@ urlpatterns = [
     path('upload_multiple_product_image/<int:productid>/<str:product_name>/<int:userid>/', Ebay.upload_multiple_product_images, name='upload_multiple_product_image'),
     path('get_uploaded_images/<int:productid>/<str:product_name>/<int:userid>/', Ebay.get_uploaded_image, name='get_uploaded_images'),
     path('delete_uploaded_images/<str:image_name>/<int:image_id>/', Ebay.delete_uploaded_image, name='delete_uploaded_images'),
+    path('fetch_access_token/<int:userid>/<str:market_name>/', Ebay.refresh_access_token_using_api_call, name='fetch_access_token'),
     
     path('marketplace_product_listing/<int:userid>/<str:market_name>/<str:category_id_or_name>/', listing_on_marketplace, name='marketplace_product_listing'),
     path('save_product_before_listing/<int:userid>/<str:market_name>/<str:category_id_or_name>/', save_product_before_listing_on_marketplace, name='save_product_before_listing'),
