@@ -684,11 +684,8 @@ class MarketInventory:
                 <?xml version="1.0" encoding="utf-8"?>
                 <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
                     <RequesterCredentials>
-                        <eBayAuthToken>{{access_token}}</eBayAuthToken>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
                     </RequesterCredentials>
-
-                    <!-- Seller username (recommended, not strictly required if token is valid) -->
-                    <UserID>{{SELLER_USERNAME}}</UserID>
 
                     <!-- REQUIRED: time window (max ~120 days per call) -->
                     <StartTimeFrom>2025-10-01T00:00:00.000Z</StartTimeFrom>
