@@ -28,9 +28,9 @@ from django.apps import apps
 from woocommerce import API
 import logging
 logger = logging.getLogger(__name__)
-# from .tasks import download_item_update_market_price_quantity
+from .tasks import download_item_update_market_price_quantity_task
 
-# download_item_update_market_price_quantity.delay()
+download_item_update_market_price_quantity_task.delay()
 
 
 
