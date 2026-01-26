@@ -318,7 +318,7 @@ class Ebay:
 
     # Function to refresh the access token using an api call
     @with_module('inventory')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def refresh_access_token_using_api_call(request, userid, market_name):
         eb = Ebay()
