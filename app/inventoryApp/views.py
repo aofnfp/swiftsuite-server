@@ -657,6 +657,139 @@ class MarketInventory:
             return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+    def fetch_all_seller_items(self, access_token, resume_from=None):
+        import requests
+        import time
+        import xml.etree.ElementTree as ET
+        from datetime import datetime, timedelta
+
+        EBAY_URL = "https://api.ebay.com/ws/api.dll"
+        NAMESPACE = {"e": "urn:ebay:apis:eBLBaseComponents"}
+
+        headers = {
+            "X-EBAY-API-CALL-NAME": "GetSellerList",
+            "X-EBAY-API-SITEID": "0",
+            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+            "X-EBAY-API-IAF-TOKEN": access_token,
+            "Content-Type": "text/xml",
+        }
+
+        # ---------------- CONFIG ----------------
+        WINDOW_DAYS = 30
+        PER_PAGE = 200
+        MAX_ITEMS_PER_RUN = 3000   # HARD SAFETY LIMIT
+        # ----------------------------------------
+
+        all_items = []
+        fetched_count = 0
+
+        # Resume support
+        if resume_from:
+            start_time = resume_from
+        else:
+            start_time = datetime(2000, 1, 1)
+
+        end_time = datetime.utcnow()
+
+        while start_time < end_time:
+            window_start = start_time
+            window_end = min(start_time + timedelta(days=WINDOW_DAYS), end_time)
+
+            page = 1
+
+            while True:
+                body = f"""<?xml version="1.0" encoding="utf-8"?>
+                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+
+                    <StartTimeFrom>{window_start.isoformat()}Z</StartTimeFrom>
+                    <StartTimeTo>{window_end.isoformat()}Z</StartTimeTo>
+
+                    <Pagination>
+                        <EntriesPerPage>{PER_PAGE}</EntriesPerPage>
+                        <PageNumber>{page}</PageNumber>
+                    </Pagination>
+
+                    <DetailLevel>ReturnAll</DetailLevel>
+                    <IncludeVariations>true</IncludeVariations>
+                </GetSellerListRequest>
+                """
+
+                response = requests.post(
+                    EBAY_URL,
+                    headers=headers,
+                    data=body,
+                    timeout=20
+                )
+
+                if response.status_code != 200:
+                    return {
+                        "items": all_items,
+                        "resume_from": window_start,
+                        "done": False,
+                        "error": response.text,
+                    }
+
+                root = ET.fromstring(response.text)
+                page_items = root.findall(".//e:Item", NAMESPACE)
+
+                if not page_items:
+                    break
+
+                for item in page_items:
+                    all_items.append({
+                        "item_id": item.findtext("e:ItemID", "", NAMESPACE),
+                        "sku": item.findtext("e:SKU", "", NAMESPACE),
+                        "title": item.findtext("e:Title", "", NAMESPACE),
+                        "price": item.findtext(
+                            "e:SellingStatus/e:CurrentPrice", "", NAMESPACE
+                        ),
+                        "quantity": item.findtext("e:Quantity", "0", NAMESPACE),
+                        "quantity_sold": item.findtext(
+                            "e:SellingStatus/e:QuantitySold", "0", NAMESPACE
+                        ),
+                        "listing_duration": item.findtext(
+                            "e:ListingDuration", "", NAMESPACE
+                        ),
+                        "listing_type": item.findtext(
+                            "e:ListingType", "", NAMESPACE
+                        ),
+                        "picture": item.findtext(
+                            "e:PictureDetails/e:GalleryURL", "", NAMESPACE
+                        ),
+                        "market_url": item.findtext(
+                            ".//e:ViewItemURL", "", NAMESPACE
+                        ),
+                    })
+
+                    fetched_count += 1
+
+                    # ---------- HARD STOP ----------
+                    if fetched_count >= MAX_ITEMS_PER_RUN:
+                        return {
+                            "items": all_items,
+                            "resume_from": window_end,
+                            "done": False,
+                        }
+
+                page += 1
+                time.sleep(0.4)
+
+            start_time = window_end
+            time.sleep(1)
+
+        return {
+            "items": all_items,
+            "resume_from": None,
+            "done": True,
+        }
+
+
+
     # Function to test any api from ebay before implementation
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -669,103 +802,17 @@ class MarketInventory:
                 userid = user.parent_id
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
-
-        EBAY_URL = "https://api.ebay.com/ws/api.dll"
-        NAMESPACE = {"e": "urn:ebay:apis:eBLBaseComponents"}
+        all_items = []
         try:
-            headers = {
-                "X-EBAY-API-CALL-NAME": "GetSellerList",
-                "X-EBAY-API-SITEID": "0",
-                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-                "X-EBAY-API-IAF-TOKEN": access_token,
-                "Content-Type": "text/xml",
-            }
+            result = eb.fetch_all_seller_items(access_token)
 
-            all_items = []
-
-            # eBay allows ~120 days, but 30 days is much safer
-            WINDOW_DAYS = 30
-            PER_PAGE = 200
-
-            end_time = datetime.utcnow()
-            start_time = datetime(2000, 1, 1)  # earliest safe seller date
-
-            while start_time < end_time:
-                window_start = start_time
-                window_end = min(start_time + timedelta(days=WINDOW_DAYS), end_time)
-
-                page = 1
-
-                while True:
-                    body = f"""<?xml version="1.0" encoding="utf-8"?>
-                    <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                        <RequesterCredentials>
-                            <eBayAuthToken>{access_token}</eBayAuthToken>
-                        </RequesterCredentials>
-
-                        <StartTimeFrom>{window_start.isoformat()}Z</StartTimeFrom>
-                        <StartTimeTo>{window_end.isoformat()}Z</StartTimeTo>
-
-                        <Pagination>
-                            <EntriesPerPage>{PER_PAGE}</EntriesPerPage>
-                            <PageNumber>{page}</PageNumber>
-                        </Pagination>
-
-                        <DetailLevel>ReturnAll</DetailLevel>
-                        <IncludeVariations>true</IncludeVariations>
-                    </GetSellerListRequest>
-                    """
-
-                    response = requests.post(
-                        EBAY_URL,
-                        headers=headers,
-                        data=body,
-                        timeout=25
-                    )
-
-                    if response.status_code != 200:
-                        # fail fast on bad responses
-                        break
-
-                    root = ET.fromstring(response.text)
-                    items = root.findall(".//e:Item", NAMESPACE)
-
-                    if not items:
-                        break
-
-                    for item in items:
-                        all_items.append({
-                            "item_id": item.findtext("e:ItemID", "", NAMESPACE),
-                            "sku": item.findtext("e:SKU", "", NAMESPACE),
-                            "title": item.findtext("e:Title", "", NAMESPACE),
-                            "price": item.findtext(
-                                "e:SellingStatus/e:CurrentPrice", "", NAMESPACE
-                            ),
-                            "quantity": item.findtext("e:Quantity", "0", NAMESPACE),
-                            "quantity_sold": item.findtext(
-                                "e:SellingStatus/e:QuantitySold", "0", NAMESPACE
-                            ),
-                            "listing_duration": item.findtext(
-                                "e:ListingDuration", "", NAMESPACE
-                            ),
-                            "listing_type": item.findtext(
-                                "e:ListingType", "", NAMESPACE
-                            ),
-                            "image": item.findtext(
-                                "e:PictureDetails/e:GalleryURL", "", NAMESPACE
-                            ),
-                            "view_url": item.findtext(
-                                ".//e:ViewItemURL", "", NAMESPACE
-                            ),
-                        })
-
-                    page += 1
-                    time.sleep(0.4)  # CRITICAL: throttle pagination
-
-                # move to next window
-                start_time = window_end
-                time.sleep(1)  # CRITICAL: throttle windows
-
+            while not result["done"]:
+                all_items.extend(result["items"])
+                # process_items(result["items"])
+                result = eb.fetch_all_seller_items(
+                    access_token,
+                    resume_from=result["resume_from"]
+                )
 
             
         except requests.exceptions.ConnectTimeout as e:
