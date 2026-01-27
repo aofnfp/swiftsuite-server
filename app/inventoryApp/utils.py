@@ -311,20 +311,20 @@ def download_item_update_market_price_quantity():
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
             try:
-                all_ebay_items = get_all_items_on_ebay(enroll_id=user._id)
+                ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
 
             except Exception as e:
                 logger.info(f"Ebay inventory download failed with error: {e}")
                 continue
-
+            logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
-            if all_ebay_items == None:
-                logger.info(f"Ebay inventory download failed with error: {all_ebay_items}")
+            if ebay_downloaded_items == None:
+                logger.info(f"Ebay inventory download failed with error: {ebay_downloaded_items}")
                 continue
             # Construct a list of ebay items with relevant details
-            for item in all_ebay_items:
+            for item in ebay_downloaded_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13], 'market_item_url':item[14]})
-            logger.info(f"Ebay inventory download fetched {len(all_ebay_items)} items for user {user.user_id}")
+            
             # Loop through each item and update or insert into InventoryModel
             for item in all_ebay_items:                         
                 try:
