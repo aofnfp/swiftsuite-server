@@ -160,24 +160,27 @@ def place_order_rsr(request, market_name, orderid):
     order_details = rsr_client.get_order_details()
     payload = rsr_client.build_payload(order_details)
     result = rsr_client.place_order(payload)
+    data = result.get("data", {})
     
-    if result.get("StatusCode") == 0:
+    if result.get("StatusCode") == "00":
         vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
-        vendor_order.vendor_order_id = result.get("OrderNum") or vendor_order.reference_id
+        vendor_order.vendor_order_id = (
+            data.get("ConfirmResp") or data.get("WebRef") or vendor_order.reference_id
+        )
         vendor_order.raw_response = result
         vendor_order.save()
-
+        
         return JsonResponse(
             {"message": "RSR order placed successfully", "data": result},
             status=status.HTTP_200_OK
         )
 
     vendor_order.status = VendorOrderLog.VendorOrderStatus.FAILED
-    vendor_order.error_message = result.get("StatusMssg")
+    vendor_order.error_message = data.get("StatusMssg", "RSR order failed")
     vendor_order.raw_response = result
     vendor_order.save()
 
     return JsonResponse(
-        {"message": f"Failed to place RSR order: {payload}", "data": result},
+        {"message": f"Failed to place RSR order", "data": result},
         status=status.HTTP_400_BAD_REQUEST
     )
