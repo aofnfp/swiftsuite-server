@@ -28,9 +28,6 @@ from django.apps import apps
 from woocommerce import API
 import logging
 logger = logging.getLogger(__name__)
-from .tasks import download_item_update_market_price_quantity_task
-
-# download_item_update_market_price_quantity_task.delay()
 
 
 
@@ -803,7 +800,7 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
-            download_item_update_market_price_quantity_task.delay()
+            pass
             
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       

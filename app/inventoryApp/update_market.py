@@ -144,7 +144,6 @@ def check_product_ended_status():
                         continue
 
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(ends_status=ends_status))
-                    item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=item.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_item=item.sku, log_description=f"Ebay item availability status changed to {ends_status}"))
                 except Exception as e:
                     print(f"Failed to check and update ended ebay items: {e}")
                     continue
