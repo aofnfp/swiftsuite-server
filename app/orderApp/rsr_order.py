@@ -37,7 +37,9 @@ class RsrOrderApiClient:
 
     def build_payload(self, order_details):
         if not self.vendor_order_log.reference_id:
-            self.vendor_order_log.reference_id = self.vendor_order_log.order.orderId
+            self.vendor_order_log.reference_id =  self.generate_reference(
+                self.vendor_order_log.order.orderId
+            )
             self.vendor_order_log.save(update_fields=["reference_id"])
 
         buyer = order_details.get("buyer", {}).get("buyerRegistrationAddress", {})
@@ -68,6 +70,9 @@ class RsrOrderApiClient:
             "FillOrKill": 1,
         }
         
+        # save raw request
+        self.vendor_order_log.raw_request = payload
+        self.vendor_order_log.save(update_fields=["raw_request"])
         
         return payload
 
@@ -155,17 +160,27 @@ def place_order_rsr(request, market_name, orderid):
             status=VendorOrderLog.VendorOrderStatus.CREATED
         )
         
+    elif vendor_order.status in [
+            VendorOrderLog.VendorOrderStatus.PROCESSING, 
+            VendorOrderLog.VendorOrderStatus.DELIVERED,
+            VendorOrderLog.VendorOrderStatus.SHIPPED
+        ]:
+        return JsonResponse(
+            {"message": "Order has already been placed with RSR."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
     # Initialize RSR client
     rsr_client = RsrOrderApiClient(vendor_order)
     order_details = rsr_client.get_order_details()
     payload = rsr_client.build_payload(order_details)
     result = rsr_client.place_order(payload)
-    data = result.get("data", {})
+    
     
     if result.get("StatusCode") == "00":
         vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
         vendor_order.vendor_order_id = (
-            data.get("ConfirmResp") or data.get("WebRef") or vendor_order.reference_id
+            result.get("ConfirmResp") or result.get("WebRef")
         )
         vendor_order.raw_response = result
         vendor_order.save()
@@ -176,7 +191,7 @@ def place_order_rsr(request, market_name, orderid):
         )
 
     vendor_order.status = VendorOrderLog.VendorOrderStatus.FAILED
-    vendor_order.error_message = data.get("StatusMssg", "RSR order failed")
+    vendor_order.error_message = result.get("StatusMssg", "RSR order failed")
     vendor_order.raw_response = result
     vendor_order.save()
 
