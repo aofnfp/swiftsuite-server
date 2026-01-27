@@ -48,7 +48,7 @@ class RsrOrderApiClient:
         for item in order_details.get("lineItems", []):
             items.append({
                 "PartNum": item.get("sku"),
-                "WishQTY": item.get("quantity"),
+                "WishQty": item.get("quantity"),
             })
 
         payload = {
@@ -74,11 +74,12 @@ class RsrOrderApiClient:
     def place_order(self, payload):
         response = requests.post(
             f"{self.BASE_URL}/place-order",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data=payload,
+            json=payload, 
+            headers={"Content-Type": "application/json"},
             timeout=30
         )
         return response.json()
+
 
     def check_order(self, payload):
         response = requests.post(
