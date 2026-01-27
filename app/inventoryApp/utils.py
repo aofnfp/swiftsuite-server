@@ -331,14 +331,15 @@ def download_item_update_market_price_quantity():
                 try:
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
-                    # Update the market url on inventory
                     InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
+                    # Update the market url on inventory
                     if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
                         continue
                     # Update the price and quantity of product on Ebay
                     if existing_item.start_price != item.get("ebay_price") or existing_item.quantity != item.get("ebay_quantity"):
                         response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, existing_item.quantity, user._id)
                         item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_item=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
+                   
 
                 except Exception as e:
                     logger.info(f"Failed processing and updating price and quantity on eBay item {item.get('ebay_item_id')} with Error: {e}")
@@ -378,7 +379,7 @@ def download_item_update_market_price_quantity():
                     # Update the price and quantity of product on Woocommerce
                     if existing_item.start_price != item.get("price") or existing_item.quantity != item.get("stock_quantity"):
                         response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, user.user_id)
-                        item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_item=item.sku, log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
+                        item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_item=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
 
             except:
                 try:
