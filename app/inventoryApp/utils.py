@@ -105,18 +105,14 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
 
 
 # Get all products already listed on Ebay using sku
-def get_all_items_on_ebay(enroll_id):
+def get_all_items_on_ebay(userid):
     eb = Ebay()
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
-    try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
-    except Exception as e:
-        print(f"Failed to fetch access token {e}")
-        return None
+    # refresh access token if expired
+    access_token = eb.refresh_access_token(userid, "Ebay")
  
-    access_token =  user_data.access_token
     try:
         url = "https://api.ebay.com/ws/api.dll"
         headers = {
@@ -179,11 +175,7 @@ def get_all_items_on_ebay(enroll_id):
 
                     items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, item_market_url])
             else:
-                if response.json().get('errors')[0]['errorId'] == 1001:
-                    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                    get_all_items_on_ebay(enroll_id)
-                else:
-                    return None
+                return None
   
             # If no more items, break out of the loop
             if not items:
@@ -311,7 +303,7 @@ def download_item_update_market_price_quantity():
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
             try:
-                ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
+                ebay_downloaded_items = get_all_items_on_ebay(userid=user.user_id)
 
             except Exception as e:
                 logger.info(f"Ebay inventory download failed with error: {e}")

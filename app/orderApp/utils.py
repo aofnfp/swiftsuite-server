@@ -19,15 +19,7 @@ from vendorEnrollment.models import Generalproducttable
 def get_product_ordered_from_background(userid, enroll_id):
     # refresh access token if expired
     eb = Ebay()
-    access_token = eb.refresh_access_token(userid, "Ebay")
-    # Get access_token
-    try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
-    except Exception as e:
-        print(f"Failed to fetch access token")
-        return None
-    
-    access_token =  user_data.access_token
+    access_token = eb.refresh_access_token(userid, "Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
     
     # Set eBay API endpoint and headers
     try:
