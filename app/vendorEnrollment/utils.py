@@ -387,6 +387,7 @@ class VendorDataMixin:
                         mpn=getattr(product, mpn_field, None),
                         account=enrollment.account,
                         vendor=enrollment.vendor,
+                        enrollment = enrollment,
                         price=price,
                         quantity=quantity,
                         total_price=total_price
@@ -395,7 +396,7 @@ class VendorDataMixin:
 
         with transaction.atomic():
             if updates:
-                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price'], batch_size=500)
+                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'enrollment'], batch_size=500)
             if new_entries:
                 model_update.objects.bulk_create(new_entries, batch_size=500)
 
