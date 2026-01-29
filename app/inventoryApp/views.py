@@ -702,7 +702,7 @@ class MarketInventory:
 
                     offset += limit
 
-            return Response(f"Total orders: {len(all_orders)}", status=status.HTTP_200_OK)
+            return Response(f"Total orders: {len(all_orders)}, items: {all_orders[::-1][:5]}", status=status.HTTP_200_OK)
             
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
