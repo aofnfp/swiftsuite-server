@@ -60,10 +60,9 @@ def get_product_ordered_from_background(userid):
                     err = response.json()
                     if err.get("errors") and err["errors"][0].get("errorId") == 1001:
                         access_token = eb.refresh_access_token(userid, "Ebay")
+                        get_product_ordered_from_background(userid)
                 except Exception:
-                    print("[ERROR] Could not parse error JSON")
-
-                return "Error"
+                    return "Error"
             
         return all_orders
 
