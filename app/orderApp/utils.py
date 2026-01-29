@@ -29,7 +29,7 @@ def get_product_ordered_from_background(userid, enroll_id):
             print("[ERROR] Failed to refresh access token")
             return None
 
-        print(f"[TOKEN] Token refreshed. Length={len(access_token)}")
+        print(f"[TOKEN] Token refreshed.")
 
         HEADERS = {
             "Authorization": f"Bearer {access_token}",
