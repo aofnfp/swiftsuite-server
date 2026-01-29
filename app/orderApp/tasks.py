@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 LOCK_KEY = "sync_ebay_order_task_lock"
-LOCK_TIMEOUT = 7200  # 2 hours, adjust based on max runtime
+LOCK_TIMEOUT = 60 * 30  # 30 minutes adjust based on max runtime
 @shared_task(queue='default')
 def sync_ebay_order_task():
     # Attempt to acquire lock; skip if already running

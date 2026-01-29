@@ -18,6 +18,8 @@ from vendorEnrollment.models import Generalproducttable
 # Function to retrieve all fulfilment orders from Ebay
 def get_product_ordered_from_background(enroll_id):
     eb = Ebay()
+    # Refresh access token
+    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
     # Get access_token
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
@@ -137,7 +139,7 @@ def get_item_ordered_details(enroll_id, item_id):
     if response.status_code == 429:  # Rate limit hit
         retry_after = int(response.headers.get('Retry-After', 2))
         time.sleep(retry_after)
-        return get_item_ordered_details(access_token, item_id)
+        return get_item_ordered_details(enroll_id, item_id)
         
     product_data = response.json()
     if response.status_code == 200:
