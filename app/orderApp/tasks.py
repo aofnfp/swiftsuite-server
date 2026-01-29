@@ -11,18 +11,19 @@ logger = logging.getLogger(__name__)
 
 LOCK_KEY = "sync_ebay_order_task_lock"
 LOCK_TIMEOUT = 7200  # 2 hours, adjust based on max runtime
-@shared_task(bind=True, queue='default')
-def sync_ebay_order_task(self):
+@shared_task(queue='default')
+def sync_ebay_order_task():
     # Attempt to acquire lock; skip if already running
     if not cache.add(LOCK_KEY, "1", timeout=LOCK_TIMEOUT):
         logger.info("sync_ebay_order_task skipped: already running")
-        raise Ignore()  # Skipped task is ignored in Celery
+        return "Skipped (already running)"
 
     logger.info("sync_ebay_order_task started")
     try:
         # Call your existing sync logic
         sync_ebay_order_with_local()
         logger.info("sync_ebay_order_task completed successfully")
+        return "Completed successfully"
     finally:
         # Always release the lock
         cache.delete(LOCK_KEY)

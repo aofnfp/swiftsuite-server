@@ -16,7 +16,7 @@ from vendorEnrollment.models import Generalproducttable
 
 
 # Function to retrieve all fulfilment orders from Ebay
-def get_product_ordered_from_background(userid, enroll_id):
+def get_product_ordered_from_background(userid):
     # refresh access token if expired
     eb = Ebay()
     access_token = eb.refresh_access_token(userid, "Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
@@ -173,7 +173,7 @@ def sync_ebay_order_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
-            ebay_orders = get_product_ordered_from_background(user.user_id, user._id)
+            ebay_orders = get_product_ordered_from_background(user.user_id)
             if ebay_orders == None:
                 # Refresh access token and retry fetching orders
                 print(f"Access token expired for user {user.user_id}, refreshing token.")
