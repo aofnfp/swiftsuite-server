@@ -668,14 +668,47 @@ class MarketInventory:
         eb = Ebay()
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
-            pass
+            HEADERS = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+
+            base_url = "https://api.ebay.com/sell/fulfillment/v1/order"
+            limit = 100
+            offset = 0
+            all_orders = []
+
+            start_time = (datetime.utcnow() - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+
+            params = {
+                "filter": f"creationdate:[{start_time}..]",
+                "limit": limit
+            }
+
+            while True:
+                params["offset"] = offset
+                response = requests.get(base_url, headers=HEADERS, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+
+                    if "orders" not in data:
+                        break
+
+                    orders = data["orders"]
+                    all_orders.extend(orders)
+                    if len(orders) < limit:
+                        break
+
+                    offset += limit
+
+            return Response(f"Total orders: {len(all_orders)}", status=status.HTTP_200_OK)
             
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
             return Response(f"Failed to delete items. {ea}", status=status.HTTP_400_BAD_REQUEST)
         
-        return Response("Total eBay items", status=status.HTTP_200_OK)
 
         
 class WooCommerceInventory:
