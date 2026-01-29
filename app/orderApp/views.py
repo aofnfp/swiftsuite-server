@@ -11,7 +11,6 @@ from .serializers import CancelOrderModelSerializer
 from .models import OrdersOnEbayModel
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventoryApp.models import InventoryModel
-from .tasks import sync_ebay_order_task
 from accounts.permissions import IsOwnerOrHasPermission
 from vendorEnrollment.utils import with_module
 

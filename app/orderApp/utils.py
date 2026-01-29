@@ -16,30 +16,11 @@ from vendorEnrollment.models import Generalproducttable
 
 
 # Function to retrieve all fulfilment orders from Ebay
-<<<<<<< HEAD
 def get_product_ordered_from_background(userid):
     # refresh access token if expired
     eb = Ebay()
     access_token = eb.refresh_access_token(userid, "Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
-    
-    # Set eBay API endpoint and headers
-=======
-def get_product_ordered_from_background(userid, enroll_id):
-    print(f"[START] Fetching eBay orders | user_id={userid} | enroll_id={enroll_id}")
-
->>>>>>> 2ab1228522afb802d7a6df041403ee2efb20ec52
     try:
-        eb = Ebay()
-
-        print("[TOKEN] Refreshing eBay access token...")
-        access_token = eb.refresh_access_token(userid, "Ebay")
-
-        if not access_token:
-            print("[ERROR] Failed to refresh access token")
-            return None
-
-        print(f"[TOKEN] Token refreshed.")
-
         HEADERS = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -58,49 +39,32 @@ def get_product_ordered_from_background(userid, enroll_id):
             "limit": limit
         }
 
-        print(f"[PARAMS] Start time = {start_time}")
-
         while True:
             params["offset"] = offset
-            print(f"\n[REQUEST] Fetching orders offset={offset} limit={limit}")
-
             response = requests.get(base_url, headers=HEADERS, params=params)
-            print(f"[RESPONSE] Status Code = {response.status_code}")
-
             if response.status_code == 200:
                 data = response.json()
 
                 if "orders" not in data:
-                    print("[INFO] No 'orders' key in response. Breaking loop.")
                     break
 
                 orders = data["orders"]
-                print(f"[DATA] Received {len(orders)} orders")
-
                 all_orders.extend(orders)
-                print(f"[TOTAL] Total collected orders = {len(all_orders)}")
-
                 if len(orders) < limit:
-                    print("[PAGINATION] Last page reached. Stopping.")
                     break
 
                 offset += limit
 
             else:
-                print("[ERROR] eBay API returned error")
                 try:
                     err = response.json()
-                    print("[ERROR RESPONSE]", err)
-
                     if err.get("errors") and err["errors"][0].get("errorId") == 1001:
-                        print("[TOKEN ERROR] Invalid access token (1001)")
-                        return None
+                        access_token = eb.refresh_access_token(userid, "Ebay")
                 except Exception:
                     print("[ERROR] Could not parse error JSON")
 
                 return "Error"
-
-        print(f"[DONE] Finished fetching orders. Total = {len(all_orders)}")
+            
         return all_orders
 
     except Exception as e:
