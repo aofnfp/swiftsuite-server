@@ -16,10 +16,16 @@ from vendorEnrollment.models import Generalproducttable
 
 
 # Function to retrieve all fulfilment orders from Ebay
-def get_product_ordered_from_background(userid):
-    # refresh access token if expired
+def get_product_ordered_from_background(enroll_id):
     eb = Ebay()
-    access_token = eb.refresh_access_token(userid, "Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+    # Get access_token
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token =  user_data.access_token 
     try:
         HEADERS = {
             "Authorization": f"Bearer {access_token}",
@@ -59,8 +65,8 @@ def get_product_ordered_from_background(userid):
                 try:
                     err = response.json()
                     if err.get("errors") and err["errors"][0].get("errorId") == 1001:
-                        access_token = eb.refresh_access_token(userid, "Ebay")
-                        get_product_ordered_from_background(userid)
+                        access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+                        get_product_ordered_from_background(enroll_id)
                 except Exception:
                     return "Error"
             
@@ -182,7 +188,7 @@ def sync_ebay_order_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
-            ebay_orders = get_product_ordered_from_background(user.user_id)
+            ebay_orders = get_product_ordered_from_background(user._id)
             if ebay_orders == None:
                 # Refresh access token and retry fetching orders
                 print(f"Access token expired for user {user.user_id}, refreshing token.")
