@@ -1,12 +1,32 @@
 from django.core.cache import cache
 from celery import shared_task
 from celery.exceptions import Ignore
-from .utils import sync_ebay_order_with_local
+from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local
 from .models import OrdersOnEbayModel, VendorOrderLog
-from .utils import create_vendor_order_log
 from django.db.models import Exists, OuterRef
 import logging
 logger = logging.getLogger(__name__)
+
+
+
+LOCK_KEY1 = "manual_sync_order_with_local_lock"
+LOCK_TIMEOUT = 60 * 30  # 30 minutes adjust based on max runtime
+@shared_task(queue='default')
+def manual_sync_order_with_local_task(userid):
+    # Attempt to acquire lock; skip if already running
+    if not cache.add(LOCK_KEY1, "1", timeout=LOCK_TIMEOUT):
+        logger.info("manual_sync_order_with_local_task skipped: already running")
+        return "Skipped (already running)"
+
+    logger.info("manual_sync_order_with_local_task started")
+    try:
+        # Call your existing sync logic
+        manual_sync_order_with_local(userid)
+        logger.info("manual_sync_order_with_local_task completed successfully")
+        return "Completed successfully"
+    finally:
+        # Always release the lock
+        cache.delete(LOCK_KEY)
 
 
 LOCK_KEY = "sync_ebay_order_task_lock"

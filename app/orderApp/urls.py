@@ -11,5 +11,5 @@ urlpatterns = [
     path('place_order_fragrancex/<str:market_name>/<str:orderid>/', place_order_fragrancex, name='place_order_fragrancex'),
     path('get_tracking_fragranceX/<str:orderId>/', getTracking_fragranceX, name='get_tracking_fragranceX'),
     path('place_order_rsr/<str:market_name>/<str:orderid>/', place_order_rsr, name='place_order_rsr'),
-    # path('sync_ordered_item/', sync_ebay_order_with_local, name='sync_ordered_item'),
+    path('download_order_manually/<int:userid>/', eb_view.sync_ebay_order_with_local_manually, name='download_order_manually'),
 ]

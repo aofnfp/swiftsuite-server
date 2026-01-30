@@ -131,7 +131,7 @@ class General_operations:
                         db_items = db_items[0]
                                                  
                     except Exception as ea:
-                        prod["error"] = str(ea)
+                        prod["error"] = "Product not found in the supplier's"
                         unmapped_items.append(prod)
                         continue
                     
@@ -155,7 +155,7 @@ class General_operations:
                             db_items.save()
                             
                         except Exception as e:
-                            prod["error"] = str(e)
+                            prod["error"] = "Product failed to process to inventory"
                             unmapped_items.append(prod)
                             continue
                 
@@ -339,6 +339,27 @@ class General_operations:
             
         except Exception as e:
             return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # Function to manually download item from marketplace
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def manually_download_item_from_marketplace(request, userid):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+        try:
+            download_item_update_market_price_quantity_task.delay(userid)
+            return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)
+
+    
+            
+
 
 # Create your views here.
 class MarketInventory:

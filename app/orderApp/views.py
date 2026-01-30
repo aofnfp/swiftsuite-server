@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventoryApp.models import InventoryModel
 from accounts.permissions import IsOwnerOrHasPermission
 from vendorEnrollment.utils import with_module
+from .tasks import manual_sync_order_with_local_task
 
 
 # Create your views here.
@@ -185,6 +186,22 @@ class OrderEbay:
             print(f"An error occurred: {e}")
             return None
 
+
+    # Create function to manually sync ebay orders with local db
+    @with_module('orders')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def sync_ebay_order_with_local_manually(request, userid):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+        try:
+            manual_sync_order_with_local_task.delay(userid)
+            return Response("Orders sync task has been initiated.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to initiate sync task: {e}", status=status.HTTP_400_BAD_REQUEST)
 
     
     

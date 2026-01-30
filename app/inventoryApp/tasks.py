@@ -1,6 +1,6 @@
 from celery import shared_task
 from django.core.cache import cache
-from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor
+from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace
 from .update_market import check_product_ended_status, update_inventory_price_quantity
 import logging
 logger = logging.getLogger(__name__)
@@ -36,6 +36,22 @@ def download_item_update_market_price_quantity_task():
     finally:
         cache.delete(LOCK_KEY)
 
+
+LOCK_KEY1 = "manually_download_item_from_marketplace_task_lock"
+@shared_task(queue='heavy-inv')
+def manually_download_item_from_marketplace_task():
+    if not cache.add(LOCK_KEY1, "1", timeout=LOCK_TIMEOUT):
+        logger.info("manually_download_item_from_marketplace_task skipped: already running")
+        return "Skipped (already running)"
+
+    logger.info("manually_download_item_from_marketplace_task started")
+
+    try:
+        manually_download_item_from_marketplace()
+        logger.info("manually_download_item_from_marketplace_task completed successfully")
+        return "Completed successfully"
+    finally:
+        cache.delete(LOCK_KEY)
 
 
 LOCK_KEY2 = "update_inventory_price_quantity_task_lock"
