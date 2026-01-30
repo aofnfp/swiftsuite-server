@@ -39,7 +39,7 @@ def download_item_update_market_price_quantity_task():
 
 LOCK_KEY1 = "manually_download_item_from_marketplace_task_lock"
 @shared_task(queue='heavy-inv')
-def manually_download_item_from_marketplace_task(userid):
+def manually_download_item_from_marketplace_task(userid, access_token):
     if not cache.add(LOCK_KEY1, "1", timeout=LOCK_TIMEOUT):
         logger.info("manually_download_item_from_marketplace_task skipped: already running")
         return "Skipped (already running)"
@@ -47,7 +47,7 @@ def manually_download_item_from_marketplace_task(userid):
     logger.info("manually_download_item_from_marketplace_task started")
 
     try:
-        manually_download_item_from_marketplace_syc(userid)
+        manually_download_item_from_marketplace_syc(userid, access_token)
         logger.info("manually_download_item_from_marketplace_task completed successfully")
         return "Completed successfully"
     finally:

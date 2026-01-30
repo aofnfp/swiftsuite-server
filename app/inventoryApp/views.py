@@ -346,13 +346,15 @@ class General_operations:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def manually_download_item_from_marketplace(request, userid):
+        eb = Ebay()
+        access_token = eb.refresh_access_token(userid, "Ebay")
         # check if user is subaccount
         user = request.user
         if user:
             if user.parent_id:
                 userid = user.parent_id
         try:
-            manually_download_item_from_marketplace_task.delay(userid)
+            manually_download_item_from_marketplace_task.delay(userid, access_token)
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)

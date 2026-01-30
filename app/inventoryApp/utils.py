@@ -105,17 +105,10 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
 
 
 # Get all products already listed on Ebay using sku
-def get_all_items_on_ebay(enroll_id):
-    eb = Ebay()
+def get_all_items_on_ebay(enroll_id, access_token):
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
-    try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
-    except Exception as e:
-        print(f"Failed to fetch access token {e}")
-        return None
-    access_token =  user_data.access_token
     try:
         url = "https://api.ebay.com/ws/api.dll"
         headers = {
@@ -179,10 +172,7 @@ def get_all_items_on_ebay(enroll_id):
                     items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, item_market_url])
             else:
                 if response.json().get('errors')[0]['errorId'] == 1001:
-                    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                    get_all_items_on_ebay(enroll_id)
-                else:
-                    return None
+                    return "access_token expired"
   
             # If no more items, break out of the loop
             if not items:
@@ -309,7 +299,9 @@ def download_item_update_market_price_quantity():
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
             try:
-                ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
+                eb = Ebay()
+                access_token = eb.refresh_access_token(user.user_id, "Ebay")
+                ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
 
             except Exception as e:
                 logger.info(f"Ebay inventory download failed with error: {e}")
@@ -404,14 +396,14 @@ def download_item_update_market_price_quantity():
 
 
 # Function to manually download all items from all marketplace to local inventory
-def manually_download_item_from_marketplace_syc(userid):
+def manually_download_item_from_marketplace_syc(userid, access_token):
     all_ebay_items = []
     user_token = MarketplaceEnronment.objects.filter(user_id=userid) # get all user to get their access_token
     for user in user_token:
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
+            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token)
             if ebay_downloaded_items == None:
                 logger.info(f"Ebay inventory download failed with error: {ebay_downloaded_items}")
                 continue
