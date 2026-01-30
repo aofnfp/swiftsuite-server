@@ -403,7 +403,7 @@ def manually_download_item_from_marketplace_syc(userid, access_token):
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token)
+            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
             if ebay_downloaded_items == None:
                 logger.info(f"Ebay inventory download failed with error: {ebay_downloaded_items}")
                 continue
