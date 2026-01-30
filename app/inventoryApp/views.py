@@ -28,7 +28,7 @@ from django.apps import apps
 from woocommerce import API
 import logging
 logger = logging.getLogger(__name__)
-from .tasks import download_item_update_market_price_quantity_task
+from .tasks import manually_download_item_from_marketplace_task
 
 
 
@@ -352,7 +352,7 @@ class General_operations:
             if user.parent_id:
                 userid = user.parent_id
         try:
-            download_item_update_market_price_quantity_task.delay(userid)
+            manually_download_item_from_marketplace_task.delay(userid)
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)
