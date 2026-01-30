@@ -404,7 +404,7 @@ def download_item_update_market_price_quantity():
 
 
 # Function to manually download all items from all marketplace to local inventory
-def manually_download_item_from_marketplace(userid):
+def manually_download_item_from_marketplace_syc(userid):
     all_ebay_items = []
     user_token = MarketplaceEnronment.objects.filter(user_id=userid) # get all user to get their access_token
     for user in user_token:
