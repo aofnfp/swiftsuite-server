@@ -27,7 +27,8 @@ def sync_ebay_order_task():
     finally:
         # Always release the lock
         cache.delete(LOCK_KEY)
-
+        
+sync_ebay_order_task.delay()
 
 @shared_task(queue='default')
 def process_vendor_orders():

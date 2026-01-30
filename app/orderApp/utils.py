@@ -16,10 +16,10 @@ from vendorEnrollment.models import Generalproducttable
 
 
 # Function to retrieve all fulfilment orders from Ebay
-def get_product_ordered_from_background(enroll_id):
+def get_product_ordered_from_background(userid, enroll_id):
     eb = Ebay()
     # Refresh access token
-    access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
+    access_token = eb.refresh_access_token(userid, "Ebay")
     # Get access_token
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
@@ -67,8 +67,8 @@ def get_product_ordered_from_background(enroll_id):
                 try:
                     err = response.json()
                     if err.get("errors") and err["errors"][0].get("errorId") == 1001:
-                        access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                        get_product_ordered_from_background(enroll_id)
+                        access_token = eb.refresh_access_token(userid, "Ebay")
+                        get_product_ordered_from_background(userid, enroll_id)
                 except Exception:
                     return "Error"
             
@@ -190,7 +190,7 @@ def sync_ebay_order_with_local():
     for user in user_token:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
-            ebay_orders = get_product_ordered_from_background(user._id)
+            ebay_orders = get_product_ordered_from_background(user.user_id, user._id)
             if ebay_orders == None:
                 # Refresh access token and retry fetching orders
                 print(f"Access token expired for user {user.user_id}, refreshing token.")
