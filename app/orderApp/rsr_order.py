@@ -1,5 +1,4 @@
 import requests
-import json
 from .utils import get_ebay_order_details
 from django.http import JsonResponse
 from rest_framework import status
@@ -102,7 +101,7 @@ class RsrOrderApiClient:
             payload["PONum"] = order_log.reference_id 
 
         if order_log.raw_response:
-            items = json.loads(order_log.raw_response).get("Items")
+            items = order_log.raw_response.get("Items")
             for item in items:
                 payload["PartNum"] = item.get("PartNum")
                 payload["WishQty"] = item.get("AckQty")
