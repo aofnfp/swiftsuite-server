@@ -100,11 +100,9 @@ class RsrOrderApiClient:
         if order_log.reference_id:
             payload["PONum"] = order_log.reference_id 
 
-        if order_log.raw_response:
-            items = order_log.raw_response.get("Items")
-            for item in items:
-                payload["PartNum"] = item.get("PartNum")
-                payload["WishQty"] = item.get("AckQty")
+        if order_log.raw_request:
+            payload["Items"] = order_log.raw_request.get("Items")
+            
 
         return payload
 
