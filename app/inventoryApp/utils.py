@@ -291,6 +291,7 @@ def get_woocommerce_existing_products(user_id):
 # Download all items from all marketplace to local inventory
 def download_item_update_market_price_quantity():
     all_ebay_items = []
+    eb = Ebay()
 
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
@@ -298,15 +299,9 @@ def download_item_update_market_price_quantity():
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            try:
-                eb = Ebay()
-                access_token = eb.refresh_access_token(user.user_id, "Ebay")
-                ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
-
-            except Exception as e:
-                logger.info(f"Ebay inventory download failed with error: {e}")
-                continue
-            
+            access_token = eb.refresh_access_token(user.user_id, "Ebay")
+            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
+            logger.info(f"access_token: {access_token}")
             logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if ebay_downloaded_items == None:
