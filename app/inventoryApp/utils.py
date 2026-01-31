@@ -407,6 +407,7 @@ def manually_download_item_from_marketplace_syc(userid, access_token):
             if ebay_downloaded_items == None:
                 logger.info(f"Ebay inventory download failed with error: {ebay_downloaded_items}")
                 continue
+            logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # Construct a list of ebay items with relevant details
             for item in ebay_downloaded_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13], 'market_item_url':item[14]})

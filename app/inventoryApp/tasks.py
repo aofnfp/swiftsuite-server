@@ -25,7 +25,7 @@ LOCK_TIMEOUT = 60 * 120  # 2 hours
 def download_item_update_market_price_quantity_task():
     "download_item_update_market_price_quantity_task skipped: already running"
     download_item_update_market_price_quantity()
-    return "Inventory doenload completed successfully"
+    return "Inventory download completed successfully"
 
 
 
@@ -33,7 +33,7 @@ def download_item_update_market_price_quantity_task():
 def manually_download_item_from_marketplace_task(userid, access_token):
     "manually_download_item_from_marketplace_task skipped: already running"
     manually_download_item_from_marketplace_syc(userid, access_token)
-    return "Completed successfully"
+    return "Manual inventory download completed successfully"
 
 
 
