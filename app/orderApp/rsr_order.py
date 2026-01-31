@@ -11,6 +11,7 @@ from accounts.models import User
 from .models import OrdersOnEbayModel
 from .utils import get_vendor_enrollment
 import logging
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -85,12 +86,32 @@ class RsrOrderApiClient:
         )
         return response.json()
 
+    def build_check_order_payload(self, order_log):
+        payload = {
+            "Username": self.username,
+            "Password": self.password,
+            "POS": self.pos,
+        }
+
+        if order_log.vendor_order_id:
+            payload["WebRef"] = order_log.vendor_order_id 
+
+        if order_log.reference_id:
+            payload["PONum"] = order_log.reference_id 
+
+        if order_log.raw_response:
+            items = json.loads(order_log.raw_response).get("Items")
+            for item in items:
+                payload["PartNum"] = item.get("PartNum")
+                payload["WishQty"] = item.get("AckQty")
+
+        return payload
 
     def check_order(self, payload):
         response = requests.post(
             f"{self.BASE_URL}/check-order",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data=payload,
+            headers={"Content-Type": "application/json"},
+            json=payload,
             timeout=30
         )
         return response.json()
@@ -99,21 +120,6 @@ class RsrOrderApiClient:
         import uuid
         unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-RSR-{order_id}-{unique_suffix}"
-    
-    def validate_item(self, sku):
-        response = requests.get(
-            f"{self.BASE_URL}/get-items",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            params={
-                "Username": self.username,
-                "Password": self.password,
-                "MfgPartNum": sku,
-                "POS": self.pos
-            },
-            timeout=30
-        )
-        return response.json()
-
 
 
 @api_view(['POST'])
@@ -199,3 +205,50 @@ def place_order_rsr(request, market_name, orderid):
         {"message": f"Failed to place RSR order", "data": result},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def check_order_rsr(request, market_name, orderid):
+    # Resolve parent account
+    user = request.user
+    if user and user.parent_id:
+        user = user.parent
+
+    # Try existing VendorOrderLog
+    vendor_order = VendorOrderLog.objects.filter(
+        order__orderId=orderid,
+        order__market_name__iexact=market_name,
+        enrollment__user=user,
+        enrollment__vendor__name__iexact='RSR'
+    ).first()
+    
+    if not vendor_order:
+        return JsonResponse(
+            {"message": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+        
+    rsr_client = RsrOrderApiClient(vendor_order)
+    payload = rsr_client.build_check_order_payload(vendor_order)
+    result = rsr_client.check_order(payload)
+    
+    if result.get("StatusCode") == "00":
+        vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
+        # vendor_order.raw_response = result
+        vendor_order.save()
+        
+        return JsonResponse(
+            {"message": "RSR order checked successfully", "data": result},
+            status=status.HTTP_200_OK
+        )
+    
+    vendor_order.status = VendorOrderLog.VendorOrderStatus.FAILED
+    vendor_order.error_message = result.get("StatusMssg", "RSR order check failed")
+    vendor_order.raw_response = result
+    vendor_order.save()
+    
+    return JsonResponse(
+        {"message": f"Failed to check RSR order", "data": result},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+    
