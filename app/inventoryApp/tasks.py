@@ -20,38 +20,21 @@ from marketplaceApp.views import Ebay
 
 LOCK_TIMEOUT = 60 * 120  # 2 hours
 
-LOCK_KEY = "download_update_marketplace_items_task_lock"
+# LOCK_KEY = "download_update_marketplace_items_task_lock"
 @shared_task(queue='heavy-inv')
 def download_item_update_market_price_quantity_task():
-    if not cache.add(LOCK_KEY, "1", timeout=LOCK_TIMEOUT):
-        logger.info("download_item_update_market_price_quantity_task skipped: already running")
-        return "Skipped (already running)"
-
-    logger.info("download_item_update_market_price_quantity_task started")
-
-    try:
-        download_item_update_market_price_quantity()
-        logger.info("download_item_update_market_price_quantity_task completed successfully")
-        return "Completed successfully"
-    finally:
-        cache.delete(LOCK_KEY)
+    "download_item_update_market_price_quantity_task skipped: already running"
+    download_item_update_market_price_quantity()
+    return "Inventory doenload completed successfully"
 
 
-LOCK_KEY1 = "manually_download_item_from_marketplace_task_lock"
+
 @shared_task(queue='heavy-inv')
 def manually_download_item_from_marketplace_task(userid, access_token):
-    if not cache.add(LOCK_KEY1, "1", timeout=LOCK_TIMEOUT):
-        logger.info("manually_download_item_from_marketplace_task skipped: already running")
-        return "Skipped (already running)"
+    "manually_download_item_from_marketplace_task skipped: already running"
+    manually_download_item_from_marketplace_syc(userid, access_token)
+    return "Completed successfully"
 
-    logger.info("manually_download_item_from_marketplace_task started")
-
-    try:
-        manually_download_item_from_marketplace_syc(userid, access_token)
-        logger.info("manually_download_item_from_marketplace_task completed successfully")
-        return "Completed successfully"
-    finally:
-        cache.delete(LOCK_KEY)
 
 
 LOCK_KEY2 = "update_inventory_price_quantity_task_lock"
