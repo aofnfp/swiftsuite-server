@@ -110,6 +110,12 @@ def get_all_items_on_ebay(enroll_id, access_token):
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
     try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  
+        access_token = user_data.access_token
+    except Exception as e:
+        print(f"Failed to fetch access token {e}")
+        return None
+    try:
         url = "https://api.ebay.com/ws/api.dll"
         headers = {
             "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",

@@ -20,6 +20,7 @@ def get_product_ordered_from_background(userid, enroll_id):
     eb = Ebay()
     # Refresh access token
     access_token = eb.refresh_access_token(userid, "Ebay")
+    logger.info(f"access_token: {access_token}")
     # Get access_token
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  # requests.get(f"https://service.swiftsuite.app/marketplaceApp/get_refresh_access_token/{user.id}/Ebay")
