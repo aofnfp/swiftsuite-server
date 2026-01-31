@@ -235,18 +235,12 @@ def check_order_rsr(request, market_name, orderid):
     
     if result.get("StatusCode") == "00":
         vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
-        # vendor_order.raw_response = result
         vendor_order.save()
         
         return JsonResponse(
             {"message": "RSR order checked successfully", "data": result},
             status=status.HTTP_200_OK
         )
-    
-    vendor_order.status = VendorOrderLog.VendorOrderStatus.FAILED
-    vendor_order.error_message = result.get("StatusMssg", "RSR order check failed")
-    vendor_order.raw_response = result
-    vendor_order.save()
     
     return JsonResponse(
         {"message": f"Failed to check RSR order", "data": result},
