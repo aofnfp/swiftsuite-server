@@ -95,10 +95,10 @@ class RsrOrderApiClient:
         }
 
         if order_log.vendor_order_id:
-            payload["WebRef"] = order_log.vendor_order_id 
+            payload["OrderNumber"] = order_log.vendor_order_id 
 
         if order_log.reference_id:
-            payload["PONum"] = order_log.reference_id 
+            payload["PONumber"] = order_log.reference_id 
 
         if order_log.raw_response:
             items = order_log.raw_response.get("Items")
@@ -193,7 +193,7 @@ def place_order_rsr(request, market_name, orderid):
         vendor_order.save()
         
         return JsonResponse(
-            {"message": "RSR order placed successfully", "data": result},
+            {"message": "RSR order placed successfully", "data": result, "payload": payload},
             status=status.HTTP_200_OK
         )
 
@@ -203,7 +203,7 @@ def place_order_rsr(request, market_name, orderid):
     vendor_order.save()
 
     return JsonResponse(
-        {"message": f"Failed to place RSR order", "data": result},
+        {"message": f"Failed to place RSR order", "data": result, "payload": payload},
         status=status.HTTP_400_BAD_REQUEST
     )
 
