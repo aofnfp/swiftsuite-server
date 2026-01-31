@@ -307,7 +307,6 @@ def download_item_update_market_price_quantity():
             # Fetch all eBay items by walking backward in 30-day windows
             access_token = eb.refresh_access_token(user.user_id, "Ebay")
             ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
-            logger.info(f"access_token: {access_token}")
             logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if ebay_downloaded_items == None:
@@ -337,7 +336,6 @@ def download_item_update_market_price_quantity():
                         InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
-                    logger.info(f"Failed processing and updating price and quantity on eBay item {item.get('ebay_item_id')} with Error: {e}")
                     try:
                         # Get product details from eBay
                         product_details = get_item_details(user._id, item.get("ebay_item_id"))

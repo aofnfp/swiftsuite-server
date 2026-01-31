@@ -20,21 +20,38 @@ from marketplaceApp.views import Ebay
 
 LOCK_TIMEOUT = 60 * 120  # 2 hours
 
-# LOCK_KEY = "download_update_marketplace_items_task_lock"
+LOCK_KEY = "download_update_marketplace_items_task_lock"
 @shared_task(queue='heavy-inv')
 def download_item_update_market_price_quantity_task():
-    "download_item_update_market_price_quantity_task skipped: already running"
-    download_item_update_market_price_quantity()
-    return "Inventory download completed successfully"
+    if not cache.add(LOCK_KEY, "1", timeout=LOCK_TIMEOUT):
+        logger.info("download_item_update_market_price_quantity_task skipped: already running")
+        return "Skipped (already running)"
+
+    logger.info("download_item_update_market_price_quantity_task started")
+
+    try:
+        download_item_update_market_price_quantity()
+        logger.info("download_item_update_market_price_quantity_task completed successfully")
+        return "Inventory download completed successfully"
+    finally:
+        cache.delete(LOCK_KEY)
 
 
-
+LOCK_KEY1 = "manually_download_item_from_marketplace_task_lock"
 @shared_task(queue='heavy-inv')
 def manually_download_item_from_marketplace_task(userid, access_token):
-    "manually_download_item_from_marketplace_task skipped: already running"
-    manually_download_item_from_marketplace_syc(userid, access_token)
-    return "Manual inventory download completed successfully"
+    if not cache.add(LOCK_KEY1, "1", timeout=LOCK_TIMEOUT):
+        logger.info("manually_download_item_from_marketplace_task skipped: already running")
+        return "Skipped (already running)"
 
+    logger.info("manually_download_item_from_marketplace_task started")
+
+    try:
+        manually_download_item_from_marketplace_syc(userid, access_token)
+        logger.info("manually_download_item_from_marketplace_task completed successfully")
+        return "Manual inventory download completed successfully"
+    finally:
+        cache.delete(LOCK_KEY1)
 
 
 LOCK_KEY2 = "update_inventory_price_quantity_task_lock"
@@ -49,7 +66,7 @@ def update_inventory_price_quantity_task():
     try:
         update_inventory_price_quantity()
         logger.info("update_inventory_price_quantity_task completed successfully")
-        return "Completed successfully"
+        return "Price and quantity completed successfully"
     finally:
         cache.delete(LOCK_KEY2)
 
@@ -67,7 +84,7 @@ def check_product_ended_status_task():
     try:
         check_product_ended_status()
         logger.info("check_product_ended_status_task completed successfully")
-        return "Completed successfully"
+        return "Item status check completed successfully"
     finally:
         cache.delete(LOCK_KEY3)
 
@@ -85,6 +102,6 @@ def map_marketplace_items_to_vendor_task():
     try:
         map_marketplace_items_to_vendor()
         logger.info("map_marketplace_items_to_vendor_task completed successfully")
-        return "Completed successfully"
+        return "mapping item completed successfully"
     finally:
         cache.delete(LOCK_KEY4)
