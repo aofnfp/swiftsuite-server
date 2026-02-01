@@ -17,74 +17,83 @@ logger = logging.getLogger(__name__)
 
 
 # Function to refresh the access token using the refresh token
-def background_refresh_access_token(userid, market_name):
-    client_id = config("EB_CLIENT_ID")
-    client_secret = config("EB_CLIENT_SECRET")
-    token_url = "https://api.ebay.com/identity/v1/oauth2/token"
-    scopes = [
-            "https://api.ebay.com/oauth/api_scope",
-            "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.marketing",
-            "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.inventory",
-            "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.account",
-            "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
-            "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.finances",
-            "https://api.ebay.com/oauth/api_scope/sell.payment.dispute",
-            "https://api.ebay.com/oauth/api_scope/commerce.identity.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.reputation",
-            "https://api.ebay.com/oauth/api_scope/sell.reputation.readonly",
-            "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription",
-            "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly",
-            "https://api.ebay.com/oauth/api_scope/sell.stores",
-            "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
-        ]
+def background_refresh_access_token():
+    while True:
+        client_id = config("EB_CLIENT_ID")
+        client_secret = config("EB_CLIENT_SECRET")
+        token_url = "https://api.ebay.com/identity/v1/oauth2/token"
+        scopes = [
+                "https://api.ebay.com/oauth/api_scope",
+                "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.marketing",
+                "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.inventory",
+                "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.account",
+                "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
+                "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.finances",
+                "https://api.ebay.com/oauth/api_scope/sell.payment.dispute",
+                "https://api.ebay.com/oauth/api_scope/commerce.identity.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.reputation",
+                "https://api.ebay.com/oauth/api_scope/sell.reputation.readonly",
+                "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription",
+                "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.stores",
+                "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
+            ]
 
 
-    try:
-        connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
-    except Exception as e:
-        return Response(f"Failed to fetch access token", status=status.HTTP_400_BAD_REQUEST)
-    
-    access_token = connection.access_token
-    refresh_token = connection.refresh_token
+        try:
+            user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
+        except Exception as e:
+            return Response(f"Failed to fetch user data {e}", status=status.HTTP_400_BAD_REQUEST)
+        for user in user_data:
+            access_token = user.access_token
+            refresh_token = user.refresh_token
 
-    credentials = f"{client_id}:{client_secret}"
-    credentials_base64 = base64.b64encode(credentials.encode()).decode()
-    
-    headers = {
-        "Authorization": f"Basic {credentials_base64}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    body = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-        "scope": " ".join(scopes)  # Ensure scope is passed correctly
-    }
+            credentials = f"{client_id}:{client_secret}"
+            credentials_base64 = base64.b64encode(credentials.encode()).decode()
+            
+            headers = {
+                "Authorization": f"Basic {credentials_base64}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            body = {
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "scope": " ".join(scopes)  # Ensure scope is passed correctly
+            }
 
-    response = requests.post(token_url, headers=headers, data=body)
-    if response.status_code != 200:
-        return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
+            response = requests.post(token_url, headers=headers, data=body)
+            if response.status_code != 200:
+                return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
 
-    result = response.json()
-    access_token = result.get('access_token')
-    
-    if not access_token:
-        return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
+            result = response.json()
+            access_token = result.get('access_token')
+            
+            if not access_token:
+                return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
-    MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-    return access_token
+            MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
+            logger.info(f"access token: {access_token}")
+        time.sleep(540)
 
+# invoke the function
+background_refresh_access_token()
 
 
 # Function to retrieve all fulfilment orders from Ebay
 def get_product_ordered_from_background(userid, enroll_id):
     # Get access_token
-    access_token = background_refresh_access_token(userid, "Ebay")
-    logger.info(f"access token {access_token}")
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+    except Exception as e:
+        print(f"Failed to fetch access token")
+        return None
+    
+    access_token =  user_data.access_token
     try:
         HEADERS = {
             "Authorization": f"Bearer {access_token}",
@@ -119,15 +128,6 @@ def get_product_ordered_from_background(userid, enroll_id):
                     break
 
                 offset += limit
-
-            else:
-                try:
-                    err = response.json()
-                    if err.get("errors") and err["errors"][0].get("errorId") == 1001:
-                        access_token = eb.refresh_access_token(userid, "Ebay")
-                        get_product_ordered_from_background(userid, enroll_id)
-                except Exception:
-                    return "Error"
             
         return all_orders
 
@@ -248,11 +248,7 @@ def sync_ebay_order_with_local():
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
             ebay_orders = get_product_ordered_from_background(user.user_id, user._id)
-            if ebay_orders == None:
-                # Refresh access token and retry fetching orders
-                print(f"Access token expired for user {user.user_id}, refreshing token.")
-                continue
-            elif ebay_orders == "Error":
+            if ebay_orders == "Error":
                 print(f"Failed to fetch all orders from ebay for user {user.user_id}.")
                 continue
             else:
