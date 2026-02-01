@@ -1,15 +1,10 @@
 from celery import shared_task
 from django.core.cache import cache
 from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc
-from .update_market import check_product_ended_status, update_inventory_price_quantity
+from .update_market import check_product_ended_status, update_inventory_price_quantity, background_refresh_access_token
 import logging
 logger = logging.getLogger(__name__)
-
-# from rest_framework.response import Response
-# from rest_framework import status
-# import base64
-# import requests
-# from decouple import config
+from decouple import config
 from marketplaceApp.models import MarketplaceEnronment
 from marketplaceApp.views import Ebay
 
@@ -108,6 +103,9 @@ LOCK_KEY5 = "refresh_access_token_task_lock"
 @shared_task(queue='heavy-inv')
 def background_refresh_access_token_task():
     eb = Ebay()
+    client_id = config("EB_CLIENT_ID")
+    client_secret = config("EB_CLIENT_SECRET")
+
     if not cache.add(LOCK_KEY5, "1", timeout=LOCK_TIMEOUT5):
         logger.info("refresh_access_token_task skipped: already running")
         return "Skipped (already running)"
@@ -117,7 +115,7 @@ def background_refresh_access_token_task():
     user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
     for user in user_data:
         try:
-            access_token = eb.refresh_access_token(user.user_id, "Ebay")
+            access_token = background_refresh_access_token(user.user_id, "Ebay", client_id, client_secret)
             logger.info(f"refresh_access_token_task completed successfully for user {user.user_id} with access_token: {access_token}")
             return "access token refresh completed successfully"
         except Exception as e:
