@@ -1,5 +1,5 @@
 from inventoryApp.models import InventoryModel
-from .views import Ebay
+# from .views import Ebay
 from .models import MarketplaceEnronment
 import logging
 logger = logging.getLogger(__name__)
@@ -17,11 +17,12 @@ def complete_enrolment_price_update(userid, market_name):
             continue
 
 
-def background_access_token_refresh():
-    eb = Ebay()
-    try:
-        user_token = MarketplaceEnronment.objects.filter(marketplace_name="Ebay") # get all user to get their access_token
-        for user in user_token:
-            access_token = eb.refresh_access_token(user.user_id, "Ebay")
-    except Exception as e:
-        logger.info(f"access token error: {e}")
+# def background_access_token_refresh():
+#     eb = Ebay()
+#     try:
+#         user_token = MarketplaceEnronment.objects.filter(marketplace_name="Ebay") # get all user to get their access_token
+#         for user in user_token:
+#             access_token = eb.refresh_access_token(user.user_id, "Ebay")
+#             logger.info(f"access_token: {access_token}")
+#     except Exception as e:
+#         logger.info(f"access token error: {e}")
