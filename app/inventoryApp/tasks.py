@@ -32,7 +32,7 @@ def download_item_update_market_price_quantity_task():
     try:
         download_item_update_market_price_quantity()
         logger.info("download_item_update_market_price_quantity_task completed successfully")
-        return "Completed successfully"
+        return "Inventory download completed successfully"
     finally:
         cache.delete(LOCK_KEY)
 
@@ -49,9 +49,9 @@ def manually_download_item_from_marketplace_task(userid, access_token):
     try:
         manually_download_item_from_marketplace_syc(userid, access_token)
         logger.info("manually_download_item_from_marketplace_task completed successfully")
-        return "Completed successfully"
+        return "Manual inventory download completed successfully"
     finally:
-        cache.delete(LOCK_KEY)
+        cache.delete(LOCK_KEY1)
 
 
 LOCK_KEY2 = "update_inventory_price_quantity_task_lock"
@@ -66,7 +66,7 @@ def update_inventory_price_quantity_task():
     try:
         update_inventory_price_quantity()
         logger.info("update_inventory_price_quantity_task completed successfully")
-        return "Completed successfully"
+        return "Price and quantity completed successfully"
     finally:
         cache.delete(LOCK_KEY2)
 
@@ -84,7 +84,7 @@ def check_product_ended_status_task():
     try:
         check_product_ended_status()
         logger.info("check_product_ended_status_task completed successfully")
-        return "Completed successfully"
+        return "Item status check completed successfully"
     finally:
         cache.delete(LOCK_KEY3)
 
@@ -102,6 +102,6 @@ def map_marketplace_items_to_vendor_task():
     try:
         map_marketplace_items_to_vendor()
         logger.info("map_marketplace_items_to_vendor_task completed successfully")
-        return "Completed successfully"
+        return "mapping item completed successfully"
     finally:
         cache.delete(LOCK_KEY4)

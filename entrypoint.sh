@@ -122,7 +122,7 @@ case "$1" in
             --queues=heavy-inv \
             --loglevel=info \
             --pool=solo \
-            --concurrency=1 \
+            --concurrency=2 \
     ;;
 
 

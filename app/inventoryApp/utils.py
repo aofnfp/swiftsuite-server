@@ -110,6 +110,12 @@ def get_all_items_on_ebay(enroll_id, access_token):
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
     try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  
+        access_token = user_data.access_token
+    except Exception as e:
+        print(f"Failed to fetch access token {e}")
+        return None
+    try:
         url = "https://api.ebay.com/ws/api.dll"
         headers = {
             "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
@@ -291,6 +297,7 @@ def get_woocommerce_existing_products(user_id):
 # Download all items from all marketplace to local inventory
 def download_item_update_market_price_quantity():
     all_ebay_items = []
+    eb = Ebay()
 
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
@@ -298,15 +305,8 @@ def download_item_update_market_price_quantity():
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            try:
-                eb = Ebay()
-                access_token = eb.refresh_access_token(user.user_id, "Ebay")
-                ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
-
-            except Exception as e:
-                logger.info(f"Ebay inventory download failed with error: {e}")
-                continue
-            
+            access_token = eb.refresh_access_token(user.user_id, "Ebay")
+            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
             logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if ebay_downloaded_items == None:
@@ -336,7 +336,6 @@ def download_item_update_market_price_quantity():
                         InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
-                    logger.info(f"Failed processing and updating price and quantity on eBay item {item.get('ebay_item_id')} with Error: {e}")
                     try:
                         # Get product details from eBay
                         product_details = get_item_details(user._id, item.get("ebay_item_id"))
@@ -407,6 +406,7 @@ def manually_download_item_from_marketplace_syc(userid, access_token):
             if ebay_downloaded_items == None:
                 logger.info(f"Ebay inventory download failed with error: {ebay_downloaded_items}")
                 continue
+            logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # Construct a list of ebay items with relevant details
             for item in ebay_downloaded_items:
                 all_ebay_items.append({"ebay_item_id":item[0], "ebay_sku":item[1], 'Title':item[2], "ebay_price":item[3], "ebay_quantity":item[4], 'ListingDuration':item[5], 'ListingType':item[6], 'PictureDetails':item[7], 'ShippingProfileID':item[8], 'ShippingProfileName':item[9], 'ReturnProfileID':item[10], 'ReturnProfileName':item[11], 'PaymentProfileID':item[12], 'PaymentProfileName':item[13], 'market_item_url':item[14]})
