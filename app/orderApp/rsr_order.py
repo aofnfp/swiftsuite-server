@@ -236,12 +236,12 @@ def check_order_rsr(request, market_name, orderid):
         vendor_order.save()
         
         return JsonResponse(
-            {"message": "RSR order checked successfully", "data": result, "payload": payload},
+            {"message": "RSR order checked successfully", "data": result},
             status=status.HTTP_200_OK
         )
     
     return JsonResponse(
-        {"message": f"Failed to check RSR order", "data": result, "payload": payload},
+        {"message": f"Failed to check RSR order", "data": result},
         status=status.HTTP_400_BAD_REQUEST
     )
     
