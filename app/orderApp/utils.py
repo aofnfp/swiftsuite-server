@@ -80,8 +80,6 @@ def background_refresh_access_token():
             logger.info(f"access token: {access_token}")
         time.sleep(540)
 
-# invoke the function
-background_refresh_access_token()
 
 
 # Function to retrieve all fulfilment orders from Ebay
