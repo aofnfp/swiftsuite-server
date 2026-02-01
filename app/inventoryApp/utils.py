@@ -1,13 +1,8 @@
 import json, requests, time
 from django.utils import timezone
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import get_object_or_404
 from ebaysdk.exception import ConnectionError
 from .models import InventoryModel, UpdateLogModel
 from xml.etree import ElementTree as ET
-from marketplaceApp.views import Ebay
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Generalproducttable, Enrollment
 from marketplaceApp.models import MarketplaceEnronment
 from orderApp.models import OrdersOnEbayModel
@@ -17,7 +12,6 @@ from woocommerce import API
 from django.apps import apps
 import logging
 logger = logging.getLogger(__name__)
-from datetime import datetime, time, timedelta
 
 
 
@@ -203,7 +197,6 @@ def get_all_items_on_ebay(enroll_id, access_token):
 @sleep_and_retry
 @limits(calls=5, period=1)
 def get_item_details(enroll_id, item_id):
-    eb = Ebay()
     """Fetch detailed product information (UPC, EAN, Brand, etc.) using GetItem API."""
     try:
         user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
@@ -230,13 +223,6 @@ def get_item_details(enroll_id, item_id):
         product_data = response.json()
         if response.status_code == 200:
             return product_data
-
-        else:
-            if response.json().get('errors')[0]['errorId'] == 1001:
-                access_token = eb.refresh_access_token(user_data.user_id, "Ebay")
-                get_item_details(enroll_id, item_id)  # return recursion call
-            else:
-                return None
             
     except Exception as e:
         return None
