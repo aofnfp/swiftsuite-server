@@ -78,7 +78,6 @@ def background_refresh_access_token():
 
             MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
             logger.info(f"access token: {access_token}")
-        time.sleep(540)
 
 
 

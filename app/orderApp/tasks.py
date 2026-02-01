@@ -1,11 +1,32 @@
 from django.core.cache import cache
 from celery import shared_task
 from celery.exceptions import Ignore
-from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local
+from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token
 from .models import OrdersOnEbayModel, VendorOrderLog
 from django.db.models import Exists, OuterRef
 import logging
 logger = logging.getLogger(__name__)
+
+
+
+LOCK_KEY = "sync_ebay_order_task_lock"
+LOCK_TIMEOUT = 60 * 30  # 30 minutes adjust based on max runtime
+@shared_task(queue='default')
+def sync_ebay_order_task():
+    # Attempt to acquire lock; skip if already running
+    if not cache.add(LOCK_KEY, "1", timeout=LOCK_TIMEOUT):
+        logger.info("sync_ebay_order_task skipped: already running")
+        return "Skipped (already running)"
+
+    logger.info("sync_ebay_order_task started")
+    try:
+        # Call your existing sync logic
+        sync_ebay_order_with_local()
+        logger.info("sync_ebay_order_task completed successfully")
+        return "Completed successfully"
+    finally:
+        # Always release the lock
+        cache.delete(LOCK_KEY)
 
 
 
@@ -29,24 +50,24 @@ def manual_sync_order_with_local_task(userid):
         cache.delete(LOCK_KEY)
 
 
-LOCK_KEY = "sync_ebay_order_task_lock"
-LOCK_TIMEOUT = 60 * 30  # 30 minutes adjust based on max runtime
-@shared_task(queue='default')
-def sync_ebay_order_task():
+LOCK_KEY2 = "background_refresh_access_token_lock"
+LOCK_TIMEOUT2 = 60 * 10  # 10 minutes adjust based on max runtime
+@shared_task(queue='heavy-inv')
+def background_refresh_access_token_task():
     # Attempt to acquire lock; skip if already running
-    if not cache.add(LOCK_KEY, "1", timeout=LOCK_TIMEOUT):
-        logger.info("sync_ebay_order_task skipped: already running")
+    if not cache.add(LOCK_KEY2, "1", timeout=LOCK_TIMEOUT2):
+        logger.info("background_refresh_access_token_task skipped: already running")
         return "Skipped (already running)"
 
-    logger.info("sync_ebay_order_task started")
+    logger.info("background_refresh_access_token_task started")
     try:
         # Call your existing sync logic
-        sync_ebay_order_with_local()
-        logger.info("sync_ebay_order_task completed successfully")
-        return "Completed successfully"
+        background_refresh_access_token()
+        logger.info("background_refresh_access_token_task completed successfully")
+        return "Refresh access token completed successfully"
     finally:
         # Always release the lock
-        cache.delete(LOCK_KEY)
+        cache.delete(LOCK_KEY2)
 
 
 @shared_task(queue='default')
