@@ -6,11 +6,11 @@ from celery.exceptions import Ignore
 from .util import complete_enrolment_price_update#, background_access_token_refresh
 
 
-# @shared_task(queue='default')
-# def complete_enrolment_price_update_task(userid, market_name):
-#     """Background task to check if eBay items have ended"""
-#     complete_enrolment_price_update(userid, market_name)
-#     return "Complete enrolment price update task finished successfully."
+@shared_task(queue='default')
+def complete_enrolment_price_update_task(userid, market_name):
+    """Background task to check if eBay items have ended"""
+    complete_enrolment_price_update(userid, market_name)
+    return "Complete enrolment price update task finished successfully."
 
 
 # LOCK_TIMEOUT = 60 * 10
