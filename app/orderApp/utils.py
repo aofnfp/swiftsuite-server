@@ -18,66 +18,63 @@ logger = logging.getLogger(__name__)
 
 # Function to refresh the access token using the refresh token
 def background_refresh_access_token():
-    while True:
-        client_id = config("EB_CLIENT_ID")
-        client_secret = config("EB_CLIENT_SECRET")
-        token_url = "https://api.ebay.com/identity/v1/oauth2/token"
-        scopes = [
-                "https://api.ebay.com/oauth/api_scope",
-                "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.marketing",
-                "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.inventory",
-                "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.account",
-                "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
-                "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.finances",
-                "https://api.ebay.com/oauth/api_scope/sell.payment.dispute",
-                "https://api.ebay.com/oauth/api_scope/commerce.identity.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.reputation",
-                "https://api.ebay.com/oauth/api_scope/sell.reputation.readonly",
-                "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription",
-                "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly",
-                "https://api.ebay.com/oauth/api_scope/sell.stores",
-                "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
-            ]
+    client_id = config("EB_CLIENT_ID")
+    client_secret = config("EB_CLIENT_SECRET")
+    token_url = "https://api.ebay.com/identity/v1/oauth2/token"
+    scopes = [
+            "https://api.ebay.com/oauth/api_scope",
+            "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.marketing",
+            "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.inventory",
+            "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.account",
+            "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
+            "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.finances",
+            "https://api.ebay.com/oauth/api_scope/sell.payment.dispute",
+            "https://api.ebay.com/oauth/api_scope/commerce.identity.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.reputation",
+            "https://api.ebay.com/oauth/api_scope/sell.reputation.readonly",
+            "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription",
+            "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly",
+            "https://api.ebay.com/oauth/api_scope/sell.stores",
+            "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
+        ]
+    try:
+        user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
+    except Exception as e:
+        return Response(f"Failed to fetch user data {e}", status=status.HTTP_400_BAD_REQUEST)
+    for user in user_data:
+        access_token = user.access_token
+        refresh_token = user.refresh_token
 
+        credentials = f"{client_id}:{client_secret}"
+        credentials_base64 = base64.b64encode(credentials.encode()).decode()
+        
+        headers = {
+            "Authorization": f"Basic {credentials_base64}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        body = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "scope": " ".join(scopes)  # Ensure scope is passed correctly
+        }
 
-        try:
-            user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
-        except Exception as e:
-            return Response(f"Failed to fetch user data {e}", status=status.HTTP_400_BAD_REQUEST)
-        for user in user_data:
-            access_token = user.access_token
-            refresh_token = user.refresh_token
+        response = requests.post(token_url, headers=headers, data=body)
+        if response.status_code != 200:
+            return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
 
-            credentials = f"{client_id}:{client_secret}"
-            credentials_base64 = base64.b64encode(credentials.encode()).decode()
-            
-            headers = {
-                "Authorization": f"Basic {credentials_base64}",
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            body = {
-                "grant_type": "refresh_token",
-                "refresh_token": refresh_token,
-                "scope": " ".join(scopes)  # Ensure scope is passed correctly
-            }
+        result = response.json()
+        access_token = result.get('access_token')
+        
+        if not access_token:
+            return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
-            response = requests.post(token_url, headers=headers, data=body)
-            if response.status_code != 200:
-                return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
-
-            result = response.json()
-            access_token = result.get('access_token')
-            
-            if not access_token:
-                return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
-
-            MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
-            logger.info(f"access token: {access_token}")
+        MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
+        logger.info(f"access token: {access_token}")
 
 
 
