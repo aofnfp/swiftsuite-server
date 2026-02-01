@@ -1,5 +1,4 @@
 from inventoryApp.models import InventoryModel
-from .views import Ebay
 from .models import MarketplaceEnronment
 import logging
 logger = logging.getLogger(__name__)
