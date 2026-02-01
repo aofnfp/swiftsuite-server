@@ -1,4 +1,8 @@
 from inventoryApp.models import InventoryModel
+from .views import Ebay
+from .models import MarketplaceEnronment
+import logging
+logger = logging.getLogger(__name__)
 
 def complete_enrolment_price_update(userid, market_name):    
     all_items = InventoryModel.objects.filter(user_id=userid, market_name=market_name)
@@ -11,3 +15,13 @@ def complete_enrolment_price_update(userid, market_name):
         except Exception as e:
             print(f"Failed to update items selling price: {e}")
             continue
+
+
+def background_access_token_refresh():
+    eb = Ebay()
+    try:
+        user_token = MarketplaceEnronment.objects.filter(marketplace_name="Ebay") # get all user to get their access_token
+        for user in user_token:
+            access_token = eb.refresh_access_token(user.user_id, "Ebay")
+    except Exception as e:
+        logger.info(f"access token error: {e}")
