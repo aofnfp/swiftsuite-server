@@ -2,6 +2,7 @@ from celery import shared_task
 from django.core.cache import cache
 from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc
 from .update_market import check_product_ended_status, update_inventory_price_quantity
+from .views import General_operations 
 import logging
 logger = logging.getLogger(__name__)
 from celery.exceptions import Ignore
@@ -18,7 +19,7 @@ from django.utils import timezone
 from marketplaceApp.views import Ebay
 
 
-LOCK_TIMEOUT = 60 * 120  # 2 hours
+LOCK_TIMEOUT = 60 * 180  # 3 hours
 
 LOCK_KEY = "download_update_marketplace_items_task_lock"
 @shared_task(queue='heavy-inv')
@@ -105,3 +106,23 @@ def map_marketplace_items_to_vendor_task():
         return "mapping item completed successfully"
     finally:
         cache.delete(LOCK_KEY4)
+
+
+
+LOCK_TIMEOUT2 = 60 * 10
+LOCK_KEY5 = "refresh_access_token_task_lock"
+@shared_task(queue='heavy-inv')
+def refresh_access_token_task():
+    go = General_operations()
+    if not cache.add(LOCK_KEY5, "1", timeout=LOCK_TIMEOUT2):
+        logger.info("refresh_access_token_task skipped: already running")
+        return "Skipped (already running)"
+
+    logger.info("refresh_access_token_task started")
+
+    try:
+        go.background_access_token_refresh()
+        logger.info("refresh_access_token_task completed successfully")
+        return "access token refresh completed successfully"
+    finally:
+        cache.delete(LOCK_KEY5)

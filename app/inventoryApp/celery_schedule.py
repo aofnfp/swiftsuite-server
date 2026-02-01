@@ -19,6 +19,10 @@ APP_CELERY_BEAT_SCHEDULE = {
         "task": "inventoryApp.tasks.map_marketplace_items_to_vendor_task",
         "schedule": crontab(hour="*/2"),
     },
+    "refresh_access_token_task_10_minutes": {
+        "task": "inventoryApp.tasks.refresh_access_token_task",
+        "schedule": crontab(minute="*/10"),
+    },
 }
 
 
