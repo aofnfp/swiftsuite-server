@@ -2,7 +2,7 @@ from celery import shared_task
 from django.core.cache import cache
 from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc
 from .update_market import check_product_ended_status, update_inventory_price_quantity
-from .views import background_access_token_refresh
+from inventoryApp.views import background_access_token_refresh
 import logging
 logger = logging.getLogger(__name__)
 from celery.exceptions import Ignore
