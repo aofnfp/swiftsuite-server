@@ -31,6 +31,16 @@ logger = logging.getLogger(__name__)
 from .tasks import manually_download_item_from_marketplace_task
 
 
+def background_access_token_refresh():
+    eb = Ebay()
+    try:
+        user_token = MarketplaceEnronment.objects.filter(marketplace_name="Ebay") # get all user to get their access_token
+        for user in user_token:
+            access_token = eb.refresh_access_token(user.user_id, "Ebay")
+    except Exception as e:
+        logger.info(f"access token error: {e}")
+
+
 # Function to update product across marketplaces
 @with_module('inventory')
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -358,16 +368,6 @@ class General_operations:
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)
-
-
-    def background_access_token_refresh(self):
-        eb = Ebay()
-        try:
-            user_token = MarketplaceEnronment.objects.filter(marketplace_name="Ebay") # get all user to get their access_token
-            for user in user_token:
-                access_token = eb.refresh_access_token(user.user_id, "Ebay")
-        except Exception as e:
-            logger.info(f"access token error: {e}")
             
 
 
