@@ -468,7 +468,7 @@ def create_vendor_order_log(order: OrdersOnEbayModel):
         # Logic to create new if strictly not exists
         enrollment = get_vendor_enrollment(order.marketItemId)
         if not enrollment:
-            logger.error(f"Enrollment not found for order with marketItemId {order.marketItemId}.")
+            logger.error(f"Enrollment not found for order-{order.orderId} with marketItemId {order.marketItemId}.")
             return None
         
         order_log = VendorOrderLog.objects.create(

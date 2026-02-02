@@ -107,7 +107,7 @@ def process_vendor_orders():
             dispatch_order.delay(order_log.id)
         else:
             logger.info(
-                f"Skipped VendorOrderLog creation for order {order.id} "
+                f"Skipped VendorOrderLog creation for order {order.orderId} "
                 f"(already has active vendor order)"
             )
             
@@ -117,9 +117,16 @@ def process_vendor_orders():
 @shared_task(queue='heavy-cpu')
 def dispatch_order(vendor_order_log_id: int):
     """Function to dispatch order to vendor"""
+
     try:
         vendor_order_log = VendorOrderLog.objects.get(id=vendor_order_log_id)
         vendor_name = vendor_order_log.vendor.lower()
+        
+        logger.info(
+            f"Dispatching VendorOrderLog={vendor_order_log_id} "
+            f"to vendor={vendor_name}"
+        )
+
         if vendor_name == 'fragrancex':
             from .fragranceX_order import FrgxOrderApiClient
             client = FrgxOrderApiClient(vendor_order_log)
@@ -162,9 +169,6 @@ def dispatch_order(vendor_order_log_id: int):
                 vendor_order_log.save()
 
                 logger.error(f"Failed to place order {vendor_order_log.id} with RSR. Error: {result.get('StatusMssg')}")
-
-
-        logger.info(f"Dispatching order {vendor_order_log.id} to vendor {vendor_order_log.vendor}.")
         
     except VendorOrderLog.DoesNotExist:
         logger.error(f"VendorOrderLog with id {vendor_order_log_id} does not exist.")
