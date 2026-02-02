@@ -110,3 +110,11 @@ class VendorOrderLog(models.Model):
 
     def __str__(self):
         return f"{self.vendor} | {self.order_id} | {self.status}"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["order", "vendor"],
+                name="unique_order_vendor"
+            )
+        ]

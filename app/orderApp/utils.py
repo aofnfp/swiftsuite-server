@@ -12,6 +12,7 @@ import base64
 import requests
 from decouple import config
 import logging
+from django.db import transaction
 logger = logging.getLogger(__name__)
 
 
@@ -439,26 +440,45 @@ def get_ebay_order_details(user_id, market_name, ebay_order_id):
     
     
 def create_vendor_order_log(order: OrdersOnEbayModel):
-    
-    if VendorOrderLog.objects.filter(
-        order=order,
-        vendor=order.vendor_name,
-    ).exclude(status=VendorOrderLog.VendorOrderStatus.FAILED).exists():
-        return
+    with transaction.atomic():
+        # Lock the order to serialize attempts for this specific order
+        # (Assuming you don't need to modify 'order' itself, but just want to lock)
+        # We lock the order row to ensure no other process is creating a log for this order simultaneously.
+        _ = OrdersOnEbayModel.objects.select_for_update().get(pk=order.pk)
 
-    enrollment = get_vendor_enrollment(order.marketItemId)
-    if not enrollment:
-        logger.error(f"Enrollment not found for order with marketItemId {order.marketItemId}.")
-        return
-    
-    order_log = VendorOrderLog.objects.create(
-        order=order,
-        enrollment=enrollment,
-        vendor=order.vendor_name,
-        status=VendorOrderLog.VendorOrderStatus.CREATED,
-    )
-    
-    return order_log  
+        # Check for ANY existing log for this order+vendor
+        existing_log = VendorOrderLog.objects.filter(
+            order=order,
+            vendor=order.vendor_name,
+        ).first()
+
+        if existing_log:
+            # If it failed previously, we can retry by resetting it
+            if existing_log.status == VendorOrderLog.VendorOrderStatus.FAILED:
+                existing_log.status = VendorOrderLog.VendorOrderStatus.CREATED
+                existing_log.error_message = None
+                existing_log.raw_response = None
+                existing_log.save()
+                return existing_log
+            else:
+                # It's already active (CREATED, PROCESSING, SHIPPED, DELIVERED)
+                # so we do nothing and return None to signal "no new work needed"
+                return None
+
+        # Logic to create new if strictly not exists
+        enrollment = get_vendor_enrollment(order.marketItemId)
+        if not enrollment:
+            logger.error(f"Enrollment not found for order with marketItemId {order.marketItemId}.")
+            return None
+        
+        order_log = VendorOrderLog.objects.create(
+            order=order,
+            enrollment=enrollment,
+            vendor=order.vendor_name,
+            status=VendorOrderLog.VendorOrderStatus.CREATED,
+        )
+        
+        return order_log  
 
 
 def get_vendor_enrollment(marketItemId):

@@ -4,6 +4,8 @@ from celery.exceptions import Ignore
 from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token
 from .models import OrdersOnEbayModel, VendorOrderLog
 from django.db.models import Exists, OuterRef
+from django.utils import timezone
+from datetime import timedelta
 import logging
 logger = logging.getLogger(__name__)
 
@@ -70,13 +72,15 @@ def background_refresh_access_token_task():
         cache.delete(LOCK_KEY2)
 
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-cpu')
 def process_vendor_orders():
     """Function to process vendor orders"""
+    cutoff_date = timezone.now() - timedelta(days=2)
     ACTIVE_STATUSES = [
         VendorOrderLog.VendorOrderStatus.CREATED,
         VendorOrderLog.VendorOrderStatus.PROCESSING,
         VendorOrderLog.VendorOrderStatus.SHIPPED,
+        VendorOrderLog.VendorOrderStatus.DELIVERED,
     ]
 
     active_vendor_orders = VendorOrderLog.objects.filter(
@@ -87,6 +91,7 @@ def process_vendor_orders():
     orders = (
         OrdersOnEbayModel.objects
         .filter(
+            creationDate__gte=cutoff_date,
             orderPaymentStatus="PAID",
             orderFulfillmentStatus="NOT_STARTED",
         )
@@ -101,12 +106,15 @@ def process_vendor_orders():
         if order_log:
             dispatch_order.delay(order_log.id)
         else:
-            logger.error(f"Failed to create VendorOrderLog for order {order.id}.")
+            logger.info(
+                f"Skipped VendorOrderLog creation for order {order.id} "
+                f"(already has active vendor order)"
+            )
             
     logger.info("order log entries created for vendor orders and dispatched.")
         
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-cpu')
 def dispatch_order(vendor_order_log_id: int):
     """Function to dispatch order to vendor"""
     try:
@@ -138,16 +146,18 @@ def dispatch_order(vendor_order_log_id: int):
             order_details = client.get_order_details()
             payload = client.build_payload(order_details)
             result = client.place_order(payload)
-            if result.get("StatusCode") == 0:
+            if result.get("StatusCode") == "00":
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
-                vendor_order_log.vendor_order_id = result.get("OrderNum") or vendor_order_log.reference_id
+                vendor_order_log.vendor_order_id = (
+                    result.get("ConfirmResp") or result.get("WebRef")
+                )
                 vendor_order_log.raw_response = result
                 vendor_order_log.save()
 
                 logger.info(f"Order {vendor_order_log.id} placed successfully with RSR.")
             else:
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.FAILED
-                vendor_order_log.error_message = result.get("StatusMssg")
+                vendor_order_log.error_message = result.get("StatusMssg", "RSR order failed")
                 vendor_order_log.raw_response = result
                 vendor_order_log.save()
 
@@ -157,4 +167,4 @@ def dispatch_order(vendor_order_log_id: int):
         logger.info(f"Dispatching order {vendor_order_log.id} to vendor {vendor_order_log.vendor}.")
         
     except VendorOrderLog.DoesNotExist:
-        logger.error(f"VendorOrderLog with id {vendor_order_log.id} does not exist.")
+        logger.error(f"VendorOrderLog with id {vendor_order_log_id} does not exist.")
