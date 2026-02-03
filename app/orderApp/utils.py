@@ -535,11 +535,11 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     logger.info(f"Preparing to push tracking for order {vendor_order_log.order.orderId}")
     
     # 1. Validate data availability
-    if not vendor_order_log.tracking_number or not vendor_order_log.carrier or not vendor_order_log.shipped_at:
-        logger.warning(
-            f"Missing tracking info for VendorOrderLog {vendor_order_log.id}. Cannot push to eBay."
-        )
-        return False
+    # if not vendor_order_log.tracking_number or not vendor_order_log.carrier or not vendor_order_log.shipped_at:
+    #     logger.warning(
+    #         f"Missing tracking info for VendorOrderLog {vendor_order_log.id}. Cannot push to eBay."
+    #     )
+    #     return False
 
     user_id = vendor_order_log.enrollment.user.id
     ebay_order_id = vendor_order_log.order.orderId
