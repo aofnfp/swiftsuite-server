@@ -37,13 +37,33 @@ class RsrOrderApiClient:
             order.orderId
         )
     
-    def validate_storename(self, storename):
-        first, last = storename.split(" ")
+    def validate_storename(self, storename: str) -> str:
+        if not storename:
+            return "Store Name"
+
+        # Normalize
+        parts = storename.strip().split()
+
+        # Remove common business suffixes
+        suffixes = {"llc", "ltd", "inc", "plc", "corp", "co"}
+        parts = [p for p in parts if p.lower().strip(".") not in suffixes]
+
+        if not parts:
+            return "Store Name"
+
+        # Ensure at least 2 tokens
+        if len(parts) == 1:
+            return f"{parts[0]} {parts[0]}"
+
+        first, second = parts[0], parts[1]
+
         if len(first) < 2:
-            first = last
-        elif len(last) < 2:
-            last = first
-        return f"{first} {last}"
+            first = second
+        if len(second) < 2:
+            second = first
+
+        return f"{first} {second}"
+
 
     def build_payload(self, order_details):
         if not self.vendor_order_log.reference_id:
