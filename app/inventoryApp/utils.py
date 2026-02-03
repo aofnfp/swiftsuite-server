@@ -51,6 +51,17 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                     <ItemID>{item_id}</ItemID>
                     <StartPrice>{price,}</StartPrice>
                     <Quantity>{quantity}</Quantity>
+                    <SellerProfiles>
+                        <SellerPaymentProfile>
+                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                        </SellerPaymentProfile>
+                        <SellerReturnProfile>
+                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                        </SellerReturnProfile>
+                        <SellerShippingProfile>
+                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                        </SellerShippingProfile>
+                    </SellerProfiles>
                 </Item>
             </ReviseItemRequest>
             """
@@ -64,6 +75,17 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 <Item>
                     <ItemID>{item_id}</ItemID>
                     <StartPrice>{price}</StartPrice>
+                    <SellerProfiles>
+                        <SellerPaymentProfile>
+                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                        </SellerPaymentProfile>
+                        <SellerReturnProfile>
+                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                        </SellerReturnProfile>
+                        <SellerShippingProfile>
+                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                        </SellerShippingProfile>
+                    </SellerProfiles>
                 </Item>
             </ReviseItemRequest>
             """
@@ -77,6 +99,17 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 <Item>
                     <ItemID>{item_id}</ItemID>
                     <Quantity>{quantity}</Quantity>
+                    <SellerProfiles>
+                        <SellerPaymentProfile>
+                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                        </SellerPaymentProfile>
+                        <SellerReturnProfile>
+                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                        </SellerReturnProfile>
+                        <SellerShippingProfile>
+                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                        </SellerShippingProfile>
+                    </SellerProfiles>
                 </Item>
             </ReviseItemRequest>
             """
