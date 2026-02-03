@@ -38,7 +38,7 @@ class FrgxOrderApiClient:
     def build_bulk_payload(self, order_details):
 
         if not self.VendorOrder.reference_id:
-            self.VendorOrder.reference_id = self.generate_reference(self.VendorOrder.order.orderId)
+            self.VendorOrder.reference_id = self.VendorOrder.order.orderId
             self.VendorOrder.save(
                 update_fields=['reference_id']
             )
