@@ -12,7 +12,7 @@ from .models import OrdersOnEbayModel
 from .utils import get_vendor_enrollment
 import logging
 from django.db import transaction
-from django.utils.dateparse import parse_datetime
+from datetime import datetime
 from django.utils.timezone import make_aware
 
 
@@ -149,7 +149,7 @@ class RsrOrderApiClient:
         return f"SW-RSR-{order_id}-{unique_suffix}"
 
     def parse_date(self, date_str):
-        shipping_date = parse_datetime(date_str)
+        shipping_date = datetime.strptime(date_str, "%Y%m%d")
         if shipping_date:
             shipping_date = make_aware(shipping_date)
         return shipping_date
@@ -273,8 +273,8 @@ def check_order_rsr(request, market_name, orderid):
             is_shipped = False
 
         for item in items:
-            date_shipped = str(item.get("DateShipped", ""))
-            tracking_num = str(item.get("TrackingNum", ""))
+            date_shipped = str(item.get("DateShipped", "")).strip(", ")
+            tracking_num = str(item.get("TrackingNum", "")).strip(", ")
             
             # Check for "Pending" or empty values which indicate not shipped
             if "Pending" in date_shipped or "Pending" in tracking_num:
