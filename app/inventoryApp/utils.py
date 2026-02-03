@@ -124,7 +124,7 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
             return update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id)
         # Check the response
         if response.status_code == 200:
-            return f"Success"
+            return f"Success:{response.text}"
         else:
             return f"Error:{response.text}"
     except ConnectionError as e:
@@ -446,11 +446,12 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
                     # Update the price and quantity of product on Ebay
                     if existing_item.start_price != item.get("ebay_price") or existing_item.quantity != item.get("ebay_quantity"):
                         response = update_items_quantity_or_price_on_ebay(userid, item.get("ebay_item_id"), existing_item.start_price, existing_item.quantity, user._id)
-                        if response == "Success":
+                        if  "Success" in response:
+                            logger.info(f"Successfully updated eBay item price {existing_item.start_price}, quantity {existing_item.quantity} for item {item.get('ebay_item_id')} with response: {response}")
                             item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=userid, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_item=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
                             InventoryModel.objects.filter(user_id=userid, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
                         else:
-                            logger.info(f"Failed to update price and quantity on eBay item {item.get('ebay_item_id')} with response: {response}")
+                            logger.info(f"Failed to update price {existing_item.start_price}, quantity {existing_item.quantity} on eBay item {item.get('ebay_item_id')} with response: {response}")
                     else:
                         InventoryModel.objects.filter(user_id=userid, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
 

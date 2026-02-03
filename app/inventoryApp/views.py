@@ -711,8 +711,8 @@ class MarketInventory:
                     </RequesterCredentials>
                     <Item>
                         <ItemID>{item_id}</ItemID>
-                        <StartPrice>32.03</StartPrice>
-                        <Quantity>8</Quantity>
+                        <StartPrice>25.30</StartPrice>
+                        <Quantity>29</Quantity>
                         <SellerProfiles>
                             <SellerPaymentProfile>
                                 <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -726,7 +726,7 @@ class MarketInventory:
                         </SellerProfiles>
                     </Item>
                 </ReviseItemRequest>
-                """ #25.30
+                """ 
             elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
                 body = f"""
                 <?xml version="1.0" encoding="utf-8"?>
@@ -736,7 +736,7 @@ class MarketInventory:
                     </RequesterCredentials>
                     <Item>
                         <ItemID>{item_id}</ItemID>
-                        <StartPrice>32.03</StartPrice>
+                        <StartPrice>25.30</StartPrice>
                         <SellerProfiles>
                             <SellerPaymentProfile>
                                 <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -760,7 +760,7 @@ class MarketInventory:
                     </RequesterCredentials>
                     <Item>
                         <ItemID>{item_id}</ItemID>
-                        <Quantity>8</Quantity>
+                        <Quantity>29</Quantity>
                         <SellerProfiles>
                             <SellerPaymentProfile>
                                 <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
