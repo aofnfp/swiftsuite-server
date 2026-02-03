@@ -36,6 +36,14 @@ class RsrOrderApiClient:
             order.market_name.capitalize(),
             order.orderId
         )
+    
+    def validate_storename(self, storename):
+        first, last = storename.split(" ")
+        if len(first) < 2:
+            first = last
+        elif len(last) < 2:
+            last = first
+        return f"{first} {last}"
 
     def build_payload(self, order_details):
         if not self.vendor_order_log.reference_id:
@@ -58,7 +66,7 @@ class RsrOrderApiClient:
         payload = {
             "Username": self.username,
             "Password": self.password,
-            "Storename": sellerId,
+            "Storename": self.validate_storename(sellerId),
             "ShipAddress": address.get("addressLine1"),
             "ShipCity": address.get("city"),
             "ShipState": address.get("stateOrProvince"),
