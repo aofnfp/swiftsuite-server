@@ -701,32 +701,82 @@ class MarketInventory:
                 'Content-Type': 'text/xml',
                 'Authorization': f'Bearer {access_token}'
             }
-
             # XML Body for ReviseItem request
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>137.89</StartPrice> 
-                    <Quantity>500</Quantity>
-                    <SellerProfiles>
-                        <SellerPaymentProfile>
-                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                        </SellerPaymentProfile>
-                        <SellerReturnProfile>
-                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                        </SellerReturnProfile>
-                        <SellerShippingProfile>
-                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                        </SellerShippingProfile>
-                    </SellerProfiles>
-                </Item>
-            </ReviseItemRequest>
-            """
+            if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
+                body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <Item>
+                        <ItemID>{item_id}</ItemID>
+                        <StartPrice>32.03</StartPrice>
+                        <Quantity>8</Quantity>
+                        <SellerProfiles>
+                            <SellerPaymentProfile>
+                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                            </SellerPaymentProfile>
+                            <SellerReturnProfile>
+                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                            </SellerReturnProfile>
+                            <SellerShippingProfile>
+                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                            </SellerShippingProfile>
+                        </SellerProfiles>
+                    </Item>
+                </ReviseItemRequest>
+                """ #25.30
+            elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
+                body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <Item>
+                        <ItemID>{item_id}</ItemID>
+                        <StartPrice>32.03</StartPrice>
+                        <SellerProfiles>
+                            <SellerPaymentProfile>
+                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                            </SellerPaymentProfile>
+                            <SellerReturnProfile>
+                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                            </SellerReturnProfile>
+                            <SellerShippingProfile>
+                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                            </SellerShippingProfile>
+                        </SellerProfiles>
+                    </Item>
+                </ReviseItemRequest>
+                """
+            elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
+                body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <Item>
+                        <ItemID>{item_id}</ItemID>
+                        <Quantity>8</Quantity>
+                        <SellerProfiles>
+                            <SellerPaymentProfile>
+                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                            </SellerPaymentProfile>
+                            <SellerReturnProfile>
+                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                            </SellerReturnProfile>
+                            <SellerShippingProfile>
+                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                            </SellerShippingProfile>
+                        </SellerProfiles>
+                    </Item>
+                </ReviseItemRequest>
+                """
+            else:
+                return None
             # Make the POST request
             response = requests.post(url, headers=headers, data=body)
             # Check the response
