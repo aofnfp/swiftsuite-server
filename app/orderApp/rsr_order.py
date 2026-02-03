@@ -12,6 +12,8 @@ from .models import OrdersOnEbayModel
 from .utils import get_vendor_enrollment
 import logging
 from django.db import transaction
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
 
 
 logger = logging.getLogger(__name__)
@@ -146,6 +148,12 @@ class RsrOrderApiClient:
         unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-RSR-{order_id}-{unique_suffix}"
 
+    def parse_date(self, date_str):
+        shipping_date = parse_datetime(date_str)
+        if shipping_date:
+            shipping_date = make_aware(shipping_date)
+        return shipping_date
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -276,7 +284,7 @@ def check_order_rsr(request, market_name, orderid):
         if is_shipped:
             vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
             vendor_order.tracking_number = tracking_num
-            vendor_order.shipped_at = date_shipped
+            vendor_order.shipped_at = rsr_client.parse_date(date_shipped)
             vendor_order.save()
         else:
             vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
