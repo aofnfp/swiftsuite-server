@@ -511,9 +511,16 @@ def get_vendor_enrollment(marketItemId):
 
 
 
-def get_order_details_by_order_id(access_token, order_id):
-        EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
-        headers = {
+def get_order_details_by_order_id(user_id, market_name, order_id):
+
+    from marketplaceApp.views import Ebay
+    ebay = Ebay()
+    
+    # Get access_token
+    access_token = ebay.refresh_access_token(user_id, market_name)
+    
+    EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
+    headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -556,7 +563,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         return False
         
     access_token = env.access_token
-    order_details = get_order_details_by_order_id(access_token, ebay_order_id)
+    order_details = get_order_details_by_order_id(user_id, "Ebay", ebay_order_id)
     if not order_details:
         logger.error(f"Failed to get order details for order {ebay_order_id}")
         return False
