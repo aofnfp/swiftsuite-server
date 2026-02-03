@@ -690,14 +690,42 @@ class MarketInventory:
         
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:
-            pass
-             
+            # eBay Trading API endpoint
+            url = 'https://api.ebay.com/ws/api.dll'
+
+            headers = {
+                'X-EBAY-API-CALL-NAME': 'ReviseItem',
+                'X-EBAY-API-SITEID': '0',
+                'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',
+                'Content-Type': 'text/xml',
+                'Authorization': f'Bearer {access_token}'
+            }
+
+            # XML Body for ReviseItem request
+            body = f"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Item>
+                    <ItemID>{item_id}</ItemID>
+                    <StartPrice>234.23</StartPrice> 
+                    <Quantity>8</Quantity>
+                </Item>
+            </ReviseItemRequest>
+            """#137.89
+            # Make the POST request
+            response = requests.post(url, headers=headers, data=body)
+            # Check the response
+            if response.status_code == 200:
+                return Response(f"Item updated successfully {response.text}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
             return Response(f"Failed to download items. {ea}", status=status.HTTP_400_BAD_REQUEST)
         
-        return Response(f"Total items: ", status=status.HTTP_200_OK)
+
 
         
 class WooCommerceInventory:
