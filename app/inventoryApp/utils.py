@@ -49,8 +49,8 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 </RequesterCredentials>
                 <Item>
                     <ItemID>{item_id}</ItemID>
-                    <StartPrice>{price,}</StartPrice>
-                    <Quantity>{quantity}</Quantity>
+                    <StartPrice>{str(price)}</StartPrice>
+                    <Quantity>{str(quantity)}</Quantity>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -74,7 +74,7 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 </RequesterCredentials>
                 <Item>
                     <ItemID>{item_id}</ItemID>
-                    <StartPrice>{price}</StartPrice>
+                    <StartPrice>{str(price)}</StartPrice>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -98,7 +98,7 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 </RequesterCredentials>
                 <Item>
                     <ItemID>{item_id}</ItemID>
-                    <Quantity>{quantity}</Quantity>
+                    <Quantity>{str(quantity)}</Quantity>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
