@@ -689,6 +689,7 @@ class MarketInventory:
                 userid = user.parent_id
         
         access_token = eb.refresh_access_token(userid, "Ebay")
+        user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
         try:
             # eBay Trading API endpoint
             url = 'https://api.ebay.com/ws/api.dll'
@@ -712,6 +713,17 @@ class MarketInventory:
                     <ItemID>{item_id}</ItemID>
                     <StartPrice>234.23</StartPrice> 
                     <Quantity>8</Quantity>
+                    <SellerProfiles>
+                        <SellerPaymentProfile>
+                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                        </SellerPaymentProfile>
+                        <SellerReturnProfile>
+                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                        </SellerReturnProfile>
+                        <SellerShippingProfile>
+                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                        </SellerShippingProfile>
+                    </SellerProfiles>
                 </Item>
             </ReviseItemRequest>
             """#137.89
