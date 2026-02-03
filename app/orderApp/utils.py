@@ -510,6 +510,23 @@ def get_vendor_enrollment(marketItemId):
     return inventory.product.enrollment
 
 
+
+def get_order_details_by_order_id(self, access_token, order_id):
+        EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        response = requests.get(EBAY_ORDER_DETAILS_URL, headers=headers)
+        
+        if response.status_code == 200:
+            order_details = response.json()
+            return order_details
+        else:
+            return None
+
+
 def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     """
     Push tracking information from a VendorOrderLog to eBay.
@@ -539,6 +556,16 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         return False
         
     access_token = env.access_token
+    order_details = get_order_details_by_order_id(access_token, ebay_order_id)
+    if not order_details:
+        logger.error(f"Failed to get order details for order {ebay_order_id}")
+        return False
+
+    line_item_id = order_details['lineItems'][0]['lineItemId']
+    if not line_item_id:
+        logger.error(f"Failed to get line item id for order {ebay_order_id}")
+        return False
+
 
     url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}/shipping_fulfillment'
 
@@ -553,7 +580,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         "trackingNumber": vendor_order_log.tracking_number,
         "lineItems": [
             {
-                "lineItemId": vendor_order_log.order.lineItemId
+                "lineItemId": line_item_id
             }
         ]
     }
