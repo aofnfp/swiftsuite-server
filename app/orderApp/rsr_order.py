@@ -275,10 +275,12 @@ def check_order_rsr(request, market_name, orderid):
         
         if is_shipped:
             vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
+            vendor_order.tracking_number = tracking_num
+            vendor_order.shipped_at = date_shipped
+            vendor_order.save()
         else:
             vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
-            
-        vendor_order.save()
+            vendor_order.save()
         
         return JsonResponse(
             {"message": "RSR order checked successfully", "data": result},
