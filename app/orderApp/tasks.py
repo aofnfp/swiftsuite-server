@@ -174,3 +174,32 @@ def dispatch_order(vendor_order_log_id: int):
         
     except VendorOrderLog.DoesNotExist:
         logger.error(f"VendorOrderLog with id {vendor_order_log_id} does not exist.")
+
+
+@shared_task(queue='default')
+def check_rsr_order_status():
+    """Background task to check status of processing RSR orders"""
+    logger.info("Starting check_rsr_order_status task")
+    
+    processing_orders = VendorOrderLog.objects.filter(
+        vendor__iexact='RSR',
+        status=VendorOrderLog.VendorOrderStatus.PROCESSING
+    )
+    
+    count = 0
+    for vendor_order in processing_orders:
+        try:
+            from .rsr_order import RsrOrderApiClient
+            client = RsrOrderApiClient(vendor_order)
+            payload = client.build_check_order_payload(vendor_order)
+            result = client.check_order(payload)
+            
+            if result.get("StatusCode") == "00":
+                client.update_local_status(result)
+                count += 1
+                
+        except Exception as e:
+            logger.error(f"Error checking RSR order {vendor_order.id}: {e}")
+            continue
+            
+    logger.info(f"Completed check_rsr_order_status. Checked {processing_orders.count()} orders, updated {count} successfully.")

@@ -12,5 +12,9 @@ APP_CELERY_BEAT_SCHEDULE = {
     "process_vendor_orders": {
         "task": "orderApp.tasks.process_vendor_orders",
         "schedule": crontab(minute="*/10"),
+    },
+    "check_rsr_orders": {
+        "task": "orderApp.tasks.check_rsr_order_status",
+        "schedule": crontab(minute="*/10"),
     }
 }

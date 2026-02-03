@@ -66,7 +66,6 @@ class RsrOrderApiClient:
 
         return f"{first} {second}"
 
-
     def build_payload(self, order_details):
         if not self.vendor_order_log.reference_id:
             self.vendor_order_log.reference_id = self.vendor_order_log.order.orderId
@@ -153,6 +152,39 @@ class RsrOrderApiClient:
         if shipping_date:
             shipping_date = make_aware(shipping_date)
         return shipping_date
+
+    def update_local_status(self, result):
+        if result.get("StatusCode") != "00":
+            return False
+
+        items = result.get("Items", [])
+        is_shipped = True
+        
+        if not items:
+            is_shipped = False
+
+        tracking_num = ""
+        date_shipped = ""
+
+        for item in items:
+            date_shipped = str(item.get("DateShipped", "")).strip(", ")
+            tracking_num = str(item.get("TrackingNum", "")).strip(", ")
+            
+            # Check for "Pending" or empty values which indicate not shipped
+            if "Pending" in date_shipped or "Pending" in tracking_num:
+                is_shipped = False
+                break
+        
+        if is_shipped:
+            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.SHIPPED
+            self.vendor_order_log.tracking_number = tracking_num
+            self.vendor_order_log.shipped_at = self.parse_date(date_shipped)
+            self.vendor_order_log.save()
+        else:
+            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+            self.vendor_order_log.save()
+            
+        return True
 
 
 @api_view(['POST'])
@@ -266,29 +298,7 @@ def check_order_rsr(request, market_name, orderid):
     result = rsr_client.check_order(payload)
     
     if result.get("StatusCode") == "00":
-        items = result.get("Items", [])
-        is_shipped = True
-        
-        if not items:
-            is_shipped = False
-
-        for item in items:
-            date_shipped = str(item.get("DateShipped", "")).strip(", ")
-            tracking_num = str(item.get("TrackingNum", "")).strip(", ")
-            
-            # Check for "Pending" or empty values which indicate not shipped
-            if "Pending" in date_shipped or "Pending" in tracking_num:
-                is_shipped = False
-                break
-        
-        if is_shipped:
-            vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
-            vendor_order.tracking_number = tracking_num
-            vendor_order.shipped_at = rsr_client.parse_date(date_shipped)
-            vendor_order.save()
-        else:
-            vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
-            vendor_order.save()
+        rsr_client.update_local_status(result)
         
         return JsonResponse(
             {"message": "RSR order checked successfully", "data": result},
