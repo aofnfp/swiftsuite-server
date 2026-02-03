@@ -521,17 +521,17 @@ def get_order_details_by_order_id(user_id, market_name, order_id):
     
     EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
     headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-        response = requests.get(EBAY_ORDER_DETAILS_URL, headers=headers)
-        
-        if response.status_code == 200:
-            order_details = response.json()
-            return order_details
-        else:
-            return None
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    response = requests.get(EBAY_ORDER_DETAILS_URL, headers=headers)
+    
+    if response.status_code == 200:
+        order_details = response.json()
+        return order_details
+    else:
+        return None
 
 
 def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
