@@ -232,7 +232,26 @@ def check_order_rsr(request, market_name, orderid):
     result = rsr_client.check_order(payload)
     
     if result.get("StatusCode") == "00":
-        vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
+        items = result.get("Items", [])
+        is_shipped = True
+        
+        if not items:
+            is_shipped = False
+
+        for item in items:
+            date_shipped = str(item.get("DateShipped", ""))
+            tracking_num = str(item.get("TrackingNum", ""))
+            
+            # Check for "Pending" or empty values which indicate not shipped
+            if "Pending" in date_shipped or "Pending" in tracking_num:
+                is_shipped = False
+                break
+        
+        if is_shipped:
+            vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
+        else:
+            vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+            
         vendor_order.save()
         
         return JsonResponse(

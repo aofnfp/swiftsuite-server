@@ -104,6 +104,8 @@ def process_vendor_orders():
         
         # dispatch order to vendor
         if order_log:
+            if not order_log.enrollment:
+                continue
             dispatch_order.delay(order_log.id)
         else:
             logger.info(
