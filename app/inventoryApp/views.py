@@ -711,8 +711,8 @@ class MarketInventory:
                 </RequesterCredentials>
                 <Item>
                     <ItemID>{item_id}</ItemID>
-                    <StartPrice>234.23</StartPrice> 
-                    <Quantity>8</Quantity>
+                    <StartPrice>137.89</StartPrice> 
+                    <Quantity>500</Quantity>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -726,7 +726,7 @@ class MarketInventory:
                     </SellerProfiles>
                 </Item>
             </ReviseItemRequest>
-            """#137.89
+            """
             # Make the POST request
             response = requests.post(url, headers=headers, data=body)
             # Check the response
