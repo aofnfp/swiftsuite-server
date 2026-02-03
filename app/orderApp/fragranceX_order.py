@@ -118,7 +118,7 @@ class FrgxOrderApiClient:
         return f"SW-FX-{order_id}-{unique_suffix}"
     
     
-    def get_tracking_and_update_ebay(self):
+    def check_and_update_status(self):
 
         vendor_order = self.VendorOrder
 
@@ -142,7 +142,7 @@ class FrgxOrderApiClient:
                 logger.warning(
                     f"FragranceX tracking API failed for order {self.order_id}"
                 )
-                return None
+                return False
 
             data = response.json()
 
@@ -156,7 +156,7 @@ class FrgxOrderApiClient:
                 logger.info(
                     f"Order {self.order_id} not shipped yet by FragranceX"
                 )
-                return None
+                return False
 
             # Convert shipped date safely
             shipped_date = parse_datetime(shipped_date_raw) if shipped_date_raw else None
@@ -178,34 +178,13 @@ class FrgxOrderApiClient:
                     "status",
                 ]
             )
+            return True
 
-            # Update local eBay order record
-            OrdersOnEbayModel.objects.filter(
-                id=vendor_order.order.id
-            ).update(
-                tracking_id=tracking_number,
-                orderFulfillmentStatus="SHIPPED",
-            )
-
-        # Final validation before eBay call
-        if not tracking_number or not carrier or not shipped_date:
-            logger.warning(
-                f"Skipping eBay tracking push for order {self.order_id}: incomplete tracking"
-            )
-            return None
-
-        # Push to eBay
-        from orderApp.views import OrderEbay 
-
-        orderEbay = OrderEbay()
-        return orderEbay.track_order_on_ebay(
-            userid=vendor_order.enrollment.user.id,
-            ebayorderid=self.order_id,
-            tracking_number=tracking_number,
-            carrier_code=carrier,
-            line_item_id=vendor_order.order.lineItemId,
-            shipped_date=shipped_date,
-        )
+        if tracking_number and carrier:
+            # Already had tracking info
+            return True
+            
+        return False
             
 
 
@@ -304,58 +283,19 @@ def getTracking_fragranceX(request, orderId):
                 {"message": "Vendor order details not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        apiAccessId = vendor_order.enrollment.account.apiAccessId
-        apiAccessKey = vendor_order.enrollment.account.apiAccessKey
 
-        # Get FragranceX token
-        token = getFragranceXAuth(apiAccessId, apiAccessKey)
-
-        if not token:
+        fx_client = FrgxOrderApiClient(vendor_order)
+        if fx_client.check_and_update_status():
             return JsonResponse(
-                {"message": "Authentication with FragranceX failed."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # FragranceX API endpoint and headers
-        url = f"https://apitracking.fragrancex.com/tracking/gettrackinginfo/{orderId}"
-        headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json',
-        }
-
-        # Make the GET request
-        response = requests.get(url, headers=headers)
-
-        if response.status_code == 200:
-            data = response.json()
-            return JsonResponse(data, status=status.HTTP_200_OK)
-        
-        elif response.status_code == 400:
-            return JsonResponse(
-                {
-                    "message": "Tracking Information doesn't exists.",
-                    "status_code": response.status_code,
-                },
-                status=response.status_code,
+                {"message": "Tracking information updated successfully."},
+                status=status.HTTP_200_OK,
             )
         else:
             return JsonResponse(
-            {
-                "message": "Failed to fetch tracking information from FragranceX.",
-                "status_code": response.status_code,
-                "response": response.text,
-            },
-            status=response.status_code,
-        )
-
-
-
-    except requests.RequestException as e:
-        # Handle network errors
-        return JsonResponse(
-            {"message": "An error occurred while communicating with the API.", "error": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+                {"message": "Tracking information not updated."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
     except Exception as e:
         # Handle other unexpected errors
         return JsonResponse(

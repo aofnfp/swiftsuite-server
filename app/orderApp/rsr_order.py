@@ -180,11 +180,11 @@ class RsrOrderApiClient:
             self.vendor_order_log.tracking_number = tracking_num
             self.vendor_order_log.shipped_at = self.parse_date(date_shipped)
             self.vendor_order_log.save()
+            return True
         else:
             self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
             self.vendor_order_log.save()
-            
-        return True
+            return False
 
 
 @api_view(['POST'])
@@ -310,3 +310,24 @@ def check_order_rsr(request, market_name, orderid):
         status=status.HTTP_400_BAD_REQUEST
     )
     
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def push_tracking_to_ebay(request, order_id):
+    vendor_order = VendorOrderLog.objects.filter(order_id=order_id).first()
+    if not vendor_order:
+        return JsonResponse(
+            {"message": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    from .utils import push_tracking_to_ebay
+    if push_tracking_to_ebay(vendor_order):
+        return JsonResponse(
+            {"message": "Tracking pushed to eBay successfully"},
+            status=status.HTTP_200_OK
+        )
+    
+    return JsonResponse(
+        {"message": "Failed to push tracking to eBay"},
+        status=status.HTTP_400_BAD_REQUEST
+    )

@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from celery import shared_task
 from celery.exceptions import Ignore
-from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token
+from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token, push_tracking_to_ebay
 from .models import OrdersOnEbayModel, VendorOrderLog
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
@@ -177,29 +177,46 @@ def dispatch_order(vendor_order_log_id: int):
 
 
 @shared_task(queue='heavy-cpu')
-def check_rsr_order_status():
-    """Background task to check status of processing RSR orders"""
-    logger.info("Starting check_rsr_order_status task")
+def check_vendor_order_status():
+    """Background task to check status of processing vendor orders (RSR, FragranceX)"""
+    logger.info("Starting check_vendor_order_status task")
     
     processing_orders = VendorOrderLog.objects.filter(
-        vendor__iexact='RSR',
         status=VendorOrderLog.VendorOrderStatus.PROCESSING
     )
-    
+
     count = 0
+    updated_count = 0
+    
     for vendor_order in processing_orders:
+        count += 1
+        vendor_name = vendor_order.vendor.lower()
+        
         try:
-            from .rsr_order import RsrOrderApiClient
-            client = RsrOrderApiClient(vendor_order)
-            payload = client.build_check_order_payload(vendor_order)
-            result = client.check_order(payload)
+            status_updated = False
             
-            if result.get("StatusCode") == "00":
-                client.update_local_status(result)
-                count += 1
+            if vendor_name == 'rsr':
+                from .rsr_order import RsrOrderApiClient
+                client = RsrOrderApiClient(vendor_order)
+                payload = client.build_check_order_payload(vendor_order)
+                result = client.check_order(payload)
                 
+                if result.get("StatusCode") == "00":
+                    if client.update_local_status(result):
+                        status_updated = True
+
+            elif vendor_name == 'fragrancex':
+                from .fragranceX_order import FrgxOrderApiClient
+                client = FrgxOrderApiClient(vendor_order)
+                if client.check_and_update_status():
+                    status_updated = True
+            
+            if status_updated:
+                # push_tracking_to_ebay(vendor_order)
+                updated_count += 1
+
         except Exception as e:
-            logger.error(f"Error checking RSR order {vendor_order.id}: {e}")
+            logger.error(f"Error checking status for order {vendor_order.id} (Vendor: {vendor_name}): {e}")
             continue
             
-    logger.info(f"Completed check_rsr_order_status. Checked {processing_orders.count()} orders, updated {count} successfully.")
+    logger.info(f"Completed check_vendor_order_status. Checked {count} orders, updated {updated_count} successfully.")

@@ -508,3 +508,78 @@ def get_vendor_enrollment(marketItemId):
         return None
 
     return inventory.product.enrollment
+
+
+def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
+    """
+    Push tracking information from a VendorOrderLog to eBay.
+    Updates the local OrdersOnEbayModel status upon success.
+    """
+    logger.info(f"Preparing to push tracking for order {vendor_order_log.order.orderId}")
+    
+    # 1. Validate data availability
+    if not vendor_order_log.tracking_number or not vendor_order_log.carrier or not vendor_order_log.shipped_at:
+        logger.warning(
+            f"Missing tracking info for VendorOrderLog {vendor_order_log.id}. Cannot push to eBay."
+        )
+        return False
+
+    user_id = vendor_order_log.enrollment.user.id
+    ebay_order_id = vendor_order_log.order.orderId
+    
+    # 2. Get Ebay credentials
+    # We query MarketplaceEnronment directly to avoid circular imports with views/Ebay view
+    env = MarketplaceEnronment.objects.filter(
+        user_id=user_id,
+        marketplace_name="Ebay"
+    ).first()
+    
+    if not env:
+        logger.error(f"No Ebay environment found for user {user_id}")
+        return False
+        
+    access_token = env.access_token
+
+    url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}/shipping_fulfillment'
+
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
+    }
+    
+    payload = {
+        "shippedDate": vendor_order_log.shipped_at.isoformat(),
+        "shippingCarrierCode": vendor_order_log.carrier,
+        "trackingNumber": vendor_order_log.tracking_number,
+        "lineItems": [
+            {
+                "lineItemId": vendor_order_log.order.lineItemId
+            }
+        ]
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        
+        if response.status_code in [200, 201, 204]:
+            logger.info(f"Successfully pushed tracking to eBay for order {ebay_order_id}")
+            
+            # Update local eBay order record
+            OrdersOnEbayModel.objects.filter(
+                id=vendor_order_log.order.id
+            ).update(
+                tracking_id=vendor_order_log.tracking_number,
+                orderFulfillmentStatus="SHIPPED",
+            )
+            return True
+            
+        else:
+            logger.error(
+                f"Failed to push tracking to eBay. Status: {response.status_code}, "
+                f"Response: {response.text}"
+            )
+            return False
+            
+    except Exception as e:
+        logger.error(f"Exception pushing tracking to eBay for order {ebay_order_id}: {e}")
+        return False
