@@ -511,7 +511,7 @@ def get_vendor_enrollment(marketItemId):
 
 
 
-def get_order_details_by_order_id(self, access_token, order_id):
+def get_order_details_by_order_id(access_token, order_id):
         EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
         headers = {
             "Authorization": f"Bearer {access_token}",
