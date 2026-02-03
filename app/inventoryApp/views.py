@@ -711,8 +711,8 @@ class MarketInventory:
                     </RequesterCredentials>
                     <Item>
                         <ItemID>{item_id}</ItemID>
-                        <StartPrice>25.30</StartPrice>
-                        <Quantity>29</Quantity>
+                        <StartPrice>{25.30}</StartPrice>
+                        <Quantity>{29}</Quantity>
                         <SellerProfiles>
                             <SellerPaymentProfile>
                                 <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
