@@ -313,7 +313,7 @@ def check_order_rsr(request, market_name, orderid):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def push_tracking_to_ebay(request, order_id):
-    vendor_order = VendorOrderLog.objects.filter(order_id=order_id).first()
+    vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
     if not vendor_order:
         return JsonResponse(
             {"message": "Order not found"},
