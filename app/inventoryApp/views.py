@@ -689,15 +689,105 @@ class MarketInventory:
                 userid = user.parent_id
         
         access_token = eb.refresh_access_token(userid, "Ebay")
+        user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
         try:
-            pass
-             
+            # eBay Trading API endpoint
+            url = 'https://api.ebay.com/ws/api.dll'
+
+            headers = {
+                'X-EBAY-API-CALL-NAME': 'ReviseItem',
+                'X-EBAY-API-SITEID': '0',
+                'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',
+                'Content-Type': 'text/xml',
+                'Authorization': f'Bearer {access_token}'
+            }
+            # XML Body for ReviseItem request
+            if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
+                body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <Item>
+                        <ItemID>{item_id}</ItemID>
+                        <StartPrice>{25.30}</StartPrice>
+                        <Quantity>{29}</Quantity>
+                        <SellerProfiles>
+                            <SellerPaymentProfile>
+                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                            </SellerPaymentProfile>
+                            <SellerReturnProfile>
+                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                            </SellerReturnProfile>
+                            <SellerShippingProfile>
+                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                            </SellerShippingProfile>
+                        </SellerProfiles>
+                    </Item>
+                </ReviseItemRequest>
+                """ 
+            elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
+                body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <Item>
+                        <ItemID>{item_id}</ItemID>
+                        <StartPrice>25.30</StartPrice>
+                        <SellerProfiles>
+                            <SellerPaymentProfile>
+                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                            </SellerPaymentProfile>
+                            <SellerReturnProfile>
+                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                            </SellerReturnProfile>
+                            <SellerShippingProfile>
+                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                            </SellerShippingProfile>
+                        </SellerProfiles>
+                    </Item>
+                </ReviseItemRequest>
+                """
+            elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
+                body = f"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <RequesterCredentials>
+                        <eBayAuthToken>{access_token}</eBayAuthToken>
+                    </RequesterCredentials>
+                    <Item>
+                        <ItemID>{item_id}</ItemID>
+                        <Quantity>29</Quantity>
+                        <SellerProfiles>
+                            <SellerPaymentProfile>
+                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
+                            </SellerPaymentProfile>
+                            <SellerReturnProfile>
+                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
+                            </SellerReturnProfile>
+                            <SellerShippingProfile>
+                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
+                            </SellerShippingProfile>
+                        </SellerProfiles>
+                    </Item>
+                </ReviseItemRequest>
+                """
+            else:
+                return None
+            # Make the POST request
+            response = requests.post(url, headers=headers, data=body)
+            # Check the response
+            if response.status_code == 200:
+                return Response(f"Item updated successfully {response.text}", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
             return Response(f"Failed to download items. {ea}", status=status.HTTP_400_BAD_REQUEST)
         
-        return Response(f"Total items: ", status=status.HTTP_200_OK)
+
 
         
 class WooCommerceInventory:

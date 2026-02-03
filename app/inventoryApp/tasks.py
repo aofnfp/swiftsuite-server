@@ -1,6 +1,6 @@
 from celery import shared_task
 from django.core.cache import cache
-from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc
+from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc_update
 from .update_market import check_product_ended_status, update_inventory_price_quantity
 import logging
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def manually_download_item_from_marketplace_task(userid, access_token):
     logger.info("manually_download_item_from_marketplace_task started")
 
     try:
-        manually_download_item_from_marketplace_syc(userid, access_token)
+        manually_download_item_from_marketplace_syc_update(userid, access_token)
         logger.info("manually_download_item_from_marketplace_task completed successfully")
         return "Manual inventory download completed successfully"
     finally:
