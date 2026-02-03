@@ -176,7 +176,7 @@ def dispatch_order(vendor_order_log_id: int):
         logger.error(f"VendorOrderLog with id {vendor_order_log_id} does not exist.")
 
 
-@shared_task(queue='default')
+@shared_task(queue='heavy-cpu')
 def check_rsr_order_status():
     """Background task to check status of processing RSR orders"""
     logger.info("Starting check_rsr_order_status task")
