@@ -69,7 +69,7 @@ def background_refresh_access_token_task():
         for user in user_data:
             # Call your existing sync logic
             access_token = requests.get(f"https://service.swiftsuite.app/marketplaceApp/refresh_connection/{user.user_id}/Ebay/")
-            # background_refresh_access_token()
+            background_refresh_access_token()
         logger.info("background_refresh_access_token_task completed successfully")
         return "Refresh access token completed successfully"
     finally:
