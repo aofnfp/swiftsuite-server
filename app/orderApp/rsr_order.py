@@ -68,42 +68,60 @@ class RsrOrderApiClient:
         return f"{first} {second}"
 
     def build_payload(self, order_details):
+        # Ensure reference_id exists
         if not self.vendor_order_log.reference_id:
             self.vendor_order_log.reference_id = self.vendor_order_log.order.orderId
             self.vendor_order_log.save(update_fields=["reference_id"])
 
-        buyer = order_details.get("buyer", {}).get("buyerRegistrationAddress", {})
-        address = buyer.get("contactAddress", {})
-        sellerId = buyer.get("fullName")
+        # ---- Extract SHIP_TO info safely ----
+        ship_to = {}
 
-        items = []
-        for item in order_details.get("lineItems", []):
-            items.append({
+        for instruction in order_details.get("fulfillmentStartInstructions", []):
+            if instruction.get("fulfillmentInstructionsType") == "SHIP_TO":
+                ship_to = instruction.get("shippingStep", {}).get("shipTo", {})
+                break
+
+        contact_address = ship_to.get("contactAddress", {})
+        phone = ship_to.get("primaryPhone", {})
+
+        full_name = ship_to.get("fullName", "")
+        email = ship_to.get("email", self.user.email)
+
+        # ---- Build Items ----
+        items = [
+            {
                 "PartNum": item.get("sku"),
                 "WishQty": item.get("quantity"),
-            })
+            }
+            for item in order_details.get("lineItems", [])
+        ]
 
+        # ---- Payload ----
         payload = {
             "Username": self.username,
             "Password": self.password,
-            "Storename": self.validate_storename(sellerId),
-            "ShipAddress": address.get("addressLine1"),
-            "ShipCity": address.get("city"),
-            "ShipState": address.get("stateOrProvince"),
-            "ShipZip": address.get("postalCode"),
+            "Storename": self.validate_storename(full_name),
+
+            "ShipAddress": contact_address.get("addressLine1"),
+            "ShipAddress2": contact_address.get("addressLine2"),
+            "ShipCity": contact_address.get("city"),
+            "ShipState": contact_address.get("stateOrProvince"),
+            "ShipZip": contact_address.get("postalCode"),
+
             "ShipAccount": self.username,
-            "ContactNum": buyer.get("primaryPhone", {}).get("phoneNumber"),
+            "ContactNum": phone.get("phoneNumber"),
             "PONum": self.vendor_order_log.reference_id,
-            "Email": self.user.email,
+            "Email": email,
+
             "Items": items,
             "POS": self.pos,
             "FillOrKill": 1,
         }
-        
-        # save raw request
+
+        # ---- Save raw request ----
         self.vendor_order_log.raw_request = payload
         self.vendor_order_log.save(update_fields=["raw_request"])
-        
+
         return payload
 
     def place_order(self, payload):
