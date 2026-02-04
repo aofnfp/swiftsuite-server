@@ -66,8 +66,8 @@ def background_refresh_access_token_task():
     try:
         # Call your existing sync logic
         access_token = background_refresh_access_token()
-        logger.info(f"background_refresh_access_token_task completed successfully with access token: {access_token}")
-        return f"Refresh access token completed successfully with access token: {access_token}"
+        logger.info(f"background_refresh_access_token_task completed successfully")
+        return f"Refresh access token completed successfully with access token: {access_token.text}"
     finally:
         # Always release the lock
         cache.delete(LOCK_KEY2)
