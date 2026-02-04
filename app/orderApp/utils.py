@@ -600,7 +600,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             
             # Update local eBay order record
             OrdersOnEbayModel.objects.filter(
-                id=vendor_order_log.order.id
+                orderId=vendor_order_log.order.orderId
             ).update(
                 tracking_id=vendor_order_log.tracking_number,
                 orderFulfillmentStatus="SHIPPED",
