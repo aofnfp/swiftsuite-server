@@ -1,7 +1,7 @@
 from .views import OrderEbay as eb_view
 from django.urls import path
 from .fragranceX_order import place_order_fragrancex, getTracking_fragranceX
-from .rsr_order import place_order_rsr, check_order_rsr
+from .rsr_order import place_order_rsr, check_order_rsr, push_tracking_to_ebay
 
 urlpatterns = [
     
@@ -14,4 +14,5 @@ urlpatterns = [
     path('get_tracking_fragranceX/<str:orderId>/', getTracking_fragranceX, name='get_tracking_fragranceX'),
     path('place_order_rsr/<str:market_name>/<str:orderid>/', place_order_rsr, name='place_order_rsr'),
     path('check_order_rsr/<str:market_name>/<str:orderid>/', check_order_rsr, name='check_order_rsr'),
+    path('push_tracking_to_ebay/<str:order_id>/', push_tracking_to_ebay, name='push_tracking_to_ebay'),
 ]

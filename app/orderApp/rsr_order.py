@@ -12,6 +12,8 @@ from .models import OrdersOnEbayModel
 from .utils import get_vendor_enrollment
 import logging
 from django.db import transaction
+from datetime import datetime
+from django.utils.timezone import make_aware
 
 
 logger = logging.getLogger(__name__)
@@ -63,7 +65,6 @@ class RsrOrderApiClient:
             second = first
 
         return f"{first} {second}"
-
 
     def build_payload(self, order_details):
         if not self.vendor_order_log.reference_id:
@@ -145,6 +146,45 @@ class RsrOrderApiClient:
         import uuid
         unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-RSR-{order_id}-{unique_suffix}"
+
+    def parse_date(self, date_str):
+        shipping_date = datetime.strptime(date_str, "%Y%m%d")
+        if shipping_date:
+            shipping_date = make_aware(shipping_date)
+        return shipping_date
+
+    def update_local_status(self, result):
+        if result.get("StatusCode") != "00":
+            return False
+
+        items = result.get("Items", [])
+        is_shipped = True
+        
+        if not items:
+            is_shipped = False
+
+        tracking_num = ""
+        date_shipped = ""
+
+        for item in items:
+            date_shipped = str(item.get("DateShipped", "")).strip(", ")
+            tracking_num = str(item.get("TrackingNum", "")).strip(", ")
+            
+            # Check for "Pending" or empty values which indicate not shipped
+            if "Pending" in date_shipped or "Pending" in tracking_num:
+                is_shipped = False
+                break
+        
+        if is_shipped:
+            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.SHIPPED
+            self.vendor_order_log.tracking_number = tracking_num
+            self.vendor_order_log.shipped_at = self.parse_date(date_shipped)
+            self.vendor_order_log.save()
+            return True
+        else:
+            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+            self.vendor_order_log.save()
+            return False
 
 
 @api_view(['POST'])
@@ -258,27 +298,7 @@ def check_order_rsr(request, market_name, orderid):
     result = rsr_client.check_order(payload)
     
     if result.get("StatusCode") == "00":
-        items = result.get("Items", [])
-        is_shipped = True
-        
-        if not items:
-            is_shipped = False
-
-        for item in items:
-            date_shipped = str(item.get("DateShipped", ""))
-            tracking_num = str(item.get("TrackingNum", ""))
-            
-            # Check for "Pending" or empty values which indicate not shipped
-            if "Pending" in date_shipped or "Pending" in tracking_num:
-                is_shipped = False
-                break
-        
-        if is_shipped:
-            vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
-        else:
-            vendor_order.status = VendorOrderLog.VendorOrderStatus.PROCESSING
-            
-        vendor_order.save()
+        rsr_client.update_local_status(result)
         
         return JsonResponse(
             {"message": "RSR order checked successfully", "data": result},
@@ -290,3 +310,24 @@ def check_order_rsr(request, market_name, orderid):
         status=status.HTTP_400_BAD_REQUEST
     )
     
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def push_tracking_to_ebay(request, order_id):
+    vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
+    if not vendor_order:
+        return JsonResponse(
+            {"message": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    from .utils import push_tracking_to_ebay
+    if push_tracking_to_ebay(vendor_order):
+        return JsonResponse(
+            {"message": "Tracking pushed to eBay successfully"},
+            status=status.HTTP_200_OK
+        )
+    
+    return JsonResponse(
+        {"message": "Failed to push tracking to eBay"},
+        status=status.HTTP_400_BAD_REQUEST
+    )
