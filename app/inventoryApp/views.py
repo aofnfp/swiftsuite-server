@@ -695,8 +695,9 @@ class MarketInventory:
         # access_token = eb.refresh_access_token(userid, "Ebay")
         try:
 
-            access_token = requests.get(f"https://service.swiftsuite.app/marketplaceApp/refresh_connection/{userid}/Ebay/")
-            return Response(f"Item updated successfully {access_token}", status=status.HTTP_200_OK)
+            response = requests.get(f"https://service.swiftsuite.app/marketplaceApp/refresh_connection/{userid}/Ebay/")
+            
+            return Response(f"Message returned: {response.text}", status=status.HTTP_200_OK)
             
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
