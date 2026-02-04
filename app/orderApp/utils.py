@@ -78,7 +78,7 @@ def background_refresh_access_token():
             return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
         MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
-        logger.info(f"access token: {access_token}")
+        return access_token
 
 
 
