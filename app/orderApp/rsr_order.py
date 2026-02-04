@@ -17,7 +17,6 @@ from django.utils.timezone import make_aware
 import re
 
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -155,8 +154,6 @@ class RsrOrderApiClient:
             shipping_date = make_aware(shipping_date)
         return shipping_date
 
-    import re
-
     def get_carrier(self, tracking_num: str) -> str:
         tracking_num = tracking_num.strip().replace(" ", "").upper()
 
@@ -212,6 +209,7 @@ class RsrOrderApiClient:
             self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
             self.vendor_order_log.save()
             return False
+    
 
 
 
@@ -328,6 +326,8 @@ def check_order_rsr(request, market_name, orderid):
     
     if result.get("StatusCode") == "00":
         rsr_client.update_local_status(result)
+        if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+            push_tracking_to_ebay(vendor_order)
         
         return JsonResponse(
             {"message": "RSR order checked successfully", "data": result},
@@ -342,18 +342,21 @@ def check_order_rsr(request, market_name, orderid):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def push_tracking_to_ebay(request, order_id):
-    vendor_orders = VendorOrderLog.objects.filter(status=VendorOrderLog.VendorOrderStatus.SHIPPED)
-    if not vendor_orders:
+    vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id, status=VendorOrderLog.VendorOrderStatus.SHIPPED).first()
+    if not vendor_order:
         return JsonResponse(
-            {"message": "No orders found"},
+            {"message": "Order not found"},
             status=status.HTTP_404_NOT_FOUND
         )
     
-    for vendor_order in vendor_orders:
-        from .utils import push_tracking_to_ebay
-        push_tracking_to_ebay(vendor_order)
-           
+    from .utils import push_tracking_to_ebay
+    if push_tracking_to_ebay(vendor_order):
+        return JsonResponse(
+            {"message": "Tracking pushed to eBay successfully"},
+            status=status.HTTP_200_OK
+        )
+    
     return JsonResponse(
-        {"message": "Tracking pushed to eBay successfully"},
-        status=status.HTTP_200_OK
+        {"message": "Failed to push tracking to eBay"},
+        status=status.HTTP_400_BAD_REQUEST
     )
