@@ -446,25 +446,11 @@ def create_vendor_order_log(order: OrdersOnEbayModel):
         # Lock the order to serialize attempts for this specific order
         _ = OrdersOnEbayModel.objects.select_for_update().get(pk=order.pk)
 
-        # Check for ANY existing log for this order+vendor
-        existing_log = VendorOrderLog.objects.filter(
-            order=order,
-            vendor=order.vendor_name,
-        ).first()
-
-        if existing_log:
-           return None
-
         # Logic to create new if strictly not exists
         enrollment = get_vendor_enrollment(order.marketItemId)
         if not enrollment:
             logger.error(f"Enrollment not found for order-{order.orderId} with marketItemId {order.marketItemId}.")
-            return VendorOrderLog.objects.create(
-                order=order,
-                vendor=order.vendor_name,
-                status=VendorOrderLog.VendorOrderStatus.FAILED,
-                error_message=f"Enrollment not found for order-{order.orderId} with marketItemId {order.marketItemId}.",
-            )
+            return None
         
         order_log = VendorOrderLog.objects.create(
             order=order,

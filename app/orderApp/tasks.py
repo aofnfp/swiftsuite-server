@@ -105,14 +105,7 @@ def process_vendor_orders():
         
         # dispatch order to vendor
         if order_log:
-            if not order_log.enrollment:
-                continue
-            dispatch_order.delay(order_log.id)
-        else:
-            logger.info(
-                f"Skipped VendorOrderLog creation for order {order.orderId} "
-                f"(already has active vendor order)"
-            )
+           dispatch_order.delay(order_log.id)
             
     logger.info("order log entries created for vendor orders and dispatched.")
         
