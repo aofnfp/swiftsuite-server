@@ -13,7 +13,10 @@ import requests
 from decouple import config
 import logging
 from django.db import transaction
+from django.utils import timezone
+
 logger = logging.getLogger(__name__)
+
 
 
 
@@ -605,6 +608,9 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                 tracking_id=vendor_order_log.tracking_number,
                 orderFulfillmentStatus="SHIPPED",
             )
+            vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
+            vendor_order_log.delivered_at = timezone.now()
+            vendor_order_log.save()
             return True
             
         else:

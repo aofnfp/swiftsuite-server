@@ -208,16 +208,17 @@ def check_vendor_order_status():
                 
                 if result.get("StatusCode") == "00":
                     if client.update_local_status(result):
+                        push_tracking_to_ebay(vendor_order)
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
                 from .fragranceX_order import FrgxOrderApiClient
                 client = FrgxOrderApiClient(vendor_order)
                 if client.check_and_update_status():
+                    push_tracking_to_ebay(vendor_order)
                     status_updated = True
             
             if status_updated:
-                # push_tracking_to_ebay(vendor_order)
                 updated_count += 1
 
         except Exception as e:

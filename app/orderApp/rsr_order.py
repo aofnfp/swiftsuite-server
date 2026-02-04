@@ -14,6 +14,8 @@ import logging
 from django.db import transaction
 from datetime import datetime
 from django.utils.timezone import make_aware
+import re
+
 
 
 logger = logging.getLogger(__name__)
@@ -153,6 +155,30 @@ class RsrOrderApiClient:
             shipping_date = make_aware(shipping_date)
         return shipping_date
 
+    import re
+
+    def get_carrier(self, tracking_num: str) -> str:
+        tracking_num = tracking_num.strip().replace(" ", "").upper()
+
+        # UPS: 1Z + 16 alphanumeric (total 18)
+        if re.fullmatch(r"1Z[A-Z0-9]{16}", tracking_num):
+            return "UPS"
+
+        # USPS: 
+        # - 20–22 digits
+        # - OR 13 alphanumeric ending with US
+        if (
+            re.fullmatch(r"\d{20,22}", tracking_num)
+            or re.fullmatch(r"[A-Z0-9]{11}US", tracking_num)
+        ):
+            return "USPS"
+
+        # FedEx: 12–15 digits
+        if re.fullmatch(r"\d{12,15}", tracking_num):
+            return "FedEx"
+
+        return "Other"
+
     def update_local_status(self, result):
         if result.get("StatusCode") != "00":
             return False
@@ -179,12 +205,15 @@ class RsrOrderApiClient:
             self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.SHIPPED
             self.vendor_order_log.tracking_number = tracking_num
             self.vendor_order_log.shipped_at = self.parse_date(date_shipped)
+            self.vendor_order_log.carrier = self.get_carrier(tracking_num)
             self.vendor_order_log.save()
             return True
         else:
             self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
             self.vendor_order_log.save()
             return False
+
+
 
 
 @api_view(['POST'])
@@ -313,21 +342,18 @@ def check_order_rsr(request, market_name, orderid):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def push_tracking_to_ebay(request, order_id):
-    vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
-    if not vendor_order:
+    vendor_orders = VendorOrderLog.objects.filter(status=VendorOrderLog.VendorOrderStatus.SHIPPED)
+    if not vendor_orders:
         return JsonResponse(
-            {"message": "Order not found"},
+            {"message": "No orders found"},
             status=status.HTTP_404_NOT_FOUND
         )
     
-    from .utils import push_tracking_to_ebay
-    if push_tracking_to_ebay(vendor_order):
-        return JsonResponse(
-            {"message": "Tracking pushed to eBay successfully"},
-            status=status.HTTP_200_OK
-        )
-    
+    for vendor_order in vendor_orders:
+        from .utils import push_tracking_to_ebay
+        push_tracking_to_ebay(vendor_order)
+           
     return JsonResponse(
-        {"message": "Failed to push tracking to eBay"},
-        status=status.HTTP_400_BAD_REQUEST
+        {"message": "Tracking pushed to eBay successfully"},
+        status=status.HTTP_200_OK
     )
