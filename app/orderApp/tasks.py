@@ -1,6 +1,6 @@
 from django.core.cache import cache
 import requests
-from Swiftsuite.marketplaceApp.models import MarketplaceEnronment
+from marketplaceApp.models import MarketplaceEnronment
 from celery import shared_task
 from celery.exceptions import Ignore
 from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token, push_tracking_to_ebay
