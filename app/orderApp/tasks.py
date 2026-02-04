@@ -1,4 +1,6 @@
 from django.core.cache import cache
+import requests
+from Swiftsuite.marketplaceApp.models import MarketplaceEnronment
 from celery import shared_task
 from celery.exceptions import Ignore
 from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token
@@ -8,7 +10,6 @@ from django.utils import timezone
 from datetime import timedelta
 import logging
 logger = logging.getLogger(__name__)
-
 
 
 LOCK_KEY = "sync_ebay_order_task_lock"
@@ -63,8 +64,12 @@ def background_refresh_access_token_task():
 
     logger.info("background_refresh_access_token_task started")
     try:
-        # Call your existing sync logic
-        background_refresh_access_token()
+        user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
+
+        for user in user_data:
+            # Call your existing sync logic
+            access_token = requests.get(f"https://service.swiftsuite.app/marketplaceApp/refresh_connection/{user.user_id}/Ebay/")
+            # background_refresh_access_token()
         logger.info("background_refresh_access_token_task completed successfully")
         return "Refresh access token completed successfully"
     finally:

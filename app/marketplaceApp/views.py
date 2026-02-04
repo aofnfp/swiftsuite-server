@@ -194,11 +194,10 @@ class Ebay:
             "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription",
             "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly",
             "https://api.ebay.com/oauth/api_scope/sell.stores",
-            "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
+            "https://api.ebay.com/oauth/api_scope/sell.stores.readonly",
         ]
 
-    # Function to get access_token and refresh_token if connection is established or re-establish connection to get access_token if expires.
-   
+    # Function to get access_token and refresh_token if connection is established or re-establish connection to get access_token if expires.   
     def make_connection_to_get_auth_code(request, market_name):
         eb = Ebay()
         
@@ -277,6 +276,7 @@ class Ebay:
 
         obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":refresh_token})
         return access_token, refresh_token
+    
 
     # Function to refresh the access token using the refresh token
     def refresh_access_token(self, userid, market_name):

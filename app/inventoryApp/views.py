@@ -69,6 +69,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
     except Exception as e:
         return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
+
 # class that takes any other operation not link to any marketplace
 class General_operations:
     # Get all unmapped ebay product listing on local table
@@ -181,6 +182,7 @@ class General_operations:
             return JsonResponse({"item_details":list(unmapped_item), "vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+
 
     # Function to get all vendor enrollment for the user
     @with_module('inventory')
@@ -607,6 +609,7 @@ class MarketInventory:
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
+
     # Delete product from inventory
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -620,6 +623,7 @@ class MarketInventory:
         except Exception as e:
             return Response(f"Failed to delete items.", status=status.HTTP_400_BAD_REQUEST)
     
+
     # Function to end product listed on ebay and delete from inventory
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -681,107 +685,19 @@ class MarketInventory:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
-        eb = Ebay()   
+        # eb = Ebay()   
         # check if user is subaccount
         user = request.user
         if user:
             if user.parent_id:
                 userid = user.parent_id
         
-        access_token = eb.refresh_access_token(userid, "Ebay")
-        user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
+        # access_token = eb.refresh_access_token(userid, "Ebay")
         try:
-            # eBay Trading API endpoint
-            url = 'https://api.ebay.com/ws/api.dll'
 
-            headers = {
-                'X-EBAY-API-CALL-NAME': 'ReviseItem',
-                'X-EBAY-API-SITEID': '0',
-                'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',
-                'Content-Type': 'text/xml',
-                'Authorization': f'Bearer {access_token}'
-            }
-            # XML Body for ReviseItem request
-            if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
-                body = f"""
-                <?xml version="1.0" encoding="utf-8"?>
-                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
-                    <Item>
-                        <ItemID>{item_id}</ItemID>
-                        <StartPrice>{25.30}</StartPrice>
-                        <Quantity>{29}</Quantity>
-                        <SellerProfiles>
-                            <SellerPaymentProfile>
-                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                            </SellerPaymentProfile>
-                            <SellerReturnProfile>
-                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                            </SellerReturnProfile>
-                            <SellerShippingProfile>
-                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                            </SellerShippingProfile>
-                        </SellerProfiles>
-                    </Item>
-                </ReviseItemRequest>
-                """ 
-            elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
-                body = f"""
-                <?xml version="1.0" encoding="utf-8"?>
-                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
-                    <Item>
-                        <ItemID>{item_id}</ItemID>
-                        <StartPrice>25.30</StartPrice>
-                        <SellerProfiles>
-                            <SellerPaymentProfile>
-                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                            </SellerPaymentProfile>
-                            <SellerReturnProfile>
-                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                            </SellerReturnProfile>
-                            <SellerShippingProfile>
-                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                            </SellerShippingProfile>
-                        </SellerProfiles>
-                    </Item>
-                </ReviseItemRequest>
-                """
-            elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
-                body = f"""
-                <?xml version="1.0" encoding="utf-8"?>
-                <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                    <RequesterCredentials>
-                        <eBayAuthToken>{access_token}</eBayAuthToken>
-                    </RequesterCredentials>
-                    <Item>
-                        <ItemID>{item_id}</ItemID>
-                        <Quantity>29</Quantity>
-                        <SellerProfiles>
-                            <SellerPaymentProfile>
-                                <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                            </SellerPaymentProfile>
-                            <SellerReturnProfile>
-                                <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                            </SellerReturnProfile>
-                            <SellerShippingProfile>
-                                <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                            </SellerShippingProfile>
-                        </SellerProfiles>
-                    </Item>
-                </ReviseItemRequest>
-                """
-            else:
-                return None
-            # Make the POST request
-            response = requests.post(url, headers=headers, data=body)
-            # Check the response
-            if response.status_code == 200:
-                return Response(f"Item updated successfully {response.text}", status=status.HTTP_200_OK)
+            access_token = requests.get(f"https://service.swiftsuite.app/marketplaceApp/refresh_connection/{userid}/Ebay/")
+            return Response(f"Item updated successfully {access_token}", status=status.HTTP_200_OK)
+            
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
