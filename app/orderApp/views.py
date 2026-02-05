@@ -257,3 +257,10 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
     def list(self, request):
         return super().list(request)
     
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        vendor_status = self.request.query_params.get('vendor_status', None)
+        if vendor_status:
+            queryset = queryset.filter(vendor_orders__status=vendor_status)
+        return queryset

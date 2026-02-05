@@ -32,6 +32,7 @@ class OrderSyncSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrdersOnEbayModel
         fields = [
+            '_id',
             'orderId',
             'creationDate',
             'buyer',
