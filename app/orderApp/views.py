@@ -17,7 +17,11 @@ from .tasks import manual_sync_order_with_local_task
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from vendorEnrollment.pagination import CustomOffsetPagination
+from .tasks import background_refresh_access_token_task
 
+
+
+background_refresh_access_token_task.delay()  # Start the background task to refresh access tokens
 
 # Create your views here.
 class OrderEbay:
