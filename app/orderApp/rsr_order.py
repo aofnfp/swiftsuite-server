@@ -198,42 +198,63 @@ class RsrOrderApiClient:
         return "Other"
 
     def update_local_status(self, result):
+        # RSR call itself failed
         if result.get("StatusCode") != "00":
             return False
 
-        items = result.get("Items", [])
-        is_shipped = True
-        
-        if not items:
-            is_shipped = False
+        hold_status = (result.get("HoldStatus") or "").strip()
 
-        tracking_num = ""
-        date_shipped = ""
+       
+        if hold_status:
+            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+            self.vendor_order_log.hold_reason = hold_status
+            self.vendor_order_log.save(update_fields=["status", "hold_reason"])
+            return False
+
+        # If we get here, order is NOT on hold → clear previous hold
+        if self.vendor_order_log.hold_reason:
+            self.vendor_order_log.hold_reason = None
+
+        items = result.get("Items", [])
+
+        if not items:
+            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+            self.vendor_order_log.save(update_fields=["status", "hold_reason"])
+            return False
 
         for item in items:
-            date_shipped = str(item.get("DateShipped", "")).strip(", ")
-            tracking_num = str(item.get("TrackingNum", "")).strip(", ")
-            
-            # Check for "Pending" or empty values which indicate not shipped
-            if "Pending" in date_shipped or "Pending" in tracking_num:
-                is_shipped = False
-                break
-        
-        if is_shipped:
+            raw_date = str(item.get("DateShipped", "")).strip(", ")
+            raw_tracking = str(item.get("TrackingNum", "")).strip(", ")
+
+            # RSR uses empty or "Pending" for not shipped
+            if (
+                not raw_date
+                or not raw_tracking
+                or "PENDING" in raw_date.upper()
+                or "PENDING" in raw_tracking.upper()
+            ):
+                self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+                self.vendor_order_log.save(update_fields=["status", "hold_reason"])
+                return False
+
+            parsed_date = self.parse_date(raw_date)
+            if not parsed_date:
+                self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+                self.vendor_order_log.save(update_fields=["status", "hold_reason"])
+                return False
+
             self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.SHIPPED
-            self.vendor_order_log.tracking_number = tracking_num
-            self.vendor_order_log.shipped_at = self.parse_date(date_shipped)
-            self.vendor_order_log.carrier = self.get_carrier(tracking_num)
+            self.vendor_order_log.tracking_number = raw_tracking
+            self.vendor_order_log.shipped_at = parsed_date
+            self.vendor_order_log.carrier = self.get_carrier(raw_tracking)
+            self.vendor_order_log.hold_reason = None
+
             self.vendor_order_log.save()
             return True
-        else:
-            self.vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
-            self.vendor_order_log.save()
-            return False
+
+        return False
+
     
-
-
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
