@@ -555,7 +555,19 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
     }
-    
+
+    if (
+        not vendor_order_log.shipped_at
+        or not vendor_order_log.tracking_number
+        or not vendor_order_log.carrier
+    ):
+        logger.info(
+            f"Skipping eBay tracking push for order "
+            f"{vendor_order_log.reference_id}: "
+            f"shipment not complete"
+        )
+        return False
+        
     payload = {
         "shippedDate": vendor_order_log.shipped_at.isoformat(),
         "shippingCarrierCode": vendor_order_log.carrier,
