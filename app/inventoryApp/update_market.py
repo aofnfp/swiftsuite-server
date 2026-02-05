@@ -1,11 +1,14 @@
 import time
 from ratelimit import limits, sleep_and_retry
 import requests
-from rest_framework.decorators import api_view, permission_classes
+from django.apps import apps
 from .models import InventoryModel
-from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, Generalproducttable, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate
+from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, Generalproducttable, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Enrollment
+from django.db.models import Q
 from marketplaceApp.models import MarketplaceEnronment
 from woocommerce import API
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -155,3 +158,26 @@ def check_product_ended_status():
                 except Exception as e:
                     print(f"Failed to update woocommerce items: {e}")
                     continue
+
+
+# function to update ended status of items that are marked as sold out or deleted from the vendor in the inventory
+def check_and_update_ended_item_from_vendor():
+    # Get all user in marketplace to sync their products with vendor
+    user_token = MarketplaceEnronment.objects.all()
+    for user in user_token:
+        all_inventory_items = InventoryModel.objects.filter(user_id=user.user_id).exclude(vendor_name="Not Found")
+            
+        for item in all_inventory_items:
+            try:
+                model_name = item.vendor_name + "Update"
+                # Get the actual model class from the string name
+                model_class = apps.get_model('vendorEnrollment', model_name)
+                db_items = model_class.objects.get(sku=item.sku)
+            except Exception as e:
+                logger.error(f"Failed to fetch item from vendor update table with sku {item.sku}. Error: {e}")
+                item.quantity = 0
+                item.ends_status = "Deleted"
+                item.vendor_name = "Not Found"
+                item.save()
+            
+     

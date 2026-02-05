@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.core.cache import cache
 from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc_update
-from .update_market import check_product_ended_status, update_inventory_price_quantity
+from .update_market import check_product_ended_status, update_inventory_price_quantity, check_and_update_ended_item_from_vendor
 import logging
 logger = logging.getLogger(__name__)
 
@@ -93,3 +93,20 @@ def map_marketplace_items_to_vendor_task():
         return "mapping item completed successfully"
     finally:
         cache.delete(LOCK_KEY4)
+
+
+LOCK_KEY5 = "check_and_update_ended_item_from_vendor_task_lock"
+@shared_task(queue='default')
+def check_and_update_ended_item_from_vendor_task():
+    if not cache.add(LOCK_KEY5, "1", timeout=LOCK_TIMEOUT):
+        logger.info("check_and_update_ended_item_from_vendor_task skipped: already running")
+        return "Skipped (already running)"
+
+    logger.info("check_and_update_ended_item_from_vendor_task started")
+
+    try:
+        check_and_update_ended_item_from_vendor()
+        logger.info("check_and_update_ended_item_from_vendor_task completed successfully")
+        return "checking and updating ended items from vendor completed successfully"
+    finally:
+        cache.delete(LOCK_KEY5)

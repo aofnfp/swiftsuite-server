@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 
-
 # Function to refresh the access token using the refresh token
 def background_refresh_access_token():
     client_id = config("EB_CLIENT_ID")
@@ -53,7 +52,7 @@ def background_refresh_access_token():
             return Response(f"Failed to fetch user data {e}", status=status.HTTP_400_BAD_REQUEST)
         for user in user_data:
             access_token = user.access_token
-        refresh_token = user.refresh_token
+            refresh_token = user.refresh_token
 
         credentials = f"{client_id}:{client_secret}"
         credentials_base64 = base64.b64encode(credentials.encode()).decode()
@@ -83,6 +82,7 @@ def background_refresh_access_token():
         time.sleep(12 * 60)  # Sleep for 12 minutes before refreshing again (eBay tokens typically last for 10 minutes)
 
 threading.Thread(target=background_refresh_access_token, daemon=True).start()  # Start the token refresh in a background thread
+
 
 # Function to retrieve all fulfilment orders from Ebay
 def get_product_ordered_from_background(userid, enroll_id):
