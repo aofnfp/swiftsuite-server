@@ -229,12 +229,25 @@ class Woo2(APIView):
 
 
 class OrderSyncView(viewsets.ReadOnlyModelViewSet):
-    queryset = OrdersOnEbayModel.objects.all().order_by('-creationDate')
+    queryset = (
+        OrdersOnEbayModel.objects
+        .prefetch_related("vendor_orders")
+        .order_by("-creationDate")
+    )
+
     serializer_class = OrderSyncSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     pagination_class = CustomOffsetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus']
+
+    filterset_fields = {
+        'orderId': ['exact', 'icontains'],
+        'creationDate': ['gte', 'lte'],
+        'vendor_name': ['exact'],
+        'market_name': ['exact'],
+        'orderFulfillmentStatus': ['exact'],
+    }
+
 
     search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus']
 
