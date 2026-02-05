@@ -53,24 +53,24 @@ def manual_sync_order_with_local_task(userid):
         cache.delete(LOCK_KEY)
 
 
-LOCK_KEY2 = "background_refresh_access_token_lock"
-LOCK_TIMEOUT2 = 60 * 10  # 10 minutes adjust based on max runtime
-@shared_task(queue='heavy-inv')
-def background_refresh_access_token_task():
-    # Attempt to acquire lock; skip if already running
-    if not cache.add(LOCK_KEY2, "1", timeout=LOCK_TIMEOUT2):
-        logger.info("background_refresh_access_token_task skipped: already running")
-        return "Skipped (already running)"
+# LOCK_KEY2 = "background_refresh_access_token_lock"
+# LOCK_TIMEOUT2 = 60 * 10  # 10 minutes adjust based on max runtime
+# @shared_task(queue='heavy-inv')
+# def background_refresh_access_token_task():
+#     # Attempt to acquire lock; skip if already running
+#     if not cache.add(LOCK_KEY2, "1", timeout=LOCK_TIMEOUT2):
+#         logger.info("background_refresh_access_token_task skipped: already running")
+#         return "Skipped (already running)"
 
-    logger.info("background_refresh_access_token_task started")
-    try:
-        # Call your existing sync logic
-        background_refresh_access_token()
-        logger.info(f"background_refresh_access_token_task completed successfully")
-        return f"Refresh access token completed successfully"
-    finally:
-        # Always release the lock
-        cache.delete(LOCK_KEY2)
+#     logger.info("background_refresh_access_token_task started")
+#     try:
+#         # Call your existing sync logic
+#         background_refresh_access_token()
+#         logger.info(f"background_refresh_access_token_task completed successfully")
+#         return f"Refresh access token completed successfully"
+#     finally:
+#         # Always release the lock
+#         cache.delete(LOCK_KEY2)
 
 
 @shared_task(queue='heavy-cpu')

@@ -13,7 +13,7 @@ import requests
 from decouple import config
 from django.db import transaction
 from django.utils import timezone
-
+import threading
 import logging
 logger = logging.getLogger(__name__)
 
@@ -82,6 +82,7 @@ def background_refresh_access_token():
         logger.info(f"Successfully refreshed access token with access_token: {access_token}")
         time.sleep(12 * 60)  # Sleep for 12 minutes before refreshing again (eBay tokens typically last for 10 minutes)
 
+threading.Thread(target=background_refresh_access_token, daemon=True).start()  # Start the token refresh in a background thread
 
 # Function to retrieve all fulfilment orders from Ebay
 def get_product_ordered_from_background(userid, enroll_id):
