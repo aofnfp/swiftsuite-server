@@ -155,7 +155,10 @@ def check_vendor_order_status():
     logger.info("Starting check_vendor_order_status task")
     
     processing_orders = VendorOrderLog.objects.filter(
-        status=VendorOrderLog.VendorOrderStatus.PROCESSING
+        status__in=[
+            VendorOrderLog.VendorOrderStatus.PROCESSING,
+            VendorOrderLog.VendorOrderStatus.SHIPPED,
+        ]
     )
 
     count = 0
