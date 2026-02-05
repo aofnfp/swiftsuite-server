@@ -235,15 +235,21 @@ def place_order_fragrancex(request, market_name, orderid):
             vendor='Fragrancex',
             status=VendorOrderLog.VendorOrderStatus.CREATED
         )
+    elif VendorOrder.status in [
+            VendorOrderLog.VendorOrderStatus.PROCESSING,
+            VendorOrderLog.VendorOrderStatus.SHIPPED,
+            VendorOrderLog.VendorOrderStatus.DELIVERED,
+        ]:
+        return JsonResponse(
+            {"message": "Order is already placed with FragranceX."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     
     # Initialize client
     order_client = FrgxOrderApiClient(VendorOrder)
-    
-    ordered_details = order_client.get_order_details()
-    
+    ordered_details = order_client.get_order_details()  
     # Define bulk order payload
     bulk_order = order_client.build_bulk_payload(ordered_details)
-    
     # Place the order
     result = order_client.place_bulk_order(bulk_order)
    
