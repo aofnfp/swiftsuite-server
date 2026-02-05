@@ -65,7 +65,7 @@ def background_refresh_access_token_task():
     logger.info("background_refresh_access_token_task started")
     try:
         # Call your existing sync logic
-        access_token = background_refresh_access_token()
+        background_refresh_access_token()
         logger.info(f"background_refresh_access_token_task completed successfully")
         return f"Refresh access token completed successfully"
     finally:

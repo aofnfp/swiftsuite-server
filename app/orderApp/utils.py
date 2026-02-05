@@ -11,10 +11,11 @@ from rest_framework import status
 import base64
 import requests
 from decouple import config
-import logging
 from django.db import transaction
 from django.utils import timezone
+from .tasks import background_refresh_access_token_task
 
+import logging
 logger = logging.getLogger(__name__)
 
 
@@ -46,12 +47,13 @@ def background_refresh_access_token():
             "https://api.ebay.com/oauth/api_scope/sell.stores",
             "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
         ]
-    try:
-        user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
-    except Exception as e:
-        return Response(f"Failed to fetch user data {e}", status=status.HTTP_400_BAD_REQUEST)
-    for user in user_data:
-        access_token = user.access_token
+    while True:
+        try:
+            user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
+        except Exception as e:
+            return Response(f"Failed to fetch user data {e}", status=status.HTTP_400_BAD_REQUEST)
+        for user in user_data:
+            access_token = user.access_token
         refresh_token = user.refresh_token
 
         credentials = f"{client_id}:{client_secret}"
@@ -78,8 +80,10 @@ def background_refresh_access_token():
             return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
         MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
-        return access_token
+        logger.info(f"Successfully refreshed access token with access_token: {access_token}")
+        time.sleep(12 * 60)  # Sleep for 12 minutes before refreshing again (eBay tokens typically last for 10 minutes)
 
+background_refresh_access_token_task.delay()  # Start the background task to refresh access tokens
 
 
 # Function to retrieve all fulfilment orders from Ebay
