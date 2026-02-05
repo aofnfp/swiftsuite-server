@@ -169,7 +169,7 @@ class RsrOrderApiClient:
     def parse_date(self, date_str):
         if not date_str:
             return None
-            
+
         shipping_date = datetime.strptime(date_str, "%Y%m%d")
         if shipping_date:
             shipping_date = make_aware(shipping_date)
@@ -348,6 +348,7 @@ def check_order_rsr(request, market_name, orderid):
     if result.get("StatusCode") == "00":
         rsr_client.update_local_status(result)
         if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+            from .utils import push_tracking_to_ebay
             push_tracking_to_ebay(vendor_order)
         
         return JsonResponse(
@@ -362,7 +363,7 @@ def check_order_rsr(request, market_name, orderid):
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def push_tracking_to_ebay(request, order_id):
+def push_tracking(request, order_id):
     vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
     if not vendor_order:
         return JsonResponse(
