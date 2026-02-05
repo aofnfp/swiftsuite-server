@@ -260,7 +260,16 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         
+        # check if user is subaccount
+        user = self.request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+            else:
+                userid = user.id
+        
         vendor_status = self.request.query_params.get('vendor_status', None)
         if vendor_status:
             queryset = queryset.filter(vendor_orders__status=vendor_status)
-        return queryset
+
+        return queryset.filter(user=userid)
