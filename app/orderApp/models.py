@@ -97,6 +97,8 @@ class VendorOrderLog(models.Model):
     tracking_url = models.URLField(null=True, blank=True)
     shipped_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
+    hold_reason = models.CharField(max_length=100, null=True, blank=True)
+    
 
     # Vendor response / payload
     raw_request = models.JSONField(null=True, blank=True)

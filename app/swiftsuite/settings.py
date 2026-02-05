@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'rest_framework_extensions',
     'drf_spectacular',
+    'django_filters',
     'rest_framework_simplejwt.token_blacklist',
     'django_cleanup.apps.CleanupConfig'
 ]

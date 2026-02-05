@@ -78,10 +78,10 @@ def process_vendor_orders():
     """Function to process vendor orders"""
     cutoff_date = timezone.now() - timedelta(days=2)
     ACTIVE_STATUSES = [
-        VendorOrderLog.VendorOrderStatus.CREATED,
         VendorOrderLog.VendorOrderStatus.PROCESSING,
         VendorOrderLog.VendorOrderStatus.SHIPPED,
         VendorOrderLog.VendorOrderStatus.DELIVERED,
+        VendorOrderLog.VendorOrderStatus.FAILED,
     ]
 
     active_vendor_orders = VendorOrderLog.objects.filter(
@@ -105,14 +105,7 @@ def process_vendor_orders():
         
         # dispatch order to vendor
         if order_log:
-            if not order_log.enrollment:
-                continue
-            dispatch_order.delay(order_log.id)
-        else:
-            logger.info(
-                f"Skipped VendorOrderLog creation for order {order.orderId} "
-                f"(already has active vendor order)"
-            )
+           dispatch_order.delay(order_log.id)
             
     logger.info("order log entries created for vendor orders and dispatched.")
         
@@ -204,14 +197,16 @@ def check_vendor_order_status():
                 
                 if result.get("StatusCode") == "00":
                     if client.update_local_status(result):
-                        push_tracking_to_ebay(vendor_order)
+                        if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+                            push_tracking_to_ebay(vendor_order)
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
                 from .fragranceX_order import FrgxOrderApiClient
                 client = FrgxOrderApiClient(vendor_order)
                 if client.check_and_update_status():
-                    push_tracking_to_ebay(vendor_order)
+                    if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+                        push_tracking_to_ebay(vendor_order)
                     status_updated = True
             
             if status_updated:

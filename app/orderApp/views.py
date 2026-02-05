@@ -2,18 +2,21 @@ import json
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from marketplaceApp.views import Ebay
-from .serializers import CancelOrderModelSerializer
+from .serializers import CancelOrderModelSerializer, OrderSyncSerializer
 from .models import OrdersOnEbayModel
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventoryApp.models import InventoryModel
 from accounts.permissions import IsOwnerOrHasPermission
 from vendorEnrollment.utils import with_module
 from .tasks import manual_sync_order_with_local_task
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from vendorEnrollment.pagination import CustomOffsetPagination
 
 
 # Create your views here.
@@ -223,3 +226,50 @@ class Walmart(APIView):
 
 class Woo2(APIView):
     pass
+
+
+class OrderSyncView(viewsets.ReadOnlyModelViewSet):
+    queryset = (
+        OrdersOnEbayModel.objects
+        .prefetch_related("vendor_orders")
+        .order_by("-creationDate")
+    )
+
+    serializer_class = OrderSyncSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    pagination_class = CustomOffsetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    filterset_fields = {
+        'orderId': ['exact', 'icontains'],
+        'creationDate': ['gte', 'lte'],
+        'vendor_name': ['exact'],
+        'market_name': ['exact'],
+        'orderFulfillmentStatus': ['exact'],
+    }
+
+
+    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus']
+
+    ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name']
+    
+    @with_module('orders')
+    def list(self, request):
+        return super().list(request)
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # check if user is subaccount
+        user = self.request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+            else:
+                userid = user.id
+        
+        vendor_status = self.request.query_params.get('vendor_status', None)
+        if vendor_status:
+            queryset = queryset.filter(vendor_orders__status=vendor_status)
+
+        return queryset.filter(user=userid)

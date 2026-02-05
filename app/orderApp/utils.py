@@ -445,12 +445,9 @@ def get_ebay_order_details(user_id, market_name, ebay_order_id):
         return None
     
     
-    
 def create_vendor_order_log(order: OrdersOnEbayModel):
     with transaction.atomic():
         # Lock the order to serialize attempts for this specific order
-        # (Assuming you don't need to modify 'order' itself, but just want to lock)
-        # We lock the order row to ensure no other process is creating a log for this order simultaneously.
         _ = OrdersOnEbayModel.objects.select_for_update().get(pk=order.pk)
 
         # Check for ANY existing log for this order+vendor
@@ -460,29 +457,13 @@ def create_vendor_order_log(order: OrdersOnEbayModel):
         ).first()
 
         if existing_log:
-            # If it failed previously, we can retry by resetting it
-            if existing_log.status == VendorOrderLog.VendorOrderStatus.FAILED:
-                existing_log.status = VendorOrderLog.VendorOrderStatus.CREATED
-                existing_log.error_message = None
-                existing_log.raw_response = None
-                existing_log.save()
-                return existing_log
-            else:
-                # It's already active (CREATED, PROCESSING, SHIPPED, DELIVERED)
-                # so we do nothing and return None to signal "no new work needed"
-                return None
+           return existing_log
 
         # Logic to create new if strictly not exists
         enrollment = get_vendor_enrollment(order.marketItemId)
         if not enrollment:
             logger.error(f"Enrollment not found for order-{order.orderId} with marketItemId {order.marketItemId}.")
-            return VendorOrderLog.objects.create(
-                order=order,
-                vendor=order.vendor_name,
-                status=VendorOrderLog.VendorOrderStatus.FAILED,
-                error_message=f"Enrollment not found for order-{order.orderId} with marketItemId {order.marketItemId}.",
-            )
-            
+            return None
         
         order_log = VendorOrderLog.objects.create(
             order=order,
@@ -517,7 +498,6 @@ def get_vendor_enrollment(marketItemId):
     return inventory.product.enrollment
 
 
-
 def get_order_details_by_order_id(user_id, market_name, order_id):
 
     from marketplaceApp.views import Ebay
@@ -548,18 +528,10 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     """
     logger.info(f"Preparing to push tracking for order {vendor_order_log.order.orderId}")
     
-    # 1. Validate data availability
-    # if not vendor_order_log.tracking_number or not vendor_order_log.carrier or not vendor_order_log.shipped_at:
-    #     logger.warning(
-    #         f"Missing tracking info for VendorOrderLog {vendor_order_log.id}. Cannot push to eBay."
-    #     )
-    #     return False
-
     user_id = vendor_order_log.enrollment.user.id
     ebay_order_id = vendor_order_log.order.orderId
     
-    # 2. Get Ebay credentials
-    # We query MarketplaceEnronment directly to avoid circular imports with views/Ebay view
+    # Get Ebay credentials
     env = MarketplaceEnronment.objects.filter(
         user_id=user_id,
         marketplace_name="Ebay"
@@ -587,7 +559,19 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
     }
-    
+
+    if (
+        not vendor_order_log.shipped_at
+        or not vendor_order_log.tracking_number
+        or not vendor_order_log.carrier
+    ):
+        logger.info(
+            f"Skipping eBay tracking push for order "
+            f"{vendor_order_log.reference_id}: "
+            f"shipment not complete"
+        )
+        return False
+        
     payload = {
         "shippedDate": vendor_order_log.shipped_at.isoformat(),
         "shippingCarrierCode": vendor_order_log.carrier,

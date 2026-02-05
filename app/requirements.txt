@@ -3,6 +3,7 @@ asgiref==3.7.2
 attrs==25.4.0
 beautifulsoup4==4.14.2
 billiard==4.2.1
+bs4==0.0.2
 celery==5.5.3
 certifi==2024.8.30
 cffi==2.0.0
@@ -13,13 +14,16 @@ click-plugins==1.1.1.2
 click-repl==0.3.0
 cloudinary==1.44.1
 colorama==0.4.6
+cron_descriptor==2.0.6
 cryptography==46.0.3
 Django==5.0.1
 django-cleanup==9.0.0
 django-cloudinary-storage==0.3.0
 django-cors-headers==4.3.1
 django-decouple==2.1
+django-filter==24.3
 django-redis==6.0.0
+django-timezone-field==7.2.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
 drf-extensions==0.8.0
@@ -46,6 +50,7 @@ prompt_toolkit==3.0.52
 pycparser==2.23
 PyJWT==2.8.0
 pyotp==2.9.0
+python-crontab==3.3.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
 PyYAML==6.0.3
@@ -72,4 +77,3 @@ WooCommerce==3.0.0
 zipp==3.23.0
 zope.event==5.1
 zope.interface==8.0
-bs4
