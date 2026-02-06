@@ -33,6 +33,7 @@ from django.db.models import Q
 from accounts.permissions import IsOwnerOrHasPermission
 from vendorEnrollment.utils import with_module
 from .tasks import complete_enrolment_price_update_task
+from django.db import transaction
 
 
 
@@ -281,40 +282,40 @@ class Ebay:
     # Function to refresh the access token using the refresh token
     def refresh_access_token(self, userid, market_name):
         eb = Ebay()
+        with transaction.atomic():
+            try:
+                connection = MarketplaceEnronment.objects.all().select_for_update().get(user_id=userid, marketplace_name=market_name)
+            except Exception as e:
+                return Response(f"Failed to fetch access token", status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            connection = MarketplaceEnronment.objects.all().get(user_id=userid, marketplace_name=market_name)
-        except Exception as e:
-            return Response(f"Failed to fetch access token", status=status.HTTP_400_BAD_REQUEST)
-        
-        access_token = connection.access_token
-        refresh_token = connection.refresh_token
+            access_token = connection.access_token
+            refresh_token = connection.refresh_token
 
-        credentials = f"{eb.client_id}:{eb.client_secret}"
-        credentials_base64 = base64.b64encode(credentials.encode()).decode()
-        
-        headers = {
-            "Authorization": f"Basic {credentials_base64}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        body = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
-        }
+            credentials = f"{eb.client_id}:{eb.client_secret}"
+            credentials_base64 = base64.b64encode(credentials.encode()).decode()
+            
+            headers = {
+                "Authorization": f"Basic {credentials_base64}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            body = {
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "scope": " ".join(eb.scopes)  # Ensure scope is passed correctly
+            }
 
-        response = requests.post(eb.token_url, headers=headers, data=body)
-        if response.status_code != 200:
-            return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
+            response = requests.post(eb.token_url, headers=headers, data=body)
+            if response.status_code != 200:
+                return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
 
-        result = response.json()
-        access_token = result.get('access_token')
-        
-        if not access_token:
-            return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
+            result = response.json()
+            access_token = result.get('access_token')
+            
+            if not access_token:
+                return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
-        MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
-        return access_token
+            MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).update(access_token=access_token, refresh_token=refresh_token)
+            return access_token
     
     # Function to refresh the access token using an api call
     @with_module('inventory')

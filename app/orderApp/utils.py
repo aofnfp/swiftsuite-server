@@ -516,6 +516,10 @@ def get_order_details_by_order_id(user_id, market_name, order_id):
         order_details = response.json()
         return order_details
     else:
+        logger.error(
+            f"eBay order details failed | "
+            f"status={response.status_code} | body={response.text}"
+        )
         return None
 
 
