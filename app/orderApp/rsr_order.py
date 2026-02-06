@@ -393,9 +393,10 @@ def push_tracking(request, order_id):
         )
     
     from .utils import push_tracking_to_ebay
-    if push_tracking_to_ebay(vendor_order):
+    res = push_tracking_to_ebay(vendor_order)
+    if res:
         return JsonResponse(
-            {"message": "Tracking pushed to eBay successfully"},
+            {"message": "Tracking pushed to eBay successfully", "data": res},
             status=status.HTTP_200_OK
         )
     
