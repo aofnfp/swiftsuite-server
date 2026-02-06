@@ -406,7 +406,7 @@ def push_tracking(request, order_id):
     )
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_shipping_fulfillment(request, order_id):
     user = request.user
