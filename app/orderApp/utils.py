@@ -600,16 +600,32 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             )
             vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
             vendor_order_log.delivered_at = timezone.now()
-            vendor_order_log.save()
-            return response.json()
+            vendor_order_log.save(update_fields=["status", "delivered_at"])
+
+            return {
+                "success": True,
+                "status_code": response.status_code,
+                "raw_body": response.text,
+                "headers": dict(response.headers),
+            }
             
         else:
             logger.error(
                 f"Failed to push tracking to eBay. Status: {response.status_code}, "
                 f"Response: {response.text}"
             )
-            return response.json()
+            return {
+                "success": False,
+                "status_code": response.status_code,
+                "raw_body": response.text,
+                "headers": dict(response.headers),
+            }
             
     except Exception as e:
         logger.error(f"Exception pushing tracking to eBay for order {ebay_order_id}: {e}")
-        return False
+        return {
+            "success": False,
+            "status_code": 500,
+            "raw_body": str(e),
+            "headers": None,
+        }
