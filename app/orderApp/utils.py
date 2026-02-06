@@ -602,7 +602,9 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             )
             vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
             vendor_order_log.delivered_at = timezone.now()
-            vendor_order_log.save(update_fields=["status", "delivered_at"])
+            vendor_order_log.fulfillment_url = response.headers.get('Location')
+
+            vendor_order_log.save(update_fields=["status", "delivered_at", "fulfillment_url"])
 
             return {
                 "success": True,

@@ -108,6 +108,7 @@ class VendorOrderLog(models.Model):
     # Meta
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    fulfillment_url = models.URLField(null=True, blank=True)
 
 
     def __str__(self):
