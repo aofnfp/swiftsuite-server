@@ -401,6 +401,6 @@ def push_tracking(request, order_id):
         )
     
     return JsonResponse(
-        {"message": "Failed to push tracking to eBay"},
+        {"message": "Failed to push tracking to eBay", "data": res},
         status=status.HTTP_400_BAD_REQUEST
     )
