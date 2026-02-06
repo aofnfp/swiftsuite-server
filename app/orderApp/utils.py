@@ -608,7 +608,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                 f"Failed to push tracking to eBay. Status: {response.status_code}, "
                 f"Response: {response.text}"
             )
-            return False
+            return response.json()
             
     except Exception as e:
         logger.error(f"Exception pushing tracking to eBay for order {ebay_order_id}: {e}")
