@@ -496,7 +496,21 @@ def get_vendor_enrollment(marketItemId):
     return inventory.product.enrollment
 
 
-def get_order_details_by_order_id(user_id, market_name, order_id, access_token):
+def get_access_token(user_id, market_name):
+    env = MarketplaceEnronment.objects.filter(
+        user_id=user_id,
+        marketplace_name=market_name
+    ).first()
+    
+    if not env:
+        logger.error(f"No {market_name} environment found for user {user_id}")
+        return None
+        
+    return env.access_token
+
+
+def get_order_details_by_order_id(user_id, market_name, order_id):
+    access_token = get_access_token(user_id, market_name)
     
     EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
     headers = {
@@ -526,19 +540,9 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     
     user_id = vendor_order_log.enrollment.user.id
     ebay_order_id = vendor_order_log.order.orderId
+    market_name = vendor_order_log.order.market_name
     
-    # Get Ebay credentials
-    env = MarketplaceEnronment.objects.filter(
-        user_id=user_id,
-        marketplace_name="Ebay"
-    ).first()
-    
-    if not env:
-        logger.error(f"No Ebay environment found for user {user_id}")
-        return False
-        
-    access_token = env.access_token
-    order_details = get_order_details_by_order_id(user_id, "Ebay", ebay_order_id, access_token)
+    order_details = get_order_details_by_order_id(user_id, market_name, ebay_order_id)
     if not order_details:
         logger.error(f"Failed to get order details for order {ebay_order_id}")
         return False
@@ -548,6 +552,10 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         logger.error(f"Failed to get line item id for order {ebay_order_id}")
         return False
 
+    access_token = get_access_token(user_id, market_name)
+    if not access_token:
+        logger.error(f"Failed to get access token for order {ebay_order_id}")
+        return False
 
     url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}/shipping_fulfillment'
 
