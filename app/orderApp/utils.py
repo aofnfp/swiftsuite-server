@@ -46,6 +46,8 @@ def background_refresh_access_token():
             "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
         ]
     while True:
+        refresh_token = None
+        access_token = None
         try:
             user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
         except Exception as e:
@@ -577,6 +579,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         return False
         
     payload = {
+        "shippingFulfillmentId": f"fulfillment-{ebay_order_id}",
         "shippedDate": vendor_order_log.shipped_at.isoformat(),
         "shippingCarrierCode": vendor_order_log.carrier,
         "trackingNumber": vendor_order_log.tracking_number,
