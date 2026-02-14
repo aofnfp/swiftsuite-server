@@ -250,72 +250,79 @@ def to_float(value, default=0.0):
         
 @shared_task(queue='default')        
 def update_inventory(enrollment_id):
-    # try:
-        enrollment = Enrollment.objects.get(id=enrollment_id)
-        logger.info(f"Updating inventory for enrollment {enrollment_id}-{enrollment.identifier}")
+    enrollment = Enrollment.objects.get(id=enrollment_id)
+    logger.info(f"Updating inventory for enrollment {enrollment_id}-{enrollment.identifier}")
 
-        shipping_cost = to_float(enrollment.shipping_cost)
-        fixed_markup = to_float(enrollment.fixed_markup)
-        percentage_markup = to_float(enrollment.percentage_markup)
+    shipping_cost = to_float(enrollment.shipping_cost)
+    fixed_markup = to_float(enrollment.fixed_markup)
+    percentage_markup = to_float(enrollment.percentage_markup)
+    
+    vendor_name = enrollment.vendor.name.lower()
+    inventory_items = InventoryModel.objects.filter(product__enrollment=enrollment)
+    total_items = inventory_items.count()
+    updated_count = 0
+    skipped_count = 0
+
+    for item in inventory_items:
+
+        if vendor_name == 'fragrancex':
+            product = FragrancexUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'rsr':
+            product = RsrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'lipsey':
+            product = LipseyUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'cwr':
+            product = CwrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'zanders':
+            product = ZandersUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        else:
+            product = None
+            
+        if not product:
+            skipped_count += 1
+            logger.warning(f"Skipped SKU {item.sku} — no matching {vendor_name} update entry for enrollment {enrollment.identifier}")
+            continue
         
-        for item in InventoryModel.objects.filter(product__enrollment=enrollment):
+        price = to_float(product.price)
 
-            vendor_name = enrollment.vendor.name.lower()
-            if vendor_name == 'fragrancex':
-                product = FragrancexUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'rsr':
-                product = RsrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'lipsey':
-                product = LipseyUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'cwr':
-                product = CwrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'zanders':
-                product = ZandersUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            else:
-                product = None
-                
-            if not product:
-                continue
-            
-            price = to_float(product.price)
-
-            total_price = round(
-                price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost,
-                2
-            )
-            
-            item.total_product_cost = total_price
-            item.shipping_cost = shipping_cost
-            item.price = price
-            
-            map_value = to_float(product.map)
-
-            item_fixed = to_float(item.fixed_markup)
-            item_pct = to_float(item.fixed_percentage_markup)
-            item_profit = to_float(item.profit_margin)
-
-            start_price = (
-                total_price +
-                item_fixed +
-                ((item_pct / 100) * total_price) +
-                ((item_profit / 100) * total_price)
-            )
-
-            if map_value:
-                start_price = max(start_price, map_value)
-
-            item.start_price = round(start_price, 2)
-            item.quantity = product.quantity
-            item.save()
-
-            # Keep Generalproducttable in sync so the 8-hour
-            # update_inventory_price_quantity_task reads fresh data
-            general_product = item.product  # FK to Generalproducttable
-            if general_product:
-                general_product.quantity = product.quantity
-                general_product.price = price
-                general_product.total_product_cost = total_price
-                general_product.save(update_fields=['quantity', 'price', 'total_product_cost'])
+        total_price = round(
+            price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost,
+            2
+        )
         
-    # except Exception as e:
-    #     print(f"Error updating shipping price for enrollment {enrollment_id}: {e}")
+        item.total_product_cost = total_price
+        item.shipping_cost = shipping_cost
+        item.price = price
+        
+        map_value = to_float(product.map)
+
+        item_fixed = to_float(item.fixed_markup)
+        item_pct = to_float(item.fixed_percentage_markup)
+        item_profit = to_float(item.profit_margin)
+
+        start_price = (
+            total_price +
+            item_fixed +
+            ((item_pct / 100) * total_price) +
+            ((item_profit / 100) * total_price)
+        )
+
+        if map_value:
+            start_price = max(start_price, map_value)
+
+        item.start_price = round(start_price, 2)
+        item.quantity = product.quantity
+        item.save()
+
+        # Keep Generalproducttable in sync so the 8-hour
+        # update_inventory_price_quantity_task reads fresh data
+        general_product = item.product  # FK to Generalproducttable
+        if general_product:
+            general_product.quantity = product.quantity
+            general_product.price = price
+            general_product.total_product_cost = total_price
+            general_product.save(update_fields=['quantity', 'price', 'total_product_cost'])
+        
+        updated_count += 1
+
+    logger.info(f"Inventory sync for {enrollment.identifier}: {updated_count}/{total_items} updated, {skipped_count} skipped (no update entry)")
