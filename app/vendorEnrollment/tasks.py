@@ -4,7 +4,7 @@ import os, csv, time
 from ftplib import FTP
 from vendorActivities.apiSupplier import getFragranceXData, getRSRWithAttr
 from .utils import VendorDataMixin
-from celery import shared_task
+from celery import shared_task, chain
 import logging
 from inventoryApp.models import InventoryModel
 
@@ -228,7 +228,10 @@ def update_all_enrollments():
         try:
             enrollment = task.enrollment
             logger.info(f"Processing enrollment {enrollment.identifier}")
-            update_vendor_data.delay(enrollment.id)
+            chain(
+                update_vendor_data.s(enrollment.id),
+                update_inventory.s()
+            ).delay()
             task.processed = True
             task.result = "Success"
         except Exception as e:
@@ -302,7 +305,17 @@ def update_inventory(enrollment_id):
                 start_price = max(start_price, map_value)
 
             item.start_price = round(start_price, 2)
+            item.quantity = product.quantity
             item.save()
+
+            # Keep Generalproducttable in sync so the 8-hour
+            # update_inventory_price_quantity_task reads fresh data
+            general_product = item.product  # FK to Generalproducttable
+            if general_product:
+                general_product.quantity = product.quantity
+                general_product.price = price
+                general_product.total_product_cost = total_price
+                general_product.save(update_fields=['quantity', 'price', 'total_product_cost'])
         
     except Exception as e:
         print(f"Error updating shipping price for enrollment {enrollment_id}: {e}")

@@ -268,6 +268,14 @@ class VendorDataMixin:
         'zanders': 'mfgpnumber',
     }
 
+    vendor_msrp_fields = {
+        'fragrancex': 'retailPriceUSD',
+        'lipsey': 'msrp',
+        'rsr': 'msrp',
+        'cwr': 'list_price',
+        'zanders': 'msrp',
+    }
+
     def get_vendor_config(self, vendor_name):
         vendor_name = vendor_name.lower()
         if vendor_name not in self.vendor_models:
@@ -278,6 +286,7 @@ class VendorDataMixin:
             'update_model': self.vendor_models[vendor_name][1],
             'id_field': self.vendor_id_fields[vendor_name],
             'mpn_field': self.vendor_mpn_fields[vendor_name],
+            'msrp_field': self.vendor_msrp_fields[vendor_name],
         }
 
     def product_matches_filters(self, product, enrollment, vendor_name):
@@ -343,6 +352,7 @@ class VendorDataMixin:
         config = self.get_vendor_config(enrollment.vendor.name)
         id_field = config['id_field']
         mpn_field = config['mpn_field']
+        msrp_field = config['msrp_field']
         supplier_name = config['vendor_name']
 
         item_ids = df[id_column_name].tolist()
@@ -373,10 +383,12 @@ class VendorDataMixin:
             total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping, 2)
 
             existing = update_map.get(product.id)
+            msrp_value = getattr(product, msrp_field, None)
             if existing:
                 existing.price = price
                 existing.quantity = quantity
                 existing.total_price = total_price
+                existing.msrp = msrp_value
                 updates.append(existing)
             else:
                 new_entries.append(
@@ -385,6 +397,7 @@ class VendorDataMixin:
                         upc=getattr(product, 'upc', None),
                         sku=getattr(product, id_field, None),
                         mpn=getattr(product, mpn_field, None),
+                        msrp=msrp_value,
                         account=enrollment.account,
                         vendor=enrollment.vendor,
                         enrollment = enrollment,
@@ -396,7 +409,7 @@ class VendorDataMixin:
 
         with transaction.atomic():
             if updates:
-                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'enrollment'], batch_size=500)
+                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'msrp', 'enrollment'], batch_size=500)
             if new_entries:
                 model_update.objects.bulk_create(new_entries, batch_size=500)
 

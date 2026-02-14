@@ -579,7 +579,6 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         return False
         
     payload = {
-        "shippingFulfillmentId": f"fulfillment-{ebay_order_id}",
         "shippedDate": vendor_order_log.shipped_at.isoformat(),
         "shippingCarrierCode": vendor_order_log.carrier,
         "trackingNumber": vendor_order_log.tracking_number,
