@@ -250,7 +250,7 @@ def to_float(value, default=0.0):
         
 @shared_task(queue='default')        
 def update_inventory(enrollment_id):
-    try:
+    # try:
         enrollment = Enrollment.objects.get(id=enrollment_id)
         logger.info(f"Updating inventory for enrollment {enrollment_id}-{enrollment.identifier}")
 
@@ -317,5 +317,5 @@ def update_inventory(enrollment_id):
                 general_product.total_product_cost = total_price
                 general_product.save(update_fields=['quantity', 'price', 'total_product_cost'])
         
-    except Exception as e:
-        print(f"Error updating shipping price for enrollment {enrollment_id}: {e}")
+    # except Exception as e:
+    #     print(f"Error updating shipping price for enrollment {enrollment_id}: {e}")
