@@ -256,12 +256,17 @@ def update_inventory(enrollment_id):
     shipping_cost = to_float(enrollment.shipping_cost)
     fixed_markup = to_float(enrollment.fixed_markup)
     percentage_markup = to_float(enrollment.percentage_markup)
+    stock_minimum = enrollment.stock_minimum or 0
     
     vendor_name = enrollment.vendor.name.lower()
     inventory_items = InventoryModel.objects.filter(product__enrollment=enrollment)
     total_items = inventory_items.count()
     updated_count = 0
     skipped_count = 0
+
+    inventory_to_update = []
+    general_products_to_update = []
+    BATCH_SIZE = 500
 
     for item in inventory_items:
 
@@ -311,18 +316,37 @@ def update_inventory(enrollment_id):
             start_price = max(start_price, map_value)
 
         item.start_price = round(start_price, 2)
-        item.quantity = product.quantity
-        item.save()
+
+        # If vendor quantity is below the set minimum, render it as 0
+        quantity = product.quantity if product.quantity >= stock_minimum else 0
+        item.quantity = quantity
+        inventory_to_update.append(item)
 
         # Keep Generalproducttable in sync so the 8-hour
         # update_inventory_price_quantity_task reads fresh data
         general_product = item.product  # FK to Generalproducttable
         if general_product:
-            general_product.quantity = product.quantity
+            general_product.quantity = quantity
             general_product.price = price
             general_product.total_product_cost = total_price
-            general_product.save(update_fields=['quantity', 'price', 'total_product_cost'])
+            general_products_to_update.append(general_product)
         
         updated_count += 1
+
+    # Flush all changes in batches
+    if inventory_to_update:
+        InventoryModel.objects.bulk_update(
+            inventory_to_update,
+            ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity'],
+            batch_size=BATCH_SIZE
+        )
+
+    if general_products_to_update:
+        from .models import Generalproducttable
+        Generalproducttable.objects.bulk_update(
+            general_products_to_update,
+            ['quantity', 'price', 'total_product_cost'],
+            batch_size=BATCH_SIZE
+        )
 
     logger.info(f"Inventory sync for {enrollment.identifier}: {updated_count}/{total_items} updated, {skipped_count} skipped (no update entry)")
