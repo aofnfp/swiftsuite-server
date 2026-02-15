@@ -413,4 +413,19 @@ class VendorDataMixin:
             if new_entries:
                 model_update.objects.bulk_create(new_entries, batch_size=500)
 
+            # Zero out quantity for FragranceX products not present in the latest update
+            if supplier_name == 'fragrancex':
+                updated_ids = {u.product_id for u in updates}
+                new_ids = {n.product_id for n in new_entries}
+                seen_product_ids = updated_ids | new_ids
+
+                stale_qs = model_update.objects.filter(
+                    account=enrollment.account,
+                    enrollment=enrollment,
+                ).exclude(product_id__in=seen_product_ids)
+
+                stale_count = stale_qs.update(quantity=0)
+                if stale_count:
+                    print(f"Zeroed quantity for {stale_count} stale FragranceX update records.")
+
         print(f"Processed {len(updates)} updates and {len(new_entries)} new entries.")
