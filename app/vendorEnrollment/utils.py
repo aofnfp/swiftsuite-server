@@ -299,6 +299,7 @@ class VendorDataMixin:
             if enrollment.brand and product.brandName not in enrollment.brand:
                 return False
         elif vendor_name == 'rsr':
+            return True
             # if enrollment.product_category and product.category_name not in enrollment.product_category:
             #     return False
             # if enrollment.manufacturer and product.manufacturer_name not in enrollment.manufacturer:
