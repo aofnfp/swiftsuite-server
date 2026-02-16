@@ -299,13 +299,12 @@ class VendorDataMixin:
             if enrollment.brand and product.brandName not in enrollment.brand:
                 return False
         elif vendor_name == 'rsr':
-            return True
-            # if enrollment.product_category and product.category_name not in enrollment.product_category:
-            #     return False
-            # if enrollment.manufacturer and product.manufacturer_name not in enrollment.manufacturer:
-            #     return False
-            # if enrollment.shippable and product.drop_shippable not in enrollment.shippable:
-            #     return False
+            if enrollment.product_category and product.category_name not in enrollment.product_category:
+                return False
+            if enrollment.manufacturer and product.manufacturer_name not in enrollment.manufacturer:
+                return False
+            if enrollment.shippable and product.drop_shippable not in enrollment.shippable:
+                return False
         elif vendor_name == 'cwr':
             
             if product.returnable == False:
@@ -376,9 +375,6 @@ class VendorDataMixin:
             price = row[price_column_name]
             quantity = row[qty_column_name]
             product = product_map.get(item_id)
-
-            if not product or not self.product_matches_filters(product, enrollment, supplier_name):
-                continue
 
             shipping = float(product.avgshipcost or 0) if shipping_cost_avg else shipping_cost
             total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping, 2)

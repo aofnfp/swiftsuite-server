@@ -578,15 +578,29 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         )
         return False
         
+    # payload = {
+    #     "shippedDate": vendor_order_log.shipped_at.isoformat(),
+    #     "shippingCarrierCode": vendor_order_log.carrier,
+    #     "trackingNumber": vendor_order_log.tracking_number,
+    #     "lineItems": [
+    #         {
+    #             "lineItemId": line_item_id
+    #         }
+    #     ]
+    # }
+
     payload = {
-        "shippedDate": vendor_order_log.shipped_at.isoformat(),
-        "shippingCarrierCode": vendor_order_log.carrier,
-        "trackingNumber": vendor_order_log.tracking_number,
         "lineItems": [
             {
-                "lineItemId": line_item_id
+                "lineItemId": line_item_id,
+                "quantity": 1
             }
-        ]
+        ],
+        "shippedDate": vendor_order_log.shipped_at.isoformat(),
+        "trackingInfo": {
+            "carrierUsed": vendor_order_log.carrier,
+            "trackingNumber": vendor_order_log.tracking_number
+        }
     }
     
     try:
