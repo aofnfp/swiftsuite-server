@@ -7,6 +7,7 @@ from .utils import VendorDataMixin
 from celery import shared_task, chain
 import logging
 from inventoryApp.models import InventoryModel
+from django.utils import timezone
 
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
@@ -320,6 +321,7 @@ def update_inventory(enrollment_id):
         # If vendor quantity is below the set minimum, render it as 0
         quantity = product.quantity if product.quantity >= stock_minimum else 0
         item.quantity = quantity
+        item.last_updated = timezone.now()
         inventory_to_update.append(item)
 
         # Keep Generalproducttable in sync so the 8-hour
@@ -337,7 +339,7 @@ def update_inventory(enrollment_id):
     if inventory_to_update:
         InventoryModel.objects.bulk_update(
             inventory_to_update,
-            ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity'],
+            ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated'],
             batch_size=BATCH_SIZE
         )
 
