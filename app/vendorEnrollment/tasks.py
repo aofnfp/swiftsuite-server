@@ -8,6 +8,7 @@ from celery import shared_task, chain
 import logging
 from inventoryApp.models import InventoryModel
 from django.utils import timezone
+from django.db.models import Q
 
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
@@ -70,16 +71,16 @@ def update_vendor_data(enrollment_id):
                 writer.writeheader()
                 writer.writerows(data)
 
-                print(f"Data successfully written to {file_path}")
-                mixin.process_vendor_update(
-                    file_path,
-                    enrollment,
-                    Rsr,
-                    RsrUpdate,
-                    "SKU",
-                    "DealerPrice",
-                    "InventoryOnHand"
-                )
+            print(f"Data successfully written to {file_path}")
+            mixin.process_vendor_update(
+                file_path,
+                enrollment,
+                Rsr,
+                RsrUpdate,
+                "SKU",
+                "DealerPrice",
+                "InventoryOnHand"
+            )
             
 
         else:
@@ -236,6 +237,7 @@ def update_all_enrollments():
             task.processed = True
             task.result = "Success"
         except Exception as e:
+            task.processed = False
             task.result = f"Error: {str(e)}"
             logger.error(task.result)
         finally:
@@ -337,18 +339,34 @@ def update_inventory(enrollment_id):
 
     # Flush all changes in batches
     if inventory_to_update:
-        InventoryModel.objects.bulk_update(
-            inventory_to_update,
-            ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated'],
-            batch_size=BATCH_SIZE
-        )
+        try:
+            InventoryModel.objects.bulk_update(
+                inventory_to_update,
+                ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated'],
+                batch_size=BATCH_SIZE
+            )
+        except Exception as e:
+            logger.error(f"Bulk update failed for InventoryModel: {e}. Falling back to individual saves.")
+            for item in inventory_to_update:
+                try:
+                    item.save(update_fields=['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated'])
+                except Exception as individual_e:
+                    logger.error(f"Failed to save individual item {item.sku}: {individual_e}")
 
     if general_products_to_update:
         from .models import Generalproducttable
-        Generalproducttable.objects.bulk_update(
-            general_products_to_update,
-            ['quantity', 'price', 'total_product_cost'],
-            batch_size=BATCH_SIZE
-        )
+        try:
+            Generalproducttable.objects.bulk_update(
+                general_products_to_update,
+                ['quantity', 'price', 'total_product_cost'],
+                batch_size=BATCH_SIZE
+            )
+        except Exception as e:
+            logger.error(f"Bulk update failed for Generalproducttable: {e}. Falling back to individual saves.")
+            for gp in general_products_to_update:
+                try:
+                    gp.save(update_fields=['quantity', 'price', 'total_product_cost'])
+                except Exception as individual_e:
+                     logger.error(f"Failed to save individual general product {gp.sku}: {individual_e}")
 
     logger.info(f"Inventory sync for {enrollment.identifier}: {updated_count}/{total_items} updated, {skipped_count} skipped (no update entry)")
