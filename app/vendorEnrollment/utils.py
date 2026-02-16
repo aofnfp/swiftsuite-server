@@ -303,8 +303,8 @@ class VendorDataMixin:
                 return False
             if enrollment.manufacturer and product.manufacturer_name not in enrollment.manufacturer:
                 return False
-            if enrollment.shippable and product.drop_shippable not in enrollment.shippable:
-                return False
+            # if enrollment.shippable and product.drop_shippable not in enrollment.shippable:
+            #     return False
         elif vendor_name == 'cwr':
             
             if product.returnable == False:
