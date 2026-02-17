@@ -234,9 +234,10 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
         .prefetch_related("vendor_orders")
         .order_by("-creationDate")
     )
-
+    
+    module_name = 'orders'
     serializer_class = OrderSyncSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
     pagination_class = CustomOffsetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
@@ -254,7 +255,7 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
 
     ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'vendor_orders__status']
     
-    # @with_module('inventory')
+   
     def list(self, request):
         return super().list(request)
     
