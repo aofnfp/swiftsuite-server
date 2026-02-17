@@ -254,7 +254,7 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
 
     ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'vendor_orders__status']
     
-    @with_module('orders')
+    @with_module('inventory')
     def list(self, request):
         return super().list(request)
     
