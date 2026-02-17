@@ -236,7 +236,7 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
     )
 
     serializer_class = OrderSyncSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    permission_classes = [IsAuthenticated]
     pagination_class = CustomOffsetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
