@@ -1,13 +1,10 @@
-from datetime import datetime, timedelta
-import os, requests, json, time
-from rest_framework.views import APIView
+import os, requests, json
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.csrf import csrf_exempt
 from ebaysdk.exception import ConnectionError
 
 from marketplaceApp.models import MarketplaceEnronment
@@ -120,6 +117,7 @@ class General_operations:
                 vendor_name = serializer_data['vendor_name']
                 product_objects = serializer_data['product_objects']
                 unmapped_items = []
+                mapped_with_caution = []
                 # Get all enrollment details of the user
                 enrollment = Enrollment.objects.get(user_id=userid, identifier=vendor_name)
                 for prod in product_objects:
@@ -128,6 +126,14 @@ class General_operations:
                         # Get the actual model class from the string name
                         model_class = apps.get_model('vendorEnrollment', model_name)
                         db_items = model_class.objects.filter(Q(enrollment_id=enrollment.id) & Q(sku=prod.get('sku')))
+                        # If product not found in the catalogue, then try to search in the supplier's table.
+                        if len(db_items) == 0:
+                            model_name = enrollment.vendor.name.capitalize()
+                            # Get the actual model class from the string name
+                            model_class = apps.get_model('vendorEnrollment', model_name)
+                            db_items = model_class.objects.filter(Q(sku=prod.get('sku')))
+                            prod["caution"] = "Product not found in the enrollment catalogue due to your applied filters. But we still help you to map it. Please verify the product details before listing to marketplace."
+                            mapped_with_caution.append(prod)
                         db_items = db_items[0]
                                                  
                     except Exception as ea:
@@ -147,9 +153,9 @@ class General_operations:
                                 except:
                                     return Response(f"Selling price calculation error.", status=status.HTTP_400_BAD_REQUEST)
                             # Create or update the product on GeneralProduct table
-                            item_product, created = Generalproducttable.objects.update_or_create(sku=prod.get("sku"), enrollment_id=enrollment.id, user_id=userid, defaults={"active": True, "total_product_cost": db_items.total_price, "map": db_items.map, "enrollment_id": db_items.enrollment_id, "product_id": db_items.product_id, "quantity": db_items.quantity, "price": db_items.price, "vendor_name": vendor_name})                           
+                            item_product, created = Generalproducttable.objects.update_or_create(sku=prod.get("sku"), enrollment_id=enrollment.id, user_id=userid, defaults={"active": True, "total_product_cost": db_items.total_price, "map": db_items.map, "msrp": db_items.msrp, "enrollment_id": db_items.enrollment_id, "product_id": db_items.product_id, "quantity": db_items.quantity, "price": db_items.price, "vendor_name": vendor_name})                           
                             # Item exists, check if we need to update price or quantity
-                            inentory = InventoryModel.objects.filter(id=prod.get("id")).update(map_status=True, product_id=item_product.id, total_product_cost=db_items.total_price, quantity=db_items.quantity, vendor_name=db_items.vendor.name, fixed_markup=market_enrollment.fixed_markup, fixed_percentage_markup=market_enrollment.fixed_percentage_markup, profit_margin=market_enrollment.profit_margin, vendor_identifier=vendor_name, manual_map=True, start_price=selling_price)
+                            inentory = InventoryModel.objects.filter(id=prod.get("id")).update(map_status=True, product_id=item_product.id, total_product_cost=db_items.total_price, quantity=db_items.quantity, vendor_name=db_items.vendor.name, msrp=db_items.msrp, fixed_markup=market_enrollment.fixed_markup, fixed_percentage_markup=market_enrollment.fixed_percentage_markup, profit_margin=market_enrollment.profit_margin, vendor_identifier=vendor_name, manual_map=True, start_price=selling_price, map=db_items.map)
                             # Update the VendorUpdate table to set listed_market to true
                             db_items.active = True
                             db_items.save()
@@ -159,7 +165,7 @@ class General_operations:
                             unmapped_items.append(prod)
                             continue
                 
-                return JsonResponse({"Message": "Items mapped successfully", "Failed_to_map_items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
+                return JsonResponse({"Message": "Items mapped successfully", "Mapped_with_caution": mapped_with_caution, "Failed_to_map_items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to map item. {e}", status=status.HTTP_400_BAD_REQUEST)
 
