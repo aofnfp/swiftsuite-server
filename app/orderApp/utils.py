@@ -553,6 +553,11 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     if not line_item_id:
         logger.error(f"Failed to get line item id for order {ebay_order_id}")
         return False
+    
+    quantity = order_details['lineItems'][0]['quantity']
+    if not quantity:
+        logger.error(f"Failed to get quantity for order {ebay_order_id}")
+        return False
 
     access_token = get_access_token(user_id, market_name)
     if not access_token:
@@ -593,7 +598,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         "lineItems": [
             {
                 "lineItemId": line_item_id,
-                "quantity": 1
+                "quantity": quantity
             }
         ],
         "shippedDate": timezone.now().isoformat().replace("+00:00", "Z"),
