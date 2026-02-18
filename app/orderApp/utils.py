@@ -596,7 +596,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                 "quantity": 1
             }
         ],
-        "shippedDate": vendor_order_log.shipped_at.isoformat(),
+        "shippedDate": timezone.now().isoformat().replace("+00:00", "Z"),
         "trackingInfo": {
             "carrierUsed": vendor_order_log.carrier,
             "trackingNumber": vendor_order_log.tracking_number
