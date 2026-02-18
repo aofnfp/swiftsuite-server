@@ -268,6 +268,14 @@ class VendorDataMixin:
         'zanders': 'mfgpnumber',
     }
 
+    vendor_msrp_fields = {
+        'fragrancex': 'retailPriceUSD',
+        'lipsey': 'msrp',
+        'rsr': 'msrp',
+        'cwr': 'list_price',
+        'zanders': 'msrp',
+    }
+
     def get_vendor_config(self, vendor_name):
         vendor_name = vendor_name.lower()
         if vendor_name not in self.vendor_models:
@@ -278,6 +286,7 @@ class VendorDataMixin:
             'update_model': self.vendor_models[vendor_name][1],
             'id_field': self.vendor_id_fields[vendor_name],
             'mpn_field': self.vendor_mpn_fields[vendor_name],
+            'msrp_field': self.vendor_msrp_fields[vendor_name],
         }
 
     def product_matches_filters(self, product, enrollment, vendor_name):
@@ -343,13 +352,14 @@ class VendorDataMixin:
         config = self.get_vendor_config(enrollment.vendor.name)
         id_field = config['id_field']
         mpn_field = config['mpn_field']
+        msrp_field = config['msrp_field']
         supplier_name = config['vendor_name']
 
         item_ids = df[id_column_name].tolist()
         product_qs = model.objects.filter(**{f"{id_field}__in": item_ids})
         product_map = {getattr(p, id_field): p for p in product_qs}
 
-        update_qs = model_update.objects.filter(product__in=product_qs, account=enrollment.account)
+        update_qs = model_update.objects.filter(product__in=product_qs, enrollment=enrollment)
         update_map = {u.product.id: u for u in update_qs}
 
         fixed_markup = float(enrollment.fixed_markup)
@@ -366,17 +376,16 @@ class VendorDataMixin:
             quantity = row[qty_column_name]
             product = product_map.get(item_id)
 
-            if not product or not self.product_matches_filters(product, enrollment, supplier_name):
-                continue
-
             shipping = float(product.avgshipcost or 0) if shipping_cost_avg else shipping_cost
             total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping, 2)
 
             existing = update_map.get(product.id)
+            msrp_value = getattr(product, msrp_field, None)
             if existing:
                 existing.price = price
                 existing.quantity = quantity
                 existing.total_price = total_price
+                existing.msrp = msrp_value
                 updates.append(existing)
             else:
                 new_entries.append(
@@ -385,6 +394,7 @@ class VendorDataMixin:
                         upc=getattr(product, 'upc', None),
                         sku=getattr(product, id_field, None),
                         mpn=getattr(product, mpn_field, None),
+                        msrp=msrp_value,
                         account=enrollment.account,
                         vendor=enrollment.vendor,
                         enrollment = enrollment,
@@ -396,8 +406,21 @@ class VendorDataMixin:
 
         with transaction.atomic():
             if updates:
-                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'enrollment'], batch_size=500)
+                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'msrp', 'enrollment'], batch_size=500)
             if new_entries:
                 model_update.objects.bulk_create(new_entries, batch_size=500)
+
+            
+            updated_ids = {u.product_id for u in updates}
+            new_ids = {n.product_id for n in new_entries}
+            seen_product_ids = updated_ids | new_ids
+
+            stale_qs = model_update.objects.filter(
+                enrollment=enrollment,
+            ).exclude(product_id__in=seen_product_ids)
+
+            stale_count = stale_qs.update(quantity=0)
+            if stale_count:
+                print(f"Zeroed quantity for {stale_count} stale {supplier_name} update records.")
 
         print(f"Processed {len(updates)} updates and {len(new_entries)} new entries.")

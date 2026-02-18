@@ -46,6 +46,8 @@ def background_refresh_access_token():
             "https://api.ebay.com/oauth/api_scope/sell.stores.readonly"
         ]
     while True:
+        refresh_token = None
+        access_token = None
         try:
             user_data = MarketplaceEnronment.objects.filter(marketplace_name="Ebay")
         except Exception as e:
@@ -496,13 +498,21 @@ def get_vendor_enrollment(marketItemId):
     return inventory.product.enrollment
 
 
-def get_order_details_by_order_id(user_id, market_name, order_id):
-
-    from marketplaceApp.views import Ebay
-    ebay = Ebay()
+def get_access_token(user_id, market_name):
+    env = MarketplaceEnronment.objects.filter(
+        user_id=user_id,
+        marketplace_name=market_name
+    ).first()
     
-    # Get access_token
-    access_token = ebay.refresh_access_token(user_id, market_name)
+    if not env:
+        logger.error(f"No {market_name} environment found for user {user_id}")
+        return None
+        
+    return env.access_token
+
+
+def get_order_details_by_order_id(user_id, market_name, order_id):
+    access_token = get_access_token(user_id, market_name)
     
     EBAY_ORDER_DETAILS_URL = f"https://api.ebay.com/sell/fulfillment/v1/order/{order_id}"
     headers = {
@@ -516,6 +526,10 @@ def get_order_details_by_order_id(user_id, market_name, order_id):
         order_details = response.json()
         return order_details
     else:
+        logger.error(
+            f"eBay order details failed | "
+            f"status={response.status_code} | body={response.text}"
+        )
         return None
 
 
@@ -528,19 +542,9 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     
     user_id = vendor_order_log.enrollment.user.id
     ebay_order_id = vendor_order_log.order.orderId
+    market_name = vendor_order_log.order.market_name
     
-    # Get Ebay credentials
-    env = MarketplaceEnronment.objects.filter(
-        user_id=user_id,
-        marketplace_name="Ebay"
-    ).first()
-    
-    if not env:
-        logger.error(f"No Ebay environment found for user {user_id}")
-        return False
-        
-    access_token = env.access_token
-    order_details = get_order_details_by_order_id(user_id, "Ebay", ebay_order_id)
+    order_details = get_order_details_by_order_id(user_id, market_name, ebay_order_id)
     if not order_details:
         logger.error(f"Failed to get order details for order {ebay_order_id}")
         return False
@@ -550,6 +554,10 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         logger.error(f"Failed to get line item id for order {ebay_order_id}")
         return False
 
+    access_token = get_access_token(user_id, market_name)
+    if not access_token:
+        logger.error(f"Failed to get access token for order {ebay_order_id}")
+        return False
 
     url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}/shipping_fulfillment'
 
@@ -570,15 +578,29 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         )
         return False
         
+    # payload = {
+    #     "shippedDate": vendor_order_log.shipped_at.isoformat(),
+    #     "shippingCarrierCode": vendor_order_log.carrier,
+    #     "trackingNumber": vendor_order_log.tracking_number,
+    #     "lineItems": [
+    #         {
+    #             "lineItemId": line_item_id
+    #         }
+    #     ]
+    # }
+
     payload = {
-        "shippedDate": vendor_order_log.shipped_at.isoformat(),
-        "shippingCarrierCode": vendor_order_log.carrier,
-        "trackingNumber": vendor_order_log.tracking_number,
         "lineItems": [
             {
-                "lineItemId": line_item_id
+                "lineItemId": line_item_id,
+                "quantity": 1
             }
-        ]
+        ],
+        "shippedDate": vendor_order_log.shipped_at.isoformat(),
+        "trackingInfo": {
+            "carrierUsed": vendor_order_log.carrier,
+            "trackingNumber": vendor_order_log.tracking_number
+        }
     }
     
     try:
@@ -596,16 +618,34 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             )
             vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
             vendor_order_log.delivered_at = timezone.now()
-            vendor_order_log.save()
-            return True
+            vendor_order_log.fulfillment_url = response.headers.get('Location')
+
+            vendor_order_log.save(update_fields=["status", "delivered_at", "fulfillment_url"])
+
+            return {
+                "success": True,
+                "status_code": response.status_code,
+                "raw_body": response.text,
+                "headers": dict(response.headers),
+            }
             
         else:
             logger.error(
                 f"Failed to push tracking to eBay. Status: {response.status_code}, "
                 f"Response: {response.text}"
             )
-            return False
+            return {
+                "success": False,
+                "status_code": response.status_code,
+                "raw_body": response.text,
+                "headers": dict(response.headers),
+            }
             
     except Exception as e:
         logger.error(f"Exception pushing tracking to eBay for order {ebay_order_id}: {e}")
-        return False
+        return {
+            "success": False,
+            "status_code": 500,
+            "raw_body": str(e),
+            "headers": None,
+        }

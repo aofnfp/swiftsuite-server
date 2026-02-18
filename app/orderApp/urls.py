@@ -1,7 +1,7 @@
 from .views import OrderEbay as eb_view, OrderSyncView
 from django.urls import path, include
 from .fragranceX_order import place_order_fragrancex, getTracking_fragranceX
-from .rsr_order import place_order_rsr, check_order_rsr, push_tracking
+from .rsr_order import place_order_rsr, check_order_rsr, push_tracking, get_shipping_fulfillment
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -19,5 +19,6 @@ urlpatterns = [
     path('place_order_rsr/<str:market_name>/<str:orderid>/', place_order_rsr, name='place_order_rsr'),
     path('check_order_rsr/<str:market_name>/<str:orderid>/', check_order_rsr, name='check_order_rsr'),
     path('push_tracking_to_ebay/<str:order_id>/', push_tracking, name='push_tracking_to_ebay'),
+    path('get_shipping_fulfillment/<str:order_id>/', get_shipping_fulfillment, name='get_shipping_fulfillment'),
     path('', include(router.urls)),
 ]

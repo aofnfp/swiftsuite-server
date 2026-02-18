@@ -246,12 +246,13 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
         'vendor_name': ['exact'],
         'market_name': ['exact'],
         'orderFulfillmentStatus': ['exact'],
+        'vendor_orders__status': ['exact'],
     }
 
 
-    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus']
+    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus', 'vendor_orders__status']
 
-    ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name']
+    ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'vendor_orders__status']
     
     @with_module('orders')
     def list(self, request):

@@ -393,13 +393,51 @@ def push_tracking(request, order_id):
         )
     
     from .utils import push_tracking_to_ebay
-    if push_tracking_to_ebay(vendor_order):
+    res = push_tracking_to_ebay(vendor_order)
+    if res["success"]:
         return JsonResponse(
-            {"message": "Tracking pushed to eBay successfully"},
+            {"message": "Tracking pushed to eBay successfully", "data": res},
             status=status.HTTP_200_OK
         )
     
     return JsonResponse(
-        {"message": "Failed to push tracking to eBay"},
+        {"message": "Failed to push tracking to eBay", "data": res},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_shipping_fulfillment(request, order_id):
+    user = request.user
+    if user and user.parent_id:
+        user = user.parent
+
+    vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
+    if not vendor_order:
+        return JsonResponse(
+            {"message": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    from .utils import get_access_token
+    market_name = vendor_order.order.market_name
+    access_token = get_access_token(user.id, market_name)
+
+    if not access_token:
+        return JsonResponse(
+            {"message": "Access token not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    url = vendor_order.fulfillment_url
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    return JsonResponse(response.json(), status=response.status_code)
+    
+
+    

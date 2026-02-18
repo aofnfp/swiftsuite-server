@@ -4,9 +4,11 @@ import os, csv, time
 from ftplib import FTP
 from vendorActivities.apiSupplier import getFragranceXData, getRSRWithAttr
 from .utils import VendorDataMixin
-from celery import shared_task
+from celery import shared_task, chain
 import logging
 from inventoryApp.models import InventoryModel
+from django.utils import timezone
+from django.db.models import Q
 
 mixin = VendorDataMixin()
 logger = logging.getLogger(__name__)
@@ -69,16 +71,16 @@ def update_vendor_data(enrollment_id):
                 writer.writeheader()
                 writer.writerows(data)
 
-                print(f"Data successfully written to {file_path}")
-                mixin.process_vendor_update(
-                    file_path,
-                    enrollment,
-                    Rsr,
-                    RsrUpdate,
-                    "SKU",
-                    "DealerPrice",
-                    "InventoryOnHand"
-                )
+            print(f"Data successfully written to {file_path}")
+            mixin.process_vendor_update(
+                file_path,
+                enrollment,
+                Rsr,
+                RsrUpdate,
+                "SKU",
+                "DealerPrice",
+                "InventoryOnHand"
+            )
             
 
         else:
@@ -228,10 +230,14 @@ def update_all_enrollments():
         try:
             enrollment = task.enrollment
             logger.info(f"Processing enrollment {enrollment.identifier}")
-            update_vendor_data.delay(enrollment.id)
+            chain(
+                update_vendor_data.s(enrollment.id),
+                update_inventory.s()
+            ).delay()
             task.processed = True
             task.result = "Success"
         except Exception as e:
+            task.processed = False
             task.result = f"Error: {str(e)}"
             logger.error(task.result)
         finally:
@@ -247,62 +253,120 @@ def to_float(value, default=0.0):
         
 @shared_task(queue='default')        
 def update_inventory(enrollment_id):
-    try:
-        enrollment = Enrollment.objects.get(id=enrollment_id)
-        logger.info(f"Updating inventory for enrollment {enrollment_id}-{enrollment.identifier}")
+    enrollment = Enrollment.objects.get(id=enrollment_id)
+    logger.info(f"Updating inventory for enrollment {enrollment_id}-{enrollment.identifier}")
 
-        shipping_cost = to_float(enrollment.shipping_cost)
-        fixed_markup = to_float(enrollment.fixed_markup)
-        percentage_markup = to_float(enrollment.percentage_markup)
+    shipping_cost = to_float(enrollment.shipping_cost)
+    fixed_markup = to_float(enrollment.fixed_markup)
+    percentage_markup = to_float(enrollment.percentage_markup)
+    stock_minimum = enrollment.stock_minimum or 0
+    
+    vendor_name = enrollment.vendor.name.lower()
+    inventory_items = InventoryModel.objects.filter(product__enrollment=enrollment)
+    total_items = inventory_items.count()
+    updated_count = 0
+    skipped_count = 0
+
+    inventory_to_update = []
+    general_products_to_update = []
+    BATCH_SIZE = 500
+
+    for item in inventory_items:
+
+        if vendor_name == 'fragrancex':
+            product = FragrancexUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'rsr':
+            product = RsrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'lipsey':
+            product = LipseyUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'cwr':
+            product = CwrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        elif vendor_name == 'zanders':
+            product = ZandersUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
+        else:
+            product = None
+            
+        if not product:
+            skipped_count += 1
+            logger.warning(f"Skipped SKU {item.sku} — no matching {vendor_name} update entry for enrollment {enrollment.identifier}")
+            continue
         
-        for item in InventoryModel.objects.filter(product__enrollment=enrollment):
+        price = to_float(product.price)
 
-            vendor_name = enrollment.vendor.name.lower()
-            if vendor_name == 'fragrancex':
-                product = FragrancexUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'rsr':
-                product = RsrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'lipsey':
-                product = LipseyUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'cwr':
-                product = CwrUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            elif vendor_name == 'zanders':
-                product = ZandersUpdate.objects.filter(sku=item.sku, enrollment=enrollment).first()
-            else:
-                product = None
-                
-            if not product:
-                continue
-            
-            price = to_float(product.price)
-
-            total_price = round(
-                price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost,
-                2
-            )
-            
-            item.total_product_cost = total_price
-            item.shipping_cost = shipping_cost
-            item.price = price
-            
-            map_value = to_float(product.map)
-
-            item_fixed = to_float(item.fixed_markup)
-            item_pct = to_float(item.fixed_percentage_markup)
-            item_profit = to_float(item.profit_margin)
-
-            start_price = (
-                total_price +
-                item_fixed +
-                ((item_pct / 100) * total_price) +
-                ((item_profit / 100) * total_price)
-            )
-
-            if map_value:
-                start_price = max(start_price, map_value)
-
-            item.start_price = round(start_price, 2)
-            item.save()
+        total_price = round(
+            price + fixed_markup + ((percentage_markup / 100) * price) + shipping_cost,
+            2
+        )
         
-    except Exception as e:
-        print(f"Error updating shipping price for enrollment {enrollment_id}: {e}")
+        item.total_product_cost = total_price
+        item.shipping_cost = shipping_cost
+        item.price = price
+        
+        map_value = to_float(product.map)
+
+        item_fixed = to_float(item.fixed_markup)
+        item_pct = to_float(item.fixed_percentage_markup)
+        item_profit = to_float(item.profit_margin)
+
+        start_price = (
+            total_price +
+            item_fixed +
+            ((item_pct / 100) * total_price) +
+            ((item_profit / 100) * total_price)
+        )
+
+        if map_value:
+            start_price = max(start_price, map_value)
+
+        item.start_price = round(start_price, 2)
+
+        # If vendor quantity is below the set minimum, render it as 0
+        quantity = product.quantity if product.quantity >= stock_minimum else 0
+        item.quantity = quantity
+        item.last_updated = timezone.now()
+        inventory_to_update.append(item)
+
+        # Keep Generalproducttable in sync so the 8-hour
+        # update_inventory_price_quantity_task reads fresh data
+        general_product = item.product  # FK to Generalproducttable
+        if general_product:
+            general_product.quantity = quantity
+            general_product.price = price
+            general_product.total_product_cost = total_price
+            general_products_to_update.append(general_product)
+        
+        updated_count += 1
+
+    # Flush all changes in batches
+    if inventory_to_update:
+        try:
+            InventoryModel.objects.bulk_update(
+                inventory_to_update,
+                ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated'],
+                batch_size=BATCH_SIZE
+            )
+        except Exception as e:
+            logger.error(f"Bulk update failed for InventoryModel: {e}. Falling back to individual saves.")
+            for item in inventory_to_update:
+                try:
+                    item.save(update_fields=['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated'])
+                except Exception as individual_e:
+                    logger.error(f"Failed to save individual item {item.sku}: {individual_e}")
+
+    if general_products_to_update:
+        from .models import Generalproducttable
+        try:
+            Generalproducttable.objects.bulk_update(
+                general_products_to_update,
+                ['quantity', 'price', 'total_product_cost'],
+                batch_size=BATCH_SIZE
+            )
+        except Exception as e:
+            logger.error(f"Bulk update failed for Generalproducttable: {e}. Falling back to individual saves.")
+            for gp in general_products_to_update:
+                try:
+                    gp.save(update_fields=['quantity', 'price', 'total_product_cost'])
+                except Exception as individual_e:
+                     logger.error(f"Failed to save individual general product {gp.sku}: {individual_e}")
+
+    logger.info(f"Inventory sync for {enrollment.identifier}: {updated_count}/{total_items} updated, {skipped_count} skipped (no update entry)")
