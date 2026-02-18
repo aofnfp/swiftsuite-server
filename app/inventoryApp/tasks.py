@@ -96,7 +96,7 @@ def map_marketplace_items_to_vendor_task():
 
 
 LOCK_KEY5 = "check_and_update_ended_item_from_vendor_task_lock"
-@shared_task(queue='default')
+@shared_task(queue='heavy-cpu')
 def check_and_update_ended_item_from_vendor_task():
     if not cache.add(LOCK_KEY5, "1", timeout=LOCK_TIMEOUT):
         logger.info("check_and_update_ended_item_from_vendor_task skipped: already running")

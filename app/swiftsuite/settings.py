@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "vendorEnrollment",
     "notificationApp",
     "reportApp",
+    "itemMigrationApp",
     "rest_framework",
     "corsheaders",
     'cloudinary',
