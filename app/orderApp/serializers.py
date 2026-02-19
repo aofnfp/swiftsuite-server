@@ -95,7 +95,7 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
         if isinstance(value, (int, float)):
             return float(value)
         if isinstance(value, str):
-            return float(value.replace("$", "").strip())
+            return float(value.replace("$", "").replace(",", "").strip())
         return 0.0
 
             
