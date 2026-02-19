@@ -8,6 +8,8 @@ from .models import OrdersOnEbayModel, VendorOrderLog
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
 from datetime import timedelta
+from .order_clients.rsr_order import RsrOrderApiClient
+from .order_clients.fx_order import FrgxOrderApiClient
 import logging
 logger = logging.getLogger(__name__)
 
@@ -103,7 +105,6 @@ def dispatch_order(vendor_order_log_id: int):
         )
 
         if vendor_name == 'fragrancex':
-            from .fragranceX_order import FrgxOrderApiClient
             client = FrgxOrderApiClient(vendor_order_log)
             order_details = client.get_order_details()
             bulk_order = client.build_bulk_payload(order_details)
@@ -123,7 +124,7 @@ def dispatch_order(vendor_order_log_id: int):
                 logger.error(f"Failed to place order {vendor_order_log.id} with Fragrancex. Error: {result}")
 
         elif vendor_name == 'rsr':
-            from .rsr_order import RsrOrderApiClient
+            
             client = RsrOrderApiClient(vendor_order_log)
             order_details = client.get_order_details()
             payload = client.build_payload(order_details)
@@ -172,7 +173,6 @@ def check_vendor_order_status():
             status_updated = False
             
             if vendor_name == 'rsr':
-                from .rsr_order import RsrOrderApiClient
                 client = RsrOrderApiClient(vendor_order)
                 payload = client.build_check_order_payload(vendor_order)
                 result = client.check_order(payload)
@@ -184,7 +184,6 @@ def check_vendor_order_status():
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
-                from .fragranceX_order import FrgxOrderApiClient
                 client = FrgxOrderApiClient(vendor_order)
                 if client.check_and_update_status():
                     if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
@@ -198,4 +197,4 @@ def check_vendor_order_status():
             logger.error(f"Error checking status for order {vendor_order.id} (Vendor: {vendor_name}): {e}")
             continue
             
-    logger.info(f"Completed check_vendor_order_status. Checked {count} orders, updated {updated_count} successfully.")
+    logger.info(f"Completed check_vendor_order_status. Checked {count} orders, updated {updated_count} successfully.") 

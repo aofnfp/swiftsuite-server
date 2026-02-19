@@ -1,13 +1,13 @@
 from rest_framework.decorators import api_view, permission_classes
-from .utils import get_vendor_enrollment
+from ..utils import get_vendor_enrollment
 import requests
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from vendorActivities.apiSupplier import getFragranceXAuth
 from accounts.models import User
-from .models import VendorOrderLog, OrdersOnEbayModel
-from .utils import get_ebay_order_details
+from ..models import VendorOrderLog, OrdersOnEbayModel
+from ..utils import get_ebay_order_details
 from django.db.models import Q
 import logging
 from django.utils.dateparse import parse_datetime
@@ -116,8 +116,7 @@ class FrgxOrderApiClient:
         import uuid
         unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-FX-{order_id}-{unique_suffix}"
-    
-    
+       
     def check_and_update_status(self):
 
         vendor_order = self.VendorOrder
@@ -186,7 +185,8 @@ class FrgxOrderApiClient:
             
         return False
             
-
+    
+        
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

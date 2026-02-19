@@ -17,6 +17,9 @@ from .tasks import manual_sync_order_with_local_task
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from vendorEnrollment.pagination import CustomOffsetPagination
+from .models import VendorOrderLog
+from .order_clients.rsr_order import RsrOrderApiClient
+from .order_clients.fx_order import FrgxOrderApiClient
 
 
 # Create your views here.
@@ -234,7 +237,7 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
         .prefetch_related("vendor_orders")
         .order_by("-creationDate")
     )
-    
+
     module_name = 'orders'
     serializer_class = OrderSyncSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
@@ -256,9 +259,6 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'vendor_orders__status']
     
    
-    def list(self, request):
-        return super().list(request)
-    
     def get_queryset(self):
         queryset = super().get_queryset()
         
@@ -275,3 +275,118 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(vendor_orders__status=vendor_status)
 
         return queryset.filter(user=userid)
+
+
+class PlaceOrderView(APIView):
+    module_name = 'orders'
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+
+    def post(self, request, market_name, orderid):
+        user = request.user
+        if user and user.parent_id:
+            user = user.parent
+        
+        
+        VendorOrder = VendorOrderLog.objects.filter(
+            order__orderId=orderid,
+            order__market_name__iexact=market_name,
+            enrollment__user=user,
+        ).first()
+
+        if not VendorOrder:
+            order = OrdersOnEbayModel.objects.filter(
+                orderId=orderid,
+                market_name__iexact=market_name,
+                user=user
+            ).first()
+            
+            if not order:
+                return Response(
+                    {"message": "Vendor order log not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            
+            from .utils import get_vendor_enrollment
+            enrollment = get_vendor_enrollment(order.marketItemId)
+            if not enrollment:
+                return Response(
+                    {
+                        "message": "Product is not linked to any active vendor enrollment.",
+                        "order_id": orderid,
+                        "market_item_id": order.marketItemId,
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            VendorOrder = VendorOrderLog.objects.create(
+                order=order,
+                enrollment=enrollment,
+                vendor= order.vendor_name,
+                status=VendorOrderLog.VendorOrderStatus.CREATED
+            )
+        
+        elif VendorOrder.status in [
+            VendorOrderLog.VendorOrderStatus.PROCESSING,
+            VendorOrderLog.VendorOrderStatus.SHIPPED,
+            VendorOrderLog.VendorOrderStatus.DELIVERED,
+        ]:
+            return Response(
+                {"message": f"Order is already placed with {VendorOrder.vendor}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if VendorOrder.vendor.lower() == "fragrancex":
+            # Initialize client
+            order_client = FrgxOrderApiClient(VendorOrder)
+            ordered_details = order_client.get_order_details()  
+            # Define bulk order payload
+            bulk_order = order_client.build_bulk_payload(ordered_details)
+            # Place the order
+            result = order_client.place_bulk_order(bulk_order)
+        
+            if result.get("Message", False) and result.get("BulkOrderId", False):
+                VendorOrder.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+                VendorOrder.vendor_order_id = result.get("BulkOrderId")
+                VendorOrder.raw_response = result
+                VendorOrder.save()
+                return Response(
+                    {"message": "Order placed successfully.", "data": result, "order_info": bulk_order},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "Failed to place order.", "data": result, "order_info": bulk_order},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        
+        elif VendorOrder.vendor.lower() == "rsr":
+            # Initialize RSR client
+            rsr_client = RsrOrderApiClient(VendorOrder)
+            order_details = rsr_client.get_order_details()
+            payload = rsr_client.build_payload(order_details)
+            result = rsr_client.place_order(payload)
+            
+            
+            if result.get("StatusCode") == "00":
+                VendorOrder.status = VendorOrderLog.VendorOrderStatus.PROCESSING
+                VendorOrder.vendor_order_id = (
+                    result.get("ConfirmResp") or result.get("WebRef")
+                )
+                VendorOrder.raw_response = result
+                VendorOrder.save()
+                
+                return Response(
+                    {"message": "RSR order placed successfully", "data": result},
+                    status=status.HTTP_200_OK
+                )
+
+            VendorOrder.status = VendorOrderLog.VendorOrderStatus.FAILED
+            VendorOrder.error_message = result.get("StatusMssg", "RSR order failed")
+            VendorOrder.raw_response = result
+            VendorOrder.save()
+
+            return Response(
+                {"message": f"Failed to place RSR order", "data": result},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+

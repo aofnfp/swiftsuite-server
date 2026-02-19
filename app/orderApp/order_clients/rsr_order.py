@@ -1,15 +1,11 @@
 import requests
-from .utils import get_ebay_order_details
+from ..utils import get_ebay_order_details, get_vendor_enrollment
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import VendorOrderLog
-from django.shortcuts import get_object_or_404
-from vendorEnrollment.models import Enrollment
+from ..models import VendorOrderLog, OrdersOnEbayModel
 from accounts.models import User
-from .models import OrdersOnEbayModel
-from .utils import get_vendor_enrollment
 import logging
 from django.db import transaction
 from datetime import datetime
@@ -369,7 +365,9 @@ def check_order_rsr(request, market_name, orderid):
     if result.get("StatusCode") == "00":
         rsr_client.update_local_status(result)
         if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
-            from .utils import push_tracking_to_ebay
+
+            from ..utils import push_tracking_to_ebay
+            
             push_tracking_to_ebay(vendor_order)
         
         return JsonResponse(
@@ -392,7 +390,8 @@ def push_tracking(request, order_id):
             status=status.HTTP_404_NOT_FOUND
         )
     
-    from .utils import push_tracking_to_ebay
+    from ..utils import push_tracking_to_ebay
+
     res = push_tracking_to_ebay(vendor_order)
     if res["success"]:
         return JsonResponse(
@@ -419,7 +418,9 @@ def get_shipping_fulfillment(request, order_id):
             {"message": "Order not found"},
             status=status.HTTP_404_NOT_FOUND
         )
-    from .utils import get_access_token
+    
+    from ..utils import get_access_token
+
     market_name = vendor_order.order.market_name
     access_token = get_access_token(user.id, market_name)
 
