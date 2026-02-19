@@ -16,9 +16,14 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
     price_summary = serializers.SerializerMethodField()
 
     def get_shipping_address(self, obj):
-        vendor_name = obj.vendor.lower()
-        if vendor_name == 'fragrancex':
-            results = obj.raw_response.get("OrderResults", [])
+        vendor_name = (obj.vendor or "").lower()
+        
+        raw_response = obj.raw_response
+        if not isinstance(raw_response, dict):
+            return None
+
+        if vendor_name == "fragrancex":
+            results = raw_response.get("OrderResults", [])
             if not results:
                 return None
 
@@ -33,13 +38,12 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
                 "city": shipping_address.get("City"),
                 "state": shipping_address.get("State"),
                 "zip": shipping_address.get("Zipcode"),
-                "county": shipping_address.get("County"),
                 "country": shipping_address.get("Country"),
                 "phone": shipping_address.get("Phone"),
             }
 
-        elif vendor_name == 'rsr':
-            address = obj.raw_response.get("Address", {})
+        elif vendor_name == "rsr":
+            address = raw_response.get("Address", {})
             if not isinstance(address, dict):
                 return None
 
@@ -58,8 +62,9 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
                 "country": address.get("Country"),
                 "phone": address.get("Phone"),
             }
-        else:
-            return None
+
+        return None
+
     
     def get_price_summary(self, obj):
         vendor_name = obj.vendor.lower()
