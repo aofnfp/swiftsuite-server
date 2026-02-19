@@ -81,6 +81,7 @@ case "$1" in
     web)
         echo "Running database migrations..."
         python manage.py migrate --noinput
+        python manage.py repush_tracking
 
         echo "Starting Gunicorn..."
         exec gunicorn swiftsuite.wsgi:application \

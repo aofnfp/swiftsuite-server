@@ -612,8 +612,26 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         response = requests.post(url, headers=headers, json=payload, timeout=30)
         
         if response.status_code in [200, 201, 204]:
-            logger.info(f"Successfully pushed tracking to eBay for order {ebay_order_id}")
-            
+            fulfillment_url = response.headers.get('Location')
+
+            # Verify the fulfillment actually exists before trusting the 201
+            verify_response = requests.get(fulfillment_url, headers=headers, timeout=15)
+
+            if verify_response.status_code != 200:
+                verify_body = verify_response.json()
+                logger.error(
+                    f"eBay fulfillment verification failed for order {ebay_order_id}. "
+                    f"Status: {verify_response.status_code}, Body: {verify_body}"
+                )
+                return {
+                    "success": False,
+                    "status_code": verify_response.status_code,
+                    "raw_body": verify_body,
+                    "headers": dict(verify_response.headers),
+                }
+
+            logger.info(f"Successfully pushed and verified tracking on eBay for order {ebay_order_id}")
+
             # Update local eBay order record
             OrdersOnEbayModel.objects.filter(
                 orderId=vendor_order_log.order.orderId
@@ -623,14 +641,14 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             )
             vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
             vendor_order_log.delivered_at = timezone.now()
-            vendor_order_log.fulfillment_url = response.headers.get('Location')
+            vendor_order_log.fulfillment_url = fulfillment_url
 
             vendor_order_log.save(update_fields=["status", "delivered_at", "fulfillment_url"])
 
             return {
                 "success": True,
                 "status_code": response.status_code,
-                "raw_body": response.text,
+                "raw_body": verify_response.json(),
                 "headers": dict(response.headers),
             }
             
