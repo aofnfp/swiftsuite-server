@@ -118,7 +118,14 @@ def dispatch_order(vendor_order_log_id: int):
                 logger.info(f"Order {vendor_order_log.id} placed successfully with Fragrancex.")
             else:
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.FAILED
-                vendor_order_log.error_message = result.get('OrderResults')[0].get('Message', 'Fragrancex order failed')
+                order_results = result.get("OrderResults")
+                
+                if isinstance(order_results, list) and order_results:
+                    message = order_results[0].get("Message", "Fragrancex order failed")
+                else:
+                    message = result.get("Message", "Fragrancex order failed")
+
+                vendor_order_log.error_message = message
                 vendor_order_log.raw_response = result
                 vendor_order_log.save()
                 logger.error(f"Failed to place order {vendor_order_log.id} with Fragrancex. Error: {result}")
