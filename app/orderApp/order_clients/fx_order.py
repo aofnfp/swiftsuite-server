@@ -147,7 +147,7 @@ class FrgxOrderApiClient:
         shipped_date = vendor_order.shipped_at
 
 
-        if not tracking_number or not carrier or not data:
+        if not tracking_number or not carrier or not isinstance(data, dict):
             tracking_number = data.get("TrackingNumber")
             carrier = data.get("Carrier")
             shipped_date_raw = data.get("DateShipped")
