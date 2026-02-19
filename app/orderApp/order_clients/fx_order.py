@@ -116,8 +116,29 @@ class FrgxOrderApiClient:
         import uuid
         unique_suffix = str(uuid.uuid4())[:6]
         return f"SW-FX-{order_id}-{unique_suffix}"
-       
-    def check_and_update_status(self):
+    
+    def check_order(self):
+        access_token = getFragranceXAuth(self.api_id, self.api_key)
+
+        url = f"https://apitracking.fragrancex.com/tracking/gettrackinginfo/{self.order_id}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.get(url, headers=headers, timeout=15)
+
+        if response.status_code != 200:
+            logger.warning(
+                f"FragranceX tracking API failed for order {self.order_id}"
+            )
+            return False
+
+        data = response.json()
+
+        return data
+
+    def update_local_status(self, data):
 
         vendor_order = self.VendorOrder
 
@@ -125,26 +146,8 @@ class FrgxOrderApiClient:
         carrier = vendor_order.carrier
         shipped_date = vendor_order.shipped_at
 
-        # Fetch tracking only if missing
+
         if not tracking_number or not carrier:
-            access_token = getFragranceXAuth(self.api_id, self.api_key)
-
-            url = f"https://apitracking.fragrancex.com/tracking/gettrackinginfo/{self.order_id}"
-            headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
-            }
-
-            response = requests.get(url, headers=headers, timeout=15)
-
-            if response.status_code != 200:
-                logger.warning(
-                    f"FragranceX tracking API failed for order {self.order_id}"
-                )
-                return False
-
-            data = response.json()
-
             tracking_number = data.get("TrackingNumber")
             carrier = data.get("Carrier")
             shipped_date_raw = data.get("DateShipped")
@@ -291,14 +294,15 @@ def getTracking_fragranceX(request, orderId):
             )
 
         fx_client = FrgxOrderApiClient(vendor_order)
-        if fx_client.check_and_update_status():
+        data = fx_client.check_order()
+        if fx_client.update_local_status(data):
             return JsonResponse(
-                {"message": "Tracking information updated successfully."},
+                {"message": "Tracking information updated successfully.", "data": data},
                 status=status.HTTP_200_OK,
             )
         else:
             return JsonResponse(
-                {"message": "Tracking information not updated."},
+                {"message": "Tracking information not updated.", "data": data},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         

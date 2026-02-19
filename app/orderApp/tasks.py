@@ -185,7 +185,8 @@ def check_vendor_order_status():
 
             elif vendor_name == 'fragrancex':
                 client = FrgxOrderApiClient(vendor_order)
-                if client.check_and_update_status():
+                data = client.check_order()
+                if client.update_local_status(data):
                     if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
                         push_tracking_to_ebay(vendor_order)
                     status_updated = True

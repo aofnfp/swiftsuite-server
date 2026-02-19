@@ -423,26 +423,27 @@ class TrackOrderView(APIView):
                 if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
                     push_tracking_to_ebay(vendor_order)
                 return Response(
-                    {"message": "RSR order checked successfully", "data": result},
+                    {"message": "Tracking information updated successfully.", "data": result},
                     status=status.HTTP_200_OK
                 )
             return Response(
-                {"message": f"Failed to check RSR order", "data": result},
+                {"message": f"Tracking information not updated.", "data": result},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         elif vendor_order.vendor.lower() == "fragrancex":
             fx_client = FrgxOrderApiClient(vendor_order)
-            if fx_client.check_and_update_status():
+            data = fx_client.check_order()
+            if fx_client.update_local_status(data):
                 if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
                     push_tracking_to_ebay(vendor_order)
                 return Response(
-                    {"message": "Tracking information updated successfully."},
+                    {"message": "Tracking information updated successfully.", "data": data},
                     status=status.HTTP_200_OK,
                 )
             else:
                 return Response(
-                    {"message": "Tracking information not updated."},
+                    {"message": "Tracking information not updated.", "data": data},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
