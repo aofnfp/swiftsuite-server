@@ -21,8 +21,8 @@ urlpatterns = [
     path('push_tracking_to_ebay/<str:order_id>/', push_tracking, name='push_tracking_to_ebay'),
     path('get_shipping_fulfillment/<str:order_id>/', get_shipping_fulfillment, name='get_shipping_fulfillment'),
 
-    
-    path('place_order/<str:market_name>/<str:orderid>/', PlaceOrderView.as_view(), name='place_order'),
+
+    path('place_order/<str:market_name>/<str:order_id>/', PlaceOrderView.as_view(), name='place_order'),
     path('track_order/<str:order_id>/', TrackOrderView.as_view(), name='track_order'),
     path('push_tracking/<str:order_id>/', PushTrackingView.as_view(), name='push_tracking'),
     path('get_fulfillment/<str:order_id>/', GetFulfillmentView.as_view(), name='get_fulfillment'),

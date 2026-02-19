@@ -282,21 +282,21 @@ class PlaceOrderView(APIView):
     module_name = 'orders'
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
 
-    def post(self, request, market_name, orderid):
+    def post(self, request, market_name, order_id):
         user = request.user
         if user and user.parent_id:
             user = user.parent
         
         
         VendorOrder = VendorOrderLog.objects.filter(
-            order__orderId=orderid,
+            order__orderId=order_id,
             order__market_name__iexact=market_name,
             enrollment__user=user,
         ).first()
 
         if not VendorOrder:
             order = OrdersOnEbayModel.objects.filter(
-                orderId=orderid,
+                orderId=order_id,
                 market_name__iexact=market_name,
                 user=user
             ).first()
@@ -313,7 +313,7 @@ class PlaceOrderView(APIView):
                 return Response(
                     {
                         "message": "Product is not linked to any active vendor enrollment.",
-                        "order_id": orderid,
+                        "order_id": order_id,
                         "market_item_id": order.marketItemId,
                     },
                     status=status.HTTP_404_NOT_FOUND,
@@ -396,14 +396,14 @@ class TrackOrderView(APIView):
     module_name = 'orders'
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
 
-    def post(self, request, market_name, orderid):
+    def post(self, request, market_name, order_id):
         user = request.user
         if user and user.parent_id:
             user = user.parent
 
         # Try existing VendorOrderLog
         vendor_order = VendorOrderLog.objects.filter(
-            order__orderId=orderid,
+            order__orderId=order_id,
             order__market_name__iexact=market_name,
             enrollment__user=user,
         ).first()
