@@ -1,8 +1,14 @@
 import requests
 import json
 import time
+from django.core.cache import cache
 
 def getFragranceXAuth(apiAccessId, apiAccessKey):
+    cache_key = f"fx_token_{apiAccessId}"
+    cached_token = cache.get(cache_key)
+    if cached_token:
+        return cached_token
+
     # API endpoint
     url = "https://apilisting.fragrancex.com/token"
 
@@ -12,7 +18,7 @@ def getFragranceXAuth(apiAccessId, apiAccessKey):
         'apiAccessId': apiAccessId,  # Your API ID
         'apiAccessKey': apiAccessKey  # Your API Key
     }
-    
+
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -22,9 +28,10 @@ def getFragranceXAuth(apiAccessId, apiAccessKey):
         # Raise an error if the request was unsuccessful
         response.raise_for_status()
         data = response.json()
-        
+
         access_token = data.get("access_token")
-        # print("Access Token:", access_token)
+        expires_in = data.get("expires_in", 3600) 
+        cache.set(cache_key, access_token, timeout=expires_in - 60)  
         return access_token
 
     except requests.exceptions.RequestException as e:

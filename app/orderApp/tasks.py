@@ -11,6 +11,7 @@ from datetime import timedelta
 from .order_clients.rsr_order import RsrOrderApiClient
 from .order_clients.fx_order import FrgxOrderApiClient
 import logging
+import time
 logger = logging.getLogger(__name__)
 
 
@@ -191,12 +192,24 @@ def check_vendor_order_status():
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
+                # Skip orders that already have full tracking info
+                if vendor_order.tracking_number and vendor_order.carrier:
+                    continue
+
                 client = FrgxOrderApiClient(vendor_order)
                 data = client.check_order()
+
+                if data is None:
+                    # Rate limit exhausted after retries — stop processing FX orders this run
+                    logger.warning("FragranceX rate limit exhausted during batch check. Stopping FX checks for this run.")
+                    break
+
                 if client.update_local_status(data):
                     if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
                         push_tracking_to_ebay(vendor_order)
                     status_updated = True
+
+                time.sleep(0.4)  # Stay safely under the 3 req/s FX rate limit
             
             if status_updated:
                 updated_count += 1

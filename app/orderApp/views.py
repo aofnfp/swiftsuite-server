@@ -432,12 +432,23 @@ class TrackOrderView(APIView):
             )
 
         elif vendor_order.vendor.lower() == "fragrancex":
+            
+            if vendor_order.tracking_number and vendor_order.carrier:
+                return JsonResponse(
+                    {"message": "Tracking already up to date."},
+                    status=status.HTTP_200_OK,
+                )
+
             fx_client = FrgxOrderApiClient(vendor_order)
             data = fx_client.check_order()
+            if data is None:
+                return JsonResponse(
+                    {"message": "FragranceX rate limit reached. Please retry shortly."},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
+                
             if fx_client.update_local_status(data):
-                if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
-                    push_tracking_to_ebay(vendor_order)
-                return Response(
+                return JsonResponse(
                     {"message": "Tracking information updated successfully.", "data": data},
                     status=status.HTTP_200_OK,
                 )

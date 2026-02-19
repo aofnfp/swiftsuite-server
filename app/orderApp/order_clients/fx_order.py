@@ -10,6 +10,7 @@ from ..models import VendorOrderLog, OrdersOnEbayModel
 from ..utils import get_ebay_order_details
 from django.db.models import Q
 import logging
+import time
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
 
@@ -126,17 +127,29 @@ class FrgxOrderApiClient:
             "Content-Type": "application/json",
         }
 
-        response = requests.get(url, headers=headers, timeout=15)
+        for attempt in range(3):
+            response = requests.get(url, headers=headers, timeout=15)
 
-        if response.status_code != 200:
-            # logger.warning(
-            #     f"FragranceX tracking API failed for order {self.order_id}"
-            # )
+            if response.status_code == 200:
+                return response.json()
+
+            if response.status_code == 429:
+                wait = 2 ** attempt  # 1s, 2s, 4s
+                logger.warning(
+                    f"FragranceX rate limit hit for order {self.order_id}, "
+                    f"retrying in {wait}s (attempt {attempt + 1}/3)"
+                )
+                time.sleep(wait)
+                continue
+
+            logger.warning(
+                f"FragranceX tracking API returned {response.status_code} for order {self.order_id}"
+            )
             return {}
 
-        data = response.json()
-
-        return data
+        # All retries exhausted on 429
+        logger.error(f"FragranceX rate limit not resolved after 3 retries for order {self.order_id}")
+        return None
 
     def update_local_status(self, data):
         vendor_order = self.VendorOrder
@@ -296,8 +309,19 @@ def getTracking_fragranceX(request, orderId):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        if vendor_order.tracking_number and vendor_order.carrier:
+            return JsonResponse(
+                {"message": "Tracking already up to date."},
+                status=status.HTTP_200_OK,
+            )
+
         fx_client = FrgxOrderApiClient(vendor_order)
         data = fx_client.check_order()
+        if data is None:
+            return JsonResponse(
+                {"message": "FragranceX rate limit reached. Please retry shortly."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
         if fx_client.update_local_status(data):
             return JsonResponse(
                 {"message": "Tracking information updated successfully.", "data": data},
