@@ -594,6 +594,8 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     #     ]
     # }
 
+    shipped_date = vendor_order_log.shipped_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
     payload = {
         "lineItems": [
             {
@@ -601,11 +603,9 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                 "quantity": quantity
             }
         ],
-        "shippedDate": timezone.now().isoformat().replace("+00:00", "Z"),
-        "trackingInfo": {
-            "carrierUsed": vendor_order_log.carrier,
-            "trackingNumber": vendor_order_log.tracking_number
-        }
+        "shippedDate": shipped_date,
+        "shippingCarrierCode": vendor_order_log.carrier,
+        "trackingNumber": vendor_order_log.tracking_number,
     }
     
     try:
