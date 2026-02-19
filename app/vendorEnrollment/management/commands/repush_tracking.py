@@ -1,26 +1,17 @@
+import json
+import time
 from django.core.management.base import BaseCommand
 from orderApp.models import VendorOrderLog
 from orderApp.utils import push_tracking_to_ebay
 
 
+# First-pass failures — retry these only
 AFFECTED_ORDER_IDS = [
     "24-14249-44919",
     "27-14229-77031",
     "27-14227-99256",
     "12-14249-15621",
     "26-14228-95579",
-    "03-14261-50386",
-    "07-14255-86895",
-    "18-14239-98760",
-    "05-14258-98927",
-    "13-14247-17403",
-    "19-14238-35904",
-    "22-14233-94015",
-    "26-14228-16235",
-    "10-14250-86429",
-    "24-14245-59017",
-    "06-14256-74412",
-    "18-14239-39249",
     "21-14234-39457",
     "08-14252-26477",
     "12-14246-86728",
@@ -36,25 +27,12 @@ AFFECTED_ORDER_IDS = [
     "03-14257-67492",
     "15-14240-43418",
     "11-14246-09634",
-    "24-14242-19557",
-    "15-14239-88775",
-    "14-14241-32252",
-    "16-14238-17288",
-    "11-14245-00694",
-    "01-14259-73088",
-    "23-14227-73705",
-    "24-14240-91664",
-    "01-14259-16522",
-    "23-14227-22748",
-    "16-14236-97238",
-    "11-14243-91967",
     "10-14244-54659",
-    "24-14210-38819",
 ]
 
 
 class Command(BaseCommand):
-    help = "Re-push eBay tracking for FragranceX orders that have ghost fulfillments"
+    help = "Re-push eBay tracking orders that have ghost fulfillments"
 
     def handle(self, *args, **kwargs):
         succeeded = []
@@ -72,9 +50,21 @@ class Command(BaseCommand):
                 continue
 
             if not vendor_order.tracking_number or not vendor_order.carrier or not vendor_order.shipped_at:
-                self.stdout.write(self.style.WARNING(f"[SKIP]  {order_id} — missing tracking info (number/carrier/date)"))
+                self.stdout.write(self.style.WARNING(
+                    f"[SKIP]  {order_id} — missing tracking info "
+                    f"(tracking={vendor_order.tracking_number}, "
+                    f"carrier={vendor_order.carrier}, "
+                    f"shipped_at={vendor_order.shipped_at})"
+                ))
                 skipped.append(order_id)
                 continue
+
+            self.stdout.write(
+                f"\n[....] {order_id} "
+                f"| carrier={vendor_order.carrier} "
+                f"| tracking={vendor_order.tracking_number} "
+                f"| shipped={vendor_order.shipped_at}"
+            )
 
             # Reset ghost fulfillment state so push_tracking_to_ebay re-creates it
             vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
@@ -90,8 +80,16 @@ class Command(BaseCommand):
             else:
                 status_code = result.get("status_code") if result else "N/A"
                 raw_body = result.get("raw_body") if result else "N/A"
-                self.stdout.write(self.style.ERROR(f"[FAIL]  {order_id} — status={status_code} body={raw_body}"))
+                try:
+                    formatted = json.dumps(raw_body, indent=2) if isinstance(raw_body, (dict, list)) else raw_body
+                except Exception:
+                    formatted = str(raw_body)
+                self.stdout.write(self.style.ERROR(
+                    f"[FAIL]  {order_id} — HTTP {status_code}\n{formatted}"
+                ))
                 failed.append(order_id)
+
+            time.sleep(0.4)  # Respect eBay rate limits between calls
 
         self.stdout.write("\n--- Summary ---")
         self.stdout.write(self.style.SUCCESS(f"Succeeded : {len(succeeded)}"))
