@@ -132,22 +132,25 @@ class FrgxOrderApiClient:
             logger.warning(
                 f"FragranceX tracking API failed for order {self.order_id}"
             )
-            return False
+            return {}
 
         data = response.json()
 
         return data
 
     def update_local_status(self, data):
-
         vendor_order = self.VendorOrder
-
         tracking_number = vendor_order.tracking_number
         carrier = vendor_order.carrier
         shipped_date = vendor_order.shipped_at
 
+        if not data:
+            logger.info(
+                f"FragranceX tracking API returned no data for order {self.order_id}"
+            )
+            return False
 
-        if not tracking_number or not carrier or not isinstance(data, dict):
+        elif not tracking_number or not carrier:
             tracking_number = data.get("TrackingNumber")
             carrier = data.get("Carrier")
             shipped_date_raw = data.get("DateShipped")
