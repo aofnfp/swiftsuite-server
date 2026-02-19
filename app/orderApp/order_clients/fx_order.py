@@ -129,9 +129,9 @@ class FrgxOrderApiClient:
         response = requests.get(url, headers=headers, timeout=15)
 
         if response.status_code != 200:
-            logger.warning(
-                f"FragranceX tracking API failed for order {self.order_id}"
-            )
+            # logger.warning(
+            #     f"FragranceX tracking API failed for order {self.order_id}"
+            # )
             return {}
 
         data = response.json()

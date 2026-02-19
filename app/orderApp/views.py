@@ -476,7 +476,7 @@ class GetFulfillmentView(APIView):
     module_name = 'orders'
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
 
-    def post(self, request, order_id):
+    def get(self, request, order_id):
         user = request.user
         if user and user.parent_id:
             user = user.parent
