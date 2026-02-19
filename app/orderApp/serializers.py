@@ -22,7 +22,7 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
             if not results:
                 return None
 
-            shipping_address = results[0].get("ShippingAddress", {})
+            shipping_address = results[0].get("ShippingAddress")
             if not isinstance(shipping_address, dict):
                 return None
 
@@ -65,6 +65,9 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
         vendor_name = obj.vendor.lower()
         if vendor_name == 'rsr':
             raw_response = obj.raw_response
+            if not isinstance(raw_response, dict):
+                return None
+
             return {
                 "subtotal": self._parse_money(raw_response.get("Subtotal")),
                 "shipping": self._parse_money(raw_response.get("Shipping")),
@@ -73,11 +76,18 @@ class VendorOrderLogSerializer(serializers.ModelSerializer):
             }
         
         elif vendor_name == 'fragrancex':
-            results = obj.raw_response.get("OrderResults", [])
+            raw_response = obj.raw_response
+            if not isinstance(raw_response, dict):
+                return None
+
+            results = raw_response.get("OrderResults", [])
             if not results:
                 return None
             
             result = results[0]
+            if not isinstance(result, dict):
+                return None
+
             return {
                 "subtotal": self._parse_money(result.get("SubTotal")),
                 "shipping": self._parse_money(result.get("ShippingCharge")),
