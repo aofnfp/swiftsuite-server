@@ -20,6 +20,7 @@ from vendorEnrollment.pagination import CustomOffsetPagination
 from .models import VendorOrderLog
 from .order_clients.rsr_order import RsrOrderApiClient
 from .order_clients.fx_order import FrgxOrderApiClient
+from .utils import push_tracking_to_ebay, get_access_token
 
 
 # Create your views here.
@@ -389,4 +390,122 @@ class PlaceOrderView(APIView):
                 {"message": f"Failed to place RSR order", "data": result},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class TrackOrderView(APIView):
+    module_name = 'orders'
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+
+    def post(self, request, market_name, orderid):
+        user = request.user
+        if user and user.parent_id:
+            user = user.parent
+
+        # Try existing VendorOrderLog
+        vendor_order = VendorOrderLog.objects.filter(
+            order__orderId=orderid,
+            order__market_name__iexact=market_name,
+            enrollment__user=user,
+        ).first()
+        
+        if not vendor_order:
+            return Response(
+                {"message": "Order not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if vendor_order.vendor.lower() == "rsr":
+            rsr_client = RsrOrderApiClient(vendor_order)
+            payload = rsr_client.build_check_order_payload(vendor_order)
+            result = rsr_client.check_order(payload)
+    
+            if result.get("StatusCode") == "00":
+                rsr_client.update_local_status(result)
+                if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+                    push_tracking_to_ebay(vendor_order)
+                return Response(
+                    {"message": "RSR order checked successfully", "data": result},
+                    status=status.HTTP_200_OK
+                )
+            return Response(
+                {"message": f"Failed to check RSR order", "data": result},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        elif vendor_order.vendor.lower() == "fragrancex":
+            fx_client = FrgxOrderApiClient(vendor_order)
+            if fx_client.check_and_update_status():
+                if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+                    push_tracking_to_ebay(vendor_order)
+                return Response(
+                    {"message": "Tracking information updated successfully."},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "Tracking information not updated."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+
+class PushTrackingView(APIView):
+    module_name = 'orders'
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+
+    def post(self, request, order_id):
+        vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
+        if not vendor_order:
+            return Response(
+                {"message": "Order not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        res = push_tracking_to_ebay(vendor_order)
+        if res["success"]:
+            return Response(
+                {"message": "Tracking pushed to eBay successfully", "data": res},
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(
+            {"message": "Failed to push tracking to eBay", "data": res},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class GetFulfillmentView(APIView):
+    module_name = 'orders'
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+
+    def post(self, request, order_id):
+        user = request.user
+        if user and user.parent_id:
+            user = user.parent
+
+        vendor_order = VendorOrderLog.objects.filter(order__orderId=order_id).first()
+        if not vendor_order:
+            return JsonResponse(
+                {"message": "Order not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        market_name = vendor_order.order.market_name
+        access_token = get_access_token(user.id, market_name)
+
+        if not access_token:
+            return JsonResponse(
+                {"message": "Access token not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        url = vendor_order.fulfillment_url
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.get(url, headers=headers)
+
+        return JsonResponse(response.json(), status=response.status_code)
+    
+        
 
