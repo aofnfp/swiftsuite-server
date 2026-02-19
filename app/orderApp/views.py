@@ -396,7 +396,7 @@ class TrackOrderView(APIView):
     module_name = 'orders'
     permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
 
-    def post(self, request, market_name, order_id):
+    def post(self, request, order_id):
         user = request.user
         if user and user.parent_id:
             user = user.parent
@@ -404,7 +404,6 @@ class TrackOrderView(APIView):
         # Try existing VendorOrderLog
         vendor_order = VendorOrderLog.objects.filter(
             order__orderId=order_id,
-            order__market_name__iexact=market_name,
             enrollment__user=user,
         ).first()
         
