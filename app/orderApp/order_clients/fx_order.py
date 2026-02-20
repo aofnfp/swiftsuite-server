@@ -4,11 +4,12 @@ import requests
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from vendorActivities.apiSupplier import getFragranceXAuth
+from vendorActivities.apiSupplier import getFragranceXAuth, frxLimitCounter
 from accounts.models import User
 from ..models import VendorOrderLog, OrdersOnEbayModel
 from ..utils import get_ebay_order_details
 from django.db.models import Q
+from django.core.cache import cache
 import logging
 import time
 from django.utils.dateparse import parse_datetime
@@ -105,6 +106,11 @@ class FrgxOrderApiClient:
         return bulk_order
          
     def place_bulk_order(self, bulk_order):
+        
+        if not frxLimitCounter(self.api_id):
+            logger.warning(f"FragranceX rate limit exceeded for order {self.order_id}. Skipping order placement.")
+            return {"Message": "FragranceX rate limit exceeded. Please retry shortly."}
+
         access_token = getFragranceXAuth(self.api_id, self.api_key)
         headers = {
         'Authorization': f'Bearer {access_token}',
@@ -119,6 +125,11 @@ class FrgxOrderApiClient:
         return f"SW-FX-{order_id}-{unique_suffix}"
     
     def check_order(self):
+        
+        if not frxLimitCounter(self.api_id):
+            logger.warning(f"FragranceX rate limit exceeded for order {self.order_id}. Skipping status check.")
+            return None
+        
         access_token = getFragranceXAuth(self.api_id, self.api_key)
 
         url = f"https://apitracking.fragrancex.com/tracking/gettrackinginfo/{self.order_id}"

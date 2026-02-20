@@ -160,13 +160,11 @@ def dispatch_order(vendor_order_log_id: int):
 
 @shared_task(queue='heavy-cpu')
 def check_vendor_order_status():
-    """Background task to check status of processing vendor orders (RSR, FragranceX)"""
     logger.info("Starting check_vendor_order_status task")
     
     processing_orders = VendorOrderLog.objects.filter(
         status__in=[
-            VendorOrderLog.VendorOrderStatus.PROCESSING,
-            VendorOrderLog.VendorOrderStatus.SHIPPED,
+            VendorOrderLog.VendorOrderStatus.PROCESSING
         ]
     )
 
@@ -192,16 +190,12 @@ def check_vendor_order_status():
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
-                # Skip orders that already have full tracking info
-                if vendor_order.tracking_number and vendor_order.carrier:
-                    continue
-
+                continue
+            
                 client = FrgxOrderApiClient(vendor_order)
                 data = client.check_order()
 
                 if data is None:
-                    # Rate limit exhausted after retries — stop processing FX orders this run
-                    logger.warning("FragranceX rate limit exhausted during batch check. Stopping FX checks for this run.")
                     break
 
                 if client.update_local_status(data):

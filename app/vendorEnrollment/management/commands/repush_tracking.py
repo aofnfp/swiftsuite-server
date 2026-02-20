@@ -54,7 +54,7 @@ def delete_ghost_fulfillments(order_id, access_token, stdout, style):
 
     fulfillments = resp.json().get("fulfillments", [])
     if not fulfillments:
-        return True  # Nothing to clean up
+        return True  
 
     deleted_any = False
     for f in fulfillments:

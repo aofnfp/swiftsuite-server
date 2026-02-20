@@ -613,10 +613,11 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         
         if response.status_code in [200, 201, 204]:
             fulfillment_url = response.headers.get('Location')
+            time.sleep(2)
 
-            # eBay sometimes puts the tracking number in the Location URL instead of
-            # an internal fulfillment ID, so verify by listing all fulfillments and
-            # confirming our tracking number is present.
+            # Verify by listing all fulfillments and confirming our tracking number
+            # is present (Location header sometimes contains the tracking number
+            # itself instead of an internal fulfillment ID).
             list_url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}/shipping_fulfillment'
             verify_response = requests.get(list_url, headers=headers, timeout=15)
             verify_body = verify_response.json()

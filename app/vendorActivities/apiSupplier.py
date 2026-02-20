@@ -2,6 +2,60 @@ import requests
 import json
 import time
 from django.core.cache import cache
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# Official FragranceX rate limits:
+#   3 req/second  — enforced by time.sleep(0.4) in the Celery task loop
+#   300 req/hour  — enforced by the cache counter below
+#   500 req/endpoint/day — enforced by the daily counter below
+FX_TRACKING_HOURLY_LIMIT = 285
+FX_TRACKING_DAILY_LIMIT = 490
+
+
+def frxLimitCounter(api_id):
+    hourly_key = f"fx_hourly_{api_id}"
+    daily_key  = f"fx_daily_{api_id}"
+
+    # Initialize safely
+    if cache.get(hourly_key) is None:
+        cache.set(hourly_key, 0, timeout=3600)
+
+    if cache.get(daily_key) is None:
+        cache.set(daily_key, 0, timeout=86400)
+
+    try:
+        hourly_count = cache.incr(hourly_key)
+        daily_count  = cache.incr(daily_key)
+    except ValueError:
+        # Key expired between get and incr
+        cache.set(hourly_key, 1, timeout=3600)
+        cache.set(daily_key, 1, timeout=86400)
+        hourly_count = 1
+        daily_count = 1
+
+    # Check limits
+    if hourly_count > FX_TRACKING_HOURLY_LIMIT:
+        cache.decr(hourly_key)
+        logger.warning(
+            f"FX hourly quota reached ({hourly_count - 1}/{FX_TRACKING_HOURLY_LIMIT}) "
+            f"for api_id={api_id}"
+        )
+        return False
+
+    if daily_count > FX_TRACKING_DAILY_LIMIT:
+        cache.decr(daily_key)
+        logger.warning(
+            f"FX daily quota reached ({daily_count - 1}/{FX_TRACKING_DAILY_LIMIT}) "
+            f"for api_id={api_id}"
+        )
+        return False
+
+    return True
+
+
 
 def getFragranceXAuth(apiAccessId, apiAccessKey):
     cache_key = f"fx_token_{apiAccessId}"
@@ -12,11 +66,10 @@ def getFragranceXAuth(apiAccessId, apiAccessKey):
     # API endpoint
     url = "https://apilisting.fragrancex.com/token"
 
-    # Payload with the required parameters
     payload = {
         'grant_type': 'apiAccessKey',
-        'apiAccessId': apiAccessId,  # Your API ID
-        'apiAccessKey': apiAccessKey  # Your API Key
+        'apiAccessId': apiAccessId,  
+        'apiAccessKey': apiAccessKey  
     }
 
     headers = {
@@ -25,7 +78,6 @@ def getFragranceXAuth(apiAccessId, apiAccessKey):
 
     try:
         response = requests.post(url, data=payload, headers=headers)
-        # Raise an error if the request was unsuccessful
         response.raise_for_status()
         data = response.json()
 
@@ -35,7 +87,6 @@ def getFragranceXAuth(apiAccessId, apiAccessKey):
         return access_token
 
     except requests.exceptions.RequestException as e:
-        # Handle any errors that occur during the request
         print(f"An error occurred: {e}")
         return None
 
