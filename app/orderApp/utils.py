@@ -614,18 +614,39 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
         if response.status_code in [200, 201, 204]:
             fulfillment_url = response.headers.get('Location')
 
-            # Verify the fulfillment actually exists before trusting the 201
-            verify_response = requests.get(fulfillment_url, headers=headers, timeout=15)
+            # eBay sometimes puts the tracking number in the Location URL instead of
+            # an internal fulfillment ID, so verify by listing all fulfillments and
+            # confirming our tracking number is present.
+            list_url = f'https://api.ebay.com/sell/fulfillment/v1/order/{ebay_order_id}/shipping_fulfillment'
+            verify_response = requests.get(list_url, headers=headers, timeout=15)
+            verify_body = verify_response.json()
 
             if verify_response.status_code != 200:
-                verify_body = verify_response.json()
                 logger.error(
-                    f"eBay fulfillment verification failed for order {ebay_order_id}. "
+                    f"eBay fulfillment list failed for order {ebay_order_id}. "
                     f"Status: {verify_response.status_code}, Body: {verify_body}"
                 )
                 return {
                     "success": False,
                     "status_code": verify_response.status_code,
+                    "raw_body": verify_body,
+                    "headers": dict(verify_response.headers),
+                }
+
+            fulfillments = verify_body.get("fulfillments", [])
+            tracking_confirmed = any(
+                f.get("shipmentTrackingNumber") == vendor_order_log.tracking_number
+                for f in fulfillments
+            )
+
+            if not tracking_confirmed:
+                logger.error(
+                    f"Tracking number not found in eBay fulfillments for order {ebay_order_id}. "
+                    f"fulfillments={fulfillments}"
+                )
+                return {
+                    "success": False,
+                    "status_code": 200,
                     "raw_body": verify_body,
                     "headers": dict(verify_response.headers),
                 }
@@ -648,7 +669,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             return {
                 "success": True,
                 "status_code": response.status_code,
-                "raw_body": verify_response.json(),
+                "raw_body": verify_body,
                 "headers": dict(response.headers),
             }
             

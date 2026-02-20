@@ -1,8 +1,9 @@
 import json
 import time
+import requests
 from django.core.management.base import BaseCommand
 from orderApp.models import VendorOrderLog
-from orderApp.utils import push_tracking_to_ebay
+from orderApp.utils import push_tracking_to_ebay, get_access_token
 
 
 # First-pass failures — retry these only
@@ -30,9 +31,58 @@ AFFECTED_ORDER_IDS = [
     "10-14244-54659",
 ]
 
+EBAY_BASE = "https://api.ebay.com/sell/fulfillment/v1/order"
+
+
+def delete_ghost_fulfillments(order_id, access_token, stdout, style):
+    """
+    List all fulfillments for the order and delete any that have no tracking number.
+    Returns True if at least one ghost was deleted (or none existed), False on error.
+    """
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+    list_url = f"{EBAY_BASE}/{order_id}/shipping_fulfillment"
+    resp = requests.get(list_url, headers=headers, timeout=15)
+
+    if resp.status_code != 200:
+        stdout.write(style.WARNING(
+            f"  [WARN] Could not list fulfillments for {order_id}: {resp.status_code} {resp.text}"
+        ))
+        return False
+
+    fulfillments = resp.json().get("fulfillments", [])
+    if not fulfillments:
+        return True  # Nothing to clean up
+
+    deleted_any = False
+    for f in fulfillments:
+        fulfillment_id = f.get("fulfillmentId")
+        has_tracking = bool(f.get("shipmentTrackingNumber"))
+
+        if has_tracking:
+            stdout.write(f"  [INFO] Fulfillment {fulfillment_id} already has tracking — skipping delete")
+            continue
+
+        # Ghost fulfillment — delete it
+        delete_url = f"{EBAY_BASE}/{order_id}/shipping_fulfillment/{fulfillment_id}"
+        del_resp = requests.delete(delete_url, headers=headers, timeout=15)
+
+        if del_resp.status_code in [200, 204]:
+            stdout.write(style.SUCCESS(f"  [DEL]  Deleted ghost fulfillment {fulfillment_id} for {order_id}"))
+            deleted_any = True
+        else:
+            stdout.write(style.WARNING(
+                f"  [WARN] Could not delete fulfillment {fulfillment_id}: "
+                f"{del_resp.status_code} {del_resp.text}"
+            ))
+
+    return deleted_any or True  # Continue even if delete failed — POST may still work
+
 
 class Command(BaseCommand):
-    help = "Re-push eBay tracking orders that have ghost fulfillments"
+    help = "Re-push eBay tracking for orders with ghost fulfillments"
 
     def handle(self, *args, **kwargs):
         succeeded = []
@@ -41,7 +91,8 @@ class Command(BaseCommand):
 
         for order_id in AFFECTED_ORDER_IDS:
             vendor_order = VendorOrderLog.objects.filter(
-                order__orderId=order_id
+                order__orderId=order_id,
+                enrollment__vendor__name__iexact="fragrancex",
             ).first()
 
             if not vendor_order:
@@ -66,7 +117,11 @@ class Command(BaseCommand):
                 f"| shipped={vendor_order.shipped_at}"
             )
 
-            # Reset ghost fulfillment state so push_tracking_to_ebay re-creates it
+            # Step 1: Delete any ghost fulfillments (no tracking) before re-pushing
+            access_token = get_access_token(vendor_order.enrollment.user.id, vendor_order.order.market_name)
+            delete_ghost_fulfillments(order_id, access_token, self.stdout, self.style)
+
+            # Step 2: Reset local state so push_tracking_to_ebay re-creates the fulfillment
             vendor_order.status = VendorOrderLog.VendorOrderStatus.SHIPPED
             vendor_order.fulfillment_url = None
             vendor_order.delivered_at = None
