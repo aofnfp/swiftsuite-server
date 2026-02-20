@@ -71,6 +71,7 @@ def delete_ghost_fulfillments(order_id, access_token, stdout, style):
 
         if del_resp.status_code in [200, 204]:
             stdout.write(style.SUCCESS(f"  [DEL]  Deleted ghost fulfillment {fulfillment_id} for {order_id}"))
+            time.sleep(2)  # Give eBay time to propagate the delete before POSTing
             deleted_any = True
         else:
             stdout.write(style.WARNING(
@@ -92,7 +93,6 @@ class Command(BaseCommand):
         for order_id in AFFECTED_ORDER_IDS:
             vendor_order = VendorOrderLog.objects.filter(
                 order__orderId=order_id,
-                enrollment__vendor__name__iexact="fragrancex",
             ).first()
 
             if not vendor_order:
