@@ -106,10 +106,6 @@ class FrgxOrderApiClient:
         return bulk_order
          
     def place_bulk_order(self, bulk_order):
-        
-        if not frxLimitCounter(self.api_id):
-            logger.warning(f"FragranceX rate limit exceeded for order {self.order_id}. Skipping order placement.")
-            return {"Message": "FragranceX rate limit exceeded. Please retry shortly."}
 
         access_token = getFragranceXAuth(self.api_id, self.api_key)
         headers = {
