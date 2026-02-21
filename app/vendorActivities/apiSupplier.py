@@ -15,30 +15,19 @@ FX_TRACKING_HOURLY_LIMIT = 285
 FX_TRACKING_DAILY_LIMIT = 490
 
 
-def frxLimitCounter(api_id):
-    hourly_key = f"fx_hourly_{api_id}"
-    daily_key  = f"fx_daily_{api_id}"
+def frxLimitCounter(api_id, endpoint="tracking"):
+    hourly_key = f"fx_{endpoint}_hourly_{api_id}"
+    daily_key  = f"fx_{endpoint}_daily_{api_id}"
 
-    # Initialize safely
-    if cache.get(hourly_key) is None:
-        cache.set(hourly_key, 0, timeout=3600)
+    cache.add(hourly_key, 0, timeout=3600)
+    cache.add(daily_key,  0, timeout=86400)
 
-    if cache.get(daily_key) is None:
-        cache.set(daily_key, 0, timeout=86400)
+    hourly_count = cache.incr(hourly_key)
+    daily_count  = cache.incr(daily_key)
 
-    try:
-        hourly_count = cache.incr(hourly_key)
-        daily_count  = cache.incr(daily_key)
-    except ValueError:
-        # Key expired between get and incr
-        cache.set(hourly_key, 1, timeout=3600)
-        cache.set(daily_key, 1, timeout=86400)
-        hourly_count = 1
-        daily_count = 1
-
-    # Check limits
     if hourly_count > FX_TRACKING_HOURLY_LIMIT:
         cache.decr(hourly_key)
+        cache.decr(daily_key)
         logger.warning(
             f"FX hourly quota reached ({hourly_count - 1}/{FX_TRACKING_HOURLY_LIMIT}) "
             f"for api_id={api_id}"
@@ -46,6 +35,7 @@ def frxLimitCounter(api_id):
         return False
 
     if daily_count > FX_TRACKING_DAILY_LIMIT:
+        cache.decr(hourly_key)
         cache.decr(daily_key)
         logger.warning(
             f"FX daily quota reached ({daily_count - 1}/{FX_TRACKING_DAILY_LIMIT}) "

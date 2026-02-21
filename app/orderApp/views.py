@@ -344,6 +344,12 @@ class PlaceOrderView(APIView):
             bulk_order = order_client.build_bulk_payload(ordered_details)
             # Place the order
             result = order_client.place_bulk_order(bulk_order)
+            
+            if result is None:
+                return JsonResponse(
+                    {"message": "FragranceX rate limit reached. Please retry shortly."},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
         
             if result.get("Message", False) and result.get("BulkOrderId", False):
                 VendorOrder.status = VendorOrderLog.VendorOrderStatus.PROCESSING

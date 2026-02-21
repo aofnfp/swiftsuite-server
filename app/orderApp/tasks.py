@@ -110,17 +110,22 @@ def dispatch_order(vendor_order_log_id: int):
             order_details = client.get_order_details()
             bulk_order = client.build_bulk_payload(order_details)
             result = client.place_bulk_order(bulk_order)
-            if result.get("Message", False) and result.get("BulkOrderId", False):
+
+            if result is None:
+                # Rate-limited — leave status as CREATED so the next task run retries
+                logger.warning(f"Order {vendor_order_log.id} skipped: FragranceX rate limit reached.")
+                
+            elif result.get("Message", False) and result.get("BulkOrderId", False):
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.PROCESSING
                 vendor_order_log.vendor_order_id = result.get("BulkOrderId")
                 vendor_order_log.raw_response = result
                 vendor_order_log.save()
-                
+
                 logger.info(f"Order {vendor_order_log.id} placed successfully with Fragrancex.")
             else:
                 vendor_order_log.status = VendorOrderLog.VendorOrderStatus.FAILED
                 order_results = result.get("OrderResults")
-                
+
                 if isinstance(order_results, list) and order_results:
                     message = order_results[0].get("Message", "Fragrancex order failed")
                 else:
@@ -164,7 +169,8 @@ def check_vendor_order_status():
     
     processing_orders = VendorOrderLog.objects.filter(
         status__in=[
-            VendorOrderLog.VendorOrderStatus.PROCESSING
+            VendorOrderLog.VendorOrderStatus.PROCESSING,
+            VendorOrderLog.VendorOrderStatus.SHIPPED,
         ]
     )
 
@@ -175,8 +181,14 @@ def check_vendor_order_status():
         count += 1
         vendor_name = vendor_order.vendor.lower()
         
+        
         try:
             status_updated = False
+            # check if status shipped has tracking info, if so push to ebay
+            if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
+                if vendor_order.tracking_number and vendor_order.carrier:
+                    push_tracking_to_ebay(vendor_order)
+                    continue
             
             if vendor_name == 'rsr':
                 client = RsrOrderApiClient(vendor_order)
@@ -190,8 +202,7 @@ def check_vendor_order_status():
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
-                continue
-            
+                
                 client = FrgxOrderApiClient(vendor_order)
                 data = client.check_order()
 
