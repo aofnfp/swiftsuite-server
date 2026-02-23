@@ -336,7 +336,7 @@ class PlaceOrderView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
-        if VendorOrder.vendor.lower() == "fragrancex" or VendorOrder.enrollment.vendor.name.lower() == "fragrancex":
+        if VendorOrder.vendor.lower() == "fragrancex":
             # Initialize client
             order_client = FrgxOrderApiClient(VendorOrder)
             ordered_details = order_client.get_order_details()  
@@ -366,7 +366,7 @@ class PlaceOrderView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         
-        elif VendorOrder.vendor.lower() == "rsr" or VendorOrder.enrollment.vendor.name.lower() == "rsr":
+        elif VendorOrder.vendor.lower() == "rsr":
             # Initialize RSR client
             rsr_client = RsrOrderApiClient(VendorOrder)
             order_details = rsr_client.get_order_details()
