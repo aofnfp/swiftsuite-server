@@ -336,7 +336,7 @@ class PlaceOrderView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
-        if VendorOrder.vendor.lower() == "fragrancex":
+        if VendorOrder.vendor.lower() == "fragrancex" or VendorOrder.enrollment.vendor.name.lower() == "fragrancex":
             # Initialize client
             order_client = FrgxOrderApiClient(VendorOrder)
             ordered_details = order_client.get_order_details()  
@@ -366,14 +366,14 @@ class PlaceOrderView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         
-        elif VendorOrder.vendor.lower() == "rsr":
+        elif VendorOrder.vendor.lower() == "rsr" or VendorOrder.enrollment.vendor.name.lower() == "rsr":
             # Initialize RSR client
             rsr_client = RsrOrderApiClient(VendorOrder)
             order_details = rsr_client.get_order_details()
             payload = rsr_client.build_payload(order_details)
             result = rsr_client.place_order(payload)
-            
-            
+
+
             if result.get("StatusCode") == "00":
                 VendorOrder.status = VendorOrderLog.VendorOrderStatus.PROCESSING
                 VendorOrder.vendor_order_id = (
@@ -381,7 +381,7 @@ class PlaceOrderView(APIView):
                 )
                 VendorOrder.raw_response = result
                 VendorOrder.save()
-                
+
                 return Response(
                     {"message": "RSR order placed successfully", "data": result},
                     status=status.HTTP_200_OK
@@ -395,6 +395,12 @@ class PlaceOrderView(APIView):
             return Response(
                 {"message": f"Failed to place RSR order", "data": result},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+        else:
+            return Response(
+                {"message": f"Vendor '{VendorOrder.vendor}' is not supported for automated order placement."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
