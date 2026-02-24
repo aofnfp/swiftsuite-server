@@ -611,6 +611,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=30)
+        logger.info(f"Response from eBay for order {ebay_order_id} and line item {line_item_id}: {response.text}")
         
         if response.status_code in [200, 201, 204]:
             fulfillment_url = response.headers.get('Location')
