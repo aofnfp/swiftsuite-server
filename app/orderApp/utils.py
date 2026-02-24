@@ -611,7 +611,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
     
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=30)
-        logger.info(f"Response from eBay for order {ebay_order_id} and line item {line_item_id}: {response.text}")
+
         
         if response.status_code in [200, 201, 204]:
             fulfillment_url = response.headers.get('Location')
@@ -634,6 +634,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                     "status_code": verify_response.status_code,
                     "raw_body": verify_body,
                     "headers": dict(verify_response.headers),
+                    "response": response.text,
                 }
 
             fulfillments = verify_body.get("fulfillments", [])
@@ -652,6 +653,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                     "status_code": 200,
                     "raw_body": verify_body,
                     "headers": dict(verify_response.headers),
+                    "response": response.text,
                 }
 
             logger.info(f"Successfully pushed and verified tracking on eBay for order {ebay_order_id}")
@@ -674,6 +676,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                 "status_code": response.status_code,
                 "raw_body": verify_body,
                 "headers": dict(response.headers),
+                "response": response.text,
             }
             
         else:
@@ -686,6 +689,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
                 "status_code": response.status_code,
                 "raw_body": response.text,
                 "headers": dict(response.headers),
+                "response": response.text,
             }
             
     except Exception as e:
@@ -695,4 +699,5 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             "status_code": 500,
             "raw_body": str(e),
             "headers": None,
+            "response": None,
         }
