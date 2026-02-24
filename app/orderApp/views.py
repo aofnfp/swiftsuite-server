@@ -319,10 +319,12 @@ class PlaceOrderView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            vendor_name = order.vendor_name if order.vendor_name else enrollment.vendor.name
+            
             VendorOrder = VendorOrderLog.objects.create(
                 order=order,
                 enrollment=enrollment,
-                vendor= order.vendor_name,
+                vendor= vendor_name,
                 status=VendorOrderLog.VendorOrderStatus.CREATED
             )
         
@@ -335,6 +337,7 @@ class PlaceOrderView(APIView):
                 {"message": f"Order is already placed with {VendorOrder.vendor}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
         
         if VendorOrder.vendor.lower() == "fragrancex":
             # Initialize client
