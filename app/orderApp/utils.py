@@ -482,7 +482,8 @@ def get_vendor_enrollment(marketItemId):
     ).first()
     if not inventory:
         logger.error(f"Inventory item with marketItemId {marketItemId} not found in inventory.")
-        
+        return None  
+
     if not inventory.product:
         logger.error(
             f"Inventory {inventory.id} has no linked product"

@@ -319,7 +319,7 @@ class PlaceOrderView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            vendor_name = order.vendor_name if order.vendor_name else enrollment.vendor.name
+            vendor_name = enrollment.vendor.name if enrollment.vendor and enrollment.vendor.name else order.vendor_name
             
             VendorOrder = VendorOrderLog.objects.create(
                 order=order,
