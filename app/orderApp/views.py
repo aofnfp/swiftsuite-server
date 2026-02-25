@@ -198,12 +198,14 @@ class OrderEbay:
     @with_module('orders')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
-    def sync_ebay_order_with_local_manually(request, userid):
+    def sync_ebay_order_with_local_manually(request):
         # check if user is subaccount
         user = request.user
         if user:
             if user.parent_id:
                 userid = user.parent_id
+            else:
+                userid = user.id
         try:
             manual_sync_order_with_local_task.delay(userid)
             return Response("Orders sync task has been initiated.", status=status.HTTP_200_OK)

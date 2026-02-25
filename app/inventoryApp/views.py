@@ -352,13 +352,16 @@ class General_operations:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
-    def manually_download_item_from_marketplace(request, userid):
+    def manually_download_item_from_marketplace(request):
         eb = Ebay()
         # check if user is subaccount
         user = request.user
         if user:
             if user.parent_id:
                 userid = user.parent_id
+            else:
+                userid = user.id
+
                 
         access_token = eb.refresh_access_token(userid, "Ebay")
         try:

@@ -18,5 +18,5 @@ urlpatterns = [
     path('search_query_unmapped_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', General_operations.search_query_unmapped_inventory_items, name='search_query_unmapped_inventory_items'),
     path('get_all_marketplaces_enrolled/<int:userid>/', General_operations.get_all_marketplaces_enrolled, name='get_all_marketplaces_enrolled'),
     path('get_all_vendor_enrolled/<int:userid>/', General_operations.get_all_vendor_enrollment, name='get_all_vendor_enrolled'),
-    path('manually_download_inventory_items/<int:userid>/', General_operations.manually_download_item_from_marketplace, name='manually_download_inventory_items'),
+    path('manually_download_inventory_items/', General_operations.manually_download_item_from_marketplace, name='manually_download_inventory_items'),
 ]
