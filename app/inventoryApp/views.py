@@ -364,6 +364,8 @@ class General_operations:
 
                 
         access_token = eb.refresh_access_token(userid, "Ebay")
+        if not isinstance(access_token, str):
+            return Response("Failed to refresh eBay access token. Please re-authorize.", status=status.HTTP_400_BAD_REQUEST)
         try:
             manually_download_item_from_marketplace_task.delay(userid, access_token)
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
