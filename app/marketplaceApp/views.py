@@ -837,7 +837,7 @@ class Ebay:
         )
 
         # Define the item details
-        if validated_data['enable_charity'] == True:
+        if validated_data['enable_charity'] == "true":
             item = f"""<Item>
                     <Title><![CDATA[{validated_data['title']}]]></Title>
                     <Description><![CDATA[
