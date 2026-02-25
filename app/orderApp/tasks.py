@@ -87,7 +87,14 @@ def process_vendor_orders():
         
         # dispatch order to vendor
         if order_log:
-           dispatch_order.delay(order_log.id)
+            # Check enrollment send_orders flag before dispatching
+            if not order_log.enrollment.send_orders:
+                logger.warning(
+                    f"Order {order.orderId} skipped: enrollment '{order_log.enrollment}' "
+                    f"has send_orders=False."
+                )
+                continue
+            dispatch_order.delay(order_log.id)
             
     logger.info("order log entries created for vendor orders and dispatched.")
         
