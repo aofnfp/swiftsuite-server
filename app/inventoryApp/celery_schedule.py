@@ -3,7 +3,7 @@ from celery.signals import task_prerun
 from django import db
 
 APP_CELERY_BEAT_SCHEDULE = {
-    "download_update_marketplace_items_30_minutes": {
+    "download_update_marketplace_items_4_hours": {
         "task": "inventoryApp.tasks.download_item_update_market_price_quantity_task",
         "schedule": crontab(hour="*/4"),
     },

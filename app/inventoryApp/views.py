@@ -134,6 +134,11 @@ class General_operations:
                             db_items = model_class.objects.filter(Q(sku=prod.get('sku')))
                             prod["caution"] = "Product not found in the enrollment catalogue due to your applied filters. But we still help you to map it. Please verify the product details before listing to marketplace."
                             mapped_with_caution.append(prod)
+                            # Insert the item to the supplier's update table for tracking and mapping if the item gets enrolled later.
+                            model_name = enrollment.vendor.name.capitalize() + "Update"
+                            # Get the actual model class from the string name
+                            model_class = apps.get_model('vendorEnrollment', model_name)
+                            model_class.objects.create(sku=db_items[0].sku, upc=db_items[0].upc, active=True, account_id=enrollment.account_id, enrollment_id=enrollment.id, product_id=db_items[0].id, vendor_id=enrollment.vendor_id, msrp=db_items[0].msrp)
                         db_items = db_items[0]
                                                  
                     except Exception as ea:
