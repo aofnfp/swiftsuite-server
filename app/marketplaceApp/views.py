@@ -867,7 +867,7 @@ class Ebay:
                 {f'''<Charity>
                     <CharityID>{validated_data['charity_id']}</CharityID>
                     <DonationPercent>{validated_data['donation_percentage']}</DonationPercent>
-                </Charity>''' if validated_data['enable_charity'] == True else ''}
+                </Charity>''' if validated_data['enable_charity'] == 1 else ''}
                 <SellerProfiles>
                     <SellerPaymentProfile>
                         <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
