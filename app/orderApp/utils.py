@@ -56,31 +56,31 @@ def background_refresh_access_token():
             access_token = user.access_token
             refresh_token = user.refresh_token
 
-        credentials = f"{client_id}:{client_secret}"
-        credentials_base64 = base64.b64encode(credentials.encode()).decode()
-        
-        headers = {
-            "Authorization": f"Basic {credentials_base64}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        body = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "scope": " ".join(scopes)  # Ensure scope is passed correctly
-        }
+            credentials = f"{client_id}:{client_secret}"
+            credentials_base64 = base64.b64encode(credentials.encode()).decode()
+            
+            headers = {
+                "Authorization": f"Basic {credentials_base64}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            body = {
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "scope": " ".join(scopes)  # Ensure scope is passed correctly
+            }
 
-        response = requests.post(token_url, headers=headers, data=body)
-        if response.status_code != 200:
-            return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
+            response = requests.post(token_url, headers=headers, data=body)
+            if response.status_code != 200:
+                return Response(f"Failed to refresh access token. Authorization code has expired", status=status.HTTP_400_BAD_REQUEST)
 
-        result = response.json()
-        access_token = result.get('access_token')
-        
-        if not access_token:
-            return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
+            result = response.json()
+            access_token = result.get('access_token')
+            
+            if not access_token:
+                return Response(f"Failed to get access token from response", status=status.HTTP_400_BAD_REQUEST)
 
-        MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
-        logger.info(f"Successfully refreshed access token with access_token: {access_token}")
+            MarketplaceEnronment.objects.filter(user_id=user.user_id, marketplace_name="Ebay").update(access_token=access_token, refresh_token=refresh_token)
+            logger.info(f"Successfully refreshed access token with access_token: {access_token}")
         time.sleep(12 * 60)  # Sleep for 12 minutes before refreshing again (eBay tokens typically last for 10 minutes)
 
 threading.Thread(target=background_refresh_access_token, daemon=True).start()  # Start the token refresh in a background thread

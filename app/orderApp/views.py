@@ -448,7 +448,10 @@ class TrackOrderView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        elif vendor_order.vendor.lower() == "fragrancex":
+        elif vendor_order.vendor.lower() == "fragrancex" or vendor_order.enrollment.vendor.name.lower() == "fragrancex":
+            if not vendor_order.vendor:
+                vendor_order.vendor = 'fragrancex'  
+                vendor_order.save()
             
             if vendor_order.tracking_number and vendor_order.carrier:
                 return JsonResponse(
@@ -474,6 +477,11 @@ class TrackOrderView(APIView):
                     {"message": "Tracking information not updated.", "data": data},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+        else:
+            return Response(
+                {"message": f"Vendor '{vendor_order.vendor}' is not supported for automated tracking."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class PushTrackingView(APIView):
