@@ -474,6 +474,11 @@ class TrackOrderView(APIView):
                     {"message": "Tracking information not updated.", "data": data},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+        else:
+            return Response(
+                {"message": f"Vendor '{vendor_order.vendor}' is not supported for automated tracking."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class PushTrackingView(APIView):
