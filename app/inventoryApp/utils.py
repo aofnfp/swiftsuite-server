@@ -521,7 +521,7 @@ def map_marketplace_items_to_vendor():
         enrollment = Enrollment.objects.filter(user_id=user.user_id)
         vendor_list = [(vendor.vendor.name.capitalize(), vendor.id) for vendor in enrollment]
         # fetch all items from inventory for the user
-        all_marketplace_items = InventoryModel.objects.filter(Q(user_id=user.user_id) & Q(manual_map=False) & Q(map_status=False))
+        all_marketplace_items = InventoryModel.objects.filter(Q(user_id=user.user_id))# & Q(manual_map=False) & Q(map_status=False))
         for item in all_marketplace_items:
             db_items = None
             for vendor_name, enrolled_id in vendor_list:
