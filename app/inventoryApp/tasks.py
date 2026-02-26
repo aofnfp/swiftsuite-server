@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.core.cache import cache
 from .utils import download_item_update_market_price_quantity, map_marketplace_items_to_vendor, manually_download_item_from_marketplace_syc_update
-from .update_market import check_product_ended_status, update_inventory_price_quantity, check_and_update_ended_item_from_vendor
+from .update_market import check_product_ended_status, update_inventory_price_quantity
 import logging
 logger = logging.getLogger(__name__)
 
