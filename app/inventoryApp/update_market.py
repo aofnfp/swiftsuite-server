@@ -160,24 +160,5 @@ def check_product_ended_status():
                     continue
 
 
-# function to update ended status of items that are marked as sold out or deleted from the vendor in the inventory
-def check_and_update_ended_item_from_vendor():
-    # Get all user in marketplace to sync their products with vendor
-    user_token = MarketplaceEnronment.objects.all()
-    for user in user_token:
-        all_inventory_items = InventoryModel.objects.filter(user_id=user.user_id).exclude(vendor_name="Not Found")
-            
-        for item in all_inventory_items:
-            try:
-                model_name = item.vendor_name + "Update"
-                # Get the actual model class from the string name
-                model_class = apps.get_model('vendorEnrollment', model_name)
-                db_items = model_class.objects.get(sku=item.sku)
-            except Exception as e:
-                logger.error(f"Failed to fetch item from vendor update table with sku {item.sku}. Error: {e}")
-                item.quantity = 0
-                item.ends_status = "Deleted"
-                item.vendor_name = "Not Found"
-                item.save()
             
      
