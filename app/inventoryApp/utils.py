@@ -356,6 +356,7 @@ def download_item_update_market_price_quantity():
                         InventoryModel.objects.filter(user_id=user.user_id, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
+                    logger.info(f"Failed to process existing item from inventory {e}")
                     try:
                         # Get product details from eBay
                         product_details = get_item_details(user._id, item.get("ebay_item_id"))
