@@ -302,6 +302,7 @@ def update_inventory(enrollment_id):
         item.shipping_cost = shipping_cost
         item.price = price
         item.map = product.map
+        item.msrp = product.msrp
 
         map_value = to_float(product.map)
 
@@ -324,7 +325,6 @@ def update_inventory(enrollment_id):
         # If vendor quantity is below the set minimum, render it as 0
         quantity = product.quantity if product.quantity >= stock_minimum else 0
         item.quantity = quantity
-        item.last_updated = timezone.now()
         inventory_to_update.append(item)
 
         # Keep Generalproducttable in sync so the 8-hour
@@ -335,6 +335,8 @@ def update_inventory(enrollment_id):
             general_product.price = price
             general_product.total_product_cost = total_price
             general_product.map = product.map
+            general_product.msrp = product.msrp
+
             general_products_to_update.append(general_product)
         
         updated_count += 1
@@ -344,14 +346,14 @@ def update_inventory(enrollment_id):
         try:
             InventoryModel.objects.bulk_update(
                 inventory_to_update,
-                ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated', 'map'],
+                ['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'map', 'msrp'],
                 batch_size=BATCH_SIZE
             )
         except Exception as e:
             logger.error(f"Bulk update failed for InventoryModel: {e}. Falling back to individual saves.")
             for item in inventory_to_update:
                 try:
-                    item.save(update_fields=['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'last_updated', 'map'])
+                    item.save(update_fields=['total_product_cost', 'shipping_cost', 'price', 'start_price', 'quantity', 'map', 'msrp'])
                 except Exception as individual_e:
                     logger.error(f"Failed to save individual item {item.sku}: {individual_e}")
 
@@ -360,14 +362,14 @@ def update_inventory(enrollment_id):
         try:
             Generalproducttable.objects.bulk_update(
                 general_products_to_update,
-                ['quantity', 'price', 'total_product_cost', 'map'],
+                ['quantity', 'price', 'total_product_cost', 'map', 'msrp'],
                 batch_size=BATCH_SIZE
             )
         except Exception as e:
             logger.error(f"Bulk update failed for Generalproducttable: {e}. Falling back to individual saves.")
             for gp in general_products_to_update:
                 try:
-                    gp.save(update_fields=['quantity', 'price', 'total_product_cost', 'map'])
+                    gp.save(update_fields=['quantity', 'price', 'total_product_cost', 'map', 'msrp'])
                 except Exception as individual_e:
                      logger.error(f"Failed to save individual general product {gp.sku}: {individual_e}")
 
