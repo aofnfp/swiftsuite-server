@@ -444,11 +444,11 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
                         response = update_items_quantity_or_price_on_ebay(userid, item.get("ebay_item_id"), existing_item.start_price, existing_item.quantity, user._id)
                         if  "Success" in response:
                             item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=userid, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_item=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
-                            InventoryModel.objects.filter(user_id=userid, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
+                            InventoryModel.objects.filter(user_id=userid, inventory_id=existing_item.id).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
                         else:
                             logger.info(f"Failed to update price {existing_item.start_price}, quantity {existing_item.quantity} on eBay item {item.get('ebay_item_id')} with response: {response}")
                     else:
-                        InventoryModel.objects.filter(user_id=userid, market_item_id=item.get("ebay_item_id")).update(market_item_url=item.get("market_item_url"))
+                        InventoryModel.objects.filter(user_id=userid, inventory_id=existing_item.id).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
                     try:
@@ -492,11 +492,11 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
                         if response == "Success":
                             item_to_save, created = UpdateLogModel.objects.update_or_create(user_id=userid, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_item=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
                             # Update the market url on inventory
-                            InventoryModel.objects.filter(user_id=userid, market_item_id=item.get("id")).update(market_item_url=item.get("permalink"))
+                            InventoryModel.objects.filter(user_id=userid, inventory_id=existing_item.id).update(market_item_url=item.get("permalink"))
                         else:
                             logger.info(f"Failed to update price and quantity on Woocommerce item {item.get('id')} with response: {response}")
                     else:
-                        InventoryModel.objects.filter(user_id=userid, market_item_id=item.get("id")).update(market_item_url=item.get("permalink"))
+                        InventoryModel.objects.filter(user_id=userid, inventory_id=existing_item.id).update(market_item_url=item.get("permalink"))
             except:
                 try:
                     # If item does not exist, insert new item
@@ -545,7 +545,7 @@ def map_marketplace_items_to_vendor():
                         item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, msrp=db_items.msrp, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                     
                     # Item exists, check if we need to update price or quantity
-                    inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, msrp=db_items.msrp, map=db_items.map, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier)
+                    inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, msrp=db_items.msrp, map=db_items.map, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin)
                     # Update the VendorUpdate table to set listed_market to true
                     db_items.active = True
                     db_items.save()
