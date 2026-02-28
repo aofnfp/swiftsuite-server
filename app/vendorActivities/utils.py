@@ -867,6 +867,7 @@ class VendorActivity():
                         db_obj.allocated = obj.allocated
                         db_obj.dealer_price = obj.dealer_price
                         db_obj.dealer_case_price = obj.dealer_case_price
+                        db_obj.map = obj.map
                         to_update.append(db_obj)
 
                 if to_update:
@@ -878,6 +879,7 @@ class VendorActivity():
                             "allocated",
                             "dealer_price",
                             "dealer_case_price",
+                            "map",
                         ],
                         batch_size=500
                     )
