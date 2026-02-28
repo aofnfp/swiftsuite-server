@@ -34,6 +34,7 @@ def map_vendor_data_to_general(vendor_name, product, user):
                 'image': product.product.imagename,
                 'category': product.product.type,
                 'msrp': product.product.msrp,
+                'map': product.product.map,
                 'mpn': product.product.manufacturermodelno,
                 'price': product.product.currentprice,
                 'model': product.product.model,
@@ -57,6 +58,7 @@ def map_vendor_data_to_general(vendor_name, product, user):
                 'image': product.product.image_300x300_url,
                 'category': product.product.category_name,
                 'msrp': product.product.list_price,
+                'map': product.product.map,
                 'mpn': product.product.manufacturer_part_number,
                 'price': product.product.your_cost,
                 'model': None,  
@@ -276,6 +278,14 @@ class VendorDataMixin:
         'zanders': 'msrp',
     }
 
+    vendor_map_fields = {
+        'fragrancex': None,  # FragranceX does not supply MAP data
+        'lipsey': 'map',
+        'rsr': 'map',
+        'cwr': 'map',
+        'zanders': 'map',
+    }
+
     def get_vendor_config(self, vendor_name):
         vendor_name = vendor_name.lower()
         if vendor_name not in self.vendor_models:
@@ -287,6 +297,7 @@ class VendorDataMixin:
             'id_field': self.vendor_id_fields[vendor_name],
             'mpn_field': self.vendor_mpn_fields[vendor_name],
             'msrp_field': self.vendor_msrp_fields[vendor_name],
+            'map_field': self.vendor_map_fields[vendor_name],
         }
 
     def product_matches_filters(self, product, enrollment, vendor_name):
@@ -353,6 +364,7 @@ class VendorDataMixin:
         id_field = config['id_field']
         mpn_field = config['mpn_field']
         msrp_field = config['msrp_field']
+        map_field = config['map_field']
         supplier_name = config['vendor_name']
 
         item_ids = df[id_column_name].tolist()
@@ -381,11 +393,13 @@ class VendorDataMixin:
 
             existing = update_map.get(product.id)
             msrp_value = getattr(product, msrp_field, None)
+            map_value = getattr(product, map_field, None) if map_field else None
             if existing:
                 existing.price = price
                 existing.quantity = quantity
                 existing.total_price = total_price
                 existing.msrp = msrp_value
+                existing.map = map_value
                 updates.append(existing)
             else:
                 new_entries.append(
@@ -395,9 +409,10 @@ class VendorDataMixin:
                         sku=getattr(product, id_field, None),
                         mpn=getattr(product, mpn_field, None),
                         msrp=msrp_value,
+                        map=map_value,
                         account=enrollment.account,
                         vendor=enrollment.vendor,
-                        enrollment = enrollment,
+                        enrollment=enrollment,
                         price=price,
                         quantity=quantity,
                         total_price=total_price
@@ -406,7 +421,7 @@ class VendorDataMixin:
 
         with transaction.atomic():
             if updates:
-                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'msrp', 'enrollment'], batch_size=500)
+                model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'msrp', 'map', 'enrollment'], batch_size=500)
             if new_entries:
                 model_update.objects.bulk_create(new_entries, batch_size=500)
 

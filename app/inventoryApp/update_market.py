@@ -83,18 +83,21 @@ def update_inventory_price_quantity():
                         print(f"item not found on product table: {e} with sku {item.sku}")
                         continue
                     
-                    # Modify selling price before updating on ebay 
+                    # Modify selling price before updating on ebay
                     try:
                         selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
+                    except Exception as e:
+                        print(f"Base price calculation error for SKU {item.sku}: {e}")
+                        continue
+                    try:
                         if db_item.map:
                             if selling_price < float(db_item.map):
                                 selling_price = float(db_item.map)
-                    except:
-                        print("Price calculation error with MAP value") 
-                        continue
+                    except Exception as e:
+                        print(f"MAP enforcement error for SKU {item.sku}: {e} — using base price")
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
-                 
+
                 except Exception as e:
                     print(f"Product fails to update price and quantity on ebay: {e}")
                     continue
@@ -109,18 +112,21 @@ def update_inventory_price_quantity():
                         db_item = Generalproducttable.objects.get(id=item.product_id)
                     except Exception as e:
                         print(f"item not found on product table: {e}")
-                        continue 
-                    
-                    # Modify selling price before updating on ebay 
+                        continue
+
+                    # Modify selling price before updating on Woocommerce
                     try:
                         selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
+                    except Exception as e:
+                        print(f"Base price calculation error for SKU {item.sku}: {e}")
+                        continue
+                    try:
                         if db_item.map:
                             if selling_price < float(db_item.map):
                                 selling_price = float(db_item.map)
-                    except:
-                        print("Price calculation error with MAP value") 
-                        continue
-                    
+                    except Exception as e:
+                        print(f"MAP enforcement error for SKU {item.sku}: {e} — using base price")
+
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
                 except Exception as e:
