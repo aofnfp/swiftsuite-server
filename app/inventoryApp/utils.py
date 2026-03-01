@@ -12,6 +12,7 @@ from woocommerce import API
 from django.apps import apps
 import logging
 logger = logging.getLogger(__name__)
+from inventoryApp.utils import calculated_minimum_offer_price
 
 
 
@@ -38,6 +39,8 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
         'Content-Type': 'text/xml',
         'Authorization': f'Bearer {access_token}'
     }
+    # calculate the minimum offer price based on the profit margin set by user
+    minimum_offer_price = calculated_minimum_offer_price(price, user_data.profit_margin, user_data.min_profit_mergin)
     try:
         # XML Body for ReviseItem request
         if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
@@ -51,6 +54,11 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                     <ItemID>{item_id}</ItemID>
                     <StartPrice>{str(price)}</StartPrice>
                     <Quantity>{str(quantity)}</Quantity>
+                    <bestOfferEnabled>{user_data.enable_best_offer}</bestOfferEnabled>
+                    <BestOfferDetails>
+                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
+                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
+                    </BestOfferDetails>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -75,6 +83,11 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 <Item>
                     <ItemID>{item_id}</ItemID>
                     <StartPrice>{str(price)}</StartPrice>
+                    <bestOfferEnabled>{user_data.enable_best_offer}</bestOfferEnabled>
+                    <BestOfferDetails>
+                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
+                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
+                    </BestOfferDetails>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
@@ -99,6 +112,11 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
                 <Item>
                     <ItemID>{item_id}</ItemID>
                     <Quantity>{str(quantity)}</Quantity>
+                    <bestOfferEnabled>{user_data.enable_best_offer}</bestOfferEnabled>
+                    <BestOfferDetails>
+                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
+                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
+                    </BestOfferDetails>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>

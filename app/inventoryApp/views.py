@@ -274,7 +274,9 @@ class General_operations:
                 Q(upc__icontains=search_query) |
                 Q(market_item_id__icontains=search_query) |
                 Q(vendor_name__icontains=search_query) |
-                Q(market_name__icontains=search_query)).values().order_by('id').reverse()
+                Q(market_name__icontains=search_query) |
+                Q(last_updated__icontains=search_query) |
+                Q(quantity__icontains=search_query)).values().order_by('id').reverse()
         
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
@@ -311,11 +313,14 @@ class General_operations:
                     status=status.HTTP_400_BAD_REQUEST
                 )
             inventory_listing = InventoryModel.objects.filter(user_id=userid, map_status=False).filter(
+                Q(title__icontains=search_query) |
                 Q(sku__icontains=search_query) |
                 Q(upc__icontains=search_query) |
                 Q(market_item_id__icontains=search_query) |
                 Q(vendor_name__icontains=search_query) |
-                Q(market_name__icontains=search_query)).values().order_by('id').reverse()
+                Q(market_name__icontains=search_query) |
+                Q(last_updated__icontains=search_query) |
+                Q(quantity__icontains=search_query)).values().order_by('id').reverse()
         
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
