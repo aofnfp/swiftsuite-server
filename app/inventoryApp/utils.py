@@ -12,8 +12,18 @@ from woocommerce import API
 from django.apps import apps
 import logging
 logger = logging.getLogger(__name__)
-from marketplaceApp.views import calculated_minimum_offer_price
+from rest_framework.response import Response
+from rest_framework import status
 
+
+
+# Calculate the minimum offer price of product going to ebay
+def calculated_minimum_offer_price(start_price, min_profit_mergin, profit_margin):
+    try:
+        minimum_offer_price = float(start_price) + float(profit_margin) + ((float(min_profit_mergin)/100) * float(start_price))
+    except Exception as e:
+        return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
+    return round(minimum_offer_price, 2)
 
 
 # Create a function to update items quantity and price at the background on Ebay
