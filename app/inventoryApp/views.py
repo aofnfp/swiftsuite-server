@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from ebaysdk.exception import ConnectionError
 
 from marketplaceApp.models import MarketplaceEnronment
-from .models import InventoryModel, UpdateLogModel
+from .models import InventoryModel, PriceQuantityUpdateLog
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer, SearchQuerySerializer
 from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
@@ -226,7 +226,7 @@ class General_operations:
                 userid = user.parent_id
 
         try:
-            log_item = UpdateLogModel.objects.all().filter(user_id=userid).values()
+            log_item = PriceQuantityUpdateLog.objects.all().filter(user_id=userid).values()
             return JsonResponse({"log_items":list(log_item)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
