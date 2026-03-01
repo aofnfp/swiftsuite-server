@@ -12,7 +12,7 @@ from woocommerce import API
 from django.apps import apps
 import logging
 logger = logging.getLogger(__name__)
-from inventoryApp.utils import calculated_minimum_offer_price
+from marketplaceApp.views import calculated_minimum_offer_price
 
 
 
