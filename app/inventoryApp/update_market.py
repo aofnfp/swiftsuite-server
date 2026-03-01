@@ -2,7 +2,7 @@ import time
 from ratelimit import limits, sleep_and_retry
 import requests
 from django.apps import apps
-from .models import InventoryModel
+from .models import InventoryModel, PriceQuantityUpdateLog
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, Generalproducttable, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Enrollment
 from django.db.models import Q
 from marketplaceApp.models import MarketplaceEnronment
@@ -97,7 +97,7 @@ def update_inventory_price_quantity():
                         print(f"MAP enforcement error for SKU {item.sku}: {e} — using base price")
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
-
+                    item_to_save, created = PriceQuantityUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 except Exception as e:
                     print(f"Product fails to update price and quantity on ebay: {e}")
                     continue
@@ -129,6 +129,7 @@ def update_inventory_price_quantity():
 
                     # update inventory with the new price and quantity and log the update
                     inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost))
+                    item_to_save, created = PriceQuantityUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {selling_price} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
                     continue

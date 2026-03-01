@@ -66,11 +66,20 @@ class InventoryModel(models.Model):
     
 
     
-class UpdateLogModel(models.Model):
+class MarketPlaceUpdateLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False)
     inventory = models.ForeignKey(InventoryModel, on_delete=models.CASCADE, unique=False)
     market_name = models.TextField(null=False, unique=False)
     vendor_name = models.TextField(null=False, unique=False)
-    updated_item = models.CharField(null=False, unique=False, max_length=25)
+    updated_sku = models.CharField(null=False, unique=False, max_length=25)
+    last_updated = models.DateTimeField(auto_now=True, unique=False, null=False)
+    log_description = models.TextField(null=True, unique=False)
+
+class PriceQuantityUpdateLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False)
+    inventory = models.ForeignKey(InventoryModel, on_delete=models.CASCADE, unique=False)
+    market_name = models.TextField(null=False, unique=False)
+    vendor_name = models.TextField(null=False, unique=False)
+    updated_sku = models.CharField(null=False, unique=False, max_length=25)
     last_updated = models.DateTimeField(auto_now=True, unique=False, null=False)
     log_description = models.TextField(null=True, unique=False)
