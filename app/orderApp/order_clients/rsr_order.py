@@ -166,6 +166,9 @@ class RsrOrderApiClient:
         if not date_str:
             return None
 
+        # RSR sometimes returns comma-separated duplicate dates (e.g. "20260226,20260226")
+        date_str = date_str.split(",")[0].strip()
+
         shipping_date = datetime.strptime(date_str, "%Y%m%d")
         if shipping_date:
             shipping_date = make_aware(shipping_date)
