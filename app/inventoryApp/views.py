@@ -398,7 +398,7 @@ class General_operations:
                     userid = user.id
 
             logs = MarketPlaceUpdateLog.objects.filter(user_id=userid).values()
-            page = requests.request.GET.get('page', int(page_number))
+            page = request.GET.get('page', int(page_number))
             paginator = Paginator(logs, int(num_per_page))
             try:
                 inventory_objects = paginator.page(page)
@@ -427,7 +427,7 @@ class General_operations:
                     userid = user.id
 
             logs = MarketPlaceUpdateLog.objects.filter(user_id=userid).values()
-            page = requests.request.GET.get('page', int(page_number))
+            page = request.GET.get('page', int(page_number))
             paginator = Paginator(logs, int(num_per_page))
             try:
                 inventory_objects = paginator.page(page)
