@@ -18,7 +18,7 @@ def complete_enrolment_price_update(userid, market_name):
                             selling_price = max(selling_price, float(item.map))
                         except (TypeError, ValueError) as map_err:
                             logger.warning(f"MAP enforcement skipped for SKU {item.sku}: {map_err}")
-                else:                    # Bug 2: enforce MAP when wc_map_enforcement is disabled
+                else:       # Bug 2: enforce MAP when wc_map_enforcement is disabled
                     if item.map:
                         try:
                             selling_price = max(selling_price, float(item.map))

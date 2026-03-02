@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from ebaysdk.exception import ConnectionError
 
 from marketplaceApp.models import MarketplaceEnronment
-from .models import InventoryModel, UpdateLogModel
+from .models import InventoryModel, PriceQuantityUpdateLog
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer, SearchQuerySerializer
 from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
@@ -226,7 +226,7 @@ class General_operations:
                 userid = user.parent_id
 
         try:
-            log_item = UpdateLogModel.objects.all().filter(user_id=userid).values()
+            log_item = PriceQuantityUpdateLog.objects.all().filter(user_id=userid).values()
             return JsonResponse({"log_items":list(log_item)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
@@ -274,7 +274,9 @@ class General_operations:
                 Q(upc__icontains=search_query) |
                 Q(market_item_id__icontains=search_query) |
                 Q(vendor_name__icontains=search_query) |
-                Q(market_name__icontains=search_query)).values().order_by('id').reverse()
+                Q(market_name__icontains=search_query) |
+                Q(last_updated__icontains=search_query) |
+                Q(quantity__icontains=search_query)).values().order_by('id').reverse()
         
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
@@ -311,11 +313,14 @@ class General_operations:
                     status=status.HTTP_400_BAD_REQUEST
                 )
             inventory_listing = InventoryModel.objects.filter(user_id=userid, map_status=False).filter(
+                Q(title__icontains=search_query) |
                 Q(sku__icontains=search_query) |
                 Q(upc__icontains=search_query) |
                 Q(market_item_id__icontains=search_query) |
                 Q(vendor_name__icontains=search_query) |
-                Q(market_name__icontains=search_query)).values().order_by('id').reverse()
+                Q(market_name__icontains=search_query) |
+                Q(last_updated__icontains=search_query) |
+                Q(quantity__icontains=search_query)).values().order_by('id').reverse()
         
             page = request.GET.get('page', int(page_number))
             paginator = Paginator(inventory_listing, int(num_per_page))
