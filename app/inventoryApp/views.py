@@ -409,7 +409,7 @@ class General_operations:
 
             return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to fetch log.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch log. {e}", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to view inventory price and quantity update activities log
@@ -438,7 +438,7 @@ class General_operations:
 
             return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to fetch log.", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch log. {e}", status=status.HTTP_400_BAD_REQUEST)
         
 
 # Create your views here.
