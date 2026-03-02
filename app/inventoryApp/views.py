@@ -387,38 +387,58 @@ class General_operations:
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
-    def get_marketplace_activities_log(request):
-        # check if user is subaccount
-        user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
-            else:
-                userid = user.id
-        try:            
+    def get_marketplace_activities_log(request, page_number, num_per_page):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+                else:
+                    userid = user.id
+
             logs = MarketPlaceUpdateLog.objects.filter(user_id=userid).values()
-            return JsonResponse({"logs":list(logs)}, safe=False, status=status.HTTP_200_OK)
+            page = requests.request.GET.get('page', int(page_number))
+            paginator = Paginator(logs, int(num_per_page))
+            try:
+                inventory_objects = paginator.page(page)
+            except PageNotAnInteger:
+                inventory_objects = paginator.page(1)
+            except EmptyPage:
+                inventory_objects = paginator.page(paginator.num_pages)
+
+            return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to fetch logs", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch log.", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to view inventory price and quantity update activities log
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
-    def get_inventory_price_quantity_update_log(request):
-        # check if user is subaccount
-        user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
-            else:
-                userid = user.id
-        try:            
-            logs = PriceQuantityUpdateLog.objects.filter(user_id=userid).values()
-            return JsonResponse({"logs":list(logs)}, safe=False, status=status.HTTP_200_OK)
+    def get_inventory_price_quantity_update_log(request, page_number, num_per_page):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+                else:
+                    userid = user.id
+
+            logs = MarketPlaceUpdateLog.objects.filter(user_id=userid).values()
+            page = requests.request.GET.get('page', int(page_number))
+            paginator = Paginator(logs, int(num_per_page))
+            try:
+                inventory_objects = paginator.page(page)
+            except PageNotAnInteger:
+                inventory_objects = paginator.page(1)
+            except EmptyPage:
+                inventory_objects = paginator.page(paginator.num_pages)
+
+            return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to fetch logs", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch log.", status=status.HTTP_400_BAD_REQUEST)
         
 
 # Create your views here.
