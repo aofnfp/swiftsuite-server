@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from ebaysdk.exception import ConnectionError
 
 from marketplaceApp.models import MarketplaceEnronment
-from .models import InventoryModel, PriceQuantityUpdateLog
+from .models import InventoryModel, PriceQuantityUpdateLog, MarketPlaceUpdateLog
 from xml.etree import ElementTree as ET
 from .serializer import InventoryModelUpdateSerializer, MappingToVendorSerializer, SearchQuerySerializer
 from vendorEnrollment.models import FragrancexUpdate, Generalproducttable, Enrollment
@@ -381,8 +381,45 @@ class General_operations:
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)
-            
 
+
+    # Function to view marketplace activities log
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_marketplace_activities_log(request):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+            else:
+                userid = user.id
+        try:            
+            logs = MarketPlaceUpdateLog.objects.filter(user_id=userid).values()
+            return JsonResponse({"logs":list(logs)}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to fetch logs", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # Function to view inventory price and quantity update activities log
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_inventory_price_quantity_update_log(request):
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+            else:
+                userid = user.id
+        try:            
+            logs = PriceQuantityUpdateLog.objects.filter(user_id=userid).values()
+            return JsonResponse({"logs":list(logs)}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to fetch logs", status=status.HTTP_400_BAD_REQUEST)
+        
 
 # Create your views here.
 class MarketInventory:
