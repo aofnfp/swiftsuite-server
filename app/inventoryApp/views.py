@@ -99,6 +99,36 @@ class General_operations:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
 
+    # Get all inventory product sorted by last updated time
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_inventory_items_sorted_by_last_updated(request, userid, page_number, num_per_page):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+            
+            unmapped_item = InventoryModel.objects.all().filter(user_id=userid, map_status=True).values().order_by('last_updated').reverse()
+            page = request.GET.get('page', int(page_number))
+            paginator = Paginator(unmapped_item, int(num_per_page))
+            try:
+                inventory_objects = paginator.page(page)
+            except PageNotAnInteger:
+                inventory_objects = paginator.page(1)
+            except EmptyPage:
+                inventory_objects = paginator.page(paginator.num_pages)
+
+            enrollment = Enrollment.objects.filter(user_id=userid)
+            vendor_list = [vendor.identifier for vendor in enrollment]
+
+            return JsonResponse({"Total_count":len(unmapped_item), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+
+
     # Map an item to the right vendor and add to product table
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
@@ -212,42 +242,6 @@ class General_operations:
             return JsonResponse({"vendor_list": list(dict.fromkeys(vendor_list))}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get vendor enrollment.", status=status.HTTP_400_BAD_REQUEST)
-
-
-    # Function to get log update
-    @with_module('inventory')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    @api_view(['GET'])
-    def get_all_log_update(request, userid):
-        # check if user is subaccount
-        user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
-
-        try:
-            log_item = PriceQuantityUpdateLog.objects.all().filter(user_id=userid).values()
-            return JsonResponse({"log_items":list(log_item)}, safe=False, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
-
-
-    # Function to get log update
-    @with_module('inventory')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    @api_view(['GET'])
-    def get_log_update_item_details(request, userid, inventoryid):
-        # check if user is subaccount
-        user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
-
-        try:
-            log_item_details = InventoryModel.objects.all().filter(user_id=userid, id=inventoryid).values()
-            return JsonResponse({"log_items_details":list(log_item_details)}, safe=False, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(f"Failed to get logs.", status=status.HTTP_400_BAD_REQUEST)
 
     
     #  Use search query to filter inventory items
@@ -675,6 +669,24 @@ class MarketInventory:
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
             
+
+    # Get inventory item details from the inventory
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_inventory_item_details(request, userid, inventoryid):
+        try:
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+
+            inventory_item = InventoryModel.objects.all().filter(id=inventoryid).values()
+            return JsonResponse({"item_details":list(inventory_item)}, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
+        
 
     # Get saved product in the inventory for listing to ebay
     @with_module('inventory')
