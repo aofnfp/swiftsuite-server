@@ -381,7 +381,7 @@ def download_item_update_market_price_quantity():
 
                         response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, item.get("ebay_quantity"), user._id)
                         if "Success" in response:
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_sku=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {item.get('ebay_quantity')} from vendor {existing_item.vendor_name}"))
+                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_sku=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {item.get('ebay_quantity')} from vendor {existing_item.vendor_name}"))
                             InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
                         else:
                             logger.info(f"Failed to update price and quantity on eBay item {item.get('ebay_item_id')} with response: {response}")
@@ -425,7 +425,7 @@ def download_item_update_market_price_quantity():
                     if existing_item.start_price != item.get("price") or existing_item.quantity != item.get("stock_quantity"):
                         response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, user.user_id)
                         if response == "Success":
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_sku=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
+                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_sku=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
                             # Update the market url on inventory
                             InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("permalink"))
                         else:
@@ -482,7 +482,7 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
 
                         response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, item.get("ebay_quantity"), user._id)
                         if "Success" in response:
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_sku=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {item.get('ebay_quantity')} from vendor {existing_item.vendor_name}"))
+                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_sku=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {item.get('ebay_quantity')} from vendor {existing_item.vendor_name}"))
                             InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
                         else:
                             logger.info(f"Failed to update price and quantity on eBay item {item.get('ebay_item_id')} with response: {response}")
@@ -529,7 +529,7 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
                     if existing_item.start_price != item.get("price") or existing_item.quantity != item.get("stock_quantity"):
                         response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, userid)
                         if response == "Success":
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_sku=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
+                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_sku=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
                             # Update the market url on inventory
                             InventoryModel.objects.filter(user_id=userid, id=existing_item.id).update(market_item_url=item.get("permalink"))
                         else:
