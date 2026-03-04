@@ -81,7 +81,7 @@ class RsrOrderApiClient:
         phone = ship_to.get("primaryPhone", {})
 
         full_name = ship_to.get("fullName", "")
-        email = ship_to.get("email", self.user.email)
+        # email = ship_to.get("email", self.user.email)
 
         # ---- Build Items ----
         items = [
@@ -107,7 +107,7 @@ class RsrOrderApiClient:
             "ShipAccount": self.username,
             "ContactNum": phone.get("phoneNumber"),
             "PONum": self.vendor_order_log.reference_id,
-            "Email": email,
+            "Email": self.user.email,
 
             "Items": items,
             "POS": self.pos,
@@ -176,25 +176,30 @@ class RsrOrderApiClient:
 
     def get_carrier(self, tracking_num: str) -> str:
         tracking_num = tracking_num.strip().replace(" ", "").upper()
+        tracking_nums = tracking_num.split(",")
 
-        # UPS: 1Z + 16 alphanumeric (total 18)
-        if re.fullmatch(r"1Z[A-Z0-9]{16}", tracking_num):
-            return "UPS"
+        carriers_str = ''
+        for tracking_num in tracking_nums:
+            # UPS: 1Z + 16 alphanumeric (total 18)
+            if re.fullmatch(r"1Z[A-Z0-9]{16}", tracking_num):
+                carriers_str += "UPS,"
 
-        # USPS: 
-        # - 20–22 digits
-        # - OR 13 alphanumeric ending with US
-        if (
-            re.fullmatch(r"\d{20,22}", tracking_num)
-            or re.fullmatch(r"[A-Z0-9]{11}US", tracking_num)
-        ):
-            return "USPS"
+            # USPS: 
+            # - 20–22 digits
+            # - OR 13 alphanumeric ending with US
+            if (
+                re.fullmatch(r"\d{20,22}", tracking_num)
+                or re.fullmatch(r"[A-Z0-9]{11}US", tracking_num)
+            ):
+                carriers_str += "USPS,"
 
-        # FedEx: 12–15 digits
-        if re.fullmatch(r"\d{12,15}", tracking_num):
-            return "FedEx"
+            # FedEx: 12–15 digits
+            if re.fullmatch(r"\d{12,15}", tracking_num):
+                carriers_str += "FedEx,"
 
-        return "Other"
+            carriers_str += "Other,"
+        
+        return carriers_str.strip(",")
 
     def update_local_status(self, result):
         # RSR call itself failed
