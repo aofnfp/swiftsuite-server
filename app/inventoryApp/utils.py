@@ -346,11 +346,10 @@ def get_woocommerce_existing_products(user_id):
 
 # Download all items from all marketplace to local inventory
 def download_item_update_market_price_quantity():
-    all_ebay_items = []
-
     # Get all user with ebay marketplace to sync their products
     user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
     for user in user_token:
+        all_ebay_items = []
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
@@ -389,7 +388,6 @@ def download_item_update_market_price_quantity():
                         InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
-                    logger.info(f"Failed to update existing item on ebay with error: {e}")
                     try:
                         # Get product details from eBay
                         product_details = get_item_details(user._id, item.get("ebay_item_id"))
@@ -450,9 +448,9 @@ def download_item_update_market_price_quantity():
 
 # Function to manually download all items from all marketplace to local inventory
 def manually_download_item_from_marketplace_syc_update(userid, access_token):
-    all_ebay_items = []
     user_token = MarketplaceEnronment.objects.filter(user_id=userid) # get all user to get their access_token
     for user in user_token:
+        all_ebay_items = []
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
