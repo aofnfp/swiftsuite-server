@@ -1,6 +1,5 @@
 import time, json, requests
 from ratelimit import limits, sleep_and_retry
-import requests
 from django.apps import apps
 from .models import InventoryModel, MarketPlaceUpdateLog, PriceQuantityUpdateLog
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, Generalproducttable, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Enrollment
@@ -355,78 +354,3 @@ def check_product_ended_status():
                     continue
 
 
-# update items price and quantity on ebay and inventory with the one from the vendor
-def manual_update_inventory_price_quantity():
-    # Get all user with ebay marketplace to sync their products
-    user_token = MarketplaceEnronment.objects.all() # get all user to get their access_token
-    for user in user_token:
-        if user.marketplace_name == "Ebay":
-            all_ebay_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Ebay").exclude(vendor_name="Not Found")
-                
-            for item in all_ebay_items:
-                try:
-                    # Get updated price and quantity from the product table
-                    try:
-                        db_item = Generalproducttable.objects.get(id=item.product_id)
-                    except Exception as e:
-                        print(f"item not found on product table: {e} with sku {item.sku}")
-                        continue
-                    
-                    # Modify selling price before updating on ebay
-                    try:
-                        selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
-                        if db_item.map:
-                            if selling_price < float(db_item.map):
-                                selling_price = float(db_item.map)
-                    except Exception as e:
-                        print(f"selling price calculation error for SKU {item.sku}: {e}")
-                        continue
-                    # Check if the price and quantity of product on Ebay need to be updated
-                    if (item.start_price != round(selling_price, 2) or item.quantity != db_item.quantity) and item.market_item_id:
-                        # Check if the minimum quantity is lesser than supplier's quantity, use the minimum qauntity set by the user for the update, otherwise use the supplier's quantity for the update
-                        if user.maximum_quantity:
-                            if user.maximum_quantity < db_item.quantity:
-                                db_item.quantity = user.maximum_quantity
-
-                        response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, round(selling_price, 2), db_item.quantity, user._id)
-                        if "Success" in response:
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-                    # update inventory with the new price and quantity and log the update
-                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost, last_updated_from_marketplace=timezone.now()))
-                    item_to_save, created = PriceQuantityUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-                except Exception as e:
-                    print(f"Product fails to update price and quantity: {e}")
-                    continue
-
-        elif user.marketplace_name == "Woocommerce":
-            # Fetch all item from Woocommerce
-            all_woocommercer_items = InventoryModel.objects.filter(user_id=user.user_id, market_name="Woocommerce").exclude(vendor_name="Not Found")
-            for item in all_woocommercer_items:
-                try:
-                    # Get updated price and quantity from the product table
-                    try:
-                        db_item = Generalproducttable.objects.get(id=item.product_id)
-                    except Exception as e:
-                        print(f"item not found on product table: {e}")
-                        continue
-
-                    # Modify selling price before updating on Woocommerce
-                    try:
-                        selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
-                        if db_item.map:
-                            if selling_price < float(db_item.map):
-                                selling_price = float(db_item.map)
-                    except Exception as e:
-                        print(f"MAP enforcement error for SKU {item.sku}: {e} — using base price")
-                    # Update the price and quantity of product on Woocommerce
-                    if item.start_price != round(selling_price, 2) or item.quantity != db_item.quantity:
-                        response = update_woocommerce_product_from_background(item.market_item_id, round(selling_price, 2), db_item.quantity, user.user_id)
-                        if response == "Success":
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-
-                    # update inventory with the new price and quantity and log the update
-                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost, updated_at=timezone.now()))
-                    item_to_save, created = PriceQuantityUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
-                except Exception as e:
-                    print(f"Product fails to update price and quantity on Woocommerce: {e}")
-                    continue
