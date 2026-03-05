@@ -12,151 +12,7 @@ from woocommerce import API
 from django.apps import apps
 import logging
 logger = logging.getLogger(__name__)
-from rest_framework.response import Response
-from rest_framework import status
 
-
-
-# Calculate the minimum offer price of product going to ebay
-def calculated_minimum_offer_price(start_price, min_profit_mergin, profit_margin):
-    try:
-        minimum_offer_price = float(start_price) + float(profit_margin) + ((float(min_profit_mergin)/100) * float(start_price))
-    except Exception as e:
-        return Response(f"Failed to fetch data: Check your enrollment details", status=status.HTTP_400_BAD_REQUEST)
-    return round(minimum_offer_price, 2)
-
-
-# Create a function to update items quantity and price at the background on Ebay
-# Limit to 5 calls per second (eBay's typical limit)
-@sleep_and_retry
-@limits(calls=5, period=1)
-def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id):
-    try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
-    except Exception as e:
-        print(f"Failed to fetch access token")
-        return None
-
-    access_token =  user_data.access_token
-
-    # eBay Trading API endpoint
-    url = 'https://api.ebay.com/ws/api.dll'
-
-    headers = {
-        'X-EBAY-API-CALL-NAME': 'ReviseItem',
-        'X-EBAY-API-SITEID': '0',  # Change this to your site ID, 0 is for US
-        'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',  # eBay API version
-        'Content-Type': 'text/xml',
-        'Authorization': f'Bearer {access_token}'
-    }
-    # calculate the minimum offer price based on the profit margin set by user
-    minimum_offer_price = calculated_minimum_offer_price(price, user_data.profit_margin, user_data.min_profit_mergin)
-    try:
-        # XML Body for ReviseItem request
-        if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>{str(price)}</StartPrice>
-                    <Quantity>{str(quantity)}</Quantity>
-                    <bestOfferEnabled>{user_data.enable_best_offer}</bestOfferEnabled>
-                    <BestOfferDetails>
-                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                    </BestOfferDetails>
-                    <SellerProfiles>
-                        <SellerPaymentProfile>
-                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                        </SellerPaymentProfile>
-                        <SellerReturnProfile>
-                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                        </SellerReturnProfile>
-                        <SellerShippingProfile>
-                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                        </SellerShippingProfile>
-                    </SellerProfiles>
-                </Item>
-            </ReviseItemRequest>
-            """
-        elif user_data.enable_price_update == True and user_data.enable_quantity_update == False:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <StartPrice>{str(price)}</StartPrice>
-                    <bestOfferEnabled>{user_data.enable_best_offer}</bestOfferEnabled>
-                    <BestOfferDetails>
-                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                    </BestOfferDetails>
-                    <SellerProfiles>
-                        <SellerPaymentProfile>
-                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                        </SellerPaymentProfile>
-                        <SellerReturnProfile>
-                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                        </SellerReturnProfile>
-                        <SellerShippingProfile>
-                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                        </SellerShippingProfile>
-                    </SellerProfiles>
-                </Item>
-            </ReviseItemRequest>
-            """
-        elif user_data.enable_price_update == False and user_data.enable_quantity_update == True:
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{item_id}</ItemID>
-                    <Quantity>{str(quantity)}</Quantity>
-                    <bestOfferEnabled>{user_data.enable_best_offer}</bestOfferEnabled>
-                    <BestOfferDetails>
-                    <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                    <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                    </BestOfferDetails>
-                    <SellerProfiles>
-                        <SellerPaymentProfile>
-                            <PaymentProfileID>{json.loads(user_data.payment_policy).get('id')}</PaymentProfileID>
-                        </SellerPaymentProfile>
-                        <SellerReturnProfile>
-                            <ReturnProfileID>{json.loads(user_data.return_policy).get('id')}</ReturnProfileID>
-                        </SellerReturnProfile>
-                        <SellerShippingProfile>
-                            <ShippingProfileID>{json.loads(user_data.shipping_policy).get('id')}</ShippingProfileID>
-                        </SellerShippingProfile>
-                    </SellerProfiles>
-                </Item>
-            </ReviseItemRequest>
-            """
-        else:
-            return None
-        
-        # Make the POST request
-        response = requests.post(url, headers=headers, data=body)
-        if response.status_code == 429:  # Rate limit hit
-            retry_after = int(response.headers.get('Retry-After', 2))
-            time.sleep(retry_after)
-            return update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, enroll_id)
-        # Check the response
-        if response.status_code == 200:
-            return f"Success:{response.text}"
-        else:
-            return f"Error:{response.text}"
-    except ConnectionError as e:
-        return f'Error: {e}'
 
 
 # Get all products already listed on Ebay using sku
@@ -292,43 +148,6 @@ def get_item_details(enroll_id, item_id):
         return None
 
 
-
-# Function to update product on woocommerce store
-# Limit to 5 calls per second (eBay's typical limit)
-@sleep_and_retry
-@limits(calls=5, period=1)
-def update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid):
-    try:
-        enrollment = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Woocommerce")
-        # Set up the WooCommerce API client
-        wcapi = API(
-            url = enrollment.wc_consumer_url, 
-            consumer_key = enrollment.wc_consumer_key,  
-            consumer_secret = enrollment.wc_consumer_secret, 
-            version = "wc/v3"
-        )
-        # Product payload mapped to WooCommerce
-        update_data = {
-            "type": "simple",
-            "regular_price": str(selling_price),
-            "stock_quantity": str(quantity),
-            "manage_stock": True,
-        }
-
-        # --- MAKE THE UPDATE REQUEST ---
-        response = wcapi.put(f"products/{market_item_id}", update_data)
-        if response.status_code == 429:  # Rate limit hit
-            retry_after = int(response.headers.get('Retry-After', 2))
-            time.sleep(retry_after)
-            return update_woocommerce_product_from_background(market_item_id, selling_price, quantity, userid)
-        if response.status_code == 200:
-            return "Success"
-        else:
-            return f"Error{response.text}"
-    except Exception as e:
-        return f"Error: {e}"
-
-
 # Get all existing listed products on Woocommerce store for a specific user.
 def get_woocommerce_existing_products(user_id):
     enrollment = MarketplaceEnronment.objects.get(user_id=user_id, marketplace_name="Woocommerce")
@@ -369,23 +188,7 @@ def download_item_update_market_price_quantity():
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
                     # Update the market url on inventory
-                    if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
-                        continue
-                    # Update the price and quantity of product on Ebay
-                    if existing_item.start_price != item.get("ebay_price") or existing_item.quantity != item.get("ebay_quantity"):
-                        # Check if the minimum quantity is lesser than supplier's quantity, use the minimum qauntity set by the user for the update, otherwise use the supplier's quantity for the update
-                        if user.maximum_quantity:
-                            if user.maximum_quantity < existing_item.quantity:
-                                item["ebay_quantity"] = user.maximum_quantity
-
-                        response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, item.get("ebay_quantity"), user._id)
-                        if "Success" in response:
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_sku=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {item.get('ebay_quantity')} from vendor {existing_item.vendor_name}"))
-                            InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
-                        else:
-                            logger.info(f"Failed to update price and quantity on eBay item {item.get('ebay_item_id')} with response: {response}")
-                    else:
-                        InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
+                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
                     try:
@@ -417,19 +220,7 @@ def download_item_update_market_price_quantity():
                 for item in all_woocommercer_items:
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("id"))
-                    if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
-                        continue
-                    # Update the price and quantity of product on Woocommerce
-                    if existing_item.start_price != item.get("price") or existing_item.quantity != item.get("stock_quantity"):
-                        response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, user.user_id)
-                        if response == "Success":
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_sku=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
-                            # Update the market url on inventory
-                            InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("permalink"))
-                        else:
-                            logger.info(f"Failed to update price and quantity on Woocommerce item {item.get('id')} with response: {response}")
-                    else:
-                        InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("permalink"))
+                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("permalink"))
             except Exception as e:
                 try:
                     # If item does not exist, insert new item
@@ -468,24 +259,7 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
                 try:
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=userid, market_item_id=item.get("ebay_item_id"))
-                    # Update the market url on inventory
-                    if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
-                        continue
-                    # Update the price and quantity of product on Ebay
-                    if existing_item.start_price != item.get("ebay_price") or existing_item.quantity != item.get("ebay_quantity"):
-                        # Check if the minimum quantity is lesser than supplier's quantity, use the minimum qauntity set by the user for the update, otherwise use the supplier's quantity for the update
-                        if user.maximum_quantity:
-                            if user.maximum_quantity < existing_item.quantity:
-                                item["ebay_quantity"] = user.maximum_quantity
-
-                        response = update_items_quantity_or_price_on_ebay(user.user_id, item.get("ebay_item_id"), existing_item.start_price, item.get("ebay_quantity"), user._id)
-                        if "Success" in response:
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=existing_item.id, defaults=dict(market_name="Ebay", vendor_name=existing_item.vendor_name, updated_sku=item.get("ebay_sku"), log_description=f"Updated price to {existing_item.start_price} and quantity to {item.get('ebay_quantity')} from vendor {existing_item.vendor_name}"))
-                            InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), last_updated=timezone.now())
-                        else:
-                            logger.info(f"Failed to update price and quantity on eBay item {item.get('ebay_item_id')} with response: {response}")
-                    else:
-                        InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
+                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
                     try:
@@ -521,19 +295,7 @@ def manually_download_item_from_marketplace_syc_update(userid, access_token):
                 for item in all_woocommerce_items:
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=userid, market_item_id=item.get("id"))
-                    if existing_item.market_item_id == "" or existing_item.vendor_name == "Not Found":
-                        continue
-                    # Update the price and quantity of product on Woocommerce
-                    if existing_item.start_price != item.get("price") or existing_item.quantity != item.get("stock_quantity"):
-                        response = update_woocommerce_product_from_background(item.get("id"), existing_item.start_price, existing_item.quantity, userid)
-                        if response == "Success":
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=existing_item.id, defaults=dict(market_name="Woocommerce", vendor_name=existing_item.vendor_name, updated_sku=item.get('sku'), log_description=f"Updated price to {existing_item.start_price} and quantity to {existing_item.quantity} from vendor {existing_item.vendor_name}"))
-                            # Update the market url on inventory
-                            InventoryModel.objects.filter(user_id=userid, id=existing_item.id).update(market_item_url=item.get("permalink"))
-                        else:
-                            logger.info(f"Failed to update price and quantity on Woocommerce item {item.get('id')} with response: {response}")
-                    else:
-                        InventoryModel.objects.filter(user_id=userid, id=existing_item.id).update(market_item_url=item.get("permalink"))
+                    InventoryModel.objects.filter(user_id=userid, id=existing_item.id).update(market_item_url=item.get("permalink"))
             except:
                 try:
                     # If item does not exist, insert new item
