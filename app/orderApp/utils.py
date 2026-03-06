@@ -327,8 +327,9 @@ def sync_ebay_order_with_local():
 
 # function to manually sync orders for a specific user
 def manual_sync_order_with_local(userid):
-    user_token = MarketplaceEnronment.objects.filter(user_id=userid) # get all account accosiated with the user to get their access_token and user id
-    for user in user_token:
+    # get all account accosiated with the user to sync their orders.
+    user_enrollments = MarketplaceEnronment.objects.filter(user_id=userid) 
+    for user in user_enrollments:
         if user.marketplace_name == "Ebay":    
             # Fetch all orders from eBay
             ebay_orders = get_product_ordered_from_background(user.user_id, user._id)

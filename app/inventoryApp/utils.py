@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 # Get all products already listed on Ebay using sku
-def get_all_items_on_ebay(enroll_id, access_token):
+def get_all_items_on_ebay(enroll_id):
     ebay_items = []
     page_number = 1
     total_pages = 1  # Initialize to 1 to enter the loop
@@ -172,7 +172,7 @@ def download_item_update_market_price_quantity():
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=user.access_token)
+            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
             logger.info(f"Ebay inventory download fetched {len(ebay_downloaded_items)} items for user {user.user_id}")
             # If fetching items failed due to invalid token, try refreshing token once and fetch again
             if ebay_downloaded_items == None:
@@ -238,14 +238,15 @@ def download_item_update_market_price_quantity():
 
 
 # Function to manually download all items from all marketplace to local inventory
-def manually_download_item_from_marketplace_syc_update(userid, access_token):
-    user_token = MarketplaceEnronment.objects.filter(user_id=userid) # get all user to get their access_token
-    for user in user_token:
+def manually_download_item_from_marketplace_syc_update(userid):
+    # Get all marketplace enrollment for the user to sync their products
+    user_enrollments = MarketplaceEnronment.objects.filter(user_id=userid) 
+    for user in user_enrollments:
         all_ebay_items = []
         # Deal with ebay marketplace
         if user.marketplace_name == "Ebay":
             # Fetch all eBay items by walking backward in 30-day windows
-            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id, access_token=access_token)
+            ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
             if ebay_downloaded_items == None:
                 logger.info(f"Ebay inventory download failed with error: {ebay_downloaded_items}")
                 continue

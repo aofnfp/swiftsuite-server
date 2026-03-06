@@ -90,9 +90,9 @@ def complete_enrolment_price_update(userid, market_name):
                         except (TypeError, ValueError) as map_err:
                             logger.warning(f"MAP enforcement skipped for SKU {item.sku}: {map_err}")
                     # Update the price and quantity of product on Woocommerce
-                    response = update_woocommerce_product_from_background(item.market_item_id, selling_price, market_enrolled.maximum_quantity, userid)
+                    response = update_woocommerce_product_from_background(item.market_item_id, round(selling_price, 2), market_enrolled.maximum_quantity, userid)
                     if response == "Success":
-                        item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {selling_price} and quantity to {market_enrolled.maximum_quantity} from vendor {item.vendor_name}"))
+                        item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {market_enrolled.maximum_quantity} from vendor {item.vendor_name}"))
                 elif market_name == "Ebay": 
                     if item.map:
                         try:
@@ -100,11 +100,11 @@ def complete_enrolment_price_update(userid, market_name):
                         except (TypeError, ValueError) as map_err:
                             logger.warning(f"MAP enforcement skipped for SKU {item.sku}: {map_err}")
                     # update the minimum quantity and new calculated price on Ebay for all items
-                    response = complete_enrollment_quantity_price_update_on_ebay(userid, item.market_item_id, selling_price, market_enrolled.maximum_quantity, market_enrolled._id)
+                    response = complete_enrollment_quantity_price_update_on_ebay(userid, item.market_item_id, round(selling_price, 2), market_enrolled.maximum_quantity, market_enrolled._id)
                     if "Success" in response:
-                        item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {selling_price} and quantity to {market_enrolled.maximum_quantity} from vendor {item.vendor_name}"))
+                        item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {market_enrolled.maximum_quantity} from vendor {item.vendor_name}"))
                           
-                inventory, created = InventoryModel.objects.update_or_create(user_id=userid, id=item.id, defaults=dict(start_price=selling_price, last_updated=timezone.now()))
+                inventory, created = InventoryModel.objects.update_or_create(user_id=userid, id=item.id, defaults=dict(start_price=round(selling_price, 2), last_updated=timezone.now()))
         except Exception as e:
             print(f"Failed to update items selling price for user: {userid} with sku: {item.sku}. Error: {e}")
             continue

@@ -357,7 +357,6 @@ class General_operations:
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def manually_download_item_from_marketplace(request):
-        eb = Ebay()
         # check if user is subaccount
         user = request.user
         if user:
@@ -365,13 +364,8 @@ class General_operations:
                 userid = user.parent_id
             else:
                 userid = user.id
-
-                
-        access_token = eb.refresh_access_token(userid, "Ebay")
-        if not isinstance(access_token, str):
-            return Response("Failed to refresh eBay access token. Please re-authorize.", status=status.HTTP_400_BAD_REQUEST)
         try:
-            manually_download_item_from_marketplace_task.delay(userid, access_token)
+            manually_download_item_from_marketplace_task.delay(userid)
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)
