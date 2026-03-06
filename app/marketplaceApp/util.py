@@ -82,7 +82,12 @@ def complete_enrolment_price_update(userid, market_name):
         try:
             # Modify selling price before updating on marketplace
             if item.total_product_cost and market_enrolled:
-                selling_price = float(item.total_product_cost) + float(item.fixed_markup) + ((float(item.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(item.profit_margin)/100) * float(item.total_product_cost))
+                try:
+                    selling_price = float(item.total_product_cost) + float(item.fixed_markup) + ((float(item.fixed_percentage_markup)/100) * float(item.total_product_cost)) + ((float(item.profit_margin)/100) * float(item.total_product_cost))
+                except Exception as e:
+                    print(f"Complete enrollment selling price calculation error for user: {userid} with SKU {item.sku}: {e}")
+                    continue
+
                 # Get updated price and quantity from the product table
                 try:
                     db_item = Generalproducttable.objects.get(id=item.product_id)
@@ -97,7 +102,7 @@ def complete_enrolment_price_update(userid, market_name):
                         quantity = db_item.quantity
                 # Enforce MAP when wc_map_enforcement is enabled
                 if market_name == "Woocommerce": 
-                    if market_enrolled.wc_map_enforcement and item.map:
+                    if market_enrolled.wc_map_enforcement==True and item.map==True:
                         try:
                             selling_price = max(round(selling_price, 2), float(item.map))
                         except (TypeError, ValueError) as map_err:
@@ -120,7 +125,7 @@ def complete_enrolment_price_update(userid, market_name):
                           
                 inventory, created = InventoryModel.objects.update_or_create(user_id=userid, id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=f"eb:{quantity}|su:{db_item.quantity}", total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
         except Exception as e:
-            print(f"Failed to update items selling price for user: {userid} with sku: {item.sku}. Error: {e}")
+            print(f"Complete enrollment failed for user: {userid} with sku: {item.sku}. Error: {e}")
             continue
 
 

@@ -46,7 +46,10 @@ def update_items_quantity_or_price_on_ebay(user_id, item_id, price, quantity, en
         'Authorization': f'Bearer {access_token}'
     }
     # calculate the minimum offer price based on the profit margin set by user
-    minimum_offer_price = calculated_minimum_offer_price(price, user_data.profit_margin, user_data.min_profit_mergin)
+    if user_data.enable_best_offer == True:
+        minimum_offer_price = calculated_minimum_offer_price(price, user_data.profit_margin, user_data.min_profit_mergin)
+    else:
+        minimum_offer_price = 0
     try:
         # XML Body for ReviseItem request
         if user_data.enable_price_update == True and user_data.enable_quantity_update == True:
