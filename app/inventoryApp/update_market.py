@@ -286,11 +286,11 @@ def update_inventory_price_quantity():
                         response = update_items_quantity_or_price_on_ebay(user.user_id, item.market_item_id, round(selling_price, 2), quantity, user._id)
                         if "Success" in response:
                             item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {quantity} from vendor {item.vendor_name}"))
+                            inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=f"eb:{quantity}|su:{db_item.quantity}", total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
                     # update inventory with the new price and quantity and log the update
-                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=f"eb:{quantity}|su:{db_item.quantity}", total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
                     item_to_save, created = PriceQuantityUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 except Exception as e:
-                    print(f"Product fails to update price and quantity: {e}")
+                    print(f"Product fails to update price and quantity on Ebay: {e}")
                     continue
 
         elif user.marketplace_name == "Woocommerce":
@@ -313,14 +313,15 @@ def update_inventory_price_quantity():
                                 selling_price = float(db_item.map)
                     except Exception as e:
                         print(f"MAP enforcement error for SKU {item.sku}: {e} — using base price")
+                    
                     # Update the price and quantity of product on Woocommerce
                     if item.start_price != round(selling_price, 2) or item.quantity != db_item.quantity:
                         response = update_woocommerce_product_from_background(item.market_item_id, round(selling_price, 2), db_item.quantity, user.user_id)
                         if response == "Success":
-                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {quantity} from vendor {item.vendor_name}"))
+                            item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
+                            inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=db_item.quantity, total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
 
                     # update inventory with the new price and quantity and log the update
-                    inventory, created = InventoryModel.objects.update_or_create(id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=f"eb:{quantity}|su:{db_item.quantity}", total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
                     item_to_save, created = PriceQuantityUpdateLog.objects.update_or_create(user_id=user.user_id, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {db_item.quantity} from vendor {item.vendor_name}"))
                 except Exception as e:
                     print(f"Product fails to update price and quantity on Woocommerce: {e}")
