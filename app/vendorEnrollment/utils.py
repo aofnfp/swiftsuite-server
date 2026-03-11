@@ -379,8 +379,13 @@ class VendorDataMixin:
         shipping_cost = float(enrollment.shipping_cost)
         shipping_cost_avg = enrollment.shipping_cost_average
 
+        from .models import Generalproducttable
+        general_product_map = {gp.sku: gp for gp in Generalproducttable.objects.filter(enrollment=enrollment)}
+
         updates = []
         new_entries = []
+        general_updates = []
+        seen_skus = []
 
         for _, row in df.iterrows():
             item_id = str(row[id_column_name])
@@ -419,11 +424,23 @@ class VendorDataMixin:
                     )
                 )
 
+            general_product = general_product_map.get(item_id)
+            if general_product:
+                general_product.price = price
+                general_product.quantity = quantity
+                general_product.total_product_cost = total_price
+                general_product.map = map_value
+                general_product.msrp = msrp_value
+                general_updates.append(general_product)
+                seen_skus.append(item_id)
+
         with transaction.atomic():
             if updates:
                 model_update.objects.bulk_update(updates, ['price', 'quantity', 'total_price', 'msrp', 'map', 'enrollment'], batch_size=500)
             if new_entries:
                 model_update.objects.bulk_create(new_entries, batch_size=500)
+            if general_updates:
+                Generalproducttable.objects.bulk_update(general_updates, ['price', 'quantity', 'total_product_cost', 'map', 'msrp'], batch_size=500)
 
             
             updated_ids = {u.product_id for u in updates}
@@ -437,5 +454,11 @@ class VendorDataMixin:
             stale_count = stale_qs.update(quantity=0)
             if stale_count:
                 print(f"Zeroed quantity for {stale_count} stale {supplier_name} update records.")
+
+            stale_general_count = Generalproducttable.objects.filter(
+                enrollment=enrollment,
+            ).exclude(sku__in=seen_skus).update(quantity=0)
+            if stale_general_count:
+                print(f"Zeroed quantity for {stale_general_count} stale {supplier_name} general product records.")
 
         print(f"Processed {len(updates)} updates and {len(new_entries)} new entries.")

@@ -20,7 +20,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .tasks import  update_vendor_data, update_inventory
+from .tasks import  update_vendor_data
 from rest_framework.decorators import api_view, permission_classes
 from vendorActivities.models import Vendors,Fragrancex, Lipsey, Cwr, Rsr, Ssi, Zanders
 from rest_framework.generics import ListAPIView
@@ -30,7 +30,6 @@ from .utils import map_vendor_data_to_general, identifier_filter, with_module
 from django.db.models import Q
 from accounts.permissions import IsOwnerOrHasPermission
 from rest_framework_extensions.cache.decorators import cache_response
-from celery import chain
 
 # Create your views here.
 MODELS_MAPPING = {
@@ -151,10 +150,7 @@ def update_enrolment(request, identifier):
         serializer.save()
         # Start the update process in a separate thread
         updated_enrollment = serializer.instance
-        chain(
-            update_vendor_data.s(updated_enrollment.id),
-            update_inventory.s()
-        ).delay()
+        update_vendor_data.delay(updated_enrollment.id)
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
