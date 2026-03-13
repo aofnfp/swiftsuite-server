@@ -582,10 +582,10 @@ class MarketInventory:
                 serializer.save()
                 return "Success"
             else:
-                return response.text
+                return Response(f"Error updating product on Ebay: {response.text}", status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            return e
+            return Response(f"Error updating product on Ebay: {e}", status=status.HTTP_400_BAD_REQUEST)
      
     
     # Get all product already listed on Ebay from the inventory
