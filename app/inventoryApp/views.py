@@ -547,21 +547,11 @@ class MarketInventory:
                     <Description><![CDATA[
                         {validated_data['description']}
                     ]]></Description>
-                    <globalId>EBAY-US</globalId>
-                    <PrimaryCategory>
-                        <CategoryID>{validated_data['category_id']}</CategoryID>
-                    </PrimaryCategory>
-                    <ConditionID>1000</ConditionID>
                     <SKU>{validated_data['sku']}</SKU>
                     {f'''<ProductListingDetails>
                         <UPC>{validated_data['upc']}</UPC>
                     </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
-                    <!-- ... more PictureURL values allowed here ... -->
-                    {item_image_url}
-                    
                     <autoPay>false</autoPay>
-                    <PostalCode>{validated_data['postal_code']}</PostalCode>
-                    <Location>{validated_data['location']}</Location>
                     <Country>US</Country>
                     <Currency>USD</Currency>
                     <ListingDuration>GTC</ListingDuration>
@@ -589,9 +579,6 @@ class MarketInventory:
                         <gift>{validated_data['gift']}</gift>
                         <watchCount>6</watchCount>
                     </listingInfo>
-                    <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
-                    <IsMultiVariationListing>true</IsMultiVariationListing>
-                    <TopRatedListing>false</TopRatedListing>
                 </Item>
                 </ReviseItemRequest>"""
             # Make the POST request
