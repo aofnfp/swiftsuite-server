@@ -582,10 +582,10 @@ class MarketInventory:
                 serializer.save()
                 return "Success"
             else:
-                return "Error"
+                return response.text
 
         except Exception as e:
-            return "Error"
+            return e
      
     
     # Get all product already listed on Ebay from the inventory
