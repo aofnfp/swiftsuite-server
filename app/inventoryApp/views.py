@@ -28,45 +28,6 @@ logger = logging.getLogger(__name__)
 from .tasks import manually_download_item_from_marketplace_task
 
 
-# Function to update product across marketplaces
-@with_module('inventory')
-@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-@api_view(['PUT'])
-def update_product_on_marketplace(request, userid, market_name, inventory_id):
-    mk = MarketInventory()
-    wooc = WooCommerceInventory()
-    # check if user is subaccount
-    user = request.user
-    if user:
-        if user.parent_id:
-            userid = user.parent_id
-
-    try:
-        if market_name == "Ebay":
-            response = mk.update_item_on_ebay(request, userid, inventory_id)
-            if response == "Success":
-                return Response(f"Product updated successfully", status=status.HTTP_200_OK)
-            else:
-                return Response(f"Error updating product on Ebay: {response}", status=status.HTTP_400_BAD_REQUEST)
-
-        elif market_name == "Woocommerce":
-            response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
-            if response == "Success":
-                return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
-            else:
-                return Response(f"Error updating product on Woocommerce: {response}", status=status.HTTP_400_BAD_REQUEST)
-
-        elif market_name == "Shopify":
-            pass
-        elif market_name == "Amazon":
-            pass
-        elif market_name == "all":
-            pass
-            
-    except Exception as e:
-        return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
-
-
 # class that takes any other operation not link to any marketplace
 class General_operations:
     # Get all unmapped ebay product listing on local table
@@ -427,7 +388,48 @@ class General_operations:
             return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to fetch log. {e}", status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+
+# Function to update product across marketplaces
+@with_module('inventory')
+@permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+@api_view(['PUT'])
+def update_product_on_marketplace(request, userid, market_name, inventory_id):
+    mk = MarketInventory()
+    wooc = WooCommerceInventory()
+    # check if user is subaccount
+    user = request.user
+    if user:
+        if user.parent_id:
+            userid = user.parent_id
+
+    try:
+        if market_name == "Ebay":
+            response = mk.update_item_on_ebay(request, userid, inventory_id)
+            if response == "Success":
+                return Response(f"Product updated successfully", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Error updating product on Ebay: {response}", status=status.HTTP_400_BAD_REQUEST)
+
+        elif market_name == "Woocommerce":
+            response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
+            if response == "Success":
+                return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Error updating product on Woocommerce: {response}", status=status.HTTP_400_BAD_REQUEST)
+
+        elif market_name == "Shopify":
+            pass
+        elif market_name == "Amazon":
+            pass
+        elif market_name == "all":
+            pass
+            
+    except Exception as e:
+        return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+
+
 
 # Create your views here.
 class MarketInventory:
@@ -556,9 +558,6 @@ class MarketInventory:
                     </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
                     <!-- ... more PictureURL values allowed here ... -->
                     {item_image_url}
-                    
-                    <!-- ... Item specifics are placed here ... -->
-                    {xml_item_specifics}
                     
                     <autoPay>false</autoPay>
                     <PostalCode>{validated_data['postal_code']}</PostalCode>
