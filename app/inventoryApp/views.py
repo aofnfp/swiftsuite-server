@@ -500,7 +500,7 @@ class MarketInventory:
             validated_data = serializer.validated_data
         access_token = eb.refresh_access_token(userid, "Ebay")
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(json.loads(product_info.item_specific_fields))
+        # xml_item_specifics = minv.json_to_xml(json.loads(product_info.item_specific_fields))
         # Get the calculated minimum offer price of product going to ebay
         try:
             minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
@@ -519,19 +519,19 @@ class MarketInventory:
             'Content-Type': 'text/xml',
             'Authorization': f'Bearer {access_token}'
         }
-        try:
-            # Validate and format the thumbnail images for listing
-            picture_details = Element('PictureDetails')
-            SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-            if validated_data["thumbnailImage"] != "Null":
-                thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-                thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
-                for img in thumbnail_images:
-                    SubElement(picture_details, 'PictureURL').text = img
-            # Convert the ElementTree to an XML string
-            item_image_url = tostring(picture_details, encoding='unicode')
-        except:
-            return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     # Validate and format the thumbnail images for listing
+        #     picture_details = Element('PictureDetails')
+        #     SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
+        #     if validated_data["thumbnailImage"] != "Null":
+        #         thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
+        #         thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+        #         for img in thumbnail_images:
+        #             SubElement(picture_details, 'PictureURL').text = img
+        #     # Convert the ElementTree to an XML string
+        #     item_image_url = tostring(picture_details, encoding='unicode')
+        # except:
+        #     return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
         
         try:
             # XML Body for ReviseItem request
@@ -551,10 +551,6 @@ class MarketInventory:
                     {f'''<ProductListingDetails>
                         <UPC>{validated_data['upc']}</UPC>
                     </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
-                    <autoPay>false</autoPay>
-                    <Country>US</Country>
-                    <Currency>USD</Currency>
-                    <ListingDuration>GTC</ListingDuration>
                     <SellerProfiles>
                         <SellerPaymentProfile>
                             <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
@@ -574,10 +570,8 @@ class MarketInventory:
                     </ListingDetails>
                     <listingInfo>
                         <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
-                        <buyItNowAvailable>false</buyItNowAvailable>
                         <listingType>{validated_data['listingType']}</listingType>
                         <gift>{validated_data['gift']}</gift>
-                        <watchCount>6</watchCount>
                     </listingInfo>
                 </Item>
                 </ReviseItemRequest>"""
