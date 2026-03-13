@@ -111,6 +111,7 @@ def complete_enrolment_price_update(userid, market_name):
                     response = update_woocommerce_product_from_background(item.market_item_id, round(selling_price, 2), quantity, userid)
                     if response == "Success":
                         item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=item.id, defaults=dict(market_name="Woocommerce", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {quantity} from vendor {item.vendor_name}"))
+                        inventory, created = InventoryModel.objects.update_or_create(user_id=userid, id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=quantity, total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
                 elif market_name == "Ebay": 
                     if item.map:
                         try:
@@ -122,8 +123,7 @@ def complete_enrolment_price_update(userid, market_name):
                     response = complete_enrollment_quantity_price_update_on_ebay(userid, item.market_item_id, round(selling_price, 2), quantity, market_enrolled._id)
                     if "Success" in response:
                         item_to_save, created = MarketPlaceUpdateLog.objects.update_or_create(user_id=userid, inventory_id=item.id, defaults=dict(market_name="Ebay", vendor_name=item.vendor_name, updated_sku=item.sku, log_description=f"Updated price to {round(selling_price, 2)} and quantity to {quantity} from vendor {item.vendor_name}"))
-                          
-                inventory, created = InventoryModel.objects.update_or_create(user_id=userid, id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=f"eb:{quantity}|su:{db_item.quantity}", total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
+                        inventory, created = InventoryModel.objects.update_or_create(user_id=userid, id=item.id, defaults=dict(start_price=round(selling_price, 2), quantity=f"eb:{quantity}|su:{db_item.quantity}", total_product_cost=db_item.total_product_cost, last_updated=timezone.now()))
         except Exception as e:
             print(f"Complete enrollment failed for user: {userid} with sku: {item.sku}. Error: {e}")
             continue
