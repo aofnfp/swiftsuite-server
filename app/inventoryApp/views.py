@@ -787,9 +787,8 @@ class MarketInventory:
             if serializer.is_valid():
                 # get the serializer's data
                 validated_data = serializer.validated_data
-            access_token = eb.refresh_access_token(userid, "Ebay")
-            # convert item specific field into xml
-            xml_item_specifics = minv.json_to_xml(json.loads(product_info.item_specific_fields))
+            # # convert item specific field into xml
+            # xml_item_specifics = minv.json_to_xml(json.loads(product_info.item_specific_fields))
             # Get the calculated minimum offer price of product going to ebay
             try:
                 minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
@@ -808,91 +807,91 @@ class MarketInventory:
                 'Content-Type': 'text/xml',
                 'Authorization': f'Bearer {access_token}'
             }
-            try:
-                # Validate and format the thumbnail images for listing
-                picture_details = Element('PictureDetails')
-                SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-                if validated_data["thumbnailImage"] != "Null":
-                    thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-                    thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
-                    for img in thumbnail_images:
-                        SubElement(picture_details, 'PictureURL').text = img
-                # Convert the ElementTree to an XML string
-                item_image_url = tostring(picture_details, encoding='unicode')
-            except:
-                return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
+            # try:
+            #     # Validate and format the thumbnail images for listing
+            #     picture_details = Element('PictureDetails')
+            #     SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
+            #     if validated_data["thumbnailImage"] != "Null":
+            #         thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
+            #         thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+            #         for img in thumbnail_images:
+            #             SubElement(picture_details, 'PictureURL').text = img
+            #     # Convert the ElementTree to an XML string
+            #     item_image_url = tostring(picture_details, encoding='unicode')
+            # except:
+            #     return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
             
             # XML Body for ReviseItem request
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{validated_data['market_item_id']}</ItemID>
-                    <Title><![CDATA[{validated_data['title']}]]></Title>
-                    <Description><![CDATA[
-                        {validated_data['description']}
-                    ]]></Description>
-                    <globalId>EBAY-US</globalId>
-                    <PrimaryCategory>
-                        <CategoryID>{validated_data['category_id']}</CategoryID>
-                    </PrimaryCategory>
-                    <ConditionID>1000</ConditionID>
-                    <SKU>{validated_data['sku']}</SKU>  
-                    {f'''<ProductListingDetails>
-                        <UPC>{validated_data['upc']}</UPC>
-                    </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
-                    <!-- ... more PictureURL values allowed here ... -->
-                    {item_image_url}
+            # body = f"""
+            # <?xml version="1.0" encoding="utf-8"?>
+            # <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            #     <RequesterCredentials>
+            #         <eBayAuthToken>{access_token}</eBayAuthToken>
+            #     </RequesterCredentials>
+            #     <Item>
+            #         <ItemID>{validated_data['market_item_id']}</ItemID>
+            #         <Title><![CDATA[{validated_data['title']}]]></Title>
+            #         <Description><![CDATA[
+            #             {validated_data['description']}
+            #         ]]></Description>
+            #         <globalId>EBAY-US</globalId>
+            #         <PrimaryCategory>
+            #             <CategoryID>{validated_data['category_id']}</CategoryID>
+            #         </PrimaryCategory>
+            #         <ConditionID>1000</ConditionID>
+            #         <SKU>{validated_data['sku']}</SKU>  
+            #         {f'''<ProductListingDetails>
+            #             <UPC>{validated_data['upc']}</UPC>
+            #         </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
+            #         <!-- ... more PictureURL values allowed here ... -->
+            #         {item_image_url}
                     
-                    <!-- ... Item specifics are placed here ... -->
-                    {xml_item_specifics}
+            #         <!-- ... Item specifics are placed here ... -->
+            #         {xml_item_specifics}
                     
-                    <autoPay>false</autoPay>
-                    <PostalCode>{validated_data['postal_code']}</PostalCode>
-                    <Location>{validated_data['location']}</Location>
-                    <Country>US</Country>
-                    <Currency>USD</Currency>
-                    <ListingDuration>GTC</ListingDuration>
-                    <SellerProfiles>
-                        <SellerPaymentProfile>
-                            <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
-                        </SellerPaymentProfile>
-                        <SellerReturnProfile>
-                            <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
-                        </SellerReturnProfile>
-                        <SellerShippingProfile>
-                            <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
-                        </SellerShippingProfile>
-                    </SellerProfiles>
-                    <StartPrice>{validated_data['start_price']}</StartPrice>
-                    <Quantity>{validated_data['quantity']}</Quantity>
-                    <ListingDetails>
-                        <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                        <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                    </ListingDetails>
-                    <listingInfo>
-                        <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
-                        <buyItNowAvailable>false</buyItNowAvailable>
-                        <listingType>{validated_data['listingType']}</listingType>
-                        <gift>{validated_data['gift']}</gift>
-                        <watchCount>6</watchCount>
-                    </listingInfo>
-                    <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
-                    <IsMultiVariationListing>true</IsMultiVariationListing>
-                    <TopRatedListing>false</TopRatedListing>
-                </Item>
-                </ReviseItemRequest>"""
-            # Make the POST request
-            response = requests.post(url, headers=headers, data=body)
+            #         <autoPay>false</autoPay>
+            #         <PostalCode>{validated_data['postal_code']}</PostalCode>
+            #         <Location>{validated_data['location']}</Location>
+            #         <Country>US</Country>
+            #         <Currency>USD</Currency>
+            #         <ListingDuration>GTC</ListingDuration>
+            #         <SellerProfiles>
+            #             <SellerPaymentProfile>
+            #                 <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
+            #             </SellerPaymentProfile>
+            #             <SellerReturnProfile>
+            #                 <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
+            #             </SellerReturnProfile>
+            #             <SellerShippingProfile>
+            #                 <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
+            #             </SellerShippingProfile>
+            #         </SellerProfiles>
+            #         <StartPrice>{validated_data['start_price']}</StartPrice>
+            #         <Quantity>{validated_data['quantity']}</Quantity>
+            #         <ListingDetails>
+            #             <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
+            #             <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
+            #         </ListingDetails>
+            #         <listingInfo>
+            #             <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
+            #             <buyItNowAvailable>false</buyItNowAvailable>
+            #             <listingType>{validated_data['listingType']}</listingType>
+            #             <gift>{validated_data['gift']}</gift>
+            #             <watchCount>6</watchCount>
+            #         </listingInfo>
+            #         <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
+            #         <IsMultiVariationListing>true</IsMultiVariationListing>
+            #         <TopRatedListing>false</TopRatedListing>
+            #     </Item>
+            #     </ReviseItemRequest>"""
+            # # Make the POST request
+            # response = requests.post(url, headers=headers, data=body)
             # return response
-            if response.status_code == 200:
-                serializer.save()
-                return Response(f"Message returned: {response.text}", status=status.HTTP_200_OK)
-            else:
-                return Response(f"Error: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+            # if response.status_code == 200:
+            #     serializer.save()
+            #     return Response(f"Message returned: {response.text}", status=status.HTTP_200_OK)
+            # else:
+            #     return Response(f"Error: {response.text}", status=status.HTTP_400_BAD_REQUEST)
             
             
         except requests.exceptions.ConnectTimeout as e:
