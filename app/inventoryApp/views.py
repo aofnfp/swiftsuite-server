@@ -513,7 +513,7 @@ class MarketInventory:
 
         access_token = eb.refresh_access_token(userid, "Ebay")
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(validated_data["item_specific_fields"])
+        xml_item_specifics = minv.json_to_xml(product_info.item_specific_fields)
         # Get the calculated minimum offer price of product going to ebay
         try:
             minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
