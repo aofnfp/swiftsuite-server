@@ -163,7 +163,7 @@ class General_operations:
                 
                 return JsonResponse({"Message": "Items mapped successfully", "Mapped_with_caution": mapped_with_caution, "Failed_to_map_items":unmapped_items}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to map item. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to map item.", status=status.HTTP_400_BAD_REQUEST)
 
     
     # Get umapped product details in the inventory for mapping to vendor
@@ -246,7 +246,7 @@ class General_operations:
             return JsonResponse({"Total_count":inventory_listing.count(), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
             
         except Exception as e:
-            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
     
 #  Use search query to filter unmapped items in the inventory
@@ -290,7 +290,7 @@ class General_operations:
             return JsonResponse({"Total_count":inventory_listing.count(), "Total_pages":paginator.num_pages, "Inventory_items":list(inventory_objects), "enrollment_detail":list(enrollment)}, safe=False, status=status.HTTP_200_OK)
             
         except Exception as e:
-            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -310,7 +310,7 @@ class General_operations:
             return JsonResponse({"enrollment_detail":list(market_enrolled)}, safe=False, status=status.HTTP_200_OK)
             
         except Exception as e:
-            return Response(f"Failed to get items. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to manually download item from marketplace
@@ -329,7 +329,7 @@ class General_operations:
             manually_download_item_from_marketplace_task.delay(userid)
             return Response("Inventory download has been initiated.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to initiate download task: {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to initiate download task", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to view marketplace activities log
@@ -358,7 +358,7 @@ class General_operations:
 
             return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to fetch log. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch log.", status=status.HTTP_400_BAD_REQUEST)
 
 
     # Function to view inventory price and quantity update activities log
@@ -387,7 +387,7 @@ class General_operations:
 
             return JsonResponse({"Total_count":len(logs), "Total_pages":paginator.num_pages, "log":list(inventory_objects)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to fetch log. {e}", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to fetch log.", status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -410,14 +410,14 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
             if response == "Success":
                 return Response(f"Product updated successfully", status=status.HTTP_200_OK)
             else:
-                return Response(f"Error updating product on Ebay: {response}", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Error updating product on Ebay", status=status.HTTP_400_BAD_REQUEST)
 
         elif market_name == "Woocommerce":
             response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
             if response == "Success":
-                return Response(f"Product updated successfully!", status=status.HTTP_200_OK)
+                return Response(f"Product updated successfully", status=status.HTTP_200_OK)
             else:
-                return Response(f"Error updating product on Woocommerce: {response}", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Error updating product on Woocommerce", status=status.HTTP_400_BAD_REQUEST)
 
         elif market_name == "Shopify":
             pass
@@ -427,7 +427,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
             pass
             
     except Exception as e:
-        return Response(f"Error {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Error updating product", status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -535,16 +535,25 @@ class MarketInventory:
         try:
             # Validate and format the thumbnail images for listing
             picture_details = Element('PictureDetails')
-            SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-            if validated_data["thumbnailImage"] != "Null":
-                thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-                thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+            # Main image
+            if validated_data.get("picture_detail"):
+                SubElement(picture_details, 'PictureURL').text = validated_data["picture_detail"]
+
+            # Additional images
+            thumbnail_images = validated_data.get("thumbnailImage")
+
+            if thumbnail_images:
+                if isinstance(thumbnail_images, str):
+                    thumbnail_images = json.loads(thumbnail_images)
+
                 for img in thumbnail_images:
-                    SubElement(picture_details, 'PictureURL').text = img
+                    if img and img.startswith("http"):
+                        SubElement(picture_details, 'PictureURL').text = img
+
             # Convert the ElementTree to an XML string
             item_image_url = tostring(picture_details, encoding='unicode')
-        except:
-            return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(f"Failed to process thumbnail images: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
         
         try:
             # XML Body for ReviseItem request
