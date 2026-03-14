@@ -1,4 +1,4 @@
-import os, requests, json
+import os, requests, json, ast
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
@@ -449,43 +449,53 @@ class MarketInventory:
         self.token_url = "https://api.ebay.com/identity/v1/oauth2/token"
         self.inventory_item_url = "https://api.ebay.com/sell/inventory/v1/inventory_item"
 
-    # Convert a JSON object back to an XML string
+    # Convert a JSON object back to an XML stringimport json
     def json_to_xml(self, json_data):
-        
+
         def build_xml_element(parent, data):
-            """ Recursively build XML elements from JSON data """
             if isinstance(data, dict):
                 for key, value in data.items():
-                    # Handle attributes
-                    if key == "@attributes":
-                        for attr_name, attr_value in value.items():
-                            parent.set(attr_name, attr_value)
-                    elif key == "#text":
-                        parent.text = value
+
+                    child = ET.SubElement(parent, key)
+
+                    if isinstance(value, dict):
+                        build_xml_element(child, value)
+
+                    elif isinstance(value, list):
+                        for item in value:
+                            list_child = ET.SubElement(parent, key)
+                            build_xml_element(list_child, item)
+
                     else:
-                        if isinstance(value, list):  # If multiple elements with the same tag
-                            for item in value:
-                                child = ET.SubElement(parent, key)
-                                build_xml_element(child, item)
+                        if value is None:
+                            child.text = ""
                         else:
-                            child = ET.SubElement(parent, key)
-                            build_xml_element(child, value)
+                            child.text = str(value)
+
             else:
                 parent.text = str(data)
-    
-        # Load JSON as a dictionary if it's a string
+
+        # Normalize incoming data
         if isinstance(json_data, str):
-            json_data = json.loads(json_data)
-    
-        # Get the root element name
-        root_key = list(json_data.keys())[0]
-        root = ET.Element(root_key)
-    
-        # Build XML recursively
-        build_xml_element(root, json_data[root_key])
-    
-        # Convert to string
+            try:
+                json_data = json.loads(json_data)
+            except json.JSONDecodeError:
+                json_data = ast.literal_eval(json_data)
+
+        # Create root tag for eBay ItemSpecifics
+        root = ET.Element("ItemSpecifics")
+
+        for key, value in json_data.items():
+            nvl = ET.SubElement(root, "NameValueList")
+
+            name = ET.SubElement(nvl, "Name")
+            name.text = key
+
+            val = ET.SubElement(nvl, "Value")
+            val.text = "" if value is None else str(value)
+
         return ET.tostring(root, encoding="unicode")
+
 
 
     # Create a function to update item information on Ebay
