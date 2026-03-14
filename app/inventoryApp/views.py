@@ -787,6 +787,8 @@ class MarketInventory:
             if serializer.is_valid():
                 # get the serializer's data
                 validated_data = serializer.validated_data
+            else:
+                return Response(f"Invalid data: {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
             # convert item specific field into xml
             # xml_item_specifics = minv.json_to_xml(json.loads(product_info.item_specific_fields))
             # Get the calculated minimum offer price of product going to ebay
@@ -811,7 +813,7 @@ class MarketInventory:
                 # Validate and format the thumbnail images for listing
                 picture_details = Element('PictureDetails')
                 SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-                if validated_data["thumbnailImage"] != "":
+                if validated_data["thumbnailImage"] != []:
                     thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
                     thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
                     for img in thumbnail_images:
