@@ -807,20 +807,20 @@ class MarketInventory:
                 'Content-Type': 'text/xml',
                 'Authorization': f'Bearer {access_token}'
             }
-            # try:
-            #     # Validate and format the thumbnail images for listing
-            #     picture_details = Element('PictureDetails')
-            #     SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-            #     if validated_data["thumbnailImage"] != "Null":
-            #         thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-            #         thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
-            #         for img in thumbnail_images:
-            #             SubElement(picture_details, 'PictureURL').text = img
-            #     # Convert the ElementTree to an XML string
-            #     item_image_url = tostring(picture_details, encoding='unicode')
-            # except:
-            #     return Response(f"Failed to process thumbnail images:", status=status.HTTP_400_BAD_REQUEST)
-            
+            try:
+                # Validate and format the thumbnail images for listing
+                picture_details = Element('PictureDetails')
+                SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
+                if validated_data["thumbnailImage"] != "Null":
+                    thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
+                    thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+                    for img in thumbnail_images:
+                        SubElement(picture_details, 'PictureURL').text = img
+                # Convert the ElementTree to an XML string
+                item_image_url = tostring(picture_details, encoding='unicode')
+            except Exception as e:
+                return Response(f"Failed to process thumbnail images: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+
             # XML Body for ReviseItem request
             # body = f"""
             # <?xml version="1.0" encoding="utf-8"?>
@@ -893,7 +893,7 @@ class MarketInventory:
             # else:
             #     return Response(f"Error: {response.text}", status=status.HTTP_400_BAD_REQUEST)
             
-            
+            return Response(f"update successful", status=status.HTTP_200_OK)
         except requests.exceptions.ConnectTimeout as e:
             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
         except Exception as ea:
