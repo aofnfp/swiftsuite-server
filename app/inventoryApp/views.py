@@ -769,7 +769,7 @@ class MarketInventory:
     # Function to test any api from ebay before implementation
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    @api_view(['GET'])
+    @api_view(['PUT'])
     def function_to_test_api(request, userid, item_id):
         eb = Ebay()   
         minv = MarketInventory()
