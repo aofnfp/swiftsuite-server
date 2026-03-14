@@ -498,9 +498,12 @@ class MarketInventory:
         if serializer.is_valid():
             # get the serializer's data
             validated_data = serializer.validated_data
+        else:
+            return Response(f"Invalid data: {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
+
         access_token = eb.refresh_access_token(userid, "Ebay")
         # convert item specific field into xml
-        xml_item_specifics = minv.json_to_xml(json.loads(product_info.item_specific_fields))
+        xml_item_specifics = minv.json_to_xml(validated_data["item_specific_fields"])
         # Get the calculated minimum offer price of product going to ebay
         try:
             minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
