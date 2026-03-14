@@ -825,12 +825,21 @@ class MarketInventory:
             try:
                 # Validate and format the thumbnail images for listing
                 picture_details = Element('PictureDetails')
-                SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-                if validated_data["thumbnailImage"] != []:
-                    thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
-                    thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
+                # Main image
+                if validated_data.get("picture_detail"):
+                    SubElement(picture_details, 'PictureURL').text = validated_data["picture_detail"]
+
+                # Additional images
+                thumbnail_images = validated_data.get("thumbnailImage")
+
+                if thumbnail_images:
+                    if isinstance(thumbnail_images, str):
+                        thumbnail_images = json.loads(thumbnail_images)
+
                     for img in thumbnail_images:
-                        SubElement(picture_details, 'PictureURL').text = img
+                        if img and img.startswith("http"):
+                            SubElement(picture_details, 'PictureURL').text = img
+
                 # Convert the ElementTree to an XML string
                 item_image_url = tostring(picture_details, encoding='unicode')
             except Exception as e:
