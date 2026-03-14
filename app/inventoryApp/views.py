@@ -811,7 +811,7 @@ class MarketInventory:
                 # Validate and format the thumbnail images for listing
                 picture_details = Element('PictureDetails')
                 SubElement(picture_details, 'PictureURL').text = validated_data['picture_detail']
-                if validated_data["thumbnailImage"] != "Null":
+                if validated_data["thumbnailImage"] != "":
                     thumbnail_images = validated_data["thumbnailImage"].strip('[]')  # Remove brackets
                     thumbnail_images = [url.strip().strip('"') for url in thumbnail_images.split(',')]  # Split and clean URLs
                     for img in thumbnail_images:
