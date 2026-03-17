@@ -735,14 +735,7 @@ def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
         logger.error(f"Failed to get legacy order ID for order {vendor_order_log.reference_id}")
         return {"success": False, "raw_body": "No legacy order ID"}
 
-    # Cap shipped_at to now to avoid eBay rejecting future dates,
-    # and ensure we have a UTC-aware datetime before formatting.
-    now = timezone.now()
-    shipped_at = vendor_order_log.shipped_at
-    if timezone.is_naive(shipped_at):
-        shipped_at = timezone.make_aware(shipped_at, timezone.utc)
-    shipped_at = min(shipped_at, now)
-    shipped_time = shipped_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+    shipped_time = timezone.now().strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
     xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
 <CompleteSaleRequest xmlns="urn:ebay:apis:eBLBaseComponents">
