@@ -740,7 +740,6 @@ def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
     xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
 <CompleteSaleRequest xmlns="urn:ebay:apis:eBLBaseComponents">
   <OrderID>{legacy_order_id}</OrderID>
-  <Paid>true</Paid>
   <Shipped>true</Shipped>
   <Shipment>
     <ShippedTime>{shipped_time}</ShippedTime>

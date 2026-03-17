@@ -36,7 +36,31 @@ class FrgxOrderApiClient:
         order_details = get_ebay_order_details(self.user.id, self.market_name, self.order_id)
         
         return order_details
-    
+
+    def validate_fullname(self, fullname: str):
+        """
+        Returns name as 'LastName FirstName'.
+        Guarantees both parts are non-empty so the FX API never
+        receives an empty LastName or FirstName.
+        """
+        fullname = fullname.strip()
+        parts = fullname.split()
+
+        if len(parts) == 1:
+            # Only one word — use it for both first and last
+            return f"{parts[0]} {parts[0]}"
+
+        first, last = parts[0], parts[1]
+
+        if len(first) < 2:
+            first = last
+        if len(last) < 2:
+            last = first
+
+        # Return as LastName FirstName
+        return f"{last} {first}"
+        
+
     def build_bulk_payload(self, order_details):
 
         if not self.VendorOrder.reference_id:
@@ -49,9 +73,10 @@ class FrgxOrderApiClient:
 
         fulfillmentStartInstructions = order_details.get('fulfillmentStartInstructions', [{}])[0]
         shipTo = fulfillmentStartInstructions.get("shippingStep", {}).get("shipTo", {})
-        fullname = shipTo.get("fullName", "Unknown").split(' ')
-        firstName = fullname[0]
-        lastName = fullname[1] if len(fullname) > 1 else ''
+        validated_name = self.validate_fullname(shipTo.get("fullName", "Unknown"))
+        name_parts = validated_name.split()
+        lastName = name_parts[0]
+        firstName = name_parts[1]
         contactAddress = shipTo.get("contactAddress", {})
         ShipAddress = contactAddress.get("addressLine1", "Unknown")
         city = contactAddress.get("city", "Unknown")
