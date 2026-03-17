@@ -735,7 +735,14 @@ def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
         logger.error(f"Failed to get legacy order ID for order {vendor_order_log.reference_id}")
         return {"success": False, "raw_body": "No legacy order ID"}
 
-    shipped_time = vendor_order_log.shipped_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+    # Cap shipped_at to now to avoid eBay rejecting future dates,
+    # and ensure we have a UTC-aware datetime before formatting.
+    now = timezone.now()
+    shipped_at = vendor_order_log.shipped_at
+    if timezone.is_naive(shipped_at):
+        shipped_at = timezone.make_aware(shipped_at, timezone.utc)
+    shipped_at = min(shipped_at, now)
+    shipped_time = shipped_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
     xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
 <CompleteSaleRequest xmlns="urn:ebay:apis:eBLBaseComponents">
@@ -770,15 +777,21 @@ def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
             f"status={response.status_code} | body={response_text}"
         )
 
-        # Parse the XML response to check Ack
+        # Parse the XML response to check Ack and error severity
         try:
             root = ET.fromstring(response_text)
             ns = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
             ack = root.findtext('ebay:Ack', namespaces=ns) or root.findtext('Ack', '')
+            has_error = any(
+                e.findtext('ebay:SeverityCode', namespaces=ns) == 'Error'
+                for e in root.findall('ebay:Errors', namespaces=ns)
+            )
         except ET.ParseError:
             ack = ''
+            has_error = True
 
-        success = ack in ('Success', 'Warning')
+        # Warning is acceptable only if no Error-severity errors are present
+        success = ack in ('Success', 'Warning') and not has_error
 
         if success:
             logger.info(f"XML tracking push succeeded for order {legacy_order_id} (Ack={ack})")
