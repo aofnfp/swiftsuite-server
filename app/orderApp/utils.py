@@ -706,8 +706,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
 
 def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
     """
-    Push tracking information to eBay using the Trading API
-    (SetShipmentTrackingInfo XML call).
+    Push tracking information to eBay using the Trading API CompleteSale call.
     Uses legacyOrderId — required by the Trading API.
     """
     import xml.etree.ElementTree as ET
@@ -739,10 +738,10 @@ def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
     shipped_time = vendor_order_log.shipped_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
     xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-<SetShipmentTrackingInfoRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-  <IsPaid>true</IsPaid>
-  <IsShipped>true</IsShipped>
+<CompleteSaleRequest xmlns="urn:ebay:apis:eBLBaseComponents">
   <OrderID>{legacy_order_id}</OrderID>
+  <Paid>true</Paid>
+  <Shipped>true</Shipped>
   <Shipment>
     <ShippedTime>{shipped_time}</ShippedTime>
     <ShipmentTrackingDetails>
@@ -750,10 +749,10 @@ def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
       <ShipmentTrackingNumber>{vendor_order_log.tracking_number}</ShipmentTrackingNumber>
     </ShipmentTrackingDetails>
   </Shipment>
-</SetShipmentTrackingInfoRequest>"""
+</CompleteSaleRequest>"""
 
     headers = {
-        'X-EBAY-API-CALL-NAME': 'SetShipmentTrackingInfo',
+        'X-EBAY-API-CALL-NAME': 'CompleteSale',
         'X-EBAY-API-SITEID': '0',
         'X-EBAY-API-COMPATIBILITY-LEVEL': '1155',
         'X-EBAY-API-IAF-TOKEN': access_token,
