@@ -20,7 +20,7 @@ from vendorEnrollment.pagination import CustomOffsetPagination
 from .models import VendorOrderLog
 from .order_clients.rsr_order import RsrOrderApiClient
 from .order_clients.fx_order import FrgxOrderApiClient
-from .utils import push_tracking_to_ebay, get_access_token
+from .utils import push_tracking_to_ebay, get_access_token, push_tracking_to_ebay_xml
 
 
 # Create your views here.
@@ -495,7 +495,8 @@ class PushTrackingView(APIView):
                 {"message": "Order not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        res = push_tracking_to_ebay(vendor_order)
+        # res = push_tracking_to_ebay(vendor_order)
+        res = push_tracking_to_ebay_xml(vendor_order)
         if res["success"]:
             return Response(
                 {"message": "Tracking pushed to eBay successfully", "data": res},

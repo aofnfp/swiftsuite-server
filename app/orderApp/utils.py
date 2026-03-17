@@ -606,7 +606,7 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             }
         ],
         "shippedDate": shipped_date,
-        "shippingCarrierCode": vendor_order_log.carrier,
+        "shippingCarrierCode": vendor_order_log.carrier.upper(),
         "trackingNumber": vendor_order_log.tracking_number,
     }
     
@@ -701,4 +701,114 @@ def push_tracking_to_ebay(vendor_order_log: VendorOrderLog):
             "raw_body": str(e),
             "headers": None,
             "response": None,
+        }
+
+
+def push_tracking_to_ebay_xml(vendor_order_log: VendorOrderLog):
+    """
+    Push tracking information to eBay using the Trading API
+    (SetShipmentTrackingInfo XML call).
+    Uses legacyOrderId — required by the Trading API.
+    """
+    import xml.etree.ElementTree as ET
+
+    user_id = vendor_order_log.enrollment.user.id
+    market_name = vendor_order_log.order.market_name
+    legacy_order_id = vendor_order_log.order.legacyOrderId
+
+    if (
+        not vendor_order_log.shipped_at
+        or not vendor_order_log.tracking_number
+        or not vendor_order_log.carrier
+    ):
+        logger.info(
+            f"Skipping XML tracking push for order "
+            f"{vendor_order_log.reference_id}: shipment not complete"
+        )
+        return {"success": False, "raw_body": "Shipment not complete"}
+
+    access_token = get_access_token(user_id, market_name)
+    if not access_token:
+        logger.error(f"Failed to get access token for order {legacy_order_id}")
+        return {"success": False, "raw_body": "No access token"}
+
+    if not legacy_order_id:
+        logger.error(f"Failed to get legacy order ID for order {vendor_order_log.reference_id}")
+        return {"success": False, "raw_body": "No legacy order ID"}
+
+    shipped_time = vendor_order_log.shipped_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<SetShipmentTrackingInfoRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <IsPaid>true</IsPaid>
+  <IsShipped>true</IsShipped>
+  <OrderID>{legacy_order_id}</OrderID>
+  <Shipment>
+    <ShippedTime>{shipped_time}</ShippedTime>
+    <ShipmentTrackingDetails>
+      <ShippingCarrierUsed>{vendor_order_log.carrier.upper()}</ShippingCarrierUsed>
+      <ShipmentTrackingNumber>{vendor_order_log.tracking_number}</ShipmentTrackingNumber>
+    </ShipmentTrackingDetails>
+  </Shipment>
+</SetShipmentTrackingInfoRequest>"""
+
+    headers = {
+        'X-EBAY-API-CALL-NAME': 'SetShipmentTrackingInfo',
+        'X-EBAY-API-SITEID': '0',
+        'X-EBAY-API-COMPATIBILITY-LEVEL': '1155',
+        'X-EBAY-API-IAF-TOKEN': access_token,
+        'Content-Type': 'text/xml',
+    }
+
+    url = 'https://api.ebay.com/ws/api.dll'
+
+    try:
+        response = requests.post(url, data=xml_body.encode('utf-8'), headers=headers, timeout=30)
+        response_text = response.text
+
+        logger.info(
+            f"eBay Trading API response for order {legacy_order_id} | "
+            f"status={response.status_code} | body={response_text}"
+        )
+
+        # Parse the XML response to check Ack
+        try:
+            root = ET.fromstring(response_text)
+            ns = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
+            ack = root.findtext('ebay:Ack', namespaces=ns) or root.findtext('Ack', '')
+        except ET.ParseError:
+            ack = ''
+
+        success = ack in ('Success', 'Warning')
+
+        if success:
+            logger.info(f"XML tracking push succeeded for order {legacy_order_id} (Ack={ack})")
+            OrdersOnEbayModel.objects.filter(
+                orderId=vendor_order_log.order.orderId
+            ).update(
+                tracking_id=vendor_order_log.tracking_number,
+                orderFulfillmentStatus="SHIPPED",
+            )
+            vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
+            vendor_order_log.delivered_at = timezone.now()
+            vendor_order_log.save(update_fields=["status", "delivered_at"])
+        else:
+            logger.error(
+                f"XML tracking push failed for order {legacy_order_id} | "
+                f"Ack={ack} | body={response_text}"
+            )
+
+        return {
+            "success": success,
+            "status_code": response.status_code,
+            "ack": ack,
+            "raw_body": response_text,
+        }
+
+    except Exception as e:
+        logger.error(f"Exception in XML tracking push for order {legacy_order_id}: {e}")
+        return {
+            "success": False,
+            "status_code": 500,
+            "raw_body": str(e),
         }
