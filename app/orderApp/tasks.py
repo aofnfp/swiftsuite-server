@@ -3,7 +3,7 @@ import requests
 from marketplaceApp.models import MarketplaceEnronment
 from celery import shared_task
 from celery.exceptions import Ignore
-from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token, push_tracking_to_ebay
+from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token, push_tracking_to_ebay, push_tracking_to_ebay_xml
 from .models import OrdersOnEbayModel, VendorOrderLog
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
@@ -194,7 +194,7 @@ def check_vendor_order_status():
             # check if status shipped has tracking info, if so push to ebay
             if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
                 if vendor_order.tracking_number and vendor_order.carrier:
-                    push_tracking_to_ebay(vendor_order)
+                    push_tracking_to_ebay_xml(vendor_order)
                     continue
             
             if vendor_name == 'rsr':
@@ -205,7 +205,7 @@ def check_vendor_order_status():
                 if result.get("StatusCode") == "00":
                     if client.update_local_status(result):
                         if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
-                            push_tracking_to_ebay(vendor_order)
+                            push_tracking_to_ebay_xml(vendor_order)
                         status_updated = True
 
             elif vendor_name == 'fragrancex':
@@ -218,7 +218,7 @@ def check_vendor_order_status():
 
                 if client.update_local_status(data):
                     if vendor_order.status == VendorOrderLog.VendorOrderStatus.SHIPPED:
-                        push_tracking_to_ebay(vendor_order)
+                        push_tracking_to_ebay_xml(vendor_order)
                     status_updated = True
 
                 time.sleep(0.4)  # Stay safely under the 3 req/s FX rate limit
