@@ -74,7 +74,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
     except Exception as e:
-        return Response(f"Error error occurred in the form.: {str(e)}", status=status.HTTP_400_BAD_REQUEST)     
+        return Response(f"Error error occurred in the form.", status=status.HTTP_400_BAD_REQUEST)     
     # Get the calculated price of the product to list
     try:
         minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
@@ -122,7 +122,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
     
         item_specifics = item_specifics_data.get('aspects', [])
         # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
     else:
         DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
     
