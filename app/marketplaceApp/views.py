@@ -762,12 +762,12 @@ class Ebay:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
         # Fetch item specifics from eBay and generate the serializer
         data = eb.get_item_specifics_from_ebay(access_token, leaf_category_id)
-        
+        required_fields = eb.get_required_fields_item(leaf_category_id, access_token)
         # Pass the item specifics to the serializer generator function
         item_specifics = data.get('aspects', [])
         
         # Generate the dynamic serializer
-        DynamicItemSpecificsSerializer, _fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
             if isinstance(field, serializers.BooleanField) and field_name in _fields:
