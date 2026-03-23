@@ -713,8 +713,9 @@ class Ebay:
         eb = Ebay()
         category_tree_id = eb.get_default_category_tree_id(access_token)
         url = (
-            f"https://api.ebay.com/commerce/taxonomy/v1_beta/"
-            f"category_tree/{category_tree_id}/get_item_aspects_for_category"
+             f"https://api.ebay.com/commerce/taxonomy/v1/category_tree/0/get_item_aspects_for_category?category_id={category_tree_id}"
+            # f"https://api.ebay.com/commerce/taxonomy/v1_beta/"
+            # f"category_tree/{category_tree_id}/get_item_aspects_for_category"
         )
         params = {
             "category_id": category_id,
