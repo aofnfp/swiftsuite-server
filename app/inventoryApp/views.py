@@ -629,7 +629,7 @@ class MarketInventory:
                 return response.text
 
         except Exception as e:
-            return e
+            return str(e)
      
     
     # Get all product already listed on Ebay from the inventory
