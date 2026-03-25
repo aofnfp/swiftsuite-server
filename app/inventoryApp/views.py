@@ -410,7 +410,7 @@ def update_product_on_marketplace(request, userid, market_name, inventory_id):
             if response == "Success":
                 return Response(f"Product updated successfully", status=status.HTTP_200_OK)
             else:
-                return Response(f"Error updating product on Ebay", status=status.HTTP_400_BAD_REQUEST)
+                return Response(f"Error updating product on Ebay: {response}", status=status.HTTP_400_BAD_REQUEST)
 
         elif market_name == "Woocommerce":
             response = wooc.update_woocommerce_product(request, userid, market_name, inventory_id)
@@ -626,10 +626,10 @@ class MarketInventory:
                 serializer.save()
                 return "Success"
             else:
-                return "Error"
+                return response.text
 
         except Exception as e:
-            return "Error"
+            return e
      
     
     # Get all product already listed on Ebay from the inventory
