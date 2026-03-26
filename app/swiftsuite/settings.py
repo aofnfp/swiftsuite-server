@@ -1,6 +1,7 @@
 
 from pathlib import Path
 from datetime import timedelta
+from xmlrpc import server
 from decouple import config
 import cloudinary
 from email.utils import formataddr
@@ -19,6 +20,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = [
+    "service-server.vps.swiftsuite.app",
     "service-test.vps.swiftsuite.app",
     "service.swiftsuite.app",
     "127.0.0.1"
