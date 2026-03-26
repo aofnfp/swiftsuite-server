@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from .serializers import MarketplaceEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer, WooComerceEnrolSerializer
+from .serializers import EbayEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer, WooComerceEnrolSerializer, ShopifyEnrolSerializer
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from .models import MarketplaceEnronment, UploadedProductImage
 from inventoryApp.models import InventoryModel
@@ -38,7 +38,7 @@ from django.db import transaction
 
 
 # Function to list product on marketplace
-@with_module('inventory')
+@with_module('marketplaceApp')
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['POST'])
 def listing_on_marketplace(request, userid, market_name, category_id_or_name):
@@ -63,7 +63,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
         
             item_specifics = item_specifics_data.get('aspects', [])
             # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-            DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+            DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         else:
             DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
         
@@ -98,7 +98,7 @@ def listing_on_marketplace(request, userid, market_name, category_id_or_name):
 
 
 # Function to save product before listing on marketplace
-@with_module('inventory')
+@with_module('marketplaceApp')
 @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
 @api_view(['POST'])
 def save_product_before_listing_on_marketplace(request, userid, market_name, category_id_or_name):
@@ -122,7 +122,7 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
     
         item_specifics = item_specifics_data.get('aspects', [])
         # Generate the dynamic serializer by combining eBay fields and model fields (Product model)
-        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, item_specifics_fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
     else:
         DynamicItemSpecificsSerializer = ItemListingToEbaySerializer.generate_other_marketplace_listing_fields_serializer()
     
@@ -157,7 +157,6 @@ def save_product_before_listing_on_marketplace(request, userid, market_name, cat
 
 
 class Ebay:
-    
     def __init__(self):
         super().__init__()
         # eBay Developer App credentials
@@ -200,9 +199,16 @@ class Ebay:
         ]
 
     # Function to get access_token and refresh_token if connection is established or re-establish connection to get access_token if expires.   
+    @with_module('marketplaceApp')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
     def make_connection_to_get_auth_code(request, market_name):
         eb = Ebay()
-        
+         # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
         # Construct the authorization URL
         authorization_params = {
             "client_id": eb.client_id,
@@ -219,7 +225,7 @@ class Ebay:
         # Redirect the user to the authorization URL
         # return JsonResponse({"message": "Please complete the authorization in your browser."})
 
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def oauth_callback(request, userid, market_name):
@@ -319,7 +325,7 @@ class Ebay:
             return access_token
     
     # Function to refresh the access token using an api call
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def refresh_access_token_using_api_call(request, userid, market_name):
@@ -442,7 +448,7 @@ class Ebay:
             
 
     # Create a function to collect all the required policies from Ebay.
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def refresh_connection_and_get_policy(request, userid, market_name):
@@ -487,8 +493,8 @@ class Ebay:
         return JsonResponse(all_policy, safe=False, status=status.HTTP_200_OK)
 
     
-    # Enroll new marketplace 
-    @with_module('inventory')
+    # Complete the enrolment process and save all details to the database. Also, update the price of all the products linked to the ebay with the calculated price if enrolment is updated.
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
     def complete_enrolment_or_update(request, userid, market_name):
@@ -501,7 +507,7 @@ class Ebay:
                     userid = user.parent_id
             
             enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
-            serializer = MarketplaceEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
+            serializer = EbayEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 valid_data = serializer.validated_data
@@ -514,7 +520,7 @@ class Ebay:
     
 
     # Get the enrolment detail from the enrolment table for editing
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_enrolment_detail(request, userid, market_name):
@@ -557,7 +563,7 @@ class Ebay:
         
 
     # Create a connection to the eBay Trading API
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_product_to_list_detail(request, userid, market_name, prod_id):
@@ -621,7 +627,7 @@ class Ebay:
             return response_data
 
     # Function to retrieve leaf categories for a given category ID
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_leaf_category_id(request, userid, market_name, category_id):
@@ -707,8 +713,9 @@ class Ebay:
         eb = Ebay()
         category_tree_id = eb.get_default_category_tree_id(access_token)
         url = (
-            f"https://api.ebay.com/commerce/taxonomy/v1_beta/"
-            f"category_tree/{category_tree_id}/get_item_aspects_for_category"
+             f"https://api.ebay.com/commerce/taxonomy/v1/category_tree/0/get_item_aspects_for_category?category_id={category_id}"
+            # f"https://api.ebay.com/commerce/taxonomy/v1_beta/"
+            # f"category_tree/{category_tree_id}/get_item_aspects_for_category"
         )
         params = {
             "category_id": category_id,
@@ -729,14 +736,14 @@ class Ebay:
         aspects = data.get("aspects", [])
         for aspect in aspects:
             constraint = aspect.get("aspectConstraint", {})
-            if constraint.get("aspectRequired", False):
+            if constraint.get("aspectRequired"):
                 required_aspects.append(aspect.get("localizedAspectName"))
         
         return required_aspects
 
 
     # Function to generate dynamic serializer for item specifics fields 
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])    
     @api_view(['GET'])
     def get_item_specifics_fields(request, userid, market_name, leaf_category_id):
@@ -756,12 +763,12 @@ class Ebay:
             return Response(f"Failed to refresh access token. Get authorization code first", status=status.HTTP_400_BAD_REQUEST)
         # Fetch item specifics from eBay and generate the serializer
         data = eb.get_item_specifics_from_ebay(access_token, leaf_category_id)
-        
+        required_fields = eb.get_required_fields_item(leaf_category_id, access_token)
         # Pass the item specifics to the serializer generator function
         item_specifics = data.get('aspects', [])
         
         # Generate the dynamic serializer
-        DynamicItemSpecificsSerializer, _fields, valid_choices_fields, required_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
+        DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
         for field_name, field in DynamicItemSpecificsSerializer().fields.items():
             if isinstance(field, serializers.BooleanField) and field_name in _fields:
@@ -949,12 +956,12 @@ class Ebay:
 
             return Response(f"Product saved was successful.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to post", status=status.HTTP_400_BAD_REQUEST)
+            return Response(f"Failed to save product", status=status.HTTP_400_BAD_REQUEST)
  
         
         
     # Function to upload thumbnail image to cloudinary
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def upload_product_image(request, productid, product_name, userid):
@@ -986,7 +993,7 @@ class Ebay:
 
     
     # Function to upload multiple images to cloudinary
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     @parser_classes([MultiPartParser, FormParser])
@@ -1033,7 +1040,7 @@ class Ebay:
 
 
     # Get thumbnail image details
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_uploaded_image(request, productid, product_name, userid):
@@ -1051,7 +1058,7 @@ class Ebay:
             return Response("Failed to retrieve image: Check your connection", status=400)
 
     # Delete thumbnail image
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def delete_uploaded_image(request, image_name, image_id):
@@ -1068,7 +1075,7 @@ class Ebay:
 
 class WooCommerce:
     # Enroll Woocommerce marketplace
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['POST'])
     def woocommerce_enrollment(request, userid):
@@ -1095,7 +1102,7 @@ class WooCommerce:
         
 
     # Update Woocommerce marketplace 
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['PUT'])
     def update_woocommerce_enrolment(request, userid, market_name):
@@ -1120,7 +1127,7 @@ class WooCommerce:
 
 
     # Function to test your connection to Woocommerce
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def test_woocommerce_connection(request, userid, market_name):
@@ -1160,7 +1167,7 @@ class WooCommerce:
 
 
     # Get all product categories
-    @with_module('inventory')
+    @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_product_category(request, userid, market_name):
@@ -1277,4 +1284,122 @@ class WooCommerce:
         
 
 class Shopify:
-    pass
+    # Shopify App credentials
+    def __init__(self):
+        super().__init__()
+        self.API_KEY = config("SHOP_API_KEY")
+        self.API_SECRET = config("SHOP_API_SECRET")
+        self.SCOPES = config("SHOP_SCOPES")
+        self.REDIRECT_URI = config("SHOP_REDIRECT_URI")
+        self.SHOP_NAME = config("SHOP_SHOP_NAME")
+        # Shopify API version
+        self.API_VERSION = "2024-01"
+
+
+    @with_module('marketplaceApp')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def connection_to_get_auth_code(request):
+        shop = Shopify()
+        try:
+            # Step 1: Redirect user to Shopify authorization page
+            install_url = (
+                f"https://{shop.SHOP_NAME}/admin/oauth/authorize"
+                f"?client_id={shop.API_KEY}"
+                f"&scope={shop.SCOPES}"
+                f"&redirect_uri={shop.REDIRECT_URI}"
+            )
+            return redirect(install_url)
+        except Exception as e:
+            return Response(f"Failed to fetch authorization code: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST) 
+
+
+    @with_module('marketplaceApp')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['POST'])
+    def shopify_oauth_callback(request, userid, market_name):
+        shop = Shopify()
+        # check if user is subaccount
+        user = request.user
+        if user:
+            if user.parent_id:
+                userid = user.parent_id
+        try:
+            # Validate the code using the serializer
+            serializer = GetAuthCodeSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Step 2: Shopify sends authorization code
+            code = requests.request.args.get(serializer.validated_data["authorization_code"])
+
+            token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
+
+            payload = {
+                "client_id": shop.API_KEY,
+                "client_secret": shop.API_SECRET,
+                "code": code
+            }
+
+            # Step 3: Exchange code for access token
+            response = requests.post(token_url, json=payload)
+
+            data = response.json()
+            access_token = data["access_token"]
+
+            obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":access_token})
+            return Response(f"Access token retrieved successfully.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Failed to retrieve access token: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+
+    
+    @with_module('marketplaceApp')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['POST'])
+    def test_shopify_connection(request, userid, market_name):
+        shop = Shopify()
+        try:
+            # Get Shopify access token from the database
+            access_token = MarketplaceEnronment.objects.filter(user_id=userid, marketplace_name=market_name).values_list("access_token", flat=True).first()
+            # Endpoint
+            url = f"https://{shop.SHOP_NAME}.myshopify.com/admin/api/{shop.API_VERSION}/shop.json"
+
+            headers = {
+                "X-Shopify-Access-Token": access_token,
+                "Content-Type": "application/json"
+            }
+
+            response = requests.get(url, headers=headers)
+
+            if response.status_code == 200:
+                return Response(f"Connection to {shop.SHOP_NAME} was successful.", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Failed to connect to {shop.SHOP_NAME}.", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(f"An error occurred: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+    
+
+    # Complete the enrolment process and save all details to the database. Also, update the price of all the products linked to the ebay with the calculated price if enrolment is updated.
+    @with_module('marketplaceApp')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['PUT'])
+    def complete_shopify_enrolment_or_update(request, userid, market_name):
+        try:
+            
+            # check if user is subaccount
+            user = request.user
+            if user:
+                if user.parent_id:
+                    userid = user.parent_id
+            
+            enrolment_list = get_object_or_404(MarketplaceEnronment, user_id=userid, marketplace_name=market_name)
+            serializer = ShopifyEnrolSerializer(instance=enrolment_list, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                valid_data = serializer.validated_data
+                InventoryModel.objects.filter(user_id=userid, market_name=market_name).update(fixed_markup=valid_data.get("fixed_markup"), profit_margin=valid_data.get("profit_margin"), min_profit_mergin=valid_data.get("min_profit_mergin"), fixed_percentage_markup=valid_data.get("fixed_percentage_markup"))
+                complete_enrolment_price_update_task.delay(userid, market_name)
+   
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Error", status=status.HTTP_400_BAD_REQUEST)

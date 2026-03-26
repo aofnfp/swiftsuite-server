@@ -2,12 +2,12 @@ from rest_framework import serializers
 from .models import MarketplaceEnronment, AuthorizationCode, UploadedProductImage
 from inventoryApp.models import InventoryModel
 
-class MarketplaceEnrolSerializer(serializers.ModelSerializer):
+class EbayEnrolSerializer(serializers.ModelSerializer):
 	marketplace_name = serializers.CharField(required=False, allow_blank=True)
 
 	class Meta:
 		model = MarketplaceEnronment
-		exclude = ('_id', 'user', 'access_token', 'refresh_token')
+		exclude = ('_id', 'user', 'access_token', 'refresh_token', 'wc_map_enforcement', 'wc_auto_populate_msrp', 'wc_consumer_url', 'wc_consumer_secret', 'wc_consumer_key', 'wc_product_status')
 
 	def update(self, instance, validated_data):
 		validated_data.pop('user_id', None)
@@ -54,7 +54,7 @@ class ItemListingToEbaySerializer:
 			options = aspect.get('aspectValues', [])
 			# get required fields and store in a list
 			constraints = aspect.get("aspectConstraints", {})
-			is_required = constraints.get("aspectRequired", False)
+			is_required = constraints.get("aspectRequired")
 			if is_required:
 				required_fields.append(aspect_name)
 
@@ -90,7 +90,7 @@ class ItemListingToEbaySerializer:
 		
 		# Dynamically create a Serializer class combining eBay specifics and model fields
 		DynamicSerializer = type('DynamicItemSpecificsSerializer', (serializers.Serializer,), serializer_fields)
-		return DynamicSerializer, item_specifics_name, valid_choices_field, required_fields
+		return DynamicSerializer, item_specifics_name, valid_choices_field
 	
 	# Serializer for other marketplaces without item specifics
 	def generate_other_marketplace_listing_fields_serializer():
@@ -133,6 +133,17 @@ class WooComerceEnrolSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = MarketplaceEnronment
 		exclude = ('_id', 'user', 'access_token', 'refresh_token', 'enable_charity', 'charity_id', 'donation_percentage', 'enable_best_offer', 'warn_copyright_complaints', 'warn_restriction_violation', 'shipping_policy', 'return_policy', 'payment_policy')
+
+	def update(self, instance, validated_data):
+		validated_data.pop('user_id', None)
+		return super().update(instance, validated_data)
+	
+class ShopifyEnrolSerializer(serializers.ModelSerializer):
+	marketplace_name = serializers.CharField(required=False, allow_blank=True)
+
+	class Meta:
+		model = MarketplaceEnronment
+		exclude = ('_id', 'user', 'access_token', 'refresh_token', 'enable_charity', 'charity_id', 'donation_percentage', 'enable_best_offer', 'warn_copyright_complaints', 'warn_restriction_violation', 'shipping_policy', 'return_policy', 'payment_policy', 'wc_map_enforcement', 'wc_auto_populate_msrp', 'wc_consumer_url', 'wc_consumer_secret', 'wc_consumer_key', 'wc_product_status')
 
 	def update(self, instance, validated_data):
 		validated_data.pop('user_id', None)
