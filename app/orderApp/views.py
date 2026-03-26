@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -250,21 +251,22 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
     filterset_fields = {
         'orderId': ['exact', 'icontains'],
         'creationDate': ['gte', 'lte'],
-        'vendor_name': ['exact'],
+        'vendor_name': ['exact', 'icontains'],
+        'quantity': ['exact'],
         'market_name': ['exact'],
         'orderFulfillmentStatus': ['exact'],
-        'vendor_orders__status': ['exact'],
+        'buyer': ['icontains'],
     }
 
 
-    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus', 'vendor_orders__status']
+    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus', 'vendor_orders__status', 'buyer']
 
-    ordering_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'vendor_orders__status']
+    ordering_fields = ['creationDate']
     
    
     def get_queryset(self):
         queryset = super().get_queryset()
-        
+
         # check if user is subaccount
         user = self.request.user
         if user:
@@ -272,12 +274,37 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
                 userid = user.parent_id
             else:
                 userid = user.id
-        
+
         vendor_status = self.request.query_params.get('vendor_status', None)
         if vendor_status:
             queryset = queryset.filter(vendor_orders__status=vendor_status)
 
-        return queryset.filter(user=userid)
+        queryset = queryset.filter(user=userid)
+
+        price_min = self.request.query_params.get('price_min')
+        price_max = self.request.query_params.get('price_max')
+        if price_min or price_max:
+            try:
+                price_min = float(price_min) if price_min else None
+                price_max = float(price_max) if price_max else None
+                matched_ids = []
+                for order in queryset.values('_id', 'lineItemCost'):
+                    match = re.search(r"'value':\s*'([^']+)'", order['lineItemCost'] or '')
+                    if match:
+                        try:
+                            price = float(match.group(1))
+                            if price_min is not None and price < price_min:
+                                continue
+                            if price_max is not None and price > price_max:
+                                continue
+                            matched_ids.append(order['_id'])
+                        except ValueError:
+                            pass
+                queryset = queryset.filter(_id__in=matched_ids)
+            except (ValueError, TypeError):
+                pass
+
+        return queryset
 
 
 class PlaceOrderView(APIView):
