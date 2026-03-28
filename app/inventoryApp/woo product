@@ -1,0 +1,2935 @@
+{
+    "Listed_products": [
+        {
+            "id": 2703,
+            "name": "Clean Blossom by Clean Eau De Parfum Spray (Unboxed) 2.14 oz for Women",
+            "slug": "clean-blossom-by-clean-eau-de-parfum-spray-unboxed-2-14-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/clean-blossom-by-clean-eau-de-parfum-spray-unboxed-2-14-oz-for-women/",
+            "date_created": "2025-11-15T09:41:52",
+            "date_created_gmt": "2025-11-15T09:41:52",
+            "date_modified": "2025-11-15T09:41:52",
+            "date_modified_gmt": "2025-11-15T09:41:52",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>As the name promises, clean blossom, launched by clean in 2016, provides wearer with a light, sweet floral experience that embraces everything women love about the modern perfume experience. This fragrances top notes include tunisian neroli, lilac and yellow freesia. These are met with core middle notes of orange blossom, lily, dianthus and magnolia, which are then in turn combined down into base notes of musk, cottonwood and sandalwood, which serve to mellow out the sweet florals of the other heavy notes used in the mixture.</p>\n",
+            "short_description": "",
+            "sku": "566174",
+            "price": "40.08",
+            "regular_price": "40.08",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 1,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2702,
+                    "date_created": "2025-11-15T09:41:52",
+                    "date_created_gmt": "2025-11-15T09:41:52",
+                    "date_modified": "2025-11-15T09:41:52",
+                    "date_modified_gmt": "2025-11-15T09:41:52",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/CLECW2146S.jpg",
+                    "name": "CLECW2146S.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>40.08</bdi></span>",
+            "related_ids": [
+                926,
+                2668,
+                2666,
+                933,
+                940
+            ],
+            "meta_data": [
+                {
+                    "id": 12162,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2703",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2695,
+            "name": "Clean Rain Reserve Blend by Clean Hair Fragrance 1.7 oz for Women",
+            "slug": "clean-rain-reserve-blend-by-clean-hair-fragrance-1-7-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/clean-rain-reserve-blend-by-clean-hair-fragrance-1-7-oz-for-women/",
+            "date_created": "2025-11-14T20:44:32",
+            "date_created_gmt": "2025-11-14T20:44:32",
+            "date_modified": "2025-11-14T20:44:32",
+            "date_modified_gmt": "2025-11-14T20:44:32",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Purifying and fresh, clean rain reserve blend is a spring and summertime fragrance with elements of rainwater, salt, citrus and flowers. The opening is a bright, elegantly aromatic effusion of bergamot. Clean, subtly aquatic white florals emerge at the heart, fusing jasmine with lovely lily-of-the-valley.</p>\n",
+            "short_description": "",
+            "sku": "555321",
+            "price": "44.04",
+            "regular_price": "44.04",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 25,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2694,
+                    "date_created": "2025-11-14T20:44:31",
+                    "date_created_gmt": "2025-11-14T20:44:31",
+                    "date_modified": "2025-11-14T20:44:32",
+                    "date_modified_gmt": "2025-11-14T20:44:32",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/CLECWXH.jpg",
+                    "name": "CLECWXH.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>44.04</bdi></span>",
+            "related_ids": [
+                959,
+                938,
+                926,
+                939,
+                2650
+            ],
+            "meta_data": [
+                {
+                    "id": 12139,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2695",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2693,
+            "name": "Jardins De Bagatelle by Guerlain Eau De Parfum Spray 2.5 oz for Women",
+            "slug": "jardins-de-bagatelle-by-guerlain-eau-de-parfum-spray-2-5-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/jardins-de-bagatelle-by-guerlain-eau-de-parfum-spray-2-5-oz-for-women/",
+            "date_created": "2025-11-14T20:40:08",
+            "date_created_gmt": "2025-11-14T20:40:08",
+            "date_modified": "2025-11-14T20:40:08",
+            "date_modified_gmt": "2025-11-14T20:40:08",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>A very feminine floral scent, jardins de bagatelle was first introduced in 1963 by the design house of guerlain. This scent is absolutely perfect for the woman who is daring, joyful and luminous. The top notes are aldehydes, jasmine, lemon, bergamot, and violet.</p>\n",
+            "short_description": "",
+            "sku": "414313",
+            "price": "169.21",
+            "regular_price": "169.21",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 16,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2692,
+                    "date_created": "2025-11-14T20:40:08",
+                    "date_created_gmt": "2025-11-14T20:40:08",
+                    "date_modified": "2025-11-14T20:40:08",
+                    "date_modified_gmt": "2025-11-14T20:40:08",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/63459.jpg",
+                    "name": "63459.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>169.21</bdi></span>",
+            "related_ids": [
+                2668,
+                959,
+                945,
+                2703,
+                932
+            ],
+            "meta_data": [
+                {
+                    "id": 12163,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2693",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2688,
+            "name": "Jardins De Bagatelle by Guerlain Eau De Toilette Spray 2.5 oz for Women",
+            "slug": "jardins-de-bagatelle-by-guerlain-eau-de-toilette-spray-2-5-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/jardins-de-bagatelle-by-guerlain-eau-de-toilette-spray-2-5-oz-for-women/",
+            "date_created": "2025-11-13T05:39:39",
+            "date_created_gmt": "2025-11-13T05:39:39",
+            "date_modified": "2025-11-13T05:39:39",
+            "date_modified_gmt": "2025-11-13T05:39:39",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>A very feminine floral scent, jardins de bagatelle was first introduced in 1963 by the design house of guerlain. This scent is absolutely perfect for the woman who is daring, joyful and luminous. The top notes are aldehydes, jasmine, lemon, bergamot, and violet.</p>\n",
+            "short_description": "",
+            "sku": "567321",
+            "price": "110.17",
+            "regular_price": "110.17",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 73,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2687,
+                    "date_created": "2025-11-13T05:39:39",
+                    "date_created_gmt": "2025-11-13T05:39:39",
+                    "date_modified": "2025-11-13T05:39:39",
+                    "date_modified_gmt": "2025-11-13T05:39:39",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/JARGWW.jpg",
+                    "name": "JARGWW.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>110.17</bdi></span>",
+            "related_ids": [
+                958,
+                2674,
+                938,
+                933,
+                942
+            ],
+            "meta_data": [
+                {
+                    "id": 12077,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2688",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2686,
+            "name": "Aqua Allegoria Forte Nerolia Vetiver by Guerlain Eau De Toilette Spray (Unisex",
+            "slug": "aqua-allegoria-forte-nerolia-vetiver-by-guerlain-eau-de-toilette-spray-unisex",
+            "permalink": "https://sozooutlet.com/product/aqua-allegoria-forte-nerolia-vetiver-by-guerlain-eau-de-toilette-spray-unisex/",
+            "date_created": "2025-11-13T05:35:26",
+            "date_created_gmt": "2025-11-13T05:35:26",
+            "date_modified": "2025-11-13T05:35:26",
+            "date_modified_gmt": "2025-11-13T05:35:26",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Aqua Allegoria Forte Nerolia Vetiver Cologne by Guerlain</p>\n",
+            "short_description": "",
+            "sku": "566968",
+            "price": "52.3",
+            "regular_price": "52.3",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 94,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 41,
+                    "name": "Rimfire Rifles",
+                    "slug": "rimfire-rifles"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2685,
+                    "date_created": "2025-11-13T05:35:26",
+                    "date_created_gmt": "2025-11-13T05:35:26",
+                    "date_modified": "2025-11-13T05:35:26",
+                    "date_modified_gmt": "2025-11-13T05:35:26",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/AQUGMA.jpg",
+                    "name": "AQUGMA.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>52.30</bdi></span>",
+            "related_ids": [
+                2672,
+                2678,
+                2664,
+                931,
+                2658
+            ],
+            "meta_data": [
+                {
+                    "id": 12078,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2686",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2684,
+            "name": "Shalimar by Guerlain Body Cream 7 oz for Women",
+            "slug": "shalimar-by-guerlain-body-cream-7-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/shalimar-by-guerlain-body-cream-7-oz-for-women/",
+            "date_created": "2025-11-08T11:34:30",
+            "date_created_gmt": "2025-11-08T11:34:30",
+            "date_modified": "2025-11-14T18:41:07",
+            "date_modified_gmt": "2025-11-14T18:41:07",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Launched by the design house of guerlain way back in 1925, shalimar is classified as a refined, oriental fragrance that serves as one of the great icons of early 20th-century perfumery. It's a feminine scent possessing a blend of balsamic and citrus accords, and it's recommended particularly for evening wear. The citrus notes appear in the top notes, specifically mandarin, bergamot, and lemon, as well as a cedar note.</p>\n",
+            "short_description": "",
+            "sku": "401498",
+            "price": "97.61",
+            "regular_price": "97.61",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 500,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2683,
+                    "date_created": "2025-11-08T11:34:29",
+                    "date_created_gmt": "2025-11-08T11:34:29",
+                    "date_modified": "2025-11-08T11:34:30",
+                    "date_modified_gmt": "2025-11-08T11:34:30",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/XWSHALIBC.jpg",
+                    "name": "XWSHALIBC.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>97.61</bdi></span>",
+            "related_ids": [
+                940,
+                927,
+                2674,
+                945,
+                959
+            ],
+            "meta_data": [
+                {
+                    "id": 12033,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2684",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2682,
+            "name": "La Petite Robe Noire by Guerlain Eau De Toilette Spray 1.6 oz for Women",
+            "slug": "la-petite-robe-noire-by-guerlain-eau-de-toilette-spray-1-6-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/la-petite-robe-noire-by-guerlain-eau-de-toilette-spray-1-6-oz-for-women/",
+            "date_created": "2025-11-07T11:26:09",
+            "date_created_gmt": "2025-11-07T11:26:09",
+            "date_modified": "2025-11-07T11:26:09",
+            "date_modified_gmt": "2025-11-07T11:26:09",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>What is more indispensible to a woman's wardrobe than a little black dress (la petite robe noire translated from the french )? named after the one article of clothing that always is appropriate, this is a fruity floral fragrance for women. The perfume opens with a cherry like fruity note with counter-balanced by a modern woodsy base and a violet-floral note reminiscent of rose-scented macaroons.</p>\n",
+            "short_description": "",
+            "sku": "543435",
+            "price": "44.81",
+            "regular_price": "44.81",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 500,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2681,
+                    "date_created": "2025-11-07T11:26:09",
+                    "date_created_gmt": "2025-11-07T11:26:09",
+                    "date_modified": "2025-11-07T11:26:09",
+                    "date_modified_gmt": "2025-11-07T11:26:09",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/LAPR16EDTW.jpg",
+                    "name": "LAPR16EDTW.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>44.81</bdi></span>",
+            "related_ids": [
+                2674,
+                960,
+                2532,
+                944,
+                961
+            ],
+            "meta_data": [
+                {
+                    "id": 12004,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2682",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2680,
+            "name": "Cool Water by Davidoff After Shave 4.2 oz for Men",
+            "slug": "cool-water-by-davidoff-after-shave-4-2-oz-for-men",
+            "permalink": "https://sozooutlet.com/product/cool-water-by-davidoff-after-shave-4-2-oz-for-men/",
+            "date_created": "2025-11-06T20:42:55",
+            "date_created_gmt": "2025-11-06T20:42:55",
+            "date_modified": "2025-11-06T20:42:55",
+            "date_modified_gmt": "2025-11-06T20:42:55",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Davidoff launched the legendary fragrance Davidoff Cool Water for men in 1988. This scent revolutionized men’s fragrances thanks to the air of freshness injected into the mixture. This sharp and intense cologne manages to combine a crispness that resonates with men from all walks of life.</p>\n",
+            "short_description": "",
+            "sku": "402068",
+            "price": "26.92",
+            "regular_price": "26.92",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 500,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 29,
+                    "name": "Packages",
+                    "slug": "packages"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2679,
+                    "date_created": "2025-11-06T20:42:55",
+                    "date_created_gmt": "2025-11-06T20:42:55",
+                    "date_modified": "2025-11-06T20:42:55",
+                    "date_modified_gmt": "2025-11-06T20:42:55",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/XMCOOLWAS.jpg",
+                    "name": "XMCOOLWAS.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>26.92</bdi></span>",
+            "related_ids": [
+                942,
+                944,
+                933,
+                941,
+                961
+            ],
+            "meta_data": [
+                {
+                    "id": 12029,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2680",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2678,
+            "name": "Shalimar by Guerlain Eau De Parfum Spray 3 oz for Women",
+            "slug": "shalimar-by-guerlain-eau-de-parfum-spray-3-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/shalimar-by-guerlain-eau-de-parfum-spray-3-oz-for-women/",
+            "date_created": "2025-11-06T20:41:43",
+            "date_created_gmt": "2025-11-06T20:41:43",
+            "date_modified": "2025-11-06T20:41:43",
+            "date_modified_gmt": "2025-11-06T20:41:43",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Launched by the design house of guerlain way back in 1925, shalimar is classified as a refined, oriental fragrance that serves as one of the great icons of early 20th-century perfumery. It's a feminine scent possessing a blend of balsamic and citrus accords, and it's recommended particularly for evening wear. The citrus notes appear in the top notes, specifically mandarin, bergamot, and lemon, as well as a cedar note.</p>\n",
+            "short_description": "",
+            "sku": "482714",
+            "price": "158.58",
+            "regular_price": "158.58",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 169,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 41,
+                    "name": "Rimfire Rifles",
+                    "slug": "rimfire-rifles"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2677,
+                    "date_created": "2025-11-06T20:41:42",
+                    "date_created_gmt": "2025-11-06T20:41:42",
+                    "date_modified": "2025-11-06T20:41:43",
+                    "date_modified_gmt": "2025-11-06T20:41:43",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/SWEDP3.jpg",
+                    "name": "SWEDP3.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>158.58</bdi></span>",
+            "related_ids": [
+                937,
+                941,
+                2686,
+                931,
+                2664
+            ],
+            "meta_data": [
+                {
+                    "id": 12030,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2678",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2676,
+            "name": "Shalimar by Guerlain Eau De Toilette Spray 1.7 oz for Women",
+            "slug": "shalimar-by-guerlain-eau-de-toilette-spray-1-7-oz-for-women",
+            "permalink": "https://sozooutlet.com/product/shalimar-by-guerlain-eau-de-toilette-spray-1-7-oz-for-women/",
+            "date_created": "2025-11-06T19:41:32",
+            "date_created_gmt": "2025-11-06T19:41:32",
+            "date_modified": "2025-11-14T18:41:22",
+            "date_modified_gmt": "2025-11-14T18:41:22",
+            "type": "simple",
+            "status": "publish",
+            "featured": false,
+            "catalog_visibility": "visible",
+            "description": "<p>Launched by the design house of guerlain way back in 1925, shalimar is classified as a refined, oriental fragrance that serves as one of the great icons of early 20th-century perfumery. It's a feminine scent possessing a blend of balsamic and citrus accords, and it's recommended particularly for evening wear. The citrus notes appear in the top notes, specifically mandarin, bergamot, and lemon, as well as a cedar note.</p>\n",
+            "short_description": "",
+            "sku": "401519",
+            "price": "4",
+            "regular_price": "4",
+            "sale_price": "",
+            "date_on_sale_from": null,
+            "date_on_sale_from_gmt": null,
+            "date_on_sale_to": null,
+            "date_on_sale_to_gmt": null,
+            "on_sale": false,
+            "purchasable": true,
+            "total_sales": 0,
+            "virtual": false,
+            "downloadable": false,
+            "downloads": [],
+            "download_limit": -1,
+            "download_expiry": -1,
+            "external_url": "",
+            "button_text": "",
+            "tax_status": "taxable",
+            "tax_class": "",
+            "manage_stock": true,
+            "stock_quantity": 1,
+            "backorders": "no",
+            "backorders_allowed": false,
+            "backordered": false,
+            "low_stock_amount": null,
+            "sold_individually": false,
+            "weight": "",
+            "dimensions": {
+                "length": "",
+                "width": "",
+                "height": ""
+            },
+            "shipping_required": true,
+            "shipping_taxable": true,
+            "shipping_class": "",
+            "shipping_class_id": 0,
+            "reviews_allowed": true,
+            "average_rating": "0.00",
+            "rating_count": 0,
+            "upsell_ids": [],
+            "cross_sell_ids": [],
+            "parent_id": 0,
+            "purchase_note": "",
+            "categories": [
+                {
+                    "id": 28,
+                    "name": "Handguns",
+                    "slug": "handguns"
+                }
+            ],
+            "tags": [],
+            "images": [
+                {
+                    "id": 2675,
+                    "date_created": "2025-11-06T19:41:31",
+                    "date_created_gmt": "2025-11-06T19:41:31",
+                    "date_modified": "2025-11-06T19:41:32",
+                    "date_modified_gmt": "2025-11-06T19:41:32",
+                    "src": "https://sozooutlet.com/wp-content/uploads/2025/11/SHATS17.jpg",
+                    "name": "SHATS17.jpg",
+                    "alt": ""
+                }
+            ],
+            "attributes": [],
+            "default_attributes": [],
+            "variations": [],
+            "grouped_products": [],
+            "menu_order": 0,
+            "price_html": "<span class=\"woocommerce-Price-amount amount\"><bdi><span class=\"woocommerce-Price-currencySymbol\">&#36;</span>4.00</bdi></span>",
+            "related_ids": [
+                941,
+                926,
+                960,
+                959,
+                938
+            ],
+            "meta_data": [
+                {
+                    "id": 12031,
+                    "key": "_elementor_page_assets",
+                    "value": []
+                }
+            ],
+            "stock_status": "instock",
+            "has_options": false,
+            "post_password": "",
+            "global_unique_id": "",
+            "brands": [],
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products/2676",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/products"
+                    }
+                ]
+            }
+        }
+    ]
+}
+
+
+// Woocommerce Orders Data
+{
+    "All Orders": [
+        {
+            "id": 2732,
+            "parent_id": 0,
+            "status": "completed",
+            "currency": "FJD",
+            "version": "10.0.3",
+            "prices_include_tax": false,
+            "date_created": "2025-11-28T09:33:35",
+            "date_modified": "2025-11-28T09:34:24",
+            "discount_total": "0.00",
+            "discount_tax": "0.00",
+            "shipping_total": "0.00",
+            "shipping_tax": "0.00",
+            "cart_tax": "0.00",
+            "total": "26.50",
+            "total_tax": "0.00",
+            "customer_id": 0,
+            "order_key": "wc_order_AWXkjr9Mbcezl",
+            "billing": {
+                "first_name": "",
+                "last_name": "",
+                "company": "",
+                "address_1": "",
+                "address_2": "",
+                "city": "",
+                "state": "",
+                "postcode": "",
+                "country": "",
+                "email": "",
+                "phone": ""
+            },
+            "shipping": {
+                "first_name": "",
+                "last_name": "",
+                "company": "",
+                "address_1": "",
+                "address_2": "",
+                "city": "",
+                "state": "",
+                "postcode": "",
+                "country": "",
+                "phone": ""
+            },
+            "payment_method": "",
+            "payment_method_title": "",
+            "transaction_id": "",
+            "customer_ip_address": "",
+            "customer_user_agent": "",
+            "created_via": "admin",
+            "customer_note": "",
+            "date_completed": "2025-11-28T09:34:24",
+            "date_paid": "2025-11-28T09:34:24",
+            "cart_hash": "",
+            "number": "2732",
+            "meta_data": [
+                {
+                    "id": 12492,
+                    "key": "_wc_order_attribution_source_type",
+                    "value": "admin"
+                }
+            ],
+            "line_items": [
+                {
+                    "id": 7,
+                    "name": "Big Pony Blue by Ralph Lauren Eau De Toilette Spray 3.4 oz for Men",
+                    "product_id": 2638,
+                    "variation_id": 0,
+                    "quantity": 1,
+                    "tax_class": "",
+                    "subtotal": "26.50",
+                    "subtotal_tax": "0.00",
+                    "total": "26.50",
+                    "total_tax": "0.00",
+                    "taxes": [],
+                    "meta_data": [
+                        {
+                            "id": 69,
+                            "key": "_reduced_stock",
+                            "value": "1",
+                            "display_key": "_reduced_stock",
+                            "display_value": "1"
+                        }
+                    ],
+                    "sku": "552051",
+                    "price": 26.5,
+                    "image": {
+                        "id": "2637",
+                        "src": "https://sozooutlet.com/wp-content/uploads/2025/10/BIGR7Y.jpg"
+                    },
+                    "parent_name": null
+                }
+            ],
+            "tax_lines": [],
+            "shipping_lines": [],
+            "fee_lines": [],
+            "coupon_lines": [],
+            "refunds": [],
+            "payment_url": "https://sozooutlet.com/checkout/order-pay/2732/?pay_for_order=true&key=wc_order_AWXkjr9Mbcezl",
+            "is_editable": false,
+            "needs_payment": false,
+            "needs_processing": true,
+            "date_created_gmt": "2025-11-28T09:33:35",
+            "date_modified_gmt": "2025-11-28T09:34:24",
+            "date_completed_gmt": "2025-11-28T09:34:24",
+            "date_paid_gmt": "2025-11-28T09:34:24",
+            "currency_symbol": "$",
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/orders/2732",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/orders"
+                    }
+                ],
+                "email_templates": [
+                    {
+                        "embeddable": true,
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/orders/2732/actions/email_templates"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2731,
+            "parent_id": 0,
+            "status": "completed",
+            "currency": "FJD",
+            "version": "10.0.3",
+            "prices_include_tax": false,
+            "date_created": "2025-11-28T09:31:04",
+            "date_modified": "2025-11-28T09:33:28",
+            "discount_total": "0.00",
+            "discount_tax": "0.00",
+            "shipping_total": "0.00",
+            "shipping_tax": "0.00",
+            "cart_tax": "0.00",
+            "total": "677.03",
+            "total_tax": "0.00",
+            "customer_id": 0,
+            "order_key": "wc_order_AYKjGRaPL8ZK5",
+            "billing": {
+                "first_name": "",
+                "last_name": "",
+                "company": "",
+                "address_1": "",
+                "address_2": "",
+                "city": "",
+                "state": "",
+                "postcode": "",
+                "country": "",
+                "email": "",
+                "phone": ""
+            },
+            "shipping": {
+                "first_name": "",
+                "last_name": "",
+                "company": "",
+                "address_1": "",
+                "address_2": "",
+                "city": "",
+                "state": "",
+                "postcode": "",
+                "country": "",
+                "phone": ""
+            },
+            "payment_method": "",
+            "payment_method_title": "",
+            "transaction_id": "",
+            "customer_ip_address": "",
+            "customer_user_agent": "",
+            "created_via": "admin",
+            "customer_note": "",
+            "date_completed": "2025-11-28T09:33:28",
+            "date_paid": "2025-11-28T09:33:28",
+            "cart_hash": "",
+            "number": "2731",
+            "meta_data": [
+                {
+                    "id": 12465,
+                    "key": "_wc_order_attribution_source_type",
+                    "value": "admin"
+                }
+            ],
+            "line_items": [
+                {
+                    "id": 5,
+                    "name": "Remington Versa Max Competition Tactical Shotgun",
+                    "product_id": 2461,
+                    "variation_id": 0,
+                    "quantity": 1,
+                    "tax_class": "",
+                    "subtotal": "654.00",
+                    "subtotal_tax": "0.00",
+                    "total": "654.00",
+                    "total_tax": "0.00",
+                    "taxes": [],
+                    "meta_data": [],
+                    "sku": "",
+                    "price": 654,
+                    "image": {
+                        "id": "2328",
+                        "src": "https://sozooutlet.com/wp-content/uploads/2017/04/Remington-Versa-Max-Competition-Tactical-Shotgun-2-1.png"
+                    },
+                    "parent_name": null
+                },
+                {
+                    "id": 6,
+                    "name": "Hot Water by Davidoff Eau De Toilette Spray 2 oz for Men",
+                    "product_id": 2729,
+                    "variation_id": 0,
+                    "quantity": 1,
+                    "tax_class": "",
+                    "subtotal": "23.03",
+                    "subtotal_tax": "0.00",
+                    "total": "23.03",
+                    "total_tax": "0.00",
+                    "taxes": [],
+                    "meta_data": [
+                        {
+                            "id": 59,
+                            "key": "_reduced_stock",
+                            "value": "1",
+                            "display_key": "_reduced_stock",
+                            "display_value": "1"
+                        }
+                    ],
+                    "sku": "463410",
+                    "price": 23.03,
+                    "image": {
+                        "id": "2728",
+                        "src": "https://sozooutlet.com/wp-content/uploads/2025/11/HOTW2OZM.jpg"
+                    },
+                    "parent_name": null
+                }
+            ],
+            "tax_lines": [],
+            "shipping_lines": [],
+            "fee_lines": [],
+            "coupon_lines": [],
+            "refunds": [],
+            "payment_url": "https://sozooutlet.com/checkout/order-pay/2731/?pay_for_order=true&key=wc_order_AYKjGRaPL8ZK5",
+            "is_editable": false,
+            "needs_payment": false,
+            "needs_processing": true,
+            "date_created_gmt": "2025-11-28T09:31:04",
+            "date_modified_gmt": "2025-11-28T09:33:28",
+            "date_completed_gmt": "2025-11-28T09:33:28",
+            "date_paid_gmt": "2025-11-28T09:33:28",
+            "currency_symbol": "$",
+            "_links": {
+                "self": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/orders/2731",
+                        "targetHints": {
+                            "allow": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    }
+                ],
+                "collection": [
+                    {
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/orders"
+                    }
+                ],
+                "email_templates": [
+                    {
+                        "embeddable": true,
+                        "href": "https://sozooutlet.com/wp-json/wc/v3/orders/2731/actions/email_templates"
+                    }
+                ]
+            }
+        }
+    ]
+}
+
+
+// ebay XML Response:
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<GetItemResponse xmlns=\"urn:ebay:apis:eBLBaseComponents\"><Timestamp>2025-12-11T15:22:10.389Z</Timestamp><Ack>Success</Ack><Version>1193</Version><Build>E1193_CORE_API_19146280_R1</Build><HardExpirationWarning>2025-12-12 00:22:09</HardExpirationWarning><Item><AutoPay>true</AutoPay><BuyerProtection>ItemIneligible</BuyerProtection><BuyItNowPrice currencyID=\"USD\">0.0</BuyItNowPrice><Charity><CharityName>SoZo Foundation NFP</CharityName><DonationPercent>100.0</DonationPercent><CharityID>188477</CharityID><Mission>SoZo Foundation NFP is a 501 c 3 nonprofit organization founded in Illinos. SoZo Foundation helps less privileged children from developing countries gain access to quality education by donating merchandise such as books, bags, uniforms, and other items that might be found wanting in schools. We build and equip classrooms, libraries, laboratories, computers labs etc. We also plan to build and operate schools to ensure all children have access to quality education needed to help frame their future.</Mission><LogoURL>https://i.ebayimg.com/00/s/MTAyM1gxNjAw/z/LWsAAOSwJahgmY8l/$_1.PNG?set_id=8800005007</LogoURL><Status>Valid</Status></Charity><Country>US</Country><Currency>USD</Currency><Description>&lt;div id=&quot;inkfrog_crosspromo_top&quot;&gt;&lt;/div&gt;\n&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;\n&lt;html xmlns=&quot;https://www.w3.org/1999/xhtml&quot;&gt;\n&lt;head&gt;\n&lt;title&gt;JTS Group Dead Center .22 Caliber Semi-Domed Pellets 21.53 Grain 250 Count Tin&lt;/title&gt;\n&lt;meta name=&quot;description&quot; content=&quot;Title&quot;&gt;\n&lt;meta name=&quot;keywords&quot; content=&quot;Title&quot;&gt;\n&lt;link href=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;\n&lt;link href=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/css/listing.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;\n&lt;link href=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/css/reponsive.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;\n&lt;link href=&quot;https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css&quot; rel=&quot;stylesheet&quot; integrity=&quot;sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN&quot; crossorigin=&quot;anonymous&quot;&gt;\n&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;&gt;\n&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;\n&lt;style&gt;\nimg {\nmax-width: 100%;\n}\n&lt;/style&gt;\n&lt;link href=&apos;//open.inkfrog.com/templates/designer/styles/user/134645.css&apos; rel=&apos;stylesheet&apos; type=&apos;text/css&apos;&gt;&lt;/head&gt;\n\n&lt;body&gt;\n&lt;div class=&quot;listing_background&quot;&gt; \n&lt;!--Header //start--&gt;\n&lt;div class=&quot;top_bg&quot;&gt;\n&lt;div class=&quot;dezign_wapper&quot;&gt;   \n&lt;div class=&quot;store_header&quot;&gt;\n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row align-items-center&quot;&gt;\n&lt;div class=&quot;col-md-4&quot;&gt;\n&lt;div id=&quot;store_logo&quot;&gt;&lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/logo.png&quot; alt=&quot;&quot;&gt;&lt;/a&gt;&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;col-md-8&quot;&gt;\n&lt;div class=&quot;top_promo_code&quot;&gt;\n&lt;ul&gt;\n&lt;li class=&quot;left_border&quot;&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/top_promo1.png&quot; alt=&quot;&quot;&gt; &lt;/li&gt;\n&lt;li&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/top_promo2.png&quot; alt=&quot;&quot;&gt; &lt;/li&gt;\n&lt;/ul&gt;\n&lt;/div&gt; \n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;store_menu&quot;&gt;\n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;main_menu&quot;&gt;\n&lt;ul class=&quot;top_main_menu&quot;&gt;\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt;Store Home&lt;/a&gt;&lt;/li&gt;\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/sch/i.html?_dmd=2&amp;_dkr=1&amp;iconV2Request=true&amp;_ssn=sozodealz&amp;store_cat=0&amp;store_name=sozo&amp;_oac=1&amp;_sop=10&quot; target=&quot;_blank&quot;&gt;new arrivals&lt;/a&gt;&lt;/li&gt;\t\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/sch/sozodealz/m.html?_trksid=p3692&quot; target=&quot;_blank&quot;&gt;Items For Sale &lt;/a&gt;&lt;/li&gt;\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/fdbk/feedback_profile/sozodealz?filter=feedback_page%3ARECEIVED_AS_SELLER&quot; target=&quot;_blank&quot;&gt;Feedback&lt;/a&gt;&lt;/li&gt;\n&lt;li&gt; &lt;a href=&quot;https://contact.ebay.com/ws/eBayISAPI.dll?ReturnUserEmail&amp;requested=sozodealz&quot; target=&quot;_blank&quot;&gt;Contact Us&lt;/a&gt;&lt;/li&gt;\n&lt;/ul&gt;\t\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;/div&gt;    \n&lt;!--Header //end--&gt;\n&lt;div class=&quot;product_section&quot;&gt;\t\n&lt;div class=&quot;container&quot;&gt;\t\t\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-6&quot;&gt;\n&lt;div class=&quot;product_images_wappers&quot;&gt;\n&lt;div class=&quot;product_images_gallery&quot;&gt;&lt;img src=&quot;https://i.frog.ink/ibqO2t26/jtsjac1091hr-1.jpg&quot;&gt;&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;col-md-6&quot;&gt;\n&lt;div class=&quot;listing_listingarea-box&quot; id=&quot;right_box&quot;&gt;\n&lt;div class=&quot;desc-hedtitle&quot;&gt;JTS Group Dead Center .22 Caliber Semi-Domed Pellets 21.53 Grain 250 Count Tin&lt;/div&gt;\n&lt;div class=&quot;desc-rd desc-text&quot;&gt;\n&lt;div vocab=&quot;https://schema.org/&quot; typeof=&quot;Product&quot;&gt;\n&lt;span property=&quot;description&quot;&gt;   \n&lt;p&gt;&lt;p&gt;Upgrade your airgun experience with JTS Group Dead Center .22 Caliber Pellets. Featuring a semi-domed tip design, these pellets combine the aerodynamic benefits of domed pellets with added precision for a range of shooting applications. Each pellet weighs 21.53 grains to ensure consistent and reliable performance. With 250 pellets per tin, they provide excellent value and convenience for target practice, small-game hunting, or plinking. JTS Group, renowned for its innovation and quality, offers these pellets to meet the demands of serious airgun enthusiasts.&lt;/p&gt;&lt;h4&gt;&lt;strong&gt;Key Features&lt;/strong&gt;&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Semi-Domed Tip Design&lt;/strong&gt;: Balances aerodynamics and precision for versatile use.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Precision Weight&lt;/strong&gt;: 21.53 grains for consistent accuracy and reliability.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Generous Quantity&lt;/strong&gt;: Includes 250 pellets per tin for extended shooting sessions.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Trusted Brand&lt;/strong&gt;: Manufactured by JTS Group, a leader in airgun accessories.&lt;/li&gt;&lt;/ul&gt;&lt;h4&gt;&lt;strong&gt;Specification&lt;/strong&gt;&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Caliber&lt;/strong&gt;: .22&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Pellet Type&lt;/strong&gt;: Semi-Domed Tip&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Weight&lt;/strong&gt;: 21.53 grains&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Quantity&lt;/strong&gt;: 250 pellets per tin&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Model&lt;/strong&gt;: Dead Center&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Brand&lt;/strong&gt;: JTS Group&lt;/li&gt;&lt;/ul&gt;&lt;h4&gt;&lt;strong&gt;Ideal for&lt;/strong&gt;&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;Airgun enthusiasts seeking precise and versatile pellets.&lt;/li&gt;&lt;li&gt;Target shooters aiming for reliable and consistent performance.&lt;/li&gt;&lt;li&gt;Small-game hunters requiring effective and accurate ammunition.&lt;/li&gt;&lt;li&gt;Plinkers and hobbyists needing high-quality airgun pellets.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;   \n&lt;/span&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt; \n&lt;/div&gt;\n&lt;/div&gt;   \n&lt;/div&gt;   \n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;div class=&quot;promotion&quot;&gt;\n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;promotion_m&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/promotion.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;div class=&quot;promotion_res&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/promotion_res.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;    \n&lt;/div&gt;   \n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt; \t\n&lt;div id=&quot;dezign_home_banner&quot;&gt;\n&lt;div class=&quot;banner_section&quot;&gt;\n&lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/banner_01.png&quot; alt=&quot;&quot;&gt; &lt;/a&gt;\n&lt;/div&gt;\n&lt;div class=&quot;banner_section_res&quot;&gt;\n&lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/banner_01_res.png&quot; alt=&quot;&quot;&gt; &lt;/a&gt;\n&lt;/div&gt;\t\n&lt;/div&gt; \n&lt;div class=&quot;feature_section&quot;&gt;\n&lt;div class=&quot;feature-title&quot;&gt;  \n&lt;h1&gt;Featured Categories&lt;/h1&gt; \n&lt;p&gt;Browse our latest collection&lt;/p&gt;\t\n&lt;/div&gt;    \n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-4&quot;&gt;\n&lt;div class=&quot;cate_section&quot;&gt;\t\n&lt;div class=&quot;fashion_text&quot;&gt;\n&lt;a href=&quot;https://www.ebay.com/str/sozo/Air-Guns/_i.html?store_cat=36045624016&quot; target=&quot;_blank&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/cate_01.png&quot; alt=&quot;&quot;&gt;&lt;/a&gt;\t\n&lt;/div&gt;\n&lt;div class=&quot;ring_text&quot;&gt;\n&lt;h1&gt;Air Guns&lt;/h1&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;div class=&quot;col-md-4&quot;&gt;\n&lt;div class=&quot;cate_section second_cate&quot;&gt;\t\n&lt;div class=&quot;fashion_text&quot;&gt;\n&lt;a href=&quot;https://www.ebay.com/str/sozo/Camping-Survival/_i.html?store_cat=36045625016&quot; target=&quot;_blank&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/cate_02.png&quot; alt=&quot;&quot;&gt;&lt;/a&gt;\t\n&lt;/div&gt;\n&lt;div class=&quot;ring_text&quot;&gt;\n&lt;h1&gt;Camping &amp; Survival&lt;/h1&gt;\t\n&lt;/div&gt;\n&lt;/div&gt;\t\t\n&lt;/div&gt;\n&lt;div class=&quot;col-md-4&quot;&gt;\n&lt;div class=&quot;cate_section&quot;&gt;\t\n&lt;div class=&quot;fashion_text&quot;&gt;\n&lt;a href=&quot;https://www.ebay.com/str/sozo/Tactical-and-Duty-Gear/_i.html?store_cat=36838052016&quot; target=&quot;_blank&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/cate_03.png&quot; alt=&quot;&quot;&gt;&lt;/a&gt;\t\n&lt;/div&gt;\n&lt;div class=&quot;ring_text&quot;&gt;\n&lt;h1&gt;tactical and duty gear&lt;/h1&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\t\n&lt;/div&gt;     \n&lt;/div&gt;\n&lt;div class=&quot;view_all_btn&quot;&gt;&lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt;Browse All Categories&lt;/a&gt;&lt;/div&gt;    \n&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;div class=&quot;main_who_section&quot;&gt;\n&lt;div class=&quot;container&quot;&gt;\t\n&lt;div class=&quot;about_bg &quot;&gt;\t\t\n&lt;div class=&quot;row align-items-center&quot;&gt;\n&lt;div class=&quot;col-md-7&quot;&gt;\n&lt;div class=&quot;about_text&quot;&gt;\n&lt;div class=&quot;about_img&quot;&gt;Who we are?&lt;/div&gt;\n&lt;h2&gt;About Sozo Outlet&lt;/h2&gt;    \n&lt;p&gt;SoZo is an ecommerce retail brand dedicated to finding the right products at best prices for our customers. We work with distributors around the USA.&lt;/p&gt;\n&lt;h2&gt;Why Buy From US?&lt;/h2&gt;    \n&lt;p&gt;We are a charity owned store and all our net profit goes into ensuring that orphans and vulnerable children in poor cities around the world have access to quality education for a better life. When you buy from us, you are changing lives and helping create a better future where it is mostly needed.&lt;/p&gt;\n&lt;div class=&quot;eBay_msg_t&quot;&gt;&lt;a target=&quot;_blank&quot; href=&quot;https://contact.ebay.com/ws/eBayISAPI.dll?ReturnUserEmail&amp;requested=sozodealz&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/email_icon.png&quot; alt=&quot;&quot;&gt;eBay Message&lt;/a&gt;&lt;/div&gt;\t\n&lt;/div&gt;\t\t\n&lt;/div&gt;\t\t\n&lt;div class=&quot;col-md-5&quot;&gt;\n&lt;div class=&quot;who_img&quot;&gt;&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt; \n&lt;!--Tabs //start--&gt;\n&lt;div class=&quot;main_tab_row&quot;&gt;\n&lt;div class=&quot;tabe_section&quot;&gt; \n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;main_payment pay_02&quot;&gt;\n&lt;div class=&quot;payment_text&quot;&gt;\n&lt;h1&gt;&lt;span&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/note_icon.png&quot; alt=&quot;&quot;&gt;&lt;/span&gt;Note to Buyers&lt;/h1&gt;\n&lt;/div&gt;\n&lt;div class=&quot;inner_text&quot;&gt;\t\n&lt;p&gt;Due to the nature of the Merchandise, an adult of 21 years or older may be required with a valid ID to sign for all Airgun purchase. Please note that Courier will make 3 attempts for delivery. Courier will not hold this item for pick up at their location or any other location. No pickup option is available for this item. Someone must be available to accept the delivery at the provided address.&lt;/p&gt;\n&lt;h6&gt;Compliance &lt;/h6&gt; \n&lt;p&gt;This listing complies with eBayâs air gun guidelines found here and I will only sell and ship air guns to buyers in jurisdictions where permitted by applicable laws&lt;/p&gt;\n&lt;p&gt;&lt;b&gt;https://pages.ebay.com/help/policies/firearms-weapons-knives.html&lt;/b&gt;&lt;/p&gt;    \n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt; \n&lt;div class=&quot;tabe_section&quot;&gt; \n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;main_payment pay_02&quot;&gt;\n&lt;div class=&quot;payment_text&quot;&gt;\n&lt;h1&gt;&lt;span&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/shiping_icon_01.png&quot; alt=&quot;&quot;&gt;&lt;/span&gt;Shipping Restriction&lt;/h1&gt;\n&lt;/div&gt;\n&lt;div class=&quot;inner_text&quot;&gt;\t\n&lt;h6&gt;Shipping restrictions by location&lt;/h6&gt;    \n&lt;p&gt;It&apos;s up to YOU to know the laws in your state, county and city and to fully comply with them. The following are examples of some state and local restrictions governing various products. This list shows products that are prohibited in the locations indicated. When criteria must be met for ownership, those are also listed.&lt;/p&gt;\n&lt;p&gt;All airsoft guns must have at least a 1/4-inch blaze orange muzzle or an orange flash hider. U.S. federal law requires that all airsoft guns are sold with this marking to avoid the guns being mistaken for firearms. Airguns (guns that shoot pellets or steel BBs) do not have an orange muzzle, nor are they required to have one by the U.S. federal government or any state, county or municipal government ordinance. If you remove the orange muzzle or flash hider from your airsoft gun, you will have voided our 30-day return policy for that item and will not be able to return it for a refund.&lt;/p&gt;\n&lt;p&gt;California&lt;br&gt;\nBlowguns&lt;br&gt;\nBlowgun bolts &amp; darts&lt;br&gt;\nDelaware&lt;br&gt;\nWilmington&lt;/p&gt;  \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nFlorida&lt;br&gt;\nSt. Augustine&lt;/p&gt;\n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nIllinois&lt;br&gt;\nEffective July 13, 2012: There is no velocity limit on airguns below .18 caliber, and airguns are no longer considered firearms by the state. Airguns over .18 caliber must still have a velocity of less than 700 fps.&lt;br&gt;\nAurora&lt;/p&gt;   \n&lt;p&gt;Foregrips&lt;br&gt;\nChicago&lt;/p&gt;  \n&lt;p&gt;Airguns&lt;br&gt;\nAirsoft guns&lt;br&gt;\nBlank guns&lt;br&gt;\nBlank gun ammo&lt;br&gt;\nCook County&lt;/p&gt; \n&lt;p&gt;Foregrips&lt;br&gt;\nNiles&lt;/p&gt;  \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nWashington&lt;/p&gt;\n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nIndiana&lt;br&gt;\nSlingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nMassachusetts&lt;br&gt;\nBlowguns&lt;br&gt;\nBlowgun bolts &amp; darts&lt;br&gt;\nSlingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nMichigan&lt;br&gt;\nRichmond&lt;/p&gt;\n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nMinnesota&lt;br&gt;\nDuluth&lt;/p&gt;  \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nNew Jersey&lt;br&gt;\nSlingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nSilencers, baffles, mufflers or suppressors...internal, removable or non-removable (does not include fake suppressors)\nPellet guns &amp; BB guns: Residents can buy them from us through a designated local gun store after acquiring the appropriate firearm permit (airguns are considered firearms per NJ state law: Title 2C:39-1).&lt;br&gt;\nYour local gun store must fax a copy of their FFL to Air Venturi in order for us to ship the gun you ordered.\n[Airsoft guns may be restricted by some local laws. It is up to you to determine if airsoft guns may be owned/possessed/used without special permits in their locale.]&lt;br&gt;\nNew York&lt;br&gt;\nWrist-braced slingshots&lt;br&gt;\nNew York City &amp; it&apos;s 5 boroughs: Manhattan, Brooklyn, Bronx, Queens &amp; Staten Island&lt;br&gt;\n(incl. ZIP Codes 100xx-104xx, 111xx, 112xx-114xx &amp; 116xx)&lt;/p&gt;\n&lt;p&gt;Airguns&lt;br&gt;\nAirsoft guns&lt;br&gt;\nBB guns&lt;br&gt;\nBlank guns&lt;br&gt;\nBlank gun ammo&lt;br&gt;\nBlowguns&lt;br&gt;\nBlowgun bolts &amp; darts&lt;br&gt;\nCrossbows&lt;br&gt;\nLasers&lt;br&gt;\nLocking folding knives with blades longer than 4 inches&lt;br&gt;\nLongbows&lt;br&gt;\nNorth Carolina&lt;br&gt;\nBlank guns&lt;br&gt;\nBlank gun ammo&lt;br&gt;\nMorehead&lt;/p&gt; \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nPennsylvania&lt;br&gt;\nPhiladelphia&lt;/p&gt; \n&lt;p&gt;Airguns&lt;br&gt;\nAirsoft guns&lt;br&gt;\nBB guns&lt;br&gt;\nBlowguns&lt;br&gt;\nBlowgun bolts &amp; darts&lt;br&gt;\nCrossbows&lt;br&gt;\nLongbows&lt;br&gt;\nSlingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nPuerto Rico&lt;br&gt;\nBlank guns&lt;br&gt;\nBlank gun ammo&lt;br&gt;\nRhode Island&lt;br&gt;\nBlank guns&lt;br&gt;\nBlank gun ammo&lt;br&gt;\nSlingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nSouth Dakota&lt;br&gt;\nRapid City&lt;/p&gt;\n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nTennessee&lt;br&gt;\nKnoxville&lt;/p&gt; \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nUtah&lt;br&gt;\nSalt Lake County&lt;/p&gt; \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nVirginia&lt;br&gt;\nBlank guns&lt;br&gt;\nBlank gun ammo&lt;br&gt;\nFalls Church&lt;/p&gt;\n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nWashington, D.C.&lt;br&gt;\nAirguns&lt;br&gt;\nAirsoft guns&lt;br&gt;\nBB guns&lt;br&gt;\nWest Virginia&lt;br&gt;\nBluefield&lt;/p&gt; \n&lt;p&gt;Slingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;br&gt;\nWisconsin&lt;br&gt;\nMadison&lt;/p&gt;  \n&lt;p&gt;Foregrips&lt;br&gt;\nSlingshots&lt;br&gt;\nSlingshot ammo&lt;br&gt;\nSlingshot accessories&lt;/p&gt;    \n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;    \n&lt;div class=&quot;tabe_section&quot;&gt; \n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;main_payment pay_02&quot;&gt;\n&lt;div class=&quot;payment_text&quot;&gt;\n&lt;h1&gt;&lt;span&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/payment_icon.png&quot; alt=&quot;&quot;&gt;&lt;/span&gt;Payment&lt;/h1&gt;\n&lt;/div&gt;\n&lt;div class=&quot;inner_text&quot;&gt;\t\n&lt;p&gt;Credit card payments through PayPal and eBay Managed Payments. You can pay with any of the credit cards accepted by PayPal. You don&apos;t even need to have a PayPal account.&lt;/p&gt;    \n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;    \n&lt;div class=&quot;tabe_section&quot;&gt; \n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;main_payment pay_02&quot;&gt;\n&lt;div class=&quot;payment_text&quot;&gt;\n&lt;h1&gt;&lt;span&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/shiping_icon.png&quot; alt=&quot;&quot;&gt;&lt;/span&gt;Shipping&lt;/h1&gt;\n&lt;/div&gt;\n&lt;div class=&quot;inner_text&quot;&gt;\t\n&lt;p&gt;We always work hard to ensure your package arrives as soon as possible. Please understand that some factors like weather, high postal traffic, and the performance of shipping companies are outside of our control.&lt;/p&gt; \n&lt;p&gt;We offer free shipping to the lower 48 states and ship within 2 - 4 business days of payment, usually sooner. We do not accept P.O. Boxes. Please provide a physical address.&lt;br&gt;We only ship to the address provided at check out. Please verify the address before placing the order.&lt;br&gt;For shipping outside of the continental USA, we only use eBay&apos;s Global Shipping Program. The item is shipped to KY and then sent to the rest of the world. International customers are responsible for all duties and taxes. Continue to check out in order to calculate costs for shipping the item to your country. Messages regarding eBay&apos;s Global Shipping Program MUST be directed at eBay EXCLUSIVELY. Thank you.&lt;/p&gt;    \n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;div class=&quot;tabe_section&quot;&gt;\n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-12&quot;&gt;\n&lt;div class=&quot;main_payment pay_03&quot;&gt;\n&lt;div class=&quot;payment_text&quot;&gt;\n&lt;h1&gt;&lt;span&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/return_icon.png&quot; alt=&quot;&quot;&gt;&lt;/span&gt;Returns&lt;/h1&gt;\n&lt;/div&gt;\n&lt;div class=&quot;inner_text paypal_text&quot;&gt;\n&lt;p&gt;100% Satisfaction Guarantee&lt;/p&gt;\n&lt;p&gt;We will do our best to keep our customers happy. If for any reason you&apos;re not satisfied, please contact us and we&apos;ll help you to resolve any concerns you may have with your purchases and we guarantee you a solution. Please remember We&apos;re Always On Your Side.&lt;/p&gt;\n&lt;p&gt;We&apos;re working very hard to maintain our business reputation and we enjoy providing a world-class service.&lt;/p&gt;\n&lt;p&gt;We gladly accept returns. Please contact us through eBay messaging to request a Return Merchandise Authorization Number (RMA).&lt;/p&gt; \n&lt;p&gt;An RMA must be obtained within 30 days upon received shipment and prior to returning any item.&lt;/p&gt; \n&lt;p&gt;Software, manuals, electronics chart cards are non refundable due to manufacture policies and there is an additional 20% re-stocking fee for unopened package.&lt;/p&gt;\n&lt;p&gt;There will be no restocking fee if an item is returned as a result of our error, shipping errors or merchandise damaged in transit.&lt;/p&gt;\n&lt;p&gt;There is a deduction of 25% on all items that have been opened, 30% on all items that have been used and up to 50% on all items that are not returned in the original packaging.&lt;/p&gt; \n&lt;p&gt;The product must be returned in original condition with all the accessories included.&lt;/p&gt;    \n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;/div&gt;     \n&lt;/div&gt;\n&lt;!--Tabs //end--&gt;\n&lt;div class=&quot;guaranteed_wapper&quot;&gt;\n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-12&quot;&gt;\n&lt;div class=&quot;guaranteed_title&quot;&gt;\n100% Customer Satisfaction Guaranteed &lt;a target=&quot;_blank&quot; href=&quot;https://www.ebay.com/fdbk/feedback_profile/sozodealz?filter=feedback_page%3ARECEIVED_AS_SELLER&quot;&gt;View All Reviews&lt;/a&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;row&quot;&gt;\n&lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;guaranteed_box&quot;&gt;\n&lt;div class=&quot;ebay_logo&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_text&quot;&gt;&quot; As described, arrived on time, great seller &quot;&lt;br&gt;&lt;br&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_name&quot;&gt;Buyer: B***E (125)&lt;/div&gt;\n&lt;div class=&quot;start&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;guaranteed_box&quot;&gt;\n&lt;div class=&quot;ebay_logo&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_text&quot;&gt;&quot; Item arrived quickly,\nno issues, will trade again\nfor sure &quot;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_name&quot;&gt;Buyer: C***D (private)&lt;/div&gt;\n&lt;div class=&quot;start&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;guaranteed_box&quot;&gt;\n&lt;div class=&quot;ebay_logo&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_text&quot;&gt;&quot; Happy, good postage\ndeal with anytime &quot;&lt;br&gt;&lt;br&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_name&quot;&gt;Buyer: I***P (69)&lt;/div&gt;\n&lt;div class=&quot;start&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;guaranteed_box&quot;&gt;\n&lt;div class=&quot;ebay_logo&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_text&quot;&gt;&quot; A hassle free transaction, fast delivery. Would deal with again &quot;&lt;br&gt;&lt;/div&gt;\n&lt;div class=&quot;guaranteed_name&quot;&gt;Buyer: T***R (private)&lt;/div&gt;\n&lt;div class=&quot;start&quot;&gt;&lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png&quot; alt=&quot;&quot;&gt;&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;footer&gt;\n&lt;div class=&quot;store_footer_wapper&quot;&gt;\n&lt;div class=&quot;footer_logo&quot;&gt; &lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/footer_logo.png&quot; class=&quot;&quot;&gt; &lt;/a&gt; &lt;/div&gt;     \n&lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row align-items-center&quot;&gt;    \n&lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;footer_block footer_block02&quot;&gt;\n&lt;div class=&quot;footer_payment&quot;&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/footer_payment.png&quot; class=&quot;img-fluid&quot;&gt; &lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;div class=&quot;col-md-6&quot;&gt;\n&lt;div class=&quot;footer_block footer_block01&quot;&gt;\n&lt;div class=&quot;footer_menu&quot;&gt;\n&lt;ul&gt;\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/str/sozo&quot; target=&quot;_blank&quot;&gt;Store Home&lt;/a&gt; &lt;/li&gt;\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/sch/i.html?_dmd=2&amp;_dkr=1&amp;iconV2Request=true&amp;_ssn=sozodealz&amp;store_cat=0&amp;store_name=sozo&amp;_oac=1&amp;_sop=10&quot; target=&quot;_blank&quot;&gt;new arrivals&lt;/a&gt; &lt;/li&gt;    \n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/sch/sozodealz/m.html?_trksid=p3692&quot; target=&quot;_blank&quot;&gt;Items For Sale&lt;/a&gt; &lt;/li&gt;\t\n&lt;li&gt; &lt;a href=&quot;https://www.ebay.com/fdbk/feedback_profile/sozodealz?filter=feedback_page%3ARECEIVED_AS_SELLER&quot; target=&quot;_blank&quot;&gt;Feedback&lt;/a&gt; &lt;/li&gt;\n&lt;li&gt; &lt;a href=&quot;https://contact.ebay.com/ws/eBayISAPI.dll?ReturnUserEmail&amp;requested=sozodealz&quot; target=&quot;_blank&quot;&gt;Contact Us&lt;/a&gt; &lt;/li&gt;\n&lt;/ul&gt;\n&lt;/div&gt;\n&lt;/div&gt;\t\n&lt;/div&gt;\n&lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;footer_block footer_block03&quot;&gt;\n&lt;div class=&quot;footer_payment&quot;&gt; &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/shop_confidence.png&quot; class=&quot;img-fluid&quot;&gt; &lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;dezign_copyright&quot;&gt; Â© Copyright 2022, &lt;span&gt;Sozo Outlet. &lt;/span&gt;  All rights reserved. &lt;/div&gt;\n&lt;div class=&quot;dezign_by&quot;&gt; Made with  &lt;img src=&quot;https://dezignbrain.com/ebay/sozo_dealz/listing/images/designby.png&quot;&gt; by &lt;span&gt;eBayshopdesign.org&lt;/span&gt;&lt;/div&gt;    \n&lt;/div&gt;\n&lt;/div&gt;\n&lt;/footer&gt;   \n&lt;/div&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n&lt;div id=&quot;inkfrog_crosspromo_bottom&quot;&gt;&lt;/div&gt;&lt;div id=&quot;inkfrog_credit&quot; style=&apos;margin-bottom:25px;width:100%;text-align:center;&apos;&gt;&lt;div class=&quot;inkfrog_promo&quot; style=&quot;margin-top:40px !important; &quot;&gt;&lt;a href=&apos;https://signin.ebay.com/authorize?client_id=inkFrogI-eBayShop-PRD-45d7504c4-548de517&amp;response_type=code&amp;redirect_uri=inkFrog__Inc.-inkFrogI-eBaySh-vlfzfmcd&amp;scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly&apos; style=&apos;border:0px;&apos; target=&apos;_blank&apos;&gt;Listing and template services provided by inkFrog&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;a href=&apos;https://signin.ebay.com/authorize?client_id=inkFrogI-eBayShop-PRD-45d7504c4-548de517&amp;response_type=code&amp;redirect_uri=inkFrog__Inc.-inkFrogI-eBaySh-vlfzfmcd&amp;scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly&apos; style=&apos;border:0px;&apos; target=&apos;_blank&apos;&gt;&lt;img src=&apos;//open.inkfrog.com/assets/img/logos/logo_small.png&apos; style=&apos;border:0px;max-width:100%&apos; alt=&apos;inkFrog&apos;&gt;&lt;/a&gt;&lt;/div&gt;\n&lt;img src=&quot;https://hit.inkfrog.com/t/hit.gif&quot; style=&quot;max-width:100%&quot;&gt;</Description><ItemID>306026850428</ItemID><ListingDetails><Adult>false</Adult><BindingAuction>false</BindingAuction><CheckoutEnabled>true</CheckoutEnabled><ConvertedBuyItNowPrice currencyID=\"USD\">0.0</ConvertedBuyItNowPrice><ConvertedStartPrice currencyID=\"USD\">21.19</ConvertedStartPrice><ConvertedReservePrice currencyID=\"USD\">0.0</ConvertedReservePrice><HasReservePrice>false</HasReservePrice><StartTime>2025-01-08T07:24:58.000Z</StartTime><EndTime>2026-01-08T07:24:58.000Z</EndTime><ViewItemURL>https://www.ebay.com/itm/JTS-Group-Dead-Center-22-Caliber-Semi-Domed-Pellets-21-53-Grain-250-Count-Tin-/306026850428</ViewItemURL><HasUnansweredQuestions>false</HasUnansweredQuestions><HasPublicMessages>false</HasPublicMessages><ViewItemURLForNaturalSearch>https://www.ebay.com/itm/JTS-Group-Dead-Center-22-Caliber-Semi-Domed-Pellets-21-53-Grain-250-Count-Tin-/306026850428</ViewItemURLForNaturalSearch></ListingDetails><ListingDesigner><LayoutID>10000</LayoutID><ThemeID>10</ThemeID></ListingDesigner><ListingDuration>GTC</ListingDuration><ListingType>FixedPriceItem</ListingType><Location>Fort Worth, Texas</Location><PrimaryCategory><CategoryID>178889</CategoryID><CategoryName>Sporting Goods:Outdoor Sports:Air Guns &amp; Slingshots:BBs &amp; Pellets</CategoryName></PrimaryCategory><PrivateListing>false</PrivateListing><ProductListingDetails><UPC>810058881359</UPC><BrandMPN><Brand>JTS Group</Brand><MPN>JAC109</MPN></BrandMPN><IncludeeBayProductDetails>true</IncludeeBayProductDetails></ProductListingDetails><Quantity>23</Quantity><IsItemEMSEligible>false</IsItemEMSEligible><ReservePrice currencyID=\"USD\">0.0</ReservePrice><ReviseStatus><ItemRevised>true</ItemRevised></ReviseStatus><Seller><AboutMePage>false</AboutMePage><Email>abrahamoladotun@gmail.com</Email><FeedbackScore>11138</FeedbackScore><PositiveFeedbackPercent>99.1</PositiveFeedbackPercent><FeedbackPrivate>false</FeedbackPrivate><IDVerified>false</IDVerified><eBayGoodStanding>true</eBayGoodStanding><NewUser>false</NewUser><RegistrationDate>2019-02-10T12:40:38.000Z</RegistrationDate><Site>US</Site><Status>Confirmed</Status><UserID>sozodealz</UserID><UserIDChanged>false</UserIDChanged><UserIDLastChanged>2020-04-25T15:08:13.000Z</UserIDLastChanged><VATStatus>NoVATTax</VATStatus><SellerInfo><AllowPaymentEdit>true</AllowPaymentEdit><CheckoutEnabled>true</CheckoutEnabled><CIPBankAccountStored>false</CIPBankAccountStored><GoodStanding>true</GoodStanding><LiveAuctionAuthorized>false</LiveAuctionAuthorized><MerchandizingPref>OptIn</MerchandizingPref><QualifiesForB2BVAT>false</QualifiesForB2BVAT><StoreOwner>true</StoreOwner><StoreURL>https://www.ebay.com/str/sozodealz</StoreURL><SafePaymentExempt>false</SafePaymentExempt><TopRatedSeller>true</TopRatedSeller></SellerInfo><MotorsDealer>false</MotorsDealer></Seller><SellingStatus><BidCount>0</BidCount><BidIncrement currencyID=\"USD\">0.0</BidIncrement><ConvertedCurrentPrice currencyID=\"USD\">21.19</ConvertedCurrentPrice><CurrentPrice currencyID=\"USD\">21.19</CurrentPrice><HighBidder><AboutMePage>false</AboutMePage><EIASToken>nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6MBkIelAJCGowidj6x9nY+seQ==</EIASToken><Email>bailey.clint64@gmail.com</Email><FeedbackScore>39</FeedbackScore><PositiveFeedbackPercent>100.0</PositiveFeedbackPercent><eBayGoodStanding>true</eBayGoodStanding><NewUser>false</NewUser><RegistrationDate>2023-03-09T03:32:20.000Z</RegistrationDate><Site>US</Site><UserID>clibai8379</UserID><VATStatus>NoVATTax</VATStatus><BuyerInfo><ShippingAddress><Country>US</Country><PostalCode>79553-3116</PostalCode></ShippingAddress></BuyerInfo><UserAnonymized>false</UserAnonymized></HighBidder><LeadCount>0</LeadCount><MinimumToBid currencyID=\"USD\">21.19</MinimumToBid><QuantitySold>3</QuantitySold><ReserveMet>true</ReserveMet><SecondChanceEligible>false</SecondChanceEligible><ListingStatus>Active</ListingStatus><QuantitySoldByPickupInStore>0</QuantitySoldByPickupInStore></SellingStatus><ShippingDetails><ApplyShippingDiscount>false</ApplyShippingDiscount><CalculatedShippingRate><WeightMajor measurementSystem=\"English\" unit=\"lbs\">0</WeightMajor><WeightMinor measurementSystem=\"English\" unit=\"oz\">0</WeightMinor></CalculatedShippingRate><SalesTax><SalesTaxPercent>0.0</SalesTaxPercent><ShippingIncludedInTax>false</ShippingIncludedInTax></SalesTax><ShippingServiceOptions><ShippingService>ShippingMethodExpress</ShippingService><ShippingServiceCost currencyID=\"USD\">0.0</ShippingServiceCost><ShippingServiceAdditionalCost currencyID=\"USD\">0.0</ShippingServiceAdditionalCost><ShippingServicePriority>1</ShippingServicePriority><ExpeditedService>false</ExpeditedService><ShippingTimeMin>1</ShippingTimeMin><ShippingTimeMax>3</ShippingTimeMax><FreeShipping>true</FreeShipping></ShippingServiceOptions><ShippingServiceOptions><ShippingService>FedEx2Day</ShippingService><ShippingServiceCost currencyID=\"USD\">35.0</ShippingServiceCost><ShippingServiceAdditionalCost currencyID=\"USD\">0.0</ShippingServiceAdditionalCost><ShippingServicePriority>2</ShippingServicePriority><ExpeditedService>false</ExpeditedService><ShippingTimeMin>1</ShippingTimeMin><ShippingTimeMax>2</ShippingTimeMax></ShippingServiceOptions><ShippingServiceOptions><ShippingService>FedExStandardOvernight</ShippingService><ShippingServiceCost currencyID=\"USD\">45.0</ShippingServiceCost><ShippingServiceAdditionalCost currencyID=\"USD\">0.0</ShippingServiceAdditionalCost><ShippingServicePriority>3</ShippingServicePriority><ExpeditedService>true</ExpeditedService><ShippingTimeMin>1</ShippingTimeMin><ShippingTimeMax>2</ShippingTimeMax></ShippingServiceOptions><ShippingServiceOptions><ShippingService>FedExPriorityOvernight</ShippingService><ShippingServiceCost currencyID=\"USD\">55.0</ShippingServiceCost><ShippingServiceAdditionalCost currencyID=\"USD\">20.0</ShippingServiceAdditionalCost><ShippingServicePriority>4</ShippingServicePriority><ExpeditedService>true</ExpeditedService><ShippingTimeMin>1</ShippingTimeMin><ShippingTimeMax>2</ShippingTimeMax></ShippingServiceOptions><ShippingType>Flat</ShippingType><ThirdPartyCheckout>false</ThirdPartyCheckout><ShippingDiscountProfileID>0</ShippingDiscountProfileID><InternationalShippingDiscountProfileID>0</InternationalShippingDiscountProfileID><ExcludeShipToLocation>US Protectorates</ExcludeShipToLocation><ExcludeShipToLocation>Alaska/Hawaii</ExcludeShipToLocation><ExcludeShipToLocation>APO/FPO</ExcludeShipToLocation><ExcludeShipToLocation>Asia</ExcludeShipToLocation><ExcludeShipToLocation>Middle East</ExcludeShipToLocation><ExcludeShipToLocation>North America</ExcludeShipToLocation><ExcludeShipToLocation>Oceania</ExcludeShipToLocation><ExcludeShipToLocation>Europe</ExcludeShipToLocation><ExcludeShipToLocation>Southeast Asia</ExcludeShipToLocation><ExcludeShipToLocation>Central America and Caribbean</ExcludeShipToLocation><ExcludeShipToLocation>Africa</ExcludeShipToLocation><ExcludeShipToLocation>South America</ExcludeShipToLocation><ExcludeShipToLocation>PO Box</ExcludeShipToLocation><SellerExcludeShipToLocationsPreference>false</SellerExcludeShipToLocationsPreference></ShippingDetails><ShipToLocations>US</ShipToLocations><Site>US</Site><StartPrice currencyID=\"USD\">21.19</StartPrice><Storefront><StoreCategoryID>1</StoreCategoryID><StoreCategory2ID>0</StoreCategory2ID><StoreURL>https://www.ebay.com/str/sozodealz</StoreURL></Storefront><TimeLeft>P27DT16H2M48S</TimeLeft><Title>JTS Group Dead Center .22 Caliber Semi-Domed Pellets 21.53 Grain 250 Count Tin</Title><UUID>5C512C28D0B446039B7659BD1652A77B</UUID><LocationDefaulted>true</LocationDefaulted><GetItFast>false</GetItFast><BuyerResponsibleForShipping>false</BuyerResponsibleForShipping><SKU>JTSJAC109</SKU><PostalCode>76155</PostalCode><PictureDetails><GalleryType>Gallery</GalleryType><PictureURL>https://i.ebayimg.com/00/s/MTYwMFgxNjAw/z/kmIAAOSwsrpnfihG/$_12.JPG?set_id=880000500F</PictureURL><PictureURL>https://i.ebayimg.com/00/s/MTYwMFgxNjAw/z/CUEAAOSwVeFnfihI/$_12.JPG?set_id=880000500F</PictureURL><PictureSource>EPS</PictureSource></PictureDetails><DispatchTimeMax>2</DispatchTimeMax><ProxyItem>false</ProxyItem><BuyerGuaranteePrice currencyID=\"USD\">20000.0</BuyerGuaranteePrice><BuyerRequirementDetails><ShipToRegistrationCountry>true</ShipToRegistrationCountry></BuyerRequirementDetails><IntangibleItem>false</IntangibleItem><ReturnPolicy><RefundOption>MoneyBack</RefundOption><Refund>Money Back</Refund><ReturnsWithinOption>Days_30</ReturnsWithinOption><ReturnsWithin>30 Days</ReturnsWithin><ReturnsAcceptedOption>ReturnsAccepted</ReturnsAcceptedOption><ReturnsAccepted>Returns Accepted</ReturnsAccepted><ShippingCostPaidByOption>Seller</ShippingCostPaidByOption><ShippingCostPaidBy>Seller</ShippingCostPaidBy><InternationalRefundOption>MoneyBack</InternationalRefundOption><InternationalReturnsAcceptedOption>ReturnsAccepted</InternationalReturnsAcceptedOption><InternationalReturnsWithinOption>Days_30</InternationalReturnsWithinOption><InternationalShippingCostPaidByOption>Buyer</InternationalShippingCostPaidByOption></ReturnPolicy><ConditionID>1000</ConditionID><ConditionDisplayName>New</ConditionDisplayName><PostCheckoutExperienceEnabled>false</PostCheckoutExperienceEnabled><SellerProfiles><SellerShippingProfile><ShippingProfileID>192943792019</ShippingProfileID><ShippingProfileName>Default</ShippingProfileName></SellerShippingProfile><SellerReturnProfile><ReturnProfileID>148084438019</ReturnProfileID><ReturnProfileName>Default</ReturnProfileName></SellerReturnProfile><SellerPaymentProfile><PaymentProfileID>148084374019</PaymentProfileID><PaymentProfileName>Default</PaymentProfileName></SellerPaymentProfile></SellerProfiles><ShippingPackageDetails><ShippingIrregular>false</ShippingIrregular><ShippingPackage>PackageThickEnvelope</ShippingPackage><WeightMajor measurementSystem=\"English\" unit=\"lbs\">0</WeightMajor><WeightMinor measurementSystem=\"English\" unit=\"oz\">0</WeightMinor></ShippingPackageDetails><HideFromSearch>false</HideFromSearch><OutOfStockControl>true</OutOfStockControl><eBayPlus>false</eBayPlus><eBayPlusEligible>false</eBayPlusEligible><IsSecureDescription>true</IsSecureDescription></Item></GetItemResponse>"
+
+
+// Ebay Product Details Response:
+
+{
+    "Listed_products": {
+        "itemId": "v1|306026850428|0",
+        "sellerItemRevision": "6",
+        "title": "JTS Group Dead Center .22 Caliber Semi-Domed Pellets 21.53 Grain 250 Count Tin",
+        "shortDescription": "Upgrade your airgun experience with JTS Group Dead Center. 22 Caliber Pellets. Generous Quantity : Includes 250 pellets per tin for extended shooting sessions. Quantity : 250 pellets per tin. Airgun enthusiasts seeking precise and versatile pellets.",
+        "price": {
+            "value": "21.19",
+            "currency": "USD"
+        },
+        "categoryPath": "Sporting Goods|Outdoor Sports|Air Guns & Slingshots|BBs & Pellets",
+        "categoryIdPath": "888|159043|178886|178889",
+        "condition": "New",
+        "conditionId": "1000",
+        "itemLocation": {
+            "city": "Fort Worth",
+            "stateOrProvince": "Texas",
+            "postalCode": "761**",
+            "country": "US"
+        },
+        "image": {
+            "imageUrl": "https://i.ebayimg.com/images/g/kmIAAOSwsrpnfihG/s-l1600.jpg",
+            "width": 1600,
+            "height": 1600
+        },
+        "additionalImages": [
+            {
+                "imageUrl": "https://i.ebayimg.com/images/g/CUEAAOSwVeFnfihI/s-l1600.jpg",
+                "width": 1600,
+                "height": 1600
+            }
+        ],
+        "brand": "JTS Group",
+        "itemCreationDate": "2025-01-08T07:24:58.000Z",
+        "seller": {
+            "username": "sozodealz",
+            "feedbackPercentage": "99.2",
+            "feedbackScore": 11234
+        },
+        "gtin": "810058881359",
+        "mpn": "JAC109",
+        "estimatedAvailabilities": [
+            {
+                "deliveryOptions": [
+                    "SHIP_TO_HOME"
+                ],
+                "availabilityThresholdType": "MORE_THAN",
+                "availabilityThreshold": 10,
+                "estimatedAvailabilityStatus": "IN_STOCK",
+                "estimatedSoldQuantity": 3,
+                "estimatedRemainingQuantity": 20
+            }
+        ],
+        "shippingOptions": [
+            {
+                "shippingServiceCode": "Expedited Shipping",
+                "type": "Expedited shipping",
+                "shippingCost": {
+                    "value": "0.00",
+                    "currency": "USD"
+                },
+                "quantityUsedForEstimate": 1,
+                "minEstimatedDeliveryDate": "2025-12-26T10:00:00.000Z",
+                "maxEstimatedDeliveryDate": "2025-12-27T10:00:00.000Z",
+                "additionalShippingCostPerUnit": {
+                    "value": "0.00",
+                    "currency": "USD"
+                },
+                "shippingCostType": "FIXED"
+            },
+            {
+                "shippingServiceCode": "FedEx 2Day",
+                "trademarkSymbol": "®",
+                "shippingCarrierCode": "FedEx",
+                "type": "Expedited Shipping",
+                "shippingCost": {
+                    "value": "35.00",
+                    "currency": "USD"
+                },
+                "quantityUsedForEstimate": 1,
+                "minEstimatedDeliveryDate": "2025-12-26T10:00:00.000Z",
+                "maxEstimatedDeliveryDate": "2025-12-27T10:00:00.000Z",
+                "additionalShippingCostPerUnit": {
+                    "value": "0.00",
+                    "currency": "USD"
+                },
+                "shippingCostType": "FIXED"
+            },
+            {
+                "shippingServiceCode": "FedEx Standard Overnight",
+                "trademarkSymbol": "®",
+                "shippingCarrierCode": "FedEx",
+                "type": "One-day Shipping",
+                "shippingCost": {
+                    "value": "45.00",
+                    "currency": "USD"
+                },
+                "quantityUsedForEstimate": 1,
+                "minEstimatedDeliveryDate": "2025-12-26T10:00:00.000Z",
+                "maxEstimatedDeliveryDate": "2025-12-29T10:00:00.000Z",
+                "additionalShippingCostPerUnit": {
+                    "value": "0.00",
+                    "currency": "USD"
+                },
+                "shippingCostType": "FIXED"
+            },
+            {
+                "shippingServiceCode": "FedEx Priority Overnight",
+                "trademarkSymbol": "®",
+                "shippingCarrierCode": "FedEx",
+                "type": "One-day Shipping",
+                "shippingCost": {
+                    "value": "55.00",
+                    "currency": "USD"
+                },
+                "quantityUsedForEstimate": 1,
+                "minEstimatedDeliveryDate": "2025-12-26T10:00:00.000Z",
+                "maxEstimatedDeliveryDate": "2025-12-27T10:00:00.000Z",
+                "additionalShippingCostPerUnit": {
+                    "value": "20.00",
+                    "currency": "USD"
+                },
+                "shippingCostType": "FIXED"
+            }
+        ],
+        "shipToLocations": {
+            "regionIncluded": [
+                {
+                    "regionName": "United States",
+                    "regionType": "COUNTRY",
+                    "regionId": "US"
+                }
+            ],
+            "regionExcluded": [
+                {
+                    "regionName": "US Protectorates",
+                    "regionType": "COUNTRY_REGION",
+                    "regionId": "_PR"
+                },
+                {
+                    "regionName": "Alaska/Hawaii",
+                    "regionType": "COUNTRY_REGION",
+                    "regionId": "_AH"
+                },
+                {
+                    "regionName": "APO/FPO",
+                    "regionType": "COUNTRY_REGION",
+                    "regionId": "_AP"
+                },
+                {
+                    "regionName": "Asia",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "ASIA"
+                },
+                {
+                    "regionName": "Middle East",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "MIDDLE_EAST"
+                },
+                {
+                    "regionName": "Greenland",
+                    "regionType": "COUNTRY",
+                    "regionId": "GL"
+                },
+                {
+                    "regionName": "Canada",
+                    "regionType": "COUNTRY",
+                    "regionId": "CA"
+                },
+                {
+                    "regionName": "Mexico",
+                    "regionType": "COUNTRY",
+                    "regionId": "MX"
+                },
+                {
+                    "regionName": "Saint Pierre and Miquelon",
+                    "regionType": "COUNTRY",
+                    "regionId": "PM"
+                },
+                {
+                    "regionName": "Bermuda",
+                    "regionType": "COUNTRY",
+                    "regionId": "BM"
+                },
+                {
+                    "regionName": "Oceania",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "OCEANIA"
+                },
+                {
+                    "regionName": "Europe",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "EUROPE"
+                },
+                {
+                    "regionName": "Southeast Asia",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "SOUTHEAST_ASIA"
+                },
+                {
+                    "regionName": "Central America and Caribbean",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "CENTRAL_AMERICA_AND_CARIBBEAN"
+                },
+                {
+                    "regionName": "Africa",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "AFRICA"
+                },
+                {
+                    "regionName": "South America",
+                    "regionType": "WORLD_REGION",
+                    "regionId": "SOUTH_AMERICA"
+                },
+                {
+                    "regionName": "PO Box",
+                    "regionType": "COUNTRY_REGION",
+                    "regionId": "PO_BOX"
+                },
+                {
+                    "regionName": "French Polynesia",
+                    "regionType": "COUNTRY",
+                    "regionId": "PF"
+                },
+                {
+                    "regionName": "Libya",
+                    "regionType": "COUNTRY",
+                    "regionId": "LY"
+                },
+                {
+                    "regionName": "New Caledonia",
+                    "regionType": "COUNTRY",
+                    "regionId": "NC"
+                },
+                {
+                    "regionName": "Guadeloupe",
+                    "regionType": "COUNTRY",
+                    "regionId": "GP"
+                },
+                {
+                    "regionName": "Venezuela",
+                    "regionType": "COUNTRY",
+                    "regionId": "VE"
+                },
+                {
+                    "regionName": "Reunion",
+                    "regionType": "COUNTRY",
+                    "regionId": "RE"
+                },
+                {
+                    "regionName": "Barbados",
+                    "regionType": "COUNTRY",
+                    "regionId": "BB"
+                },
+                {
+                    "regionName": "Martinique",
+                    "regionType": "COUNTRY",
+                    "regionId": "MQ"
+                },
+                {
+                    "regionName": "French Guiana",
+                    "regionType": "COUNTRY",
+                    "regionId": "GF"
+                },
+                {
+                    "regionName": "Ukraine",
+                    "regionType": "COUNTRY",
+                    "regionId": "UA"
+                },
+                {
+                    "regionName": "Russian Federation",
+                    "regionType": "COUNTRY",
+                    "regionId": "RU"
+                }
+            ]
+        },
+        "returnTerms": {
+            "returnsAccepted": true,
+            "refundMethod": "MONEY_BACK",
+            "returnShippingCostPayer": "SELLER",
+            "returnPeriod": {
+                "value": 30,
+                "unit": "CALENDAR_DAY"
+            }
+        },
+        "taxes": [
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Alabama",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "AL"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Alaska",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "AK"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Arizona",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "AZ"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Arkansas",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "AR"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "California",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "CA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Colorado",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "CO"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Connecticut",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "CT"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "District of Columbia",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "DC"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Florida",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "FL"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Georgia",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "GA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Hawaii",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "HI"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Idaho",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "ID"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Illinois",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "IL"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Indiana",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "IN"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Iowa",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "IA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Kansas",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "KS"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Kentucky",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "KY"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Louisiana",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "LA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Maine",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "ME"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Maryland",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "MD"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Massachusetts",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "MA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Michigan",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "MI"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Minnesota",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "MN"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Mississippi",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "MS"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Nebraska",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "NE"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Nevada",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "NV"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "New Jersey",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "NJ"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "New Mexico",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "NM"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "New York",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "NY"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "North Carolina",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "NC"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "North Dakota",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "ND"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Ohio",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "OH"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Oklahoma",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "OK"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Pennsylvania",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "PA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Puerto Rico",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "PR"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Rhode Island",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "RI"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "South Carolina",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "SC"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "South Dakota",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "SD"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Tennessee",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "TN"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Texas",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "TX"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Utah",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "UT"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Vermont",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "VT"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Virginia",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "VA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Washington",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "WA"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "West Virginia",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "WV"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Wisconsin",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "WI"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            },
+            {
+                "taxJurisdiction": {
+                    "region": {
+                        "regionName": "Wyoming",
+                        "regionType": "STATE_OR_PROVINCE"
+                    },
+                    "taxJurisdictionId": "WY"
+                },
+                "taxType": "STATE_SALES_TAX",
+                "shippingAndHandlingTaxed": true,
+                "includedInPrice": false,
+                "ebayCollectAndRemitTax": true
+            }
+        ],
+        "localizedAspects": [
+            {
+                "type": "STRING",
+                "name": "Brand",
+                "value": "JTS Group"
+            },
+            {
+                "type": "STRING",
+                "name": "Type",
+                "value": "Pellets"
+            },
+            {
+                "type": "STRING",
+                "name": "Caliber",
+                "value": ".22 Pellet"
+            },
+            {
+                "type": "STRING",
+                "name": "MPN",
+                "value": "JAC109"
+            },
+            {
+                "type": "STRING",
+                "name": "Model",
+                "value": "Dead Center"
+            },
+            {
+                "type": "STRING",
+                "name": "UPC",
+                "value": "810058881359"
+            }
+        ],
+        "primaryProductReviewRating": {
+            "reviewCount": 0,
+            "averageRating": "0.0",
+            "ratingHistograms": [
+                {
+                    "rating": "5",
+                    "count": 0
+                },
+                {
+                    "rating": "4",
+                    "count": 0
+                },
+                {
+                    "rating": "3",
+                    "count": 0
+                },
+                {
+                    "rating": "2",
+                    "count": 0
+                },
+                {
+                    "rating": "1",
+                    "count": 0
+                }
+            ]
+        },
+        "topRatedBuyingExperience": false,
+        "buyingOptions": [
+            "FIXED_PRICE"
+        ],
+        "itemWebUrl": "https://www.ebay.com/itm/306026850428?amdata=enc%3AAQAKAAAAoFu2GTm2ZGNVXFEsdeNYg5IS542YHlKmMfzzZno8JoCgoIKo2Vd3p7f2Rp4HBOJC2bloV5Eswt2CN8X4al%2FKgotseXSxLvFX5Y8wqOb8JnDregSGvfhQtWMzl8Xv%2Bzq--vsKRLXvxGEwl7yQHKmWDKPQuf6NIDtBud1nTayTpupRJfoSaFBd5Ice3SdOi7xGpfvsPYyz%2B2s2rp67%2FsZeX8U%3D",
+        "description": "<div id=\"inkfrog_crosspromo_top\"></div>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"https://www.w3.org/1999/xhtml\">\n<head>\n<title>JTS Group Dead Center .22 Caliber Semi-Domed Pellets 21.53 Grain 250 Count Tin</title>\n<meta name=\"description\" content=\"Title\">\n<meta name=\"keywords\" content=\"Title\">\n<link href=\"https://dezignbrain.com/ebay/sozo_dealz/listing/css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">\n<link href=\"https://dezignbrain.com/ebay/sozo_dealz/listing/css/listing.css\" rel=\"stylesheet\" type=\"text/css\">\n<link href=\"https://dezignbrain.com/ebay/sozo_dealz/listing/css/reponsive.css\" rel=\"stylesheet\" type=\"text/css\">\n<link href=\"https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" rel=\"stylesheet\" integrity=\"sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN\" crossorigin=\"anonymous\">\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>\nimg {\nmax-width: 100%;\n}\n</style>\n<link href='//open.inkfrog.com/templates/designer/styles/user/134645.css' rel='stylesheet' type='text/css'></head>\n\n<body>\n<div class=\"listing_background\"> \n<!--Header //start-->\n<div class=\"top_bg\">\n<div class=\"dezign_wapper\">   \n<div class=\"store_header\">\n<div class=\"container\">\n<div class=\"row align-items-center\">\n<div class=\"col-md-4\">\n<div id=\"store_logo\"><a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/logo.png\" alt=\"\"></a></div>\n</div>\n<div class=\"col-md-8\">\n<div class=\"top_promo_code\">\n<ul>\n<li class=\"left_border\"> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/top_promo1.png\" alt=\"\"> </li>\n<li> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/top_promo2.png\" alt=\"\"> </li>\n</ul>\n</div> \n</div>\n</div>\n</div>\n</div>\n</div>\n<div class=\"store_menu\">\n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"main_menu\">\n<ul class=\"top_main_menu\">\n<li> <a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\">Store Home</a></li>\n<li> <a href=\"https://www.ebay.com/sch/i.html?_dmd=2&_dkr=1&iconV2Request=true&_ssn=sozodealz&store_cat=0&store_name=sozo&_oac=1&_sop=10\" target=\"_blank\">new arrivals</a></li>\t\n<li> <a href=\"https://www.ebay.com/sch/sozodealz/m.html?_trksid=p3692\" target=\"_blank\">Items For Sale </a></li>\n<li> <a href=\"https://www.ebay.com/fdbk/feedback_profile/sozodealz?filter=feedback_page%3ARECEIVED_AS_SELLER\" target=\"_blank\">Feedback</a></li>\n<li> <a href=\"https://contact.ebay.com/ws/eBayISAPI.dll?ReturnUserEmail&requested=sozodealz\" target=\"_blank\">Contact Us</a></li>\n</ul>\t\n</div>\n</div>\t\n</div>\t\n</div>\n</div>    \n<!--Header //end-->\n<div class=\"product_section\">\t\n<div class=\"container\">\t\t\n<div class=\"row\">\n<div class=\"col-md-6\">\n<div class=\"product_images_wappers\">\n<div class=\"product_images_gallery\"><img src=\"https://i.frog.ink/ibqO2t26/jtsjac1091hr-1.jpg\"></div>\n</div>\n</div>\n<div class=\"col-md-6\">\n<div class=\"listing_listingarea-box\" id=\"right_box\">\n<div class=\"desc-hedtitle\">JTS Group Dead Center .22 Caliber Semi-Domed Pellets 21.53 Grain 250 Count Tin</div>\n<div class=\"desc-rd desc-text\">\n<div vocab=\"https://schema.org/\" typeof=\"Product\">\n<span property=\"description\">   \n<p><p>Upgrade your airgun experience with JTS Group Dead Center .22 Caliber Pellets. Featuring a semi-domed tip design, these pellets combine the aerodynamic benefits of domed pellets with added precision for a range of shooting applications. Each pellet weighs 21.53 grains to ensure consistent and reliable performance. With 250 pellets per tin, they provide excellent value and convenience for target practice, small-game hunting, or plinking. JTS Group, renowned for its innovation and quality, offers these pellets to meet the demands of serious airgun enthusiasts.</p><h4><strong>Key Features</strong></h4><ul><li><strong>Semi-Domed Tip Design</strong>: Balances aerodynamics and precision for versatile use.</li><li><strong>Precision Weight</strong>: 21.53 grains for consistent accuracy and reliability.</li><li><strong>Generous Quantity</strong>: Includes 250 pellets per tin for extended shooting sessions.</li><li><strong>Trusted Brand</strong>: Manufactured by JTS Group, a leader in airgun accessories.</li></ul><h4><strong>Specification</strong></h4><ul><li><strong>Caliber</strong>: .22</li><li><strong>Pellet Type</strong>: Semi-Domed Tip</li><li><strong>Weight</strong>: 21.53 grains</li><li><strong>Quantity</strong>: 250 pellets per tin</li><li><strong>Model</strong>: Dead Center</li><li><strong>Brand</strong>: JTS Group</li></ul><h4><strong>Ideal for</strong></h4><ul><li>Airgun enthusiasts seeking precise and versatile pellets.</li><li>Target shooters aiming for reliable and consistent performance.</li><li>Small-game hunters requiring effective and accurate ammunition.</li><li>Plinkers and hobbyists needing high-quality airgun pellets.</li></ul></p>   \n</span>\n</div>\n</div>\n</div> \n</div>\n</div>   \n</div>   \n</div>\n</div>\t\n<div class=\"promotion\">\n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"promotion_m\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/promotion.png\" alt=\"\"></div>\n<div class=\"promotion_res\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/promotion_res.png\" alt=\"\"></div>    \n</div>   \n</div>\t\n</div>\t\n</div> \t\n<div id=\"dezign_home_banner\">\n<div class=\"banner_section\">\n<a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\"> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/banner_01.png\" alt=\"\"> </a>\n</div>\n<div class=\"banner_section_res\">\n<a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\"> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/banner_01_res.png\" alt=\"\"> </a>\n</div>\t\n</div> \n<div class=\"feature_section\">\n<div class=\"feature-title\">  \n<h1>Featured Categories</h1> \n<p>Browse our latest collection</p>\t\n</div>    \n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-4\">\n<div class=\"cate_section\">\t\n<div class=\"fashion_text\">\n<a href=\"https://www.ebay.com/str/sozo/Air-Guns/_i.html?store_cat=36045624016\" target=\"_blank\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/cate_01.png\" alt=\"\"></a>\t\n</div>\n<div class=\"ring_text\">\n<h1>Air Guns</h1>\n</div>\t\n</div>\n</div>\t\n<div class=\"col-md-4\">\n<div class=\"cate_section second_cate\">\t\n<div class=\"fashion_text\">\n<a href=\"https://www.ebay.com/str/sozo/Camping-Survival/_i.html?store_cat=36045625016\" target=\"_blank\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/cate_02.png\" alt=\"\"></a>\t\n</div>\n<div class=\"ring_text\">\n<h1>Camping & Survival</h1>\t\n</div>\n</div>\t\t\n</div>\n<div class=\"col-md-4\">\n<div class=\"cate_section\">\t\n<div class=\"fashion_text\">\n<a href=\"https://www.ebay.com/str/sozo/Tactical-and-Duty-Gear/_i.html?store_cat=36838052016\" target=\"_blank\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/cate_03.png\" alt=\"\"></a>\t\n</div>\n<div class=\"ring_text\">\n<h1>tactical and duty gear</h1>\n</div>\n</div>\t\t\n</div>     \n</div>\n<div class=\"view_all_btn\"><a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\">Browse All Categories</a></div>    \n</div>\t\n</div>\n<div class=\"main_who_section\">\n<div class=\"container\">\t\n<div class=\"about_bg \">\t\t\n<div class=\"row align-items-center\">\n<div class=\"col-md-7\">\n<div class=\"about_text\">\n<div class=\"about_img\">Who we are?</div>\n<h2>About Sozo Outlet</h2>    \n<p>SoZo is an ecommerce retail brand dedicated to finding the right products at best prices for our customers. We work with distributors around the USA.</p>\n<h2>Why Buy From US?</h2>    \n<p>We are a charity owned store and all our net profit goes into ensuring that orphans and vulnerable children in poor cities around the world have access to quality education for a better life. When you buy from us, you are changing lives and helping create a better future where it is mostly needed.</p>\n<div class=\"eBay_msg_t\"><a target=\"_blank\" href=\"https://contact.ebay.com/ws/eBayISAPI.dll?ReturnUserEmail&requested=sozodealz\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/email_icon.png\" alt=\"\">eBay Message</a></div>\t\n</div>\t\t\n</div>\t\t\n<div class=\"col-md-5\">\n<div class=\"who_img\"></div>\t\n</div>\n</div>\t\n</div>\t\n</div>\t\n</div> \n<!--Tabs //start-->\n<div class=\"main_tab_row\">\n<div class=\"tabe_section\"> \n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"main_payment pay_02\">\n<div class=\"payment_text\">\n<h1><span><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/note_icon.png\" alt=\"\"></span>Note to Buyers</h1>\n</div>\n<div class=\"inner_text\">\t\n<p>Due to the nature of the Merchandise, an adult of 21 years or older may be required with a valid ID to sign for all Airgun purchase. Please note that Courier will make 3 attempts for delivery. Courier will not hold this item for pick up at their location or any other location. No pickup option is available for this item. Someone must be available to accept the delivery at the provided address.</p>\n<h6>Compliance </h6> \n<p>This listing complies with eBay’s air gun guidelines found here and I will only sell and ship air guns to buyers in jurisdictions where permitted by applicable laws</p>\n<p><b>https://pages.ebay.com/help/policies/firearms-weapons-knives.html</b></p>    \n</div>\n</div>\n</div>\t\n</div>\t\n</div>\t\n</div> \n<div class=\"tabe_section\"> \n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"main_payment pay_02\">\n<div class=\"payment_text\">\n<h1><span><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/shiping_icon_01.png\" alt=\"\"></span>Shipping Restriction</h1>\n</div>\n<div class=\"inner_text\">\t\n<h6>Shipping restrictions by location</h6>    \n<p>It's up to YOU to know the laws in your state, county and city and to fully comply with them. The following are examples of some state and local restrictions governing various products. This list shows products that are prohibited in the locations indicated. When criteria must be met for ownership, those are also listed.</p>\n<p>All airsoft guns must have at least a 1/4-inch blaze orange muzzle or an orange flash hider. U.S. federal law requires that all airsoft guns are sold with this marking to avoid the guns being mistaken for firearms. Airguns (guns that shoot pellets or steel BBs) do not have an orange muzzle, nor are they required to have one by the U.S. federal government or any state, county or municipal government ordinance. If you remove the orange muzzle or flash hider from your airsoft gun, you will have voided our 30-day return policy for that item and will not be able to return it for a refund.</p>\n<p>California<br>\nBlowguns<br>\nBlowgun bolts & darts<br>\nDelaware<br>\nWilmington</p>  \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nFlorida<br>\nSt. Augustine</p>\n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nIllinois<br>\nEffective July 13, 2012: There is no velocity limit on airguns below .18 caliber, and airguns are no longer considered firearms by the state. Airguns over .18 caliber must still have a velocity of less than 700 fps.<br>\nAurora</p>   \n<p>Foregrips<br>\nChicago</p>  \n<p>Airguns<br>\nAirsoft guns<br>\nBlank guns<br>\nBlank gun ammo<br>\nCook County</p> \n<p>Foregrips<br>\nNiles</p>  \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nWashington</p>\n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nIndiana<br>\nSlingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nMassachusetts<br>\nBlowguns<br>\nBlowgun bolts & darts<br>\nSlingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nMichigan<br>\nRichmond</p>\n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nMinnesota<br>\nDuluth</p>  \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nNew Jersey<br>\nSlingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nSilencers, baffles, mufflers or suppressors...internal, removable or non-removable (does not include fake suppressors)\nPellet guns & BB guns: Residents can buy them from us through a designated local gun store after acquiring the appropriate firearm permit (airguns are considered firearms per NJ state law: Title 2C:39-1).<br>\nYour local gun store must fax a copy of their FFL to Air Venturi in order for us to ship the gun you ordered.\n[Airsoft guns may be restricted by some local laws. It is up to you to determine if airsoft guns may be owned/possessed/used without special permits in their locale.]<br>\nNew York<br>\nWrist-braced slingshots<br>\nNew York City & it's 5 boroughs: Manhattan, Brooklyn, Bronx, Queens & Staten Island<br>\n(incl. ZIP Codes 100xx-104xx, 111xx, 112xx-114xx & 116xx)</p>\n<p>Airguns<br>\nAirsoft guns<br>\nBB guns<br>\nBlank guns<br>\nBlank gun ammo<br>\nBlowguns<br>\nBlowgun bolts & darts<br>\nCrossbows<br>\nLasers<br>\nLocking folding knives with blades longer than 4 inches<br>\nLongbows<br>\nNorth Carolina<br>\nBlank guns<br>\nBlank gun ammo<br>\nMorehead</p> \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nPennsylvania<br>\nPhiladelphia</p> \n<p>Airguns<br>\nAirsoft guns<br>\nBB guns<br>\nBlowguns<br>\nBlowgun bolts & darts<br>\nCrossbows<br>\nLongbows<br>\nSlingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nPuerto Rico<br>\nBlank guns<br>\nBlank gun ammo<br>\nRhode Island<br>\nBlank guns<br>\nBlank gun ammo<br>\nSlingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nSouth Dakota<br>\nRapid City</p>\n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nTennessee<br>\nKnoxville</p> \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nUtah<br>\nSalt Lake County</p> \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nVirginia<br>\nBlank guns<br>\nBlank gun ammo<br>\nFalls Church</p>\n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nWashington, D.C.<br>\nAirguns<br>\nAirsoft guns<br>\nBB guns<br>\nWest Virginia<br>\nBluefield</p> \n<p>Slingshots<br>\nSlingshot ammo<br>\nSlingshot accessories<br>\nWisconsin<br>\nMadison</p>  \n<p>Foregrips<br>\nSlingshots<br>\nSlingshot ammo<br>\nSlingshot accessories</p>    \n</div>\n</div>\n</div>\t\n</div>\t\n</div>\t\n</div>    \n<div class=\"tabe_section\"> \n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"main_payment pay_02\">\n<div class=\"payment_text\">\n<h1><span><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/payment_icon.png\" alt=\"\"></span>Payment</h1>\n</div>\n<div class=\"inner_text\">\t\n<p>Credit card payments through PayPal and eBay Managed Payments. You can pay with any of the credit cards accepted by PayPal. You don't even need to have a PayPal account.</p>    \n</div>\n</div>\n</div>\t\n</div>\t\n</div>\t\n</div>    \n<div class=\"tabe_section\"> \n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"main_payment pay_02\">\n<div class=\"payment_text\">\n<h1><span><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/shiping_icon.png\" alt=\"\"></span>Shipping</h1>\n</div>\n<div class=\"inner_text\">\t\n<p>We always work hard to ensure your package arrives as soon as possible. Please understand that some factors like weather, high postal traffic, and the performance of shipping companies are outside of our control.</p> \n<p>We offer free shipping to the lower 48 states and ship within 2 - 4 business days of payment, usually sooner. We do not accept P.O. Boxes. Please provide a physical address.<br>We only ship to the address provided at check out. Please verify the address before placing the order.<br>For shipping outside of the continental USA, we only use eBay's Global Shipping Program. The item is shipped to KY and then sent to the rest of the world. International customers are responsible for all duties and taxes. Continue to check out in order to calculate costs for shipping the item to your country. Messages regarding eBay's Global Shipping Program MUST be directed at eBay EXCLUSIVELY. Thank you.</p>    \n</div>\n</div>\n</div>\t\n</div>\t\n</div>\t\n</div>\n<div class=\"tabe_section\">\n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-md-12\">\n<div class=\"main_payment pay_03\">\n<div class=\"payment_text\">\n<h1><span><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/return_icon.png\" alt=\"\"></span>Returns</h1>\n</div>\n<div class=\"inner_text paypal_text\">\n<p>100% Satisfaction Guarantee</p>\n<p>We will do our best to keep our customers happy. If for any reason you're not satisfied, please contact us and we'll help you to resolve any concerns you may have with your purchases and we guarantee you a solution. Please remember We're Always On Your Side.</p>\n<p>We're working very hard to maintain our business reputation and we enjoy providing a world-class service.</p>\n<p>We gladly accept returns. Please contact us through eBay messaging to request a Return Merchandise Authorization Number (RMA).</p> \n<p>An RMA must be obtained within 30 days upon received shipment and prior to returning any item.</p> \n<p>Software, manuals, electronics chart cards are non refundable due to manufacture policies and there is an additional 20% re-stocking fee for unopened package.</p>\n<p>There will be no restocking fee if an item is returned as a result of our error, shipping errors or merchandise damaged in transit.</p>\n<p>There is a deduction of 25% on all items that have been opened, 30% on all items that have been used and up to 50% on all items that are not returned in the original packaging.</p> \n<p>The product must be returned in original condition with all the accessories included.</p>    \n</div>\n</div>\t\n</div>\t\n</div>\t\n</div>\n</div>     \n</div>\n<!--Tabs //end-->\n<div class=\"guaranteed_wapper\">\n<div class=\"container\">\n<div class=\"row\">\n<div class=\"col-12\">\n<div class=\"guaranteed_title\">\n100% Customer Satisfaction Guaranteed <a target=\"_blank\" href=\"https://www.ebay.com/fdbk/feedback_profile/sozodealz?filter=feedback_page%3ARECEIVED_AS_SELLER\">View All Reviews</a>\n</div>\n</div>\n</div>\n<div class=\"row\">\n<div class=\"col-md-3\">\n<div class=\"guaranteed_box\">\n<div class=\"ebay_logo\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png\" alt=\"\"></div>\n<div class=\"guaranteed_text\">\" As described, arrived on time, great seller \"<br><br></div>\n<div class=\"guaranteed_name\">Buyer: B***E (125)</div>\n<div class=\"start\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png\" alt=\"\"></div>\n</div>\n</div>\n<div class=\"col-md-3\">\n<div class=\"guaranteed_box\">\n<div class=\"ebay_logo\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png\" alt=\"\"></div>\n<div class=\"guaranteed_text\">\" Item arrived quickly,\nno issues, will trade again\nfor sure \"</div>\n<div class=\"guaranteed_name\">Buyer: C***D (private)</div>\n<div class=\"start\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png\" alt=\"\"></div>\n</div>\n</div>\n<div class=\"col-md-3\">\n<div class=\"guaranteed_box\">\n<div class=\"ebay_logo\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png\" alt=\"\"></div>\n<div class=\"guaranteed_text\">\" Happy, good postage\ndeal with anytime \"<br><br></div>\n<div class=\"guaranteed_name\">Buyer: I***P (69)</div>\n<div class=\"start\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png\" alt=\"\"></div>\n</div>\n</div>\n<div class=\"col-md-3\">\n<div class=\"guaranteed_box\">\n<div class=\"ebay_logo\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/ebay_logo.png\" alt=\"\"></div>\n<div class=\"guaranteed_text\">\" A hassle free transaction, fast delivery. Would deal with again \"<br></div>\n<div class=\"guaranteed_name\">Buyer: T***R (private)</div>\n<div class=\"start\"><img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/start.png\" alt=\"\"></div>\n</div>\n</div>\n</div>\n</div>\n</div>\n<footer>\n<div class=\"store_footer_wapper\">\n<div class=\"footer_logo\"> <a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\"> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/footer_logo.png\" class=\"\"> </a> </div>     \n<div class=\"container\">\n<div class=\"row align-items-center\">    \n<div class=\"col-md-3\">\n<div class=\"footer_block footer_block02\">\n<div class=\"footer_payment\"> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/footer_payment.png\" class=\"img-fluid\"> </div>\n</div>\n</div>\t\n<div class=\"col-md-6\">\n<div class=\"footer_block footer_block01\">\n<div class=\"footer_menu\">\n<ul>\n<li> <a href=\"https://www.ebay.com/str/sozo\" target=\"_blank\">Store Home</a> </li>\n<li> <a href=\"https://www.ebay.com/sch/i.html?_dmd=2&_dkr=1&iconV2Request=true&_ssn=sozodealz&store_cat=0&store_name=sozo&_oac=1&_sop=10\" target=\"_blank\">new arrivals</a> </li>    \n<li> <a href=\"https://www.ebay.com/sch/sozodealz/m.html?_trksid=p3692\" target=\"_blank\">Items For Sale</a> </li>\t\n<li> <a href=\"https://www.ebay.com/fdbk/feedback_profile/sozodealz?filter=feedback_page%3ARECEIVED_AS_SELLER\" target=\"_blank\">Feedback</a> </li>\n<li> <a href=\"https://contact.ebay.com/ws/eBayISAPI.dll?ReturnUserEmail&requested=sozodealz\" target=\"_blank\">Contact Us</a> </li>\n</ul>\n</div>\n</div>\t\n</div>\n<div class=\"col-md-3\">\n<div class=\"footer_block footer_block03\">\n<div class=\"footer_payment\"> <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/shop_confidence.png\" class=\"img-fluid\"> </div>\n</div>\n</div>\n</div>\n<div class=\"dezign_copyright\"> © Copyright 2022, <span>Sozo Outlet. </span>  All rights reserved. </div>\n<div class=\"dezign_by\"> Made with  <img src=\"https://dezignbrain.com/ebay/sozo_dealz/listing/images/designby.png\"> by <span>eBayshopdesign.org</span></div>    \n</div>\n</div>\n</footer>   \n</div>\n</body>\n</html>\n<div id=\"inkfrog_crosspromo_bottom\"></div><div id=\"inkfrog_credit\" style='margin-bottom:25px;width:100%;text-align:center;'><div class=\"inkfrog_promo\" style=\"margin-top:40px !important; \"><a href='https://signin.ebay.com/authorize?client_id=inkFrogI-eBayShop-PRD-45d7504c4-548de517&response_type=code&redirect_uri=inkFrog__Inc.-inkFrogI-eBaySh-vlfzfmcd&scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly' style='border:0px;' target='_blank'>Listing and template services provided by inkFrog</a><br><br></div><a href='https://signin.ebay.com/authorize?client_id=inkFrogI-eBayShop-PRD-45d7504c4-548de517&response_type=code&redirect_uri=inkFrog__Inc.-inkFrogI-eBaySh-vlfzfmcd&scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly' style='border:0px;' target='_blank'><img src='//open.inkfrog.com/assets/img/logos/logo_small.png' style='border:0px;max-width:100%' alt='inkFrog'></a></div>\n<img src=\"https://hit.inkfrog.com/t/hit.gif\" style=\"max-width:100%\">",
+        "paymentMethods": [
+            {
+                "paymentMethodType": "OTHER"
+            },
+            {
+                "paymentMethodType": "WALLET",
+                "paymentMethodBrands": [
+                    {
+                        "paymentMethodBrandType": "PAYPAL"
+                    },
+                    {
+                        "paymentMethodBrandType": "APPLE_PAY"
+                    },
+                    {
+                        "paymentMethodBrandType": "GOOGLE_PAY"
+                    }
+                ]
+            },
+            {
+                "paymentMethodType": "CREDIT_CARD",
+                "paymentMethodBrands": [
+                    {
+                        "paymentMethodBrandType": "VISA"
+                    },
+                    {
+                        "paymentMethodBrandType": "MASTERCARD"
+                    },
+                    {
+                        "paymentMethodBrandType": "DISCOVER"
+                    },
+                    {
+                        "paymentMethodBrandType": "DINERS_CLUB"
+                    }
+                ]
+            }
+        ],
+        "immediatePay": true,
+        "enabledForGuestCheckout": false,
+        "eligibleForInlineCheckout": true,
+        "lotSize": 0,
+        "legacyItemId": "306026850428",
+        "priorityListing": true,
+        "adultOnly": false,
+        "categoryId": "178889",
+        "listingMarketplaceId": "EBAY_US"
+    }
+}
+
+
+// All order items on Ebay
+
+"order_items": [
+    {
+        "_id": 315,
+        "user_id": 12,
+        "orderId": "02-14114-48029",
+        "legacyOrderId": "02-14114-48029",
+        "creationDate": "2026-01-15T08:16:20Z",
+        "orderFulfillmentStatus": "NOT_STARTED",
+        "orderPaymentStatus": "PAID",
+        "sellerId": "sozodealz",
+        "buyer": "{'username': 'jagad-40', 'taxAddress': {'city': 'Coeur D Alene', 'stateOrProvince': 'ID', 'postalCode': '83814-9639', 'countryCode': 'US'}, 'buyerRegistrationAddress': {'fullName': 'jack gadmer', 'contactAddress': {'addressLine1': '1652 S Agate Rd', 'city': 'Coeur D Alene', 'stateOrProvince': 'ID', 'postalCode': '83814', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '2819101157'}, 'email': '44016b6a44d5af2e5379@members.ebay.com'}}",
+        "cancelStatus": "{'cancelState': 'NONE_REQUESTED', 'cancelRequests': []}",
+        "pricingSummary": "{'priceSubtotal': {'value': '25.79', 'currency': 'USD'}, 'deliveryCost': {'value': '0.0', 'currency': 'USD'}, 'total': {'value': '25.79', 'currency': 'USD'}}",
+        "paymentSummary": "{'totalDueSeller': {'value': '24.82', 'currency': 'USD'}, 'refunds': [], 'payments': [{'paymentMethod': 'EBAY', 'paymentReferenceId': '420004_S', 'paymentDate': '2026-01-15T08:16:20.125Z', 'amount': {'value': '24.82', 'currency': 'USD'}, 'paymentStatus': 'PAID'}]}",
+        "fulfillmentStartInstructions": "[{'fulfillmentInstructionsType': 'SHIP_TO', 'minEstimatedDeliveryDate': '2026-01-17T08:00:00.000Z', 'maxEstimatedDeliveryDate': '2026-01-21T08:00:00.000Z', 'ebaySupportedFulfillment': False, 'shippingStep': {'shipTo': {'fullName': 'jack gadmer', 'contactAddress': {'addressLine1': '1652 S Agate Rd', 'city': 'Coeur D Alene', 'stateOrProvince': 'ID', 'postalCode': '83814-9639', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '2819101157'}, 'email': '44016b6a44d5af2e5379@members.ebay.com'}, 'shippingServiceCode': 'ShippingMethodExpress'}}]",
+        "sku": "RUG90434",
+        "title": "​Ruger Stock Adapter High Comb/Compact Pull Fits American Rimfire & 10/22 Black",
+        "lineItemCost": "{'value': '25.79', 'currency': 'USD'}",
+        "quantity": "1",
+        "listingMarketplaceId": "EBAY_US",
+        "purchaseMarketplaceId": "EBAY_US",
+        "itemLocation": "{'location': 'Fort Worth, Texas', 'countryCode': 'US', 'postalCode': '76155'}",
+        "image": "https://i.ebayimg.com/images/g/Xw0AAOSw2Rtl1HEI/s-l1600.jpg",
+        "additionalImages": "[{'imageUrl': 'https://i.ebayimg.com/images/g/EOoAAOSwtpNl1HEK/s-l1600.jpg', 'width': 1600, 'height': 1600}, {'imageUrl': 'https://i.ebayimg.com/images/g/R~sAAOSwqoRl1HEM/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+        "mpn": null,
+        "description": "\"Ruger rifle owners looking to enhance comfort and ergonomics during shooting sessions. Those prioritizing genuine Ruger accessories for optimal fit and performance. Provides 1.84\\\" comb height and 12.5\\\" length of pull.\"",
+        "categoryId": "73949",
+        "vendor_name": "Not Found",
+        "tracking_id": null,
+        "marketItemId": "305405699685",
+        "itemMarketStatus": null,
+        "market_name": "Ebay",
+        "legacyItemId": "305405699685",
+        "localizeAspects": "{'Brand': 'Ruger', 'Type': 'Stock Adapter', 'For Gun Type': 'Rifle', 'Model': '90434', 'Fit': 'Fits any Ruger Rifle with the Modular Stock System', 'UPC': '736676904341'}",
+        "last_updated": "2026-01-15T08:20:01.464Z"
+    },
+    {
+        "_id": 313,
+        "user_id": 12,
+        "orderId": "15-14094-92974",
+        "legacyOrderId": "15-14094-92974",
+        "creationDate": "2026-01-15T01:37:40Z",
+        "orderFulfillmentStatus": "NOT_STARTED",
+        "orderPaymentStatus": "PAID",
+        "sellerId": "sozodealz",
+        "buyer": "{'username': 'jodyc110', 'taxAddress': {'city': 'houma', 'stateOrProvince': 'LA', 'postalCode': '70360-7305', 'countryCode': 'US'}, 'buyerRegistrationAddress': {'fullName': 'jody cenac', 'contactAddress': {'addressLine1': '9dallasdr', 'city': 'houma', 'stateOrProvince': 'LA', 'postalCode': '70360', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '9852170024'}, 'email': '43fff4a35501cfa8cf92@members.ebay.com'}}",
+        "cancelStatus": "{'cancelState': 'NONE_REQUESTED', 'cancelRequests': []}",
+        "pricingSummary": "{'priceSubtotal': {'value': '89.34', 'currency': 'USD'}, 'deliveryCost': {'value': '0.0', 'currency': 'USD'}, 'total': {'value': '89.34', 'currency': 'USD'}}",
+        "paymentSummary": "{'totalDueSeller': {'value': '86.91', 'currency': 'USD'}, 'refunds': [], 'payments': [{'paymentMethod': 'EBAY', 'paymentReferenceId': '420008_S', 'paymentDate': '2026-01-15T01:37:40.561Z', 'amount': {'value': '86.91', 'currency': 'USD'}, 'paymentStatus': 'PAID'}]}",
+        "fulfillmentStartInstructions": "[{'fulfillmentInstructionsType': 'SHIP_TO', 'minEstimatedDeliveryDate': '2026-01-16T08:00:00.000Z', 'maxEstimatedDeliveryDate': '2026-01-20T08:00:00.000Z', 'ebaySupportedFulfillment': False, 'shippingStep': {'shipTo': {'fullName': 'jody cenac', 'contactAddress': {'addressLine1': '9 dallas dr', 'city': 'houma', 'stateOrProvince': 'LA', 'postalCode': '70360-7305', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '9852170024'}, 'email': '43fff4a35501cfa8cf92@members.ebay.com'}, 'shippingServiceCode': 'ShippingMethodExpress'}}]",
+        "sku": "BSA22-412X40AOWRTB",
+        "title": "​BSA Optics Sweet 22 Rimfire Scope 4-12X40mm 30/30 Duplex Reticle - Black",
+        "lineItemCost": "{'value': '89.34', 'currency': 'USD'}",
+        "quantity": "1",
+        "listingMarketplaceId": "EBAY_US",
+        "purchaseMarketplaceId": "EBAY_US",
+        "itemLocation": "{'location': 'Fort Worth, Texas', 'countryCode': 'US', 'postalCode': '76155'}",
+        "image": "https://i.ebayimg.com/images/g/-58AAOSw5nJl4yNW/s-l1600.jpg",
+        "additionalImages": "[{'imageUrl': 'https://i.ebayimg.com/images/g/aBAAAOSwSFll4yNY/s-l1600.jpg', 'width': 1600, 'height': 1600}, {'imageUrl': 'https://i.ebayimg.com/images/g/pMcAAOSwuQhl4yNZ/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+        "mpn": null,
+        "description": "\"Designed with specific features tailored to the. 22LR caliber, this scope ensures optimal performance and accuracy with every shot. Specifically designed for. 22LR rifles, ideal for rimfire shooting.\"",
+        "categoryId": "31714",
+        "vendor_name": "Not Found",
+        "tracking_id": null,
+        "marketItemId": "305428586122",
+        "itemMarketStatus": null,
+        "market_name": "Ebay",
+        "legacyItemId": "305428586122",
+        "localizeAspects": "{'Features': 'Fogproof, Shock Proof, Waterproof, SHOCKPROOF', 'Size': '1\"', 'Power': '4-12X', 'Objective': '40mm', 'UPC': '793676089881', 'Brand': 'BSA', 'Mounting': 'Picatinny, Dovetail', 'Reticle Type': 'Duplex', 'Type': 'Hunting Scope', 'Lens Coating': 'Fully Coated', 'Color': 'Black', 'Objective Lens Diameter': '40 mm', 'Model': '22412X40AO', 'MPN': '22412X40AO', 'For Gun Type': 'Rifle', 'Range': '12x', 'Tube Diameter': '1 in'}",
+        "last_updated": "2026-01-15T07:59:56.809Z"
+    },
+    {
+        "_id": 314,
+        "user_id": 12,
+        "orderId": "18-14090-71697",
+        "legacyOrderId": "18-14090-71697",
+        "creationDate": "2026-01-15T01:07:46Z",
+        "orderFulfillmentStatus": "NOT_STARTED",
+        "orderPaymentStatus": "PAID",
+        "sellerId": "sozodealz",
+        "buyer": "{'username': 'rorha.us.5621ln7', 'taxAddress': {'city': 'Carlisle', 'stateOrProvince': 'IA', 'postalCode': '50047-3196', 'countryCode': 'US'}, 'buyerRegistrationAddress': {'fullName': 'Robert Hartz', 'contactAddress': {'addressLine1': '1208 east lacona ave', 'city': 'Des Moines', 'stateOrProvince': 'IA', 'postalCode': '50315', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '15153261468'}, 'email': '43ffd8a850c73fa56095@members.ebay.com'}}",
+        "cancelStatus": "{'cancelState': 'NONE_REQUESTED', 'cancelRequests': []}",
+        "pricingSummary": "{'priceSubtotal': {'value': '42.56', 'currency': 'USD'}, 'deliveryCost': {'value': '0.0', 'currency': 'USD'}, 'total': {'value': '42.56', 'currency': 'USD'}}",
+        "paymentSummary": "{'totalDueSeller': {'value': '41.22', 'currency': 'USD'}, 'refunds': [], 'payments': [{'paymentMethod': 'EBAY', 'paymentReferenceId': '420004_S', 'paymentDate': '2026-01-15T01:07:47.113Z', 'amount': {'value': '41.22', 'currency': 'USD'}, 'paymentStatus': 'PAID'}]}",
+        "fulfillmentStartInstructions": "[{'fulfillmentInstructionsType': 'SHIP_TO', 'minEstimatedDeliveryDate': '2026-01-16T08:00:00.000Z', 'maxEstimatedDeliveryDate': '2026-01-20T08:00:00.000Z', 'ebaySupportedFulfillment': False, 'shippingStep': {'shipTo': {'fullName': 'Robert Hartz', 'contactAddress': {'addressLine1': '2160 152nd Ln', 'city': 'Carlisle', 'stateOrProvince': 'IA', 'postalCode': '50047-3196', 'countryCode': 'US'}, 'primaryPhone': {'phoneNumber': '5153261468'}, 'email': '43ffd8a850c73fa56095@members.ebay.com'}, 'shippingServiceCode': 'ShippingMethodExpress'}}]",
+        "sku": "GOGPS-T800-75T",
+        "title": "GPS Suppressor Cover 7.5\" Heat Resistant for Suppressor Secure Tether Nylon Tan",
+        "lineItemCost": "{'value': '42.56', 'currency': 'USD'}",
+        "quantity": "1",
+        "listingMarketplaceId": "EBAY_US",
+        "purchaseMarketplaceId": "EBAY_US",
+        "itemLocation": "{'location': 'Fort Worth, Texas', 'countryCode': 'US', 'postalCode': '76155'}",
+        "image": "https://i.ebayimg.com/images/g/PEgAAOSwlFBnI9aY/s-l1600.jpg",
+        "additionalImages": "[{'imageUrl': 'https://i.ebayimg.com/images/g/F88AAOSwralnI9aZ/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+        "mpn": null,
+        "description": "\"The inner lining features heat-resistant fiberglass and silicone, ensuring that your suppressor remains protected even during prolonged shooting sessions. Reduces visual mirage caused by heat from suppressor during shooting.\"",
+        "categoryId": "73949",
+        "vendor_name": "rsr",
+        "tracking_id": null,
+        "marketItemId": "305874809295",
+        "itemMarketStatus": null,
+        "market_name": "Ebay",
+        "legacyItemId": "305874809295",
+        "localizeAspects": "{'Brand': 'GPS', 'Type': 'Cover', 'For Gun Type': 'Rifle', 'Color': 'Tan', 'Model': 'Suppressor Cover', 'Barrel Length': '7.5\"', 'UPC': '888151059968'}",
+        "last_updated": "2026-01-15T07:59:56.826Z"
+    },
+
+]
+
+// Ebay order item details response
+
+{
+    "ordered_details": {
+        "orderId": "25-12529-08476",
+        "legacyOrderId": "25-12529-08476",
+        "creationDate": "2025-01-06T15:35:35.000Z",
+        "lastModifiedDate": "2025-02-05T08:12:47.000Z",
+        "orderFulfillmentStatus": "FULFILLED",
+        "orderPaymentStatus": "PARTIALLY_REFUNDED",
+        "sellerId": "sozodealz",
+        "buyer": {
+            "username": "3gn-vegas",
+            "taxAddress": {
+                "city": "Las Vegas",
+                "stateOrProvince": "NV",
+                "postalCode": "89179-1438",
+                "countryCode": "US"
+            },
+            "buyerRegistrationAddress": {
+                "contactAddress": {
+                    "city": "Las Vegas",
+                    "stateOrProvince": "NV",
+                    "postalCode": "89179",
+                    "countryCode": "US"
+                }
+            }
+        },
+        "pricingSummary": {
+            "priceSubtotal": {
+                "value": "50.18",
+                "currency": "USD"
+            },
+            "deliveryCost": {
+                "value": "0.0",
+                "currency": "USD"
+            },
+            "total": {
+                "value": "50.18",
+                "currency": "USD"
+            }
+        },
+        "cancelStatus": {
+            "cancelState": "NONE_REQUESTED",
+            "cancelRequests": []
+        },
+        "paymentSummary": {
+            "totalDueSeller": {
+                "value": "13.56",
+                "currency": "USD"
+            },
+            "refunds": [
+                {
+                    "refundDate": "2025-01-20T19:37:36.393Z",
+                    "amount": {
+                        "value": "35.13",
+                        "currency": "USD"
+                    },
+                    "refundStatus": "REFUNDED",
+                    "refundReferenceId": "5282652702"
+                }
+            ],
+            "payments": [
+                {
+                    "paymentMethod": "EBAY",
+                    "paymentReferenceId": "420004_S",
+                    "paymentDate": "2025-01-06T15:35:37.958Z",
+                    "amount": {
+                        "value": "48.69",
+                        "currency": "USD"
+                    },
+                    "paymentStatus": "PAID"
+                }
+            ]
+        },
+        "fulfillmentStartInstructions": [
+            {
+                "fulfillmentInstructionsType": "SHIP_TO",
+                "minEstimatedDeliveryDate": "2025-01-08T08:00:00.000Z",
+                "maxEstimatedDeliveryDate": "2025-01-13T08:00:00.000Z",
+                "ebaySupportedFulfillment": false,
+                "shippingStep": {
+                    "shipTo": {
+                        "contactAddress": {
+                            "city": "Las Vegas",
+                            "stateOrProvince": "NV",
+                            "postalCode": "89179-1438",
+                            "countryCode": "US"
+                        }
+                    },
+                    "shippingServiceCode": "ShippingMethodExpress"
+                }
+            }
+        ],
+        "fulfillmentHrefs": [
+            "https://api.ebay.com/sell/fulfillment/v1/order/25-12529-08476/shipping_fulfillment/436292108447"
+        ],
+        "lineItems": [
+            {
+                "lineItemId": "10068730007925",
+                "legacyItemId": "305786180551",
+                "sku": "REP100-085",
+                "title": "Reptilia Riser Black Fits for Trijicon RMR Anodized Mount ROF 10MM  100-085",
+                "lineItemCost": {
+                    "value": "50.18",
+                    "currency": "USD"
+                },
+                "quantity": 1,
+                "soldFormat": "FIXED_PRICE",
+                "listingMarketplaceId": "EBAY_US",
+                "purchaseMarketplaceId": "EBAY_US",
+                "lineItemFulfillmentStatus": "FULFILLED",
+                "total": {
+                    "value": "50.18",
+                    "currency": "USD"
+                },
+                "deliveryCost": {
+                    "shippingCost": {
+                        "value": "0.0",
+                        "currency": "USD"
+                    }
+                },
+                "appliedPromotions": [],
+                "taxes": [],
+                "ebayCollectAndRemitTaxes": [
+                    {
+                        "taxType": "STATE_SALES_TAX",
+                        "amount": {
+                            "value": "4.2",
+                            "currency": "USD"
+                        },
+                        "collectionMethod": "NET"
+                    }
+                ],
+                "properties": {
+                    "buyerProtection": true
+                },
+                "refunds": [
+                    {
+                        "refundDate": "2025-01-20T19:37:36.393Z",
+                        "amount": {
+                            "value": "35.13",
+                            "currency": "USD"
+                        }
+                    }
+                ],
+                "lineItemFulfillmentInstructions": {
+                    "minEstimatedDeliveryDate": "2025-01-08T08:00:00.000Z",
+                    "maxEstimatedDeliveryDate": "2025-01-13T08:00:00.000Z",
+                    "shipByDate": "2025-01-09T07:59:59.000Z",
+                    "guaranteedDelivery": false
+                },
+                "itemLocation": {
+                    "location": "Fort Worth, Texas",
+                    "countryCode": "US",
+                    "postalCode": "76155"
+                }
+            }
+        ],
+        "ebayCollectAndRemitTax": true,
+        "salesRecordReference": "23151",
+        "totalFeeBasisAmount": {
+            "value": "54.38",
+            "currency": "USD"
+        },
+        "totalMarketplaceFee": {
+            "value": "1.49",
+            "currency": "USD"
+        }
+    },
+    "product_data": [
+        {
+            "id": 6228,
+            "title": "Reptilia Riser Black Fits for Trijicon RMR Anodized Mount ROF 10MM  100-085",
+            "description": "\"Made from high-quality anodized aluminum, this riser provides both strength and lightweight properties. Compatibility: Designed to fit Trijicon RMR optics. Color: Black anodized finish for durability and a sleek appearance.\"",
+            "location": "US",
+            "category_id": "52510",
+            "sku": "REP100-085",
+            "upc": "850002688818",
+            "mpn": "100-085",
+            "start_price": "1095.0",
+            "picture_detail": "https://i.ebayimg.com/images/g/e8kAAOSwDexm5-MF/s-l1600.jpg",
+            "postal_code": "761**",
+            "quantity": "98",
+            "return_profileID": "148084438019",
+            "return_profileName": "Default",
+            "payment_profileID": "148084374019",
+            "payment_profileName": "Default",
+            "shipping_profileID": "192943792019",
+            "shipping_profileName": "Default",
+            "bestOfferEnabled": true,
+            "listingType": "FixedPriceItem",
+            "gift": null,
+            "categoryMappingAllowed": null,
+            "item_specific_fields": "{'Type': 'Riser', 'Brand': 'Reptilia', 'Model': 'ROF', 'MPN': '100-085', 'Fit': 'Trijicon RMR', 'UPC': '850002688818'}",
+            "market_logos": "EBAY_US",
+            "market_item_id": "305786180551",
+            "user_id": 12,
+            "product_id": 37313,
+            "map_status": false,
+            "date_created": "2026-01-06",
+            "active": true,
+            "enable_charity": true,
+            "category": "Sporting Goods|Hunting|Scopes, Optics & Lasers|Scope Mounts & Accessories",
+            "city": "Fort Worth",
+            "cost": "51.08",
+            "country": "US",
+            "model": null,
+            "msrp": null,
+            "price": "838.89",
+            "percentage_markup": null,
+            "fixed_percentage_markup": null,
+            "fixed_markup": null,
+            "shipping_cost": null,
+            "shipping_height": null,
+            "shipping_width": null,
+            "thumbnailImage": "[{'imageUrl': 'https://i.ebayimg.com/images/g/qpwAAOSw2Wlm5-MG/s-l1600.jpg', 'width': 1600, 'height': 1600}]",
+            "total_product_cost": "848.89",
+            "us_size": null,
+            "min_profit_mergin": null,
+            "profit_margin": null,
+            "charity_id": 188477,
+            "donation_percentage": null,
+            "vendor_name": "Not Found",
+            "woo_category_name": null,
+            "market_name": "Ebay",
+            "last_updated": "2026-01-17T14:05:51.446Z",
+            "ends_status": "active",
+            "market_item_url": "https://www.ebay.com/itm/Reptilia-Riser-Black-Fits-for-Trijicon-RMR-Anodized-Mount-ROF-10MM-100-085-/305786180551",
+            "vendor_identifier": "",
+            "manual_map": false
+        }
+    ]
+}
+
+
+ebay: "https://i.postimg.cc/3xZSgy9Z/ebay.png",
+shopify: "https://i.postimg.cc/ZqRGnFZN/shopify.png",
+woocommerce: "https://i.postimg.cc/Wbfbs7QB/woocommerce.png",
+walmart: "https://i.postimg.cc/vZpK8RPJ/walmart.png",
+amazon: "https://i.postimg.cc/JzYvBDpB/amazon.png"
+
+
+
+

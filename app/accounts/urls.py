@@ -1,0 +1,36 @@
+
+from django.urls import path, include, re_path
+from . import views as vw
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('account-tier', vw.TierViewSet, basename='account-tier')
+
+urlpatterns = [
+    path('register/', vw.RegisterUserView.as_view(), name="register"),
+    path('verify_email/', vw.VerifyUserEmail.as_view(), name='verify_email'),
+    path('login/', vw.LoginUserView.as_view(), name='login'),
+    path('password_reset/', vw.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset_confirm/<uidb64>/<token>/', vw.PasswordResetConfirm.as_view(), name='password_reset_confirm'),
+    path('set_new_password/', vw.SetNewPassword.as_view(), name='set_new_password'),
+    path('logout/', vw.LogoutUserView.as_view(), name='logout'),
+    path('change-password/', vw.ChangePasswordView.as_view(), name='change-password'),
+    path('send-otp/', vw.SendOTP.as_view(), name='send_otp'),
+    path('create-subaccount/', vw.RegisterSubaccountView.as_view(), name="create-subaccount"),
+    path('user-profile/', vw.UserProfileView.as_view(), name='user-profile'),
+    re_path(r'^manage-user(?:/(?P<pk>\d+))?/$', vw.ManageUser.as_view(), name='manage-user'),
+    
+    path('tier-subscription/', vw.SubscriptionView.as_view(), name='tier-subsciption'),
+    path('stripe-webhook/', vw.stripe_webhook, name='stripe-webhook'),
+    path('verify-checkout/<str:session_id>/', vw.VerifyCheckoutSessionView.as_view(), name='verify-checkout'),
+    path('payment-history/', vw.PaymentView.as_view(), name='payment-history'),
+    
+    re_path(r'^subaccounts(?:/(?P<pk>\d+))?/$', vw.ManageSubAccountsView.as_view(), name='manage-subaccounts'),
+    path('delete-subaccount/<int:pk>/', vw.DeleteSubAccountView.as_view(), name='delete-subaccount'),
+    path('subaccount-activation/<int:pk>/', vw.SubaccountActivationView.as_view(), name='subaccount-activation'),
+    path('send-reminder/<int:pk>/', vw.SendReminder.as_view(), name='send-reminder'),
+
+    path('dashboard-analytics/', vw.DashboardAnalyticsView.as_view(), name='dashboard-analytics'),
+
+    path("", include(router.urls))
+]

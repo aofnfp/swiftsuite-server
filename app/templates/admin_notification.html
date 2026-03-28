@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Vendor Integration Request</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'UncutSans', sans-serif;
+      background-color: #FFFFFF;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #F8F5FF;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .content {
+      background-color: #FFFFFF;
+      padding: 20px;
+      border-radius: 5px;
+      color: #170045;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    td, th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #027840;
+      color: white;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://res.cloudinary.com/dtmhv0qae/image/upload/v1708637224/swiftsuitemain_narepe.png" alt="SwiftSuite Logo" width="180">
+    </div>
+    <div class="content">
+      <p><strong>New Vendor Integration Request</strong></p>
+      <p>The following vendor request has just been submitted:</p>
+
+      <table>
+        <tr><th>Vendor Name</th><td>{{vendor.name}}</td></tr>
+        <tr><th>Requested By</th><td>{{vendor.requested_by.first_name}} {{vendor.requested_by.last_name}} ({{vendor.requested_by.email}})</td></tr>
+        <tr><th>Request Type</th><td>{{vendor.request_type}}</td></tr>
+        <tr><th>Country</th><td>{{vendor.country}}</td></tr>
+        <tr><th>City</th><td>{{vendor.city}}</td></tr>
+        <tr><th>Created At</th><td>{{vendor.created_at}}</td></tr>
+      </table>
+
+      {% if vendor.request_type == "force" %}
+      <p><strong>⚡ Priority Action Required:</strong> This is a <em>Force Integration</em> request. Please ensure payment confirmation and start integration immediately.</p>
+      {% endif %}
+
+      <p>Best,<br>The SwiftSuite System</p>
+    </div>
+  </div>
+</body>
+</html>
