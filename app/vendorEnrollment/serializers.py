@@ -93,7 +93,7 @@ class EnrollmentSerializer(VendorDataMixin, serializers.ModelSerializer):
                     )
                     for item in filtered_data
                 ]
-                update_model.objects.bulk_create(updates)
+                update_model.objects.bulk_create(updates, ignore_conflicts=True)
 
         return enrollment
 

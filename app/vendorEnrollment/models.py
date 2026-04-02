@@ -1,5 +1,5 @@
 from django.db import models
-from vendorActivities.models import Vendors, Fragrancex, Lipsey, Cwr, Rsr, Zanders
+from vendorActivities.models import Vendors, Fragrancex, Lipsey, Cwr, Rsr, Zanders, Ssi
 from accounts.models import User
 
 
@@ -28,7 +28,7 @@ class Account(models.Model):
 class Enrollment(models.Model):
     vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    identifier = models.CharField(max_length=255, blank=False, null=False)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='enrollments')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -164,7 +164,7 @@ class ZandersUpdate(models.Model):
     
 class SsiUpdate(models.Model):
     vendor = models.ForeignKey(Vendors, on_delete=models.CASCADE)
-    product = models.ForeignKey(Zanders, on_delete=models.CASCADE)
+    product = models.ForeignKey(Ssi, on_delete=models.CASCADE)
     sku = models.CharField(max_length=255, blank=True, null=True)
     upc = models.CharField(max_length=255, blank=True, null=True)
     mpn = models.CharField(max_length=255, blank=True, null=True)

@@ -175,7 +175,7 @@ def identifier_filter(Enrollment, vendor_name, identifier, userid, model, update
             enrollment = Enrollment.objects.filter(user_id=userid, vendor__name=vendor_name).first()
             
         else:
-            enrollment = Enrollment.objects.get(user_id=userid, vendor__name=vendor_name, identifier=identifier)
+            enrollment = Enrollment.objects.get(user_id=userid, vendor__name__iexact=vendor_name, identifier=identifier)
             
         if not enrollment:
             print("Enrollment is None skipping processing.")
@@ -371,7 +371,7 @@ class VendorDataMixin:
         product_qs = model.objects.filter(**{f"{id_field}__in": item_ids})
         product_map = {getattr(p, id_field): p for p in product_qs}
 
-        update_qs = model_update.objects.filter(product__in=product_qs, enrollment=enrollment)
+        update_qs = model_update.objects.filter(product__in=product_qs, account=enrollment.account)
         update_map = {u.product.id: u for u in update_qs}
 
         fixed_markup = float(enrollment.fixed_markup)
