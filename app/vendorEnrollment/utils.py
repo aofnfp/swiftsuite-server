@@ -3,6 +3,8 @@ import pandas as pd
 from django.db import transaction
 from functools import wraps
 
+RSR_FIREARM_CATEGORY_IDS = {'1', '2', '3', '5', '6', '7'}
+
 def with_module(module_name):
     def decorator(view_func):
         @wraps(view_func)
@@ -395,6 +397,8 @@ class VendorDataMixin:
 
             shipping = float(product.avgshipcost or 0) if shipping_cost_avg else shipping_cost
             total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping, 2)
+            if supplier_name == 'rsr' and str(getattr(product, 'category_id', '') or '') in RSR_FIREARM_CATEGORY_IDS:
+                total_price = round(total_price + 5.00, 2)
 
             existing = update_map.get(product.id)
             msrp_value = getattr(product, msrp_field, None)
