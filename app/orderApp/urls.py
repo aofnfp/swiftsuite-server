@@ -1,4 +1,4 @@
-from .views import OrderEbay as eb_view, OrderSyncView, PlaceOrderView, TrackOrderView, PushTrackingView, GetFulfillmentView
+from .views import OrderEbay as eb_view, OrderSyncView, PlaceOrderView, TrackOrderView, PushTrackingView, GetFulfillmentView, HeldSkuView
 from django.urls import path, include
 from .order_clients.fx_order import place_order_fragrancex, getTracking_fragranceX
 from .order_clients.rsr_order import place_order_rsr, check_order_rsr, push_tracking, get_shipping_fulfillment
@@ -27,4 +27,7 @@ urlpatterns = [
     path('push_tracking/<str:order_id>/', PushTrackingView.as_view(), name='push_tracking'),
     path('get_fulfillment/<str:order_id>/', GetFulfillmentView.as_view(), name='get_fulfillment'),
     path('', include(router.urls)),
+
+    path('held-sku/<int:account_id>/', HeldSkuView.as_view(), name='held-sku'),
+    path('held-sku/<int:account_id>/<str:sku>/', HeldSkuView.as_view(), name='held-sku-detail'),
 ]

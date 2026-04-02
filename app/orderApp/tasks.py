@@ -4,7 +4,7 @@ from marketplaceApp.models import MarketplaceEnronment
 from celery import shared_task
 from celery.exceptions import Ignore
 from .utils import sync_ebay_order_with_local, create_vendor_order_log, manual_sync_order_with_local, background_refresh_access_token, push_tracking_to_ebay, push_tracking_to_ebay_xml
-from .models import OrdersOnEbayModel, VendorOrderLog
+from .models import OrdersOnEbayModel, VendorOrderLog, HeldSku
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
 from datetime import timedelta
@@ -92,6 +92,11 @@ def process_vendor_orders():
                 logger.warning(
                     f"Order {order.orderId} skipped: enrollment '{order_log.enrollment}' "
                     f"has send_orders=False."
+                )
+                continue
+            if HeldSku.objects.filter(account=order_log.enrollment.account, sku=order.sku).exists():
+                logger.warning(
+                    f"Order {order.orderId} skipped: SKU '{order.sku}' is on hold for account '{order_log.enrollment.account}'."
                 )
                 continue
             dispatch_order.delay(order_log.id)

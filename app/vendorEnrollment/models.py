@@ -38,6 +38,8 @@ class Enrollment(models.Model):
     fixed_markup = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     shipping_cost_average = models.BooleanField(default=False)
+    adult_signature = models.BooleanField(default=False)
+    adult_sig_threshold = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     stock_minimum = models.PositiveIntegerField(default=0)
     stock_maximum = models.PositiveIntegerField(default=0)
     update_inventory = models.BooleanField(default=False)

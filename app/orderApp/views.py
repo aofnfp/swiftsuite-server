@@ -9,7 +9,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from marketplaceApp.views import Ebay
 from .serializers import CancelOrderModelSerializer, OrderSyncSerializer
-from .models import OrdersOnEbayModel
+from .models import OrdersOnEbayModel, HeldSku
+from vendorEnrollment.models import Account
+from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventoryApp.models import InventoryModel
 from accounts.permissions import IsOwnerOrHasPermission
@@ -570,6 +572,35 @@ class GetFulfillmentView(APIView):
         response = requests.get(url, headers=headers)
 
         return JsonResponse(response.json(), status=response.status_code)
+
+
+class HeldSkuView(APIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrHasPermission]
+    module_name = 'orders'
+
+    def _get_account(self, request, account_id):
+        user = request.user
+        if user.is_subaccount:
+            user = user.parent
+        return get_object_or_404(Account, id=account_id, user=user)
+
+    def get(self, request, account_id):
+        account = self._get_account(request, account_id)
+        skus = HeldSku.objects.filter(account=account).values_list('sku', flat=True)
+        return Response({'held_skus': list(skus)}, status=status.HTTP_200_OK)
+
+    def post(self, request, account_id, sku):
+        account = self._get_account(request, account_id)
+        _, created = HeldSku.objects.get_or_create(account=account, sku=sku)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response({'message': 'SKU held', 'sku': sku}, status=status_code)
+
+    def delete(self, request, account_id, sku):
+        account = self._get_account(request, account_id)
+        deleted, _ = HeldSku.objects.filter(account=account, sku=sku).delete()
+        if not deleted:
+            return Response({'error': 'SKU not found in hold list'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'SKU released', 'sku': sku}, status=status.HTTP_200_OK)
     
         
 

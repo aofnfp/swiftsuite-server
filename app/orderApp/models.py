@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from vendorEnrollment.models import Account
 
 # Create your models here.
 class CancelOrderModel(models.Model):
@@ -121,3 +122,17 @@ class VendorOrderLog(models.Model):
                 name="unique_order_vendor"
             )
         ]
+
+
+class HeldSku(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='held_skus')
+    sku = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['account', 'sku'], name='unique_held_sku_per_account')
+        ]
+
+    def __str__(self):
+        return f"{self.account} - {self.sku}"
