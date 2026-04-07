@@ -56,9 +56,11 @@ class RsrOrderApiClient:
 
         first, second = parts[0], parts[1]
 
-        if len(first) < 2:
+        if len(first) < 2 and len(second) < 2:
+            return "Store Name" 
+        elif len(first) < 2:
             first = second
-        if len(second) < 2:
+        elif len(second) < 2:
             second = first
 
         return f"{first} {second}"
