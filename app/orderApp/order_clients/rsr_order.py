@@ -65,6 +65,12 @@ class RsrOrderApiClient:
 
         return f"{first} {second}"
 
+    def validate_phone(self, phone_number: str) -> bool:
+        if not phone_number:
+            return False
+        digits = re.sub(r"\D", "", phone_number)
+        return len(digits) >= 10
+
     def build_payload(self, order_details):
         # Ensure reference_id exists
         if not self.vendor_order_log.reference_id:
@@ -80,7 +86,18 @@ class RsrOrderApiClient:
                 break
 
         contact_address = ship_to.get("contactAddress", {})
-        phone = ship_to.get("primaryPhone", {})
+        ship_phone = ship_to.get("primaryPhone", {}).get("phoneNumber", "")
+
+        # Fall back to buyer's phone if shipTo phone is invalid
+        if not self.validate_phone(ship_phone):
+            ship_phone = (
+                order_details.get("buyer", {})
+                .get("buyerRegistrationAddress", {})
+                .get("primaryPhone", {})
+                .get("phoneNumber", "")
+            )
+
+        phone = ship_phone
 
         full_name = ship_to.get("fullName", "")
         # email = ship_to.get("email", self.user.email)
@@ -107,7 +124,7 @@ class RsrOrderApiClient:
             "ShipZip": contact_address.get("postalCode"),
 
             "ShipAccount": self.username,
-            "ContactNum": phone.get("phoneNumber"),
+            "ContactNum": phone,
             "PONum": self.vendor_order_log.reference_id,
             "Email": self.user.email,
 
