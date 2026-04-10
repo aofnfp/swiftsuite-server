@@ -943,9 +943,9 @@ class Ebay:
         custom_fields = {}
        
         # Put all the custom fields in the dictionary
-        # if item_specifics_fields:
-        #     for value in item_specifics_fields:
-        #         custom_fields[value] = validated_data[value]
+        for value in item_specifics_fields:
+            if value in validated_data:
+                custom_fields[value] = validated_data[value]
         
         # if upc is null, set it to empty string
         if validated_data['upc'] == 'Null':
