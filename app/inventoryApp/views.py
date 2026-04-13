@@ -791,10 +791,9 @@ class MarketInventory:
     # Function to test any api from ebay before implementation
     @with_module('inventory')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    @api_view(['PUT'])
+    @api_view(['GET'])
     def function_to_test_api(request, userid, item_id):
         eb = Ebay()   
-        minv = MarketInventory()
         # check if user is subaccount
         user = request.user
         if user:
@@ -802,134 +801,92 @@ class MarketInventory:
                 userid = user.parent_id
         
         access_token = eb.refresh_access_token(userid, "Ebay")
+        ebay_items = []
+        page_number = 1
+        total_pages = 1  # Initialize to 1 to enter the loop
         try:
-
-            product_info = get_object_or_404(InventoryModel, id=item_id)
-            serializer = InventoryModelUpdateSerializer(instance=product_info, data=request.data, partial=True)
-            if serializer.is_valid():
-                # get the serializer's data
-                validated_data = serializer.validated_data
-            else:
-                return Response(f"Invalid data: {serializer.errors}", status=status.HTTP_400_BAD_REQUEST)
-            # convert item specific field into xml
-            xml_item_specifics = minv.json_to_xml(validated_data["item_specific_fields"])
-            # Get the calculated minimum offer price of product going to ebay
-            try:
-                minimum_offer_price = eb.calculated_minimum_offer_price(validated_data['start_price'], validated_data['min_profit_mergin'], validated_data['profit_margin'])
-                if type(minimum_offer_price) != float:
-                    return Response(f"Failed to fetch data {type(minimum_offer_price)}", status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return Response(f"Failed to fetch data {str(e)}", status=status.HTTP_400_BAD_REQUEST)
-
-            # eBay Trading API endpoint
-            url = 'https://api.ebay.com/ws/api.dll'
-
+            url = "https://api.ebay.com/ws/api.dll"
             headers = {
-                'X-EBAY-API-CALL-NAME': 'ReviseItem',
-                'X-EBAY-API-SITEID': '0',  # Change this to your site ID, 0 is for US
-                'X-EBAY-API-COMPATIBILITY-LEVEL': '1081',  # eBay API version
-                'Content-Type': 'text/xml',
-                'Authorization': f'Bearer {access_token}'
+                "X-EBAY-API-CALL-NAME": "GetMyeBaySelling",
+                "X-EBAY-API-SITEID": "0",
+                "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+                "X-EBAY-API-IAF-TOKEN": access_token,
+                "Content-Type": "text/xml"
             }
-            try:
-                # Validate and format the thumbnail images for listing
-                picture_details = Element('PictureDetails')
-                # Main image
-                if validated_data.get("picture_detail"):
-                    SubElement(picture_details, 'PictureURL').text = validated_data["picture_detail"]
+            namespace = {'ebay': 'urn:ebay:apis:eBLBaseComponents'}
 
-                # Additional images
-                thumbnail_images = validated_data.get("thumbnailImage")
-
-                if thumbnail_images:
-                    if isinstance(thumbnail_images, str):
-                        thumbnail_images = json.loads(thumbnail_images)
-
-                    for img in thumbnail_images:
-                        if img and img.startswith("http"):
-                            SubElement(picture_details, 'PictureURL').text = img
-
-                # Convert the ElementTree to an XML string
-                item_image_url = tostring(picture_details, encoding='unicode')
-            except Exception as e:
-                return Response(f"Failed to process thumbnail images: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
-
-            # XML Body for ReviseItem request
-            body = f"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <ReviseItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Item>
-                    <ItemID>{validated_data['market_item_id']}</ItemID>
-                    <Title><![CDATA[{validated_data['title']}]]></Title>
-                    <Description><![CDATA[
-                        {validated_data['description']}
-                    ]]></Description>
-                    <globalId>EBAY-US</globalId>
-                    <PrimaryCategory>
-                        <CategoryID>{validated_data['category_id']}</CategoryID>
-                    </PrimaryCategory>
-                    <ConditionID>1000</ConditionID>
-                    <SKU>{validated_data['sku']}</SKU>  
-                    {f'''<ProductListingDetails>
-                        <UPC>{validated_data['upc']}</UPC>
-                    </ProductListingDetails>'''if validated_data['upc']!='Null' else ''}
-                    <!-- ... more PictureURL values allowed here ... -->
-                    {item_image_url}
+            while page_number <= total_pages:
+                items = []
+                # XML request body for the GetMyeBaySelling API with current page number
+                body = f"""<?xml version="1.0" encoding="utf-8"?>
+                        <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                            <RequesterCredentials>
+                                <eBayAuthToken>{access_token}</eBayAuthToken>
+                            </RequesterCredentials>
+                            <ActiveList>
+                                <Pagination>
+                                    <EntriesPerPage>100</EntriesPerPage>
+                                    <PageNumber>{page_number}</PageNumber>
+                                </Pagination>
+                            </ActiveList>
+                        </GetMyeBaySellingRequest>"""
+                            
+                # Sending the request
+                response = requests.post(url, headers=headers, data=body)               
+                if response.status_code == 200:
+                    # Decode response content if it's in byte format
+                    xml_content = response.content.decode('utf-8')
                     
-                    <!-- ... Item specifics are placed here ... -->
-                    {xml_item_specifics}
-                    
-                    <autoPay>false</autoPay>
-                    <PostalCode>{validated_data['postal_code']}</PostalCode>
-                    <Location>{validated_data['location']}</Location>
-                    <Country>US</Country>
-                    <Currency>USD</Currency>
-                    <ListingDuration>GTC</ListingDuration>
-                    <SellerProfiles>
-                        <SellerPaymentProfile>
-                            <PaymentProfileID>{validated_data['payment_profileID']}</PaymentProfileID>
-                        </SellerPaymentProfile>
-                        <SellerReturnProfile>
-                            <ReturnProfileID>{validated_data['return_profileID']}</ReturnProfileID>
-                        </SellerReturnProfile>
-                        <SellerShippingProfile>
-                            <ShippingProfileID>{validated_data['shipping_profileID']}</ShippingProfileID>
-                        </SellerShippingProfile>
-                    </SellerProfiles>
-                    <StartPrice>{validated_data['start_price']}</StartPrice>
-                    <Quantity>{validated_data['quantity']}</Quantity>
-                    <ListingDetails>
-                        <BestOfferAutoAcceptPrice> {minimum_offer_price} </BestOfferAutoAcceptPrice>
-                        <MinimumBestOfferPrice> {minimum_offer_price} </MinimumBestOfferPrice>
-                    </ListingDetails>
-                    <listingInfo>
-                        <bestOfferEnabled>{validated_data['bestOfferEnabled']}</bestOfferEnabled>
-                        <buyItNowAvailable>false</buyItNowAvailable>
-                        <listingType>{validated_data['listingType']}</listingType>
-                        <gift>{validated_data['gift']}</gift>
-                        <watchCount>6</watchCount>
-                    </listingInfo>
-                    <CategoryMappingAllowed>{validated_data['categoryMappingAllowed']}</CategoryMappingAllowed>
-                    <IsMultiVariationListing>true</IsMultiVariationListing>
-                    <TopRatedListing>false</TopRatedListing>
-                </Item>
-                </ReviseItemRequest>"""
-            # Make the POST request
-            response = requests.post(url, headers=headers, data=body)
+                    # Parsing the XML response
+                    root = ET.fromstring(xml_content)
 
-            if response.status_code == 200:
-                serializer.save()
-                return Response(f"Message returned: {response.text}", status=status.HTTP_200_OK)
-            else:
-                return Response(f"Error: {response.text}", status=status.HTTP_400_BAD_REQUEST)
+                    # Get the total number of pages from the response
+                    total_pages_element = root.find(".//ebay:PaginationResult/ebay:TotalNumberOfPages", namespaces=namespace)
+                    if total_pages_element is not None:
+                        total_pages = int(total_pages_element.text)                   
+
+                    # Loop through each item in the current page
+                    for item in root.findall(".//ebay:ItemArray/ebay:Item", namespaces=namespace):
+                        item_id = item.find("ebay:ItemID", namespaces=namespace).text if item.find("ebay:ItemID", namespaces=namespace) is not None else "Not Found"
+                        sku = item.find("ebay:SKU", namespaces=namespace).text if item.find("ebay:SKU", namespaces=namespace) is not None else "N/A"
+                        title = item.find("ebay:Title", namespaces=namespace).text if item.find("ebay:Title", namespaces=namespace) is not None else "No Title"
+                        description = item.find("ebay:Description", namespaces=namespace).text if item.find("ebay:Description", namespaces=namespace) is not None else "No Description"
+                        price = item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace) is not None else "No Price"
+                        quantity = item.find("ebay:Quantity", namespaces=namespace).text if item.find("ebay:Quantity", namespaces=namespace) is not None else "0"
+                        quantity_sold = item.find("ebay:SellingStatus/ebay:QuantitySold", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:QuantitySold", namespaces=namespace) is not None else "0"
+                        ListingDuration = item.find("ebay:ListingDuration", namespaces=namespace).text if item.find("ebay:ListingDuration", namespaces=namespace) is not None else "N/A"
+                        Listingtype = item.find("ebay:ListingType", namespaces=namespace).text if item.find("ebay:ListingType", namespaces=namespace) is not None else "N/A"
+                        PictureDetails = item.find("ebay:PictureDetails/ebay:GalleryURL", namespaces=namespace).text if item.find("ebay:PictureDetails/ebay:GalleryURL", namespaces=namespace) is not None else "N/A"
+                        ShippingProfileID = item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileID", namespaces=namespace) is not None else "N/A"
+                        ShippingProfileName = item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace) is not None else "N/A"
+                        ReturnProfileID = item.find("ebay:SellerProfiles/ebay:SellerReturnProfile/ebay:ReturnProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileID", namespaces=namespace) is not None else "N/A"
+                        ReturnProfileName = item.find("ebay:SellerProfiles/ebay:SellerReturnProfile/ebay:ReturnProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerShippingProfile/ebay:ShippingProfileName", namespaces=namespace) is not None else "N/A"
+                        PaymentProfileID = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileID", namespaces=namespace) is not None else "N/A"
+                        PaymentProfileName = item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace).text if item.find("ebay:SellerProfiles/ebay:SellerPaymentProfile/ebay:PaymentProfileName", namespaces=namespace) is not None else "N/A"
+                        item_market_url = item.find(".//ebay:ViewItemURL", namespaces=namespace).text if item.find(".//ebay:ViewItemURL", namespaces=namespace) is not None else "N/A"
+                        # Extract thumbnail images
+                        images = [pic.text for pic in item.findall(".//ebay:PictureDetails/ebay:PictureURL", namespaces=namespace)] if item.findall(".//ebay:PictureDetails/ebay:PictureURL", namespaces=namespace) is not None else []
+                        
+                        items.append([item_id, sku, title, price, quantity, ListingDuration, Listingtype, PictureDetails, ShippingProfileID, ShippingProfileName, ReturnProfileID, ReturnProfileName, PaymentProfileID, PaymentProfileName, item_market_url, images, description])
+                else:
+                    if response.json().get('errors')[0]['errorId'] == 1001:
+                        return "access_token expired"
+    
+                # If no more items, break out of the loop
+                if not items:
+                    break
+
+                # Add retrieved items to the list
+                ebay_items.extend(items)
             
+                # Increment the page number for the next iteration
+                page_number += 1
+
         except requests.exceptions.ConnectTimeout as e:
-            return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)       
+             return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)     
         except Exception as ea:
             return Response(f"Failed to update items. {ea}", status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"ebay_items":ebay_items}, safe=False, status=status.HTTP_200_OK)
         
 
 
