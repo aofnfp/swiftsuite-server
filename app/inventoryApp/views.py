@@ -833,20 +833,19 @@ class MarketInventory:
                 </GetSellerListRequest>
                 """
             response = requests.post(url, headers=headers, data=xml_body)
-                # Parse the XML
-            # namespace = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
-            # root = ET.fromstring(response.text)
-            # items = root.findall('.//ns:Item', namespace)
-            # ebay_items = []
-            # for item in items:
-            #     item_id = item.find('ns:ItemID', namespace).text if item.find('ns:ItemID', namespace) is not None else None
-            #     title = item.find('ns:Title', namespace).text if item.find('ns:Title', namespace) is not None else None
-            #     ebay_items.append({"item_id": item_id, "title": title})
+            # Parse the XML
+            namespace = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
+            root = ET.fromstring(response.text)
+            items = root.findall('.//ns:Item', namespace)
+            ebay_items = []
+            for item in items:
+                description = item.find('ns:Description', namespace).text if item.find('ns:Description', namespace) is not None else None
+
         except requests.exceptions.ConnectTimeout as e:
              return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)     
         except Exception as ea:
             return Response(f"Failed to update items. {ea}", status=status.HTTP_400_BAD_REQUEST)
-        return JsonResponse({"ebay_items":response.text}, safe=False, status=status.HTTP_200_OK)
+        return JsonResponse({"ebay_items":description}, safe=False, status=status.HTTP_200_OK)
         
 
 
