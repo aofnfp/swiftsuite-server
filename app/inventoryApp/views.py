@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os, requests, json, ast
 from rest_framework.response import Response
 from rest_framework import status
@@ -812,19 +813,25 @@ class MarketInventory:
                 "Content-Type": "text/xml"
             }
 
+            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
             xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-            <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <RequesterCredentials>
-                <eBayAuthToken>{access_token}</eBayAuthToken>
-            </RequesterCredentials>
-            <Pagination>
-                <EntriesPerPage>10</EntriesPerPage>
-                <PageNumber>1</PageNumber>
-            </Pagination>
-            <DetailLevel>ReturnAll</DetailLevel>
-            </GetSellerListRequest>
-            """
+                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>REAL_LEGACY_AUTH_TOKEN_HERE</eBayAuthToken>
+                </RequesterCredentials>
 
+                <StartTimeFrom>{start_time_from}</StartTimeFrom>
+                <StartTimeTo>{start_time_to}</StartTimeTo>
+
+                <Pagination>
+                    <EntriesPerPage>10</EntriesPerPage>
+                    <PageNumber>1</PageNumber>
+                </Pagination>
+
+                <DetailLevel>ReturnAll</DetailLevel>
+                </GetSellerListRequest>
+                """
             response = requests.post(url, headers=headers, data=xml_body)
                 # Parse the XML
             # namespace = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
