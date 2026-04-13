@@ -818,7 +818,7 @@ class MarketInventory:
             xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
                 <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
                 <RequesterCredentials>
-                    <eBayAuthToken>REAL_LEGACY_AUTH_TOKEN_HERE</eBayAuthToken>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
                 </RequesterCredentials>
 
                 <StartTimeFrom>{start_time_from}</StartTimeFrom>
