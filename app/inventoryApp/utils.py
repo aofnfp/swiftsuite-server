@@ -1,7 +1,6 @@
-import json, requests, time, html
+import json, requests, time
 from django.utils import timezone
-from ebaysdk.exception import ConnectionError
-from .models import InventoryModel, MarketPlaceUpdateLog, PriceQuantityUpdateLog
+from .models import InventoryModel
 from xml.etree import ElementTree as ET
 from vendorEnrollment.models import CwrUpdate, FragrancexUpdate, LipseyUpdate, RsrUpdate, SsiUpdate, ZandersUpdate, Generalproducttable, Enrollment
 from marketplaceApp.models import MarketplaceEnronment
@@ -72,13 +71,7 @@ def get_all_items_on_ebay(enroll_id):
                     item_id = item.find("ebay:ItemID", namespaces=namespace).text if item.find("ebay:ItemID", namespaces=namespace) is not None else "Not Found"
                     sku = item.find("ebay:SKU", namespaces=namespace).text if item.find("ebay:SKU", namespaces=namespace) is not None else "N/A"
                     title = item.find("ebay:Title", namespaces=namespace).text if item.find("ebay:Title", namespaces=namespace) is not None else "No Title"
-                    # description = item.find("ebay:Description", namespaces=namespace).text if item.find("ebay:Description", namespaces=namespace) is not None else "No Description"
-                    desc_elem = item.find("ebay:Description", namespaces=namespace)
-                    if desc_elem is not None:
-                        raw_description = desc_elem.text or ""
-                        description = html.unescape(raw_description)
-                    else:
-                        description = "No Description"
+                    description = item.find('ebay:Description', namespaces=namespace).text if item.find('ebay:Description', namespaces=namespace) is not None else None
                     price = item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace) is not None else "No Price"
                     quantity = item.find("ebay:Quantity", namespaces=namespace).text if item.find("ebay:Quantity", namespaces=namespace) is not None else "0"
                     quantity_sold = item.find("ebay:SellingStatus/ebay:QuantitySold", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:QuantitySold", namespaces=namespace) is not None else "0"
