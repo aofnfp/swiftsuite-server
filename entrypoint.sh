@@ -122,7 +122,7 @@ case "$1" in
         exec celery -A swiftsuite worker \
             --queues=heavy-inv \
             --loglevel=info \
-            --pool=solo \
+            --pool=gevent \
             --concurrency=3 \
     ;;
 
