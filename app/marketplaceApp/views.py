@@ -205,10 +205,10 @@ class Ebay:
     def make_connection_to_get_auth_code(request, market_name):
         eb = Ebay()
          # check if user is subaccount
-        user = request.user
-        if user:
-            if not user.parent_id:
-                userid = user.parent_id
+        # user = request.user
+        # if user:
+        #     if not user.parent_id:
+        #         userid = user.parent_id
 
         # Construct the authorization URL
         authorization_params = {
