@@ -41,6 +41,7 @@ def map_vendor_data_to_general(vendor_name, product, user):
                 'price': product.product.currentprice,
                 'model': product.product.model,
                 'manufacturer': product.product.manufacturer,
+                'brand': product.product.manufacturer,
                 'shipping_weight': product.product.shippingweight,
                 'shipping_length': product.product.packagelength,
                 'shipping_width': product.product.packagewidth,
@@ -397,8 +398,9 @@ class VendorDataMixin:
 
             shipping = float(product.avgshipcost or 0) if shipping_cost_avg else shipping_cost
             total_price = round(price + fixed_markup + ((percentage_markup / 100) * price) + shipping, 2)
-            if supplier_name == 'rsr' and str(getattr(product, 'category_id', '') or '') in RSR_FIREARM_CATEGORY_IDS:
-                total_price = round(total_price + 5.00, 2)
+
+            # if enrollment.adult_signature and price >= enrollment.adult_sig_threshold:
+            #     total_price = round(total_price + 5.00, 2)
 
             existing = update_map.get(product.id)
             msrp_value = getattr(product, msrp_field, None)
