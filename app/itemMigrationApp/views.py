@@ -24,7 +24,7 @@ last_request_time = 0
 
 
 # ---------------------------------------
-# 🔁 Rate Limiter
+#  Rate Limiter
 # ---------------------------------------
 def rate_limit():
     global last_request_time
@@ -36,7 +36,7 @@ def rate_limit():
 
 
 # ---------------------------------------
-# 🔁 Retry wrapper
+#  Retry wrapper
 # ---------------------------------------
 @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=10))
 def safe_request(method, url, **kwargs):
@@ -175,7 +175,7 @@ def create_inventory_item(payload, userid):
 
 
 # ---------------------------------------
-# 🔁 Single Listing Migration
+#  Single Listing Migration
 # ---------------------------------------
 def migrate_single_listing(userid, listing):
     user_data = MarketplaceEnronment.objects.get(user_id=userid, marketplace_name="Ebay")
@@ -198,7 +198,7 @@ def migrate_single_listing(userid, listing):
 
 
 # ---------------------------------------
-# 🔥 Bulk Migration Controller
+#  Bulk Migration Controller
 # ---------------------------------------
 def migrate_bulk(userid, listings):
     for listing in listings:

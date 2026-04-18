@@ -190,7 +190,7 @@ def download_item_update_market_price_quantity():
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
                     # Update the market url on inventory
-                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), description=json.dumps(item.get("description")))
+                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
                     logger.info(f"Ebay item {item.get('ebay_item_id')} already exists in inventory for user {user.user_id}, updated market url and description")
                 except Exception as e:
                     logger.info(f"Ebay item {item.get('ebay_item_id')} does not exist in inventory for user {user.user_id}, trying to fetch product details and insert into inventory")
