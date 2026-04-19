@@ -263,14 +263,14 @@ def manually_download_item_from_marketplace_syc_update(userid):
             
             # Loop through each item and update or insert into InventoryModel
             for item in all_ebay_items:                         
-                # try:
-                # If item already exists, skip to next item
-                existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
-                # Update the market url on inventory
-                InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), description=json.dumps(item.get("description")))
-                logger.info(f"Ebay item {item.get('ebay_item_id')} already exists in inventory for user {user.user_id}, updated market url and description")
-                # except Exception as e:
-                #     logger.info(f"Ebay item {item.get('ebay_item_id')} does not exist in inventory for user {user.user_id}, trying to fetch product details and insert into inventory")
+                try:
+                    # If item already exists, skip to next item
+                    existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
+                    # Update the market url on inventory
+                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), description=json.dumps(item.get("description")))
+                    logger.info(f"Ebay item {item.get('ebay_item_id')} already exists in inventory for user {user.user_id}, updated market url and description")
+                except Exception as e:
+                    logger.info(f"Ebay item {item.get('ebay_item_id')} does not exist in inventory for user {user.user_id}, trying to fetch product details and insert into inventory")
             # # Fetch all eBay items by walking backward in 30-day windows
             # ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
             # if ebay_downloaded_items == None:
