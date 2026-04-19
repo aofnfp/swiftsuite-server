@@ -802,45 +802,35 @@ class MarketInventory:
                 userid = user.parent_id
         
         access_token = eb.refresh_access_token(userid, "Ebay")
-
         try:
             url = "https://api.ebay.com/ws/api.dll"
 
             headers = {
-                "X-EBAY-API-CALL-NAME": "GetSellerList",
+                "X-EBAY-API-CALL-NAME": "GetItem",
                 "X-EBAY-API-SITEID": "0",
                 "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+                "X-EBAY-API-IAF-TOKEN": access_token,
                 "Content-Type": "text/xml"
             }
 
-            start_time_from = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            start_time_to = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
+            body = f"""<?xml version="1.0" encoding="utf-8"?>
+                    <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                    <ItemID>{item_id}</ItemID>
+                    <DetailLevel>ReturnAll</DetailLevel>
+                    <!-- IMPORTANT -->
+                    <IncludeItemSpecifics>true</IncludeItemSpecifics>
+                    <IncludeWatchCount>false</IncludeWatchCount>
+                    </GetItemRequest>
+                    """
 
-                <StartTimeFrom>{start_time_from}</StartTimeFrom>
-                <StartTimeTo>{start_time_to}</StartTimeTo>
-
-                <Pagination>
-                    <EntriesPerPage>10</EntriesPerPage>
-                    <PageNumber>1</PageNumber>
-                </Pagination>
-
-                <DetailLevel>ReturnAll</DetailLevel>
-                </GetSellerListRequest>
-                """
-            response = requests.post(url, headers=headers, data=xml_body)
-            # Parse the XML
-            namespace = {'ns': 'urn:ebay:apis:eBLBaseComponents'}
-            root = ET.fromstring(response.text)
-            items = root.findall('.//ns:Item', namespace)
-            ebay_items = []
-            for item in items:
-                description = item.find('ns:Description', namespace).text if item.find('ns:Description', namespace) is not None else None
-
+            response = requests.post(url, headers=headers, data=body)
+            if response.status_code == 200:
+                root = ET.fromstring(response.text)
+                description = root.findtext(
+                    ".//e:Description",
+                    default=None,
+                    namespaces={"e": "urn:ebay:apis:eBLBaseComponents"}
+                )
         except requests.exceptions.ConnectTimeout as e:
              return Response(f"Connection timed out. {e}", status=status.HTTP_400_BAD_REQUEST)     
         except Exception as ea:

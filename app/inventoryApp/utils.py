@@ -40,17 +40,18 @@ def get_all_items_on_ebay(enroll_id):
             items = []
             # XML request body for the GetMyeBaySelling API with current page number
             body = f"""<?xml version="1.0" encoding="utf-8"?>
-                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                <RequesterCredentials>
-                    <eBayAuthToken>{access_token}</eBayAuthToken>
-                </RequesterCredentials>
-                <Pagination>
-                    <EntriesPerPage>10</EntriesPerPage>
-                    <PageNumber>1</PageNumber>
-                </Pagination>
-                <DetailLevel>ReturnAll</DetailLevel>
-                </GetSellerListRequest>
-                """
+                    <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                        <RequesterCredentials>
+                            <eBayAuthToken>{access_token}</eBayAuthToken>
+                        </RequesterCredentials>
+                        <ActiveList>
+                            <Pagination>
+                                <EntriesPerPage>100</EntriesPerPage>
+                                <PageNumber>{page_number}</PageNumber>
+                            </Pagination>
+                        </ActiveList>
+                        <DetailLevel>ReturnAll</DetailLevel>
+                    </GetMyeBaySellingRequest>"""
                         
             # Sending the request
             response = requests.post(url, headers=headers, data=body)               
@@ -110,7 +111,62 @@ def get_all_items_on_ebay(enroll_id):
     
     return ebay_items
       
-     
+
+# Get full descriptions of the item from eBay using GetItem API, which has a rate limit of 5 calls per second
+@sleep_and_retry
+@limits(calls=5, period=1)
+def get_item_full_description(enroll_id, item_id):
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  
+        access_token = user_data.access_token
+    except Exception as e:
+        print(f"Failed to fetch access token {e}")
+        return None
+    
+
+    url = "https://api.ebay.com/ws/api.dll"
+
+    headers = {
+        "X-EBAY-API-CALL-NAME": "GetItem",
+        "X-EBAY-API-SITEID": "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        "X-EBAY-API-IAF-TOKEN": access_token,
+        "Content-Type": "text/xml"
+    }
+
+    body = f"""<?xml version="1.0" encoding="utf-8"?>
+            <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+            <ItemID>{item_id}</ItemID>
+            <DetailLevel>ReturnAll</DetailLevel>
+            <!-- IMPORTANT -->
+            <IncludeItemSpecifics>true</IncludeItemSpecifics>
+            <IncludeWatchCount>false</IncludeWatchCount>
+            </GetItemRequest>
+            """
+
+    response = requests.post(url, headers=headers, data=body)
+    if response.status_code == 429:  # Rate limit hit
+        retry_after = int(response.headers.get('Retry-After', 2))
+        time.sleep(retry_after)
+        return get_item_full_description(enroll_id, item_id)
+    if response.status_code == 200:
+        root = ET.fromstring(response.text)
+        description = root.findtext(
+            ".//e:Description",
+            default=None,
+            namespaces={"e": "urn:ebay:apis:eBLBaseComponents"}
+        )
+        return description
+        # xml_content = response.content.decode('utf-8')
+        # root = ET.fromstring(xml_content)
+        # description = root.find(".//{urn:ebay:apis:eBLBaseComponents}Description")
+        # return description.text if description is not None else None
+    
+
+
+    
+
+
 # Function to get details of specific item listing on ebay
 # Limit to 5 calls per second (eBay's typical limit)
 @sleep_and_retry
