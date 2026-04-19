@@ -72,13 +72,7 @@ def get_all_items_on_ebay(enroll_id):
                     item_id = item.find("ebay:ItemID", namespaces=namespace).text if item.find("ebay:ItemID", namespaces=namespace) is not None else "Not Found"
                     sku = item.find("ebay:SKU", namespaces=namespace).text if item.find("ebay:SKU", namespaces=namespace) is not None else "N/A"
                     title = item.find("ebay:Title", namespaces=namespace).text if item.find("ebay:Title", namespaces=namespace) is not None else "No Title"
-                    
-                    desc_elem = item.find("ebay:Description", namespaces=namespace)
-                    if desc_elem is not None:
-                        raw_description = "".join(desc_elem.itertext())
-                        description = html.unescape(raw_description.strip())
-                    else:
-                        description = "No Description"
+                    description = get_item_full_description(enroll_id, item_id)
                     # description = item.find('ebay:Description', namespaces=namespace).text if item.find('ebay:Description', namespaces=namespace) is not None else None
                     price = item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace).text if item.find("ebay:SellingStatus/ebay:CurrentPrice", namespaces=namespace) is not None else "No Price"
                     quantity = item.find("ebay:Quantity", namespaces=namespace).text if item.find("ebay:Quantity", namespaces=namespace) is not None else "0"
@@ -130,49 +124,44 @@ def get_item_full_description(enroll_id, item_id):
         print(f"Failed to fetch access token {e}")
         return None
     
+    try:
+        url = "https://api.ebay.com/ws/api.dll"
 
-    url = "https://api.ebay.com/ws/api.dll"
+        headers = {
+            "X-EBAY-API-CALL-NAME": "GetItem",
+            "X-EBAY-API-SITEID": "0",
+            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+            "X-EBAY-API-IAF-TOKEN": access_token,
+            "Content-Type": "text/xml"
+        }
 
-    headers = {
-        "X-EBAY-API-CALL-NAME": "GetItem",
-        "X-EBAY-API-SITEID": "0",
-        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-        "X-EBAY-API-IAF-TOKEN": access_token,
-        "Content-Type": "text/xml"
-    }
+        body = f"""<?xml version="1.0" encoding="utf-8"?>
+                <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <ItemID>{item_id}</ItemID>
+                <DetailLevel>ReturnAll</DetailLevel>
+                <!-- IMPORTANT -->
+                <IncludeItemSpecifics>true</IncludeItemSpecifics>
+                <IncludeWatchCount>false</IncludeWatchCount>
+                </GetItemRequest>
+                """
 
-    body = f"""<?xml version="1.0" encoding="utf-8"?>
-            <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-            <ItemID>{item_id}</ItemID>
-            <DetailLevel>ReturnAll</DetailLevel>
-            <!-- IMPORTANT -->
-            <IncludeItemSpecifics>true</IncludeItemSpecifics>
-            <IncludeWatchCount>false</IncludeWatchCount>
-            </GetItemRequest>
-            """
-
-    response = requests.post(url, headers=headers, data=body)
-    if response.status_code == 429:  # Rate limit hit
-        retry_after = int(response.headers.get('Retry-After', 2))
-        time.sleep(retry_after)
-        return get_item_full_description(enroll_id, item_id)
-    if response.status_code == 200:
-        root = ET.fromstring(response.text)
-        description = root.findtext(
-            ".//e:Description",
-            default=None,
-            namespaces={"e": "urn:ebay:apis:eBLBaseComponents"}
-        )
+        response = requests.post(url, headers=headers, data=body)
+        if response.status_code == 429:  # Rate limit hit
+            retry_after = int(response.headers.get('Retry-After', 2))
+            time.sleep(retry_after)
+            return get_item_full_description(enroll_id, item_id)
+        if response.status_code == 200:
+            root = ET.fromstring(response.text)
+            description = root.findtext(
+                ".//e:Description",
+                default=None,
+                namespaces={"e": "urn:ebay:apis:eBLBaseComponents"}
+            )
         return description
-        # xml_content = response.content.decode('utf-8')
-        # root = ET.fromstring(xml_content)
-        # description = root.find(".//{urn:ebay:apis:eBLBaseComponents}Description")
-        # return description.text if description is not None else None
-    
-
-
-    
-
+    except requests.exceptions.ConnectTimeout as e:
+        return None
+    except Exception as e:
+        return None
 
 # Function to get details of specific item listing on ebay
 # Limit to 5 calls per second (eBay's typical limit)
