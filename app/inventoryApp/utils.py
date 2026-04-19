@@ -40,18 +40,17 @@ def get_all_items_on_ebay(enroll_id):
             items = []
             # XML request body for the GetMyeBaySelling API with current page number
             body = f"""<?xml version="1.0" encoding="utf-8"?>
-                    <GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-                        <RequesterCredentials>
-                            <eBayAuthToken>{access_token}</eBayAuthToken>
-                        </RequesterCredentials>
-                        <ActiveList>
-                            <Pagination>
-                                <EntriesPerPage>100</EntriesPerPage>
-                                <PageNumber>{page_number}</PageNumber>
-                            </Pagination>
-                        </ActiveList>
-                        <DetailLevel>ReturnAll</DetailLevel>
-                    </GetMyeBaySellingRequest>"""
+                <GetSellerListRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                <RequesterCredentials>
+                    <eBayAuthToken>{access_token}</eBayAuthToken>
+                </RequesterCredentials>
+                <Pagination>
+                    <EntriesPerPage>10</EntriesPerPage>
+                    <PageNumber>1</PageNumber>
+                </Pagination>
+                <DetailLevel>ReturnAll</DetailLevel>
+                </GetSellerListRequest>
+                """
                         
             # Sending the request
             response = requests.post(url, headers=headers, data=body)               
