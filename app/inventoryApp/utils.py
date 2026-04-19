@@ -263,14 +263,14 @@ def manually_download_item_from_marketplace_syc_update(userid):
             
             # Loop through each item and update or insert into InventoryModel
             for item in all_ebay_items:                         
-                try:
-                    # If item already exists, skip to next item
-                    existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
-                    # Update the market url on inventory
-                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), description=json.dumps(item.get("description")))
-                    logger.info(f"Ebay item {item.get('ebay_item_id')} already exists in inventory for user {user.user_id}, updated market url and description")
-                except Exception as e:
-                    logger.info(f"Ebay item {item.get('ebay_item_id')} does not exist in inventory for user {user.user_id}, trying to fetch product details and insert into inventory")
+                # try:
+                # If item already exists, skip to next item
+                existing_item = InventoryModel.objects.get(user_id=user.user_id, market_item_id=item.get("ebay_item_id"))
+                # Update the market url on inventory
+                InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), description=json.dumps(item.get("description")))
+                logger.info(f"Ebay item {item.get('ebay_item_id')} already exists in inventory for user {user.user_id}, updated market url and description")
+                # except Exception as e:
+                #     logger.info(f"Ebay item {item.get('ebay_item_id')} does not exist in inventory for user {user.user_id}, trying to fetch product details and insert into inventory")
             # # Fetch all eBay items by walking backward in 30-day windows
             # ebay_downloaded_items = get_all_items_on_ebay(enroll_id=user._id)
             # if ebay_downloaded_items == None:
@@ -312,30 +312,30 @@ def manually_download_item_from_marketplace_syc_update(userid):
                 #         continue
 
 
-        elif user.marketplace_name == "Woocommerce":
-            # Fetch all item from Woocommerce
-            all_woocommerce_items = get_woocommerce_existing_products(userid)
-            if all_woocommerce_items ==None:
-                logger.info(f"Woocommerce inventory download failed with error: {all_woocommerce_items}")
-                continue
-            try:
-                for item in all_woocommerce_items:
-                    # If item already exists, skip to next item
-                    existing_item = InventoryModel.objects.get(user_id=userid, market_item_id=item.get("id"))
-                    InventoryModel.objects.filter(user_id=userid, id=existing_item.id).update(market_item_url=item.get("permalink"))
-            except:
-                try:
-                    # If item does not exist, insert new item
-                    categories = item.get("categories") or []
-                    category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
-                    category_name = categories[0].get("name") if categories else "NA"
-                    images = item.get("images") or []
-                    picture_url = images[0].get("src") if images else "NA"
-                    item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name") or "NA", description=json.dumps(item.get("description")) or "NA", category_id=category_id, category=category_name, woo_category_name=category_name, sku=item.get("sku") or 0,  start_price=item.get("price") or 0, price=item.get("price") or 0, picture_detail=picture_url, thumbnailImage="Null", quantity=item.get("stock_quantity") or 0, return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", date_created=(item.get("date_created") or "NA").split("T")[0], active=True, vendor_name="Not Found", enable_charity=True, market_name="Woocommerce", map_status=False, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin,  market_item_url=item.get("permalink") or "NA"))
+        # elif user.marketplace_name == "Woocommerce":
+        #     # Fetch all item from Woocommerce
+        #     all_woocommerce_items = get_woocommerce_existing_products(userid)
+        #     if all_woocommerce_items ==None:
+        #         logger.info(f"Woocommerce inventory download failed with error: {all_woocommerce_items}")
+        #         continue
+        #     try:
+        #         for item in all_woocommerce_items:
+        #             # If item already exists, skip to next item
+        #             existing_item = InventoryModel.objects.get(user_id=userid, market_item_id=item.get("id"))
+        #             InventoryModel.objects.filter(user_id=userid, id=existing_item.id).update(market_item_url=item.get("permalink"))
+        #     except:
+        #         try:
+        #             # If item does not exist, insert new item
+        #             categories = item.get("categories") or []
+        #             category_id = categories[0]["id"] if categories and "id" in categories[0] else 0
+        #             category_name = categories[0].get("name") if categories else "NA"
+        #             images = item.get("images") or []
+        #             picture_url = images[0].get("src") if images else "NA"
+        #             item_to_save, created = InventoryModel.objects.update_or_create(user_id=user.user_id, market_item_id=item.get("id"), defaults=dict(title=item.get("name") or "NA", description=json.dumps(item.get("description")) or "NA", category_id=category_id, category=category_name, woo_category_name=category_name, sku=item.get("sku") or 0,  start_price=item.get("price") or 0, price=item.get("price") or 0, picture_detail=picture_url, thumbnailImage="Null", quantity=item.get("stock_quantity") or 0, return_profileID="Null", return_profileName="Null", payment_profileID="Null", payment_profileName="Null", shipping_profileID="Null", shipping_profileName="Null", categoryMappingAllowed="", item_specific_fields="Null", market_logos="Null", date_created=(item.get("date_created") or "NA").split("T")[0], active=True, vendor_name="Not Found", enable_charity=True, market_name="Woocommerce", map_status=False, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin,  market_item_url=item.get("permalink") or "NA"))
 
-                except Exception as e:
-                    logger.info(f"Woocommerce Product failed to insert into inventory {e}")
-                    continue
+        #         except Exception as e:
+        #             logger.info(f"Woocommerce Product failed to insert into inventory {e}")
+        #             continue
 
 
 # Map items in inventory to products vendor update tables
