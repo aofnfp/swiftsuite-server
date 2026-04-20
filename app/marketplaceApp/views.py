@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import webbrowser
 import requests
 import base64
-import os, json, random, re
+import os, json, random, re, secrets
 from urllib.parse import urlencode, urlparse, parse_qs
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1300,12 +1300,15 @@ class Shopify:
         shop = Shopify()
         try:
             # Step 1: Redirect user to Shopify authorization page
-            install_url = (
-                f"https://{shop.SHOP_NAME}/admin/oauth/authorize"
-                f"?client_id={shop.API_KEY}"
-                f"&scope={shop.SCOPES}"
-                f"&redirect_uri={shop.REDIRECT_URI}"
-            )
+            params = {
+                "client_id": shop.API_KEY,
+                "scope": "read_products,write_products",
+                "redirect_uri": "https://swiftsuite.app/marketplace/shopify/callback",
+                "state": secrets.token_hex(16)
+            }
+
+            install_url = f"https://swiftsuitemain.myshopify.com/admin/oauth/authorize?{urlencode(params)}"
+
             return redirect(install_url)
         except Exception as e:
             return Response(f"Failed to fetch authorization code: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST) 
