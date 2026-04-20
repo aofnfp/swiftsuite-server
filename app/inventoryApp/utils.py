@@ -50,7 +50,6 @@ def get_all_items_on_ebay(enroll_id):
                                 <PageNumber>{page_number}</PageNumber>
                             </Pagination>
                         </ActiveList>
-                        <DetailLevel>ReturnAll</DetailLevel>
                     </GetMyeBaySellingRequest>"""
                         
             # Sending the request
