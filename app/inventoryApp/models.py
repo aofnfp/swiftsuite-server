@@ -38,7 +38,7 @@ class InventoryModel(models.Model):
     city = models.CharField(null=True, unique=False, max_length=20)
     cost = models.CharField(null=True, unique=False, max_length=20)
     country = models.CharField(null=True, unique=False, max_length=20)
-    model = models.CharField(null=True, unique=False, max_length=20)
+    model = models.CharField(null=True, unique=False, max_length=50)
     msrp = models.CharField(null=True, unique=False, max_length=20)
     map = models.CharField(null=True, unique=False, max_length=20)
     price = models.CharField(null=True, unique=False, max_length=20)

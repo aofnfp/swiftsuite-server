@@ -1305,9 +1305,9 @@ class Shopify:
                 "scope": "read_products,write_products",
                 "redirect_uri": "https://swiftsuite.app/marketplace/shopify/callback",
                 "state": secrets.token_hex(16)
-            }
+            } 
 
-            install_url = f"https://swiftsuitemain.myshopify.com/admin/oauth/authorize?{urlencode(params)}"
+            install_url = f"https://{shop.SHOP_NAME}/admin/oauth/authorize?{urlencode(params)}"
 
             return redirect(install_url)
         except Exception as e:
