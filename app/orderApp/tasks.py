@@ -175,6 +175,20 @@ def dispatch_order(vendor_order_log_id: int):
         logger.error(f"VendorOrderLog with id {vendor_order_log_id} does not exist.")
 
 
+def check_order_status_from_ebay(vendor_order_log: VendorOrderLog):
+    try:
+        orderOnEbay = OrdersOnEbayModel.objects.get(orderId=vendor_order_log.reference_id)
+    except OrdersOnEbayModel.DoesNotExist:
+        logger.error(f"OrderOnEbayModel with id {vendor_order_log.reference_id} does not exist.")
+        return False
+
+    if vendor_order_log.status == VendorOrderLog.VendorOrderStatus.PROCESSING and orderOnEbay.orderFulfillmentStatus == "FULFILLED":
+        vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
+        vendor_order_log.save()
+        return True
+    return False
+
+
 @shared_task(queue='heavy-cpu')
 def check_vendor_order_status():
     logger.info("Starting check_vendor_order_status task")
@@ -201,6 +215,10 @@ def check_vendor_order_status():
                 if vendor_order.tracking_number and vendor_order.carrier:
                     push_tracking_to_ebay_xml(vendor_order)
                     continue
+
+            if check_order_status_from_ebay(vendor_order):
+                status_updated = True
+                continue
             
             if vendor_name == 'rsr':
                 client = RsrOrderApiClient(vendor_order)
