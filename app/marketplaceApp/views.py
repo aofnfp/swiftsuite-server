@@ -1319,39 +1319,54 @@ class Shopify:
     @api_view(['POST'])
     def shopify_oauth_callback(request, userid, market_name):
         shop = Shopify()
-        # check if user is subaccount
+
         user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
+        if user and user.parent_id:
+            userid = user.parent_id
+
         try:
-            # Validate the code using the serializer
-            serializer = GetAuthCodeSerializer(data=request.data)
-            if serializer.is_valid():
-                # Step 2: Shopify sends authorization code
-                code = requests.request.args.get(serializer.validated_data["authorization_code"])
+            # Validate the code using the serializer 
+            serializer = GetAuthCodeSerializer(data=request.data) 
+            if serializer.is_valid(): 
+                # Step 2: Shopify sends authorization code 
+                code = serializer.validated_data["authorization_code"]
 
-                token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
+            if not code:
+                return Response("Authorization code missing", status=400)
 
-                payload = {
-                    "client_id": shop.API_KEY,
-                    "client_secret": shop.API_SECRET,
-                    "code": code
+            token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
+
+            payload = {
+                "client_id": shop.API_KEY,
+                "client_secret": shop.API_SECRET,
+                "code": code
+            }
+
+            response = requests.post(token_url, json=payload)
+
+            if response.status_code != 200:
+                return Response(response.text, status=400)
+
+            data = response.json()
+            access_token = data.get("access_token")
+
+            if not access_token:
+                return Response("Access token not returned", status=400)
+
+            MarketplaceEnronment.objects.update_or_create(
+                user_id=userid,
+                marketplace_name=market_name,
+                defaults={
+                    "access_token": access_token,
+                    "refresh_token": access_token
                 }
+            )
 
-                # Step 3: Exchange code for access token
-                response = requests.post(token_url, json=payload)
+            return Response("Access token created successfully.", status=200)
 
-                data = response.json()
-                access_token = data["access_token"]
-            else:
-                return Response(f"Invalid authorization code: Check the code and try again.", status=status.HTTP_400_BAD_REQUEST)
-            
-            obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":access_token})
-            return Response(f"Access token created successfully.", status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(f"Failed to retrieve access token: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST)
-
+            return Response(f"Error: {str(e)}", status=400)
+        
     
     @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
