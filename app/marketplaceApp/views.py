@@ -1327,28 +1327,28 @@ class Shopify:
         try:
             # Validate the code using the serializer
             serializer = GetAuthCodeSerializer(data=request.data)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                # Step 2: Shopify sends authorization code
+                code = requests.request.args.get(serializer.validated_data["authorization_code"])
+
+                token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
+
+                payload = {
+                    "client_id": shop.API_KEY,
+                    "client_secret": shop.API_SECRET,
+                    "code": code
+                }
+
+                # Step 3: Exchange code for access token
+                response = requests.post(token_url, json=payload)
+
+                data = response.json()
+                access_token = data["access_token"]
+            else:
+                return Response(f"Invalid authorization code: Check the code and try again.", status=status.HTTP_400_BAD_REQUEST)
             
-            # Step 2: Shopify sends authorization code
-            code = requests.request.args.get(serializer.validated_data["authorization_code"])
-
-            token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
-
-            payload = {
-                "client_id": shop.API_KEY,
-                "client_secret": shop.API_SECRET,
-                "code": code
-            }
-
-            # Step 3: Exchange code for access token
-            response = requests.post(token_url, json=payload)
-
-            data = response.json()
-            access_token = data["access_token"]
-
             obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":access_token})
-            return Response(f"Access token retrieved successfully.", status=status.HTTP_200_OK)
+            return Response(f"Access token created successfully.", status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to retrieve access token: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
