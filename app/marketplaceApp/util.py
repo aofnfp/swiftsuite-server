@@ -102,7 +102,7 @@ def complete_enrolment_price_update(userid, market_name):
                         quantity = db_item.quantity
                 # Enforce MAP when wc_map_enforcement is enabled
                 if market_name == "Woocommerce": 
-                    if market_enrolled.wc_map_enforcement==True and item.map==True:
+                    if market_enrolled.wc_map_enforcement==True and item.map:
                         try:
                             selling_price = max(round(selling_price, 2), float(item.map))
                         except (TypeError, ValueError) as map_err:

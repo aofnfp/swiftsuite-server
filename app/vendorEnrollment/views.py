@@ -378,7 +378,7 @@ class AllCatalogueView(ListAPIView):
     module_name = 'inventory'
     pagination_class = CustomOffsetPagination
 
-    @cache_response()
+    # @cache_response()
     def list(self, request, *args, **kwargs):
         user = request.user
         if user.is_subaccount:
