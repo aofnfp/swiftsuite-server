@@ -52,11 +52,11 @@ class ItemListingToEbaySerializer:
 		for aspect in item_specifics:
 			aspect_name = aspect['localizedAspectName']
 			options = aspect.get('aspectValues', [])
-			# get required fields and store in a list
-			constraints = aspect.get("aspectConstraints", {})
-			is_required = constraints.get("aspectRequired")
-			if is_required:
-				required_fields.append(aspect_name)
+			# # get required fields and store in a list
+			# constraints = aspect.get("aspectConstraints", {})
+			# is_required = constraints.get("aspectRequired")
+			# if is_required:
+			# 	required_fields.append(aspect_name)
 
 			# Skip if this field is already in the model fields to avoid duplication
 			if hasattr(model_class, aspect_name):
