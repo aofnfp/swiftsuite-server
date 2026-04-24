@@ -1303,7 +1303,7 @@ class Shopify:
             params = {
                 "client_id": shop.API_KEY,
                 "scope": "read_products,write_products",
-                "redirect_uri": "https://swiftsuite.app/marketplace/shopify/callback",
+                "redirect_uri": "https://swiftsuite.app/",
                 "state": secrets.token_hex(16)
             } 
 
