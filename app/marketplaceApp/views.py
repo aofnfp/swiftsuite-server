@@ -1303,7 +1303,7 @@ class Shopify:
             params = {
                 "client_id": shop.API_KEY,
                 "scope": "read_products,write_products",
-                "redirect_uri": "https://swiftsuite.app/",
+                "redirect_uri": "https://swiftsuite.app/marketplace/shopify/oauth/callback",
                 "state": secrets.token_hex(16)
             } 
 
@@ -1316,13 +1316,9 @@ class Shopify:
 
     @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    @api_view(['POST'])
-    def shopify_oauth_callback(request, userid, market_name):
+    @api_view(['GET'])
+    def shopify_oauth_callback(request):
         shop = Shopify()
-
-        user = request.user
-        if user and user.parent_id:
-            userid = user.parent_id
 
         try:
             # Validate the code using the serializer 
@@ -1354,8 +1350,8 @@ class Shopify:
                 return Response("Access token not returned", status=400)
 
             MarketplaceEnronment.objects.update_or_create(
-                user_id=userid,
-                marketplace_name=market_name,
+                user_id=request.user.id,
+                marketplace_name="Shopify",
                 defaults={
                     "access_token": access_token,
                     "refresh_token": access_token
