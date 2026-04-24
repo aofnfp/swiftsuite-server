@@ -27,7 +27,7 @@ urlpatterns = [
     path('get_product_category/<int:userid>/<str:market_name>/', WooCommerce.get_product_category, name='get_product_category'),
     # Shopify URLs
     path('get_shopify_auth_code/', Shopify.connection_to_get_auth_code, name='get_shopify_auth_code'),
-    path('shopify/oauth/callback/<int:userid>/<str:market_name>/', Shopify.shopify_oauth_callback, name='shopify_oauth_callback'),
+    path('shopify/callback/', Shopify.shopify_oauth_callback, name='shopify_callback'),
     path('test_shopify_connection/<int:userid>/<str:market_name>/', Shopify.test_shopify_connection, name='test_shopify_connection'),
     path('complete_shopify_enrolment_or_update/<int:userid>/<str:market_name>/', Shopify.complete_shopify_enrolment_or_update, name='complete_shopify_enrolment_or_update'),
 ]
