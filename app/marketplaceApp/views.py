@@ -1321,14 +1321,15 @@ class Shopify:
         shop = Shopify()
 
         try:
-            # Validate the code using the serializer 
-            serializer = GetAuthCodeSerializer(data=request.data) 
-            if serializer.is_valid(): 
-                # Step 2: Shopify sends authorization code 
-                code = serializer.validated_data["authorization_code"]
+            # # Validate the code using the serializer 
+            # serializer = GetAuthCodeSerializer(data=request.data) 
+            # if serializer.is_valid(): 
+            #     # Step 2: Shopify sends authorization code 
+            #     code = serializer.validated_data["authorization_code"]
 
-            if not code:
-                return Response("Authorization code missing", status=400)
+            # if not code:
+            #     return Response("Authorization code missing", status=400)
+            code = request.args.get("code")
 
             token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
 
