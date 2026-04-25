@@ -261,7 +261,7 @@ class OrderSyncView(viewsets.ReadOnlyModelViewSet):
     }
 
 
-    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus', 'vendor_orders__status', 'buyer']
+    search_fields = ['orderId', 'creationDate', 'vendor_name', 'market_name', 'orderFulfillmentStatus', 'vendor_orders__status', 'buyer', 'sku']
 
     ordering_fields = ['creationDate']
     
