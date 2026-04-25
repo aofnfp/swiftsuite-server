@@ -308,7 +308,7 @@ def update_inventory_price_quantity():
                     # Modify selling price before updating on Woocommerce
                     try:
                         selling_price = float(db_item.total_product_cost) + float(user.fixed_markup) + ((float(user.fixed_percentage_markup)/100) * float(db_item.total_product_cost)) + ((float(user.profit_margin)/100) * float(db_item.total_product_cost))
-                        if db_item.map==True and user.wc_map_enforcement==True:
+                        if db_item.map and user.wc_map_enforcement==True:
                             if selling_price < float(db_item.map):
                                 selling_price = float(db_item.map)
                     except Exception as e:

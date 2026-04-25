@@ -365,8 +365,7 @@ def manually_download_item_from_marketplace_syc_update(userid):
                 try:
                     # If item already exists, skip to next item
                     existing_item = InventoryModel.objects.get(user_id=userid, market_item_id=item.get("ebay_item_id"))
-                    description = get_item_full_description(user._id, item.get("ebay_item_id"))
-                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"), description=json.dumps(description))
+                    InventoryModel.objects.filter(user_id=user.user_id, id=existing_item.id).update(market_item_url=item.get("market_item_url"))
 
                 except Exception as e:
                     try:

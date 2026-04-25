@@ -176,15 +176,22 @@ def dispatch_order(vendor_order_log_id: int):
 
 
 def check_order_status_from_ebay(vendor_order_log: VendorOrderLog):
-    try:
-        orderOnEbay = OrdersOnEbayModel.objects.get(orderId=vendor_order_log.reference_id)
-    except OrdersOnEbayModel.DoesNotExist:
-        logger.error(f"OrderOnEbayModel with id {vendor_order_log.reference_id} does not exist.")
-        return False
+    orderOnEbay = vendor_order_log.order
 
-    if vendor_order_log.status == VendorOrderLog.VendorOrderStatus.PROCESSING and orderOnEbay.orderFulfillmentStatus == "FULFILLED":
+    if (
+        orderOnEbay.orderFulfillmentStatus == "FULFILLED"
+        and vendor_order_log.status in [
+            VendorOrderLog.VendorOrderStatus.PROCESSING,
+            VendorOrderLog.VendorOrderStatus.SHIPPED,
+        ]
+    ):
         vendor_order_log.status = VendorOrderLog.VendorOrderStatus.DELIVERED
-        vendor_order_log.save()
+        vendor_order_log.delivered_at = timezone.now()
+        vendor_order_log.save(update_fields=["status", "delivered_at"])
+        logger.info(
+            f"Order {orderOnEbay.orderId} transitioned to DELIVERED "
+            f"(eBay orderFulfillmentStatus=FULFILLED)"
+        )
         return True
     return False
 

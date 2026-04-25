@@ -1314,19 +1314,19 @@ class Shopify:
         self.API_VERSION = "2024-01"
 
 
-    @with_module('marketplaceApp')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    # @with_module('marketplaceApp')
+    # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def connection_to_get_auth_code(request):
         shop = Shopify()
         try:
-            # Step 1: Redirect user to Shopify authorization page
+
             params = {
                 "client_id": shop.API_KEY,
                 "scope": "read_products,write_products",
-                "redirect_uri": "https://swiftsuite.app/marketplace/shopify/callback",
+                "redirect_uri": "https://swiftsuite.app/shopify/callback/",
                 "state": secrets.token_hex(16)
-            } 
+            }
 
             install_url = f"https://{shop.SHOP_NAME}/admin/oauth/authorize?{urlencode(params)}"
 
@@ -1335,26 +1335,23 @@ class Shopify:
             return Response(f"Failed to fetch authorization code: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST) 
 
 
-    @with_module('marketplaceApp')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
-    @api_view(['POST'])
-    def shopify_oauth_callback(request, userid, market_name):
-        shop = Shopify()
-        # check if user is subaccount
-        user = request.user
-        if user:
-            if user.parent_id:
-                userid = user.parent_id
-        try:
-            # Validate the code using the serializer
-            serializer = GetAuthCodeSerializer(data=request.data)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Step 2: Shopify sends authorization code
-            code = requests.request.args.get(serializer.validated_data["authorization_code"])
+    # @with_module('marketplaceApp')
+    # @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def shopify_oauth_callback(request):
 
-            token_url = f"https://{shop.SHOP_NAME}/admin/oauth/access_token"
+        shop = Shopify()
+
+        try:
+            # Shopify sends these via query params
+            code = request.GET.get("code")
+            shop_domain = request.GET.get("shop")
+
+            if not code or not shop_domain:
+                return Response("Missing code or shop", status=400)
+
+            # Exchange token immediately
+            token_url = f"https://{shop_domain}/admin/oauth/access_token"
 
             payload = {
                 "client_id": shop.API_KEY,
@@ -1362,17 +1359,31 @@ class Shopify:
                 "code": code
             }
 
-            # Step 3: Exchange code for access token
             response = requests.post(token_url, json=payload)
 
-            data = response.json()
-            access_token = data["access_token"]
+            if response.status_code != 200:
+                return Response(response.text, status=400)
 
-            obj, created = MarketplaceEnronment.objects.update_or_create(user_id=userid, marketplace_name=market_name, defaults={"access_token":access_token, "refresh_token":access_token})
-            return Response(f"Access token retrieved successfully.", status=status.HTTP_200_OK)
+            access_token = response.json().get("access_token")
+
+            if not access_token:
+                return Response("Access token not returned", status=400)
+
+            # Save token (adjust userid logic as needed)
+            MarketplaceEnronment.objects.update_or_create(
+                user_id=request.user.id,
+                marketplace_name="shopify",
+                defaults={
+                    "access_token": access_token,
+                    "refresh_token": access_token
+                }
+            )
+
+            return redirect("https://swiftsuite.app")
+
         except Exception as e:
-            return Response(f"Failed to retrieve access token: Check your connection or credentials. : {str(e)}", status=status.HTTP_400_BAD_REQUEST)
-
+            return Response(str(e), status=400)
+        
     
     @with_module('marketplaceApp')
     @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
