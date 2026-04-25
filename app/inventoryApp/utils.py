@@ -114,9 +114,66 @@ def get_all_items_on_ebay(enroll_id):
 # Get full descriptions of the item from eBay using GetItem API, which has a rate limit of 5 calls per second
 @sleep_and_retry
 @limits(calls=5, period=1)
+def get_item_specifics_from_ebay_for_item(enroll_id, item_id):
+    """
+    Live fetch of ItemSpecifics for an existing eBay listing via Trading API
+    GetItem. Returns a dict of {aspect_name: value_string}, where multi-value
+    aspects are joined with ", ". Returns {} on any failure.
+
+    Used by `get_live_item_specifics` view to populate the edit page when
+    the local InventoryModel.item_specific_fields is empty or stale.
+    """
+    try:
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
+        access_token = user_data.access_token
+    except Exception as e:
+        logger.info(f"get_item_specifics_from_ebay_for_item: no enrollment for {enroll_id}: {e}")
+        return {}
+
+    try:
+        url = "https://api.ebay.com/ws/api.dll"
+        headers = {
+            "X-EBAY-API-CALL-NAME": "GetItem",
+            "X-EBAY-API-SITEID": "0",
+            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+            "X-EBAY-API-IAF-TOKEN": access_token,
+            "Content-Type": "text/xml",
+        }
+        body = f"""<?xml version="1.0" encoding="utf-8"?>
+            <GetItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+              <ItemID>{item_id}</ItemID>
+              <DetailLevel>ReturnAll</DetailLevel>
+              <IncludeItemSpecifics>true</IncludeItemSpecifics>
+            </GetItemRequest>"""
+        response = requests.post(url, headers=headers, data=body, timeout=15)
+        if response.status_code == 429:
+            retry_after = int(response.headers.get("Retry-After", 2))
+            time.sleep(retry_after)
+            return get_item_specifics_from_ebay_for_item(enroll_id, item_id)
+        if response.status_code != 200:
+            return {}
+
+        ns = {"e": "urn:ebay:apis:eBLBaseComponents"}
+        root = ET.fromstring(response.text)
+        specifics = {}
+        for nvl in root.findall(".//e:ItemSpecifics/e:NameValueList", ns):
+            name = nvl.findtext("e:Name", default="", namespaces=ns)
+            if not name:
+                continue
+            values = [(v.text or "") for v in nvl.findall("e:Value", ns)]
+            specifics[name] = ", ".join(values) if len(values) > 1 else (values[0] if values else "")
+        return specifics
+    except requests.exceptions.RequestException as e:
+        logger.info(f"get_item_specifics_from_ebay_for_item: request failed for item {item_id}: {e}")
+        return {}
+    except Exception as e:
+        logger.info(f"get_item_specifics_from_ebay_for_item: parse failed for item {item_id}: {e}")
+        return {}
+
+
 def get_item_full_description(enroll_id, item_id):
     try:
-        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")  
+        user_data = MarketplaceEnronment.objects.get(_id=enroll_id, marketplace_name="Ebay")
         access_token = user_data.access_token
     except Exception as e:
         print(f"Failed to fetch access token {e}")

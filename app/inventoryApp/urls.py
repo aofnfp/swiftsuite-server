@@ -5,6 +5,7 @@ from django.urls import path
 urlpatterns = [
     path('get_all_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', MarketInventory.get_all_inventory_items, name='get_all_inventory_items'),
     path('get_inventory_item_details/<int:userid>/<int:inventoryid>/', MarketInventory.get_inventory_item_details, name='get_inventory_item_details'),
+    path('get_live_item_specifics/<int:userid>/<int:inventoryid>/', MarketInventory.get_live_item_specifics, name='get_live_item_specifics'),
     path('get_all_saved_inventory_items/<int:userid>/<int:page_number>/<int:num_per_page>/', MarketInventory.get_all_saved_inventory_items, name='get_all_saved_inventory_items'),
     path('get_saved_product_for_listing/<int:inventoryid>/', MarketInventory.get_saved_product_for_listing, name='get_saved_product_for_listing'),
     path('delete_product_from_inventory/<int:inventoryid>/', MarketInventory.delete_product_from_inventory, name='delete_product_from_inventory'),

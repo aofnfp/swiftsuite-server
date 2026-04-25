@@ -705,7 +705,78 @@ class MarketInventory:
             return JsonResponse({"item_details":list(inventory_item)}, safe=False, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Failed to get items.", status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+    # Get the live ItemSpecifics for an existing eBay listing.
+    #
+    # Cache-first: if InventoryModel.item_specific_fields is already a populated
+    # JSON object, returns it without hitting eBay. On a miss (or when the
+    # caller passes ?refresh=1), fetches from eBay's Trading API GetItem,
+    # persists into item_specific_fields, and returns the fresh values.
+    #
+    # This lets the listing edit page prefill dropdowns with what eBay
+    # currently has on the listing, while keeping eBay API call volume low.
+    @with_module('inventory')
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
+    @api_view(['GET'])
+    def get_live_item_specifics(request, userid, inventoryid):
+        from inventoryApp.utils import get_item_specifics_from_ebay_for_item
+
+        # subaccount → use parent
+        user = request.user
+        if user and user.parent_id:
+            userid = user.parent_id
+
+        force_refresh = str(request.GET.get('refresh', '')).lower() in ('1', 'true', 'yes')
+
+        try:
+            item = InventoryModel.objects.get(id=inventoryid, user_id=userid)
+        except InventoryModel.DoesNotExist:
+            return Response("Item not found.", status=status.HTTP_404_NOT_FOUND)
+
+        # 1. Try cache (the row's own item_specific_fields column) first
+        if not force_refresh:
+            cached = (item.item_specific_fields or "").strip()
+            if cached and cached not in ("Null", "null", "{}"):
+                try:
+                    parsed = json.loads(cached.replace("'", '"'))
+                    if isinstance(parsed, dict) and parsed:
+                        return JsonResponse({
+                            "item_specifics": parsed,
+                            "source": "cache",
+                        }, status=status.HTTP_200_OK)
+                except (json.JSONDecodeError, ValueError):
+                    pass  # malformed cache → fall through to live fetch
+
+        # 2. Cache miss → only worth fetching if this row is actually on eBay
+        if item.market_name != "Ebay" or not item.market_item_id:
+            return JsonResponse({
+                "item_specifics": {},
+                "source": "no_ebay_listing",
+            }, status=status.HTTP_200_OK)
+
+        enrollment = MarketplaceEnronment.objects.filter(
+            user_id=userid, marketplace_name="Ebay"
+        ).first()
+        if not enrollment:
+            return JsonResponse({
+                "item_specifics": {},
+                "source": "no_enrollment",
+            }, status=status.HTTP_200_OK)
+
+        # 3. Live fetch from eBay
+        specifics = get_item_specifics_from_ebay_for_item(enrollment._id, item.market_item_id)
+
+        # 4. Persist back so subsequent edits are cache hits
+        if specifics:
+            item.item_specific_fields = json.dumps(specifics)
+            item.save(update_fields=["item_specific_fields"])
+
+        return JsonResponse({
+            "item_specifics": specifics or {},
+            "source": "ebay_live" if specifics else "ebay_empty",
+        }, status=status.HTTP_200_OK)
+
 
     # Get saved product in the inventory for listing to ebay
     @with_module('inventory')

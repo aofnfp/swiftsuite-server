@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
+from django.core.cache import cache
 from .serializers import EbayEnrolSerializer, GetAuthCodeSerializer, ItemListingToEbaySerializer, UploadedProductImageSerializer, WooComerceEnrolSerializer, ShopifyEnrolSerializer
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from .models import MarketplaceEnronment, UploadedProductImage
@@ -738,21 +739,34 @@ class Ebay:
         return required_aspects
 
 
-    # Function to generate dynamic serializer for item specifics fields 
+    # Function to generate dynamic serializer for item specifics fields
+    #
+    # The response (aspect schema + valid choices + required fields) is per
+    # category and changes very rarely on eBay's side. We cache the full
+    # payload in Redis for 24h keyed by (market_name, leaf_category_id) so
+    # that opening 50 listings in the same category triggers 1 eBay round-trip
+    # instead of 50. Force-refresh with ?refresh=1.
     @with_module('marketplaceApp')
-    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])    
+    @permission_classes([IsAuthenticated, IsOwnerOrHasPermission])
     @api_view(['GET'])
     def get_item_specifics_fields(request, userid, market_name, leaf_category_id):
+        force_refresh = str(request.GET.get('refresh', '')).lower() in ('1', 'true', 'yes')
+        cache_key = f"item_specifics_fields:{market_name}:{leaf_category_id}"
+
+        if not force_refresh:
+            cached_payload = cache.get(cache_key)
+            if cached_payload is not None:
+                return Response(cached_payload)
+
         eb = Ebay()
         item_specifics_field = []
-        choices_data = {}
-        
+
         # check if user is subaccount
         user = request.user
         if user:
             if user.parent_id:
                 userid = user.parent_id
-            
+
         # refresh the refresh access_token
         access_token = eb.refresh_access_token(userid, market_name)
         if not access_token:
@@ -762,7 +776,7 @@ class Ebay:
         required_fields = eb.get_required_fields_item(leaf_category_id, access_token)
         # Pass the item specifics to the serializer generator function
         item_specifics = data.get('aspects', [])
-        
+
         # Generate the dynamic serializer
         DynamicItemSpecificsSerializer, _fields, valid_choices_fields = ItemListingToEbaySerializer.generate_item_specifics_serializer(item_specifics)
         # Extract choices from the ChoiceField fields
@@ -772,11 +786,18 @@ class Ebay:
             else:
                 if field_name in _fields:
                     item_specifics_field.append(field_name)
-        
-        # return the field names and their choices and required fields
-        return Response({
-            "item_specifics":item_specifics_field, "valid_choices":valid_choices_fields , "required_fields": required_fields
-        })
+
+        payload = {
+            "item_specifics": item_specifics_field,
+            "valid_choices": valid_choices_fields,
+            "required_fields": required_fields,
+        }
+
+        # Only cache successful, non-empty schema fetches.
+        if item_specifics_field or valid_choices_fields or required_fields:
+            cache.set(cache_key, payload, timeout=60 * 60 * 24)  # 24h
+
+        return Response(payload)
     
 
     # Calculate the selling price of product going to marketplace
