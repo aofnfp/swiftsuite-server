@@ -452,7 +452,7 @@ def map_marketplace_items_to_vendor():
                         item_product = Generalproducttable.objects.create(user_id=user.user_id, sku=db_items.sku, upc=db_items.upc, mpn=db_items.mpn, active=True, total_product_cost=db_items.total_price, map=db_items.map, msrp=db_items.msrp, enrollment_id=db_items.enrollment_id, product_id=db_items.product_id, quantity=db_items.quantity, price=db_items.price, vendor_name=db_items.vendor.name)
                     
                     # Item exists, check if we need to update price or quantity
-                    inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, msrp=db_items.msrp, map=db_items.map, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin)
+                    inventory = InventoryModel.objects.filter(market_item_id=item.market_item_id, user_id=user.user_id).update(map_status=True, msrp=db_items.msrp, map=db_items.map, product_id=item_product.id, total_product_cost=db_items.total_price, price=db_items.price, vendor_name=db_items.vendor.name, vendor_identifier=db_items.enrollment.identifier, fixed_percentage_markup=user.fixed_percentage_markup, fixed_markup=user.fixed_markup, profit_margin=user.profit_margin, min_profit_mergin=user.min_profit_mergin)
                     # Update the VendorUpdate table to set listed_market to true
                     db_items.active = True
                     db_items.save()
